@@ -1,0 +1,33 @@
+{
+  "name": "frontend",
+  "scripts": {
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "prebuild": "npm run -w backend build",
+    "build": "npx vue-tsc && vite build",
+    "dev": "vite dev",
+    "predeploy": "npm run build",
+    "deploy": "wrangler pages deploy"
+  },
+  "dependencies": {
+    "@vueuse/core": "^12.5.0",
+    "bootstrap-icons-vue": "^1.11.3",
+    "dayjs": "^1.11.13",
+    "element-plus": "^2.9.4",
+    "vue": "^3.5.0",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/tsconfig": "^0.7.0",
+    "eslint-plugin-vue": "^9.32.0",
+    "sass-embedded": "^1.83.4",
+    "unplugin-element-plus": "^0.9.1",
+    "unplugin-vue-components": "^28.0.0",
+    "unplugin-vue-router": "^0.11.1",
+    "vite": "^6.0.7",
+    "vite-plugin-checker": "^0.8.0",
+    "vue-eslint-parser": "^9.4.3",
+    "vue-tsc": "^2.2.0"
+  }
+}

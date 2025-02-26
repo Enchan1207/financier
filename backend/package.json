@@ -1,0 +1,25 @@
+{
+  "name": "backend",
+  "scripts": {
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "build": "tsc",
+    "dev": "wrangler --env=development dev",
+    "test": "vitest",
+    "predeploy": "npm run build",
+    "deploy": "wrangler --env=production deploy",
+    "db:init": "wrangler --env=development d1 execute financier-backend-db --local --file='src/infrastructure/migrations/0000-init.sql'",
+    "db:init:remote": "wrangler --env=production d1 execute financier-backend-db --remote --file='src/infrastructure/migrations/0000-init.sql'"
+  },
+  "dependencies": {
+    "ulid": "^2.3.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.6.10",
+    "@hono/node-server": "^1.13.7",
+    "@hono/zod-validator": "^0.4.2",
+    "miniflare": "^3.20250124.1",
+    "tsx": "^4.19.2"
+  }
+}
