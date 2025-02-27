@@ -16,7 +16,7 @@ const toggleDark = useToggle(isDark)
       :router="true"
       @select="emits('select')"
     >
-      <el-menu-item index="/tasks">
+      <el-menu-item index="/">
         <el-icon><b-icon-house-fill /></el-icon>
         <span>ホーム</span>
       </el-menu-item>
