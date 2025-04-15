@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useAuth0 } from '@auth0/auth0-vue'
 import {
   breakpointsElement, useBreakpoints, useDark, useToggle,
 } from '@vueuse/core'
@@ -26,13 +25,25 @@ const onClickNew = () => {
 
 <template>
   <div class="sidebar-container">
-    <div v-if="!isSmartphone" class="add-button-container sidebar-button-container">
-      <el-button type="primary" :icon="BIconPencilSquare" size="large" round @click="onClickNew">
+    <div
+      v-if="!isSmartphone"
+      class="add-button-container sidebar-button-container"
+    >
+      <el-button
+        type="primary"
+        :icon="BIconPencilSquare"
+        size="large"
+        round
+        @click="onClickNew"
+      >
         追加
       </el-button>
     </div>
 
-    <el-menu :router="true" @select="emits('select')">
+    <el-menu
+      :router="true"
+      @select="emits('select')"
+    >
       <el-menu-item index="/">
         <el-icon><b-icon-house-fill /></el-icon>
         <span>ホーム</span>
@@ -43,8 +54,13 @@ const onClickNew = () => {
       <el-text>
         外観:
       </el-text>
-      <el-switch :model-value="isDark" :active-icon="BIconMoonFill" :inactive-icon="BIconSunFill"
-        class="color-mode-switch" @change="toggleDark()" />
+      <el-switch
+        :model-value="isDark"
+        :active-icon="BIconMoonFill"
+        :inactive-icon="BIconSunFill"
+        class="color-mode-switch"
+        @change="toggleDark()"
+      />
     </div>
   </div>
 </template>
