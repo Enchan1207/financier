@@ -75,11 +75,19 @@ const onClickLogout = async () => {
   </template>
 
   <template v-else>
-    <el-button
-      :icon="BIconPersonFill"
-      @click="loginWithRedirect()"
-    >
-      ログイン
-    </el-button>
+    <template v-if="isSmartphone">
+      <el-button
+        :icon="BIconPersonFill"
+        @click="loginWithRedirect()"
+      />
+    </template>
+    <template v-else>
+      <el-button
+        :icon="BIconPersonFill"
+        @click="loginWithRedirect()"
+      >
+        ログイン
+      </el-button>
+    </template>
   </template>
 </template>
