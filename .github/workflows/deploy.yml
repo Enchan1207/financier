@@ -1,0 +1,39 @@
+name: deploy
+on:
+  workflow_dispatch:
+  push:
+    branches: 
+      - master
+      - release
+
+jobs:
+  deploy:
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      DEPLOY_ENV: ${{ github.ref == 'refs/heads/master' && 'staging' || github.ref == 'refs/heads/release' && 'production' || '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: install
+        run: npm i
+
+      - name: test
+        run: npm run -w backend test
+
+      - name: deploy backend
+        run: npm run -w backend deploy -- --env=${{ env.DEPLOY_ENV }}
+
+      # not working now...
+      # - name: apply D1 migration
+      #   run: npm run -w backend db:migrations:apply -- --remote
+
+      - name: deploy frontend
+        env:
+          MODE: ${{ env.DEPLOY_ENV }}
+        run: npm run -w frontend deploy

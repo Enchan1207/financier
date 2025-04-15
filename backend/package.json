@@ -1,0 +1,27 @@
+{
+  "name": "backend",
+  "scripts": {
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "build": "tsc",
+    "dev": "wrangler --env=development dev",
+    "test": "vitest",
+    "predeploy": "npm run build",
+    "deploy": "wrangler deploy",
+    "db:migrations:create": "wrangler --env=development d1 migrations create financier-backend-db-development",
+    "db:migrations:apply": "wrangler --env=${DEPLOY_ENV:-development} d1 migrations apply financier-backend-db-${DEPLOY_ENV:-development}"
+  },
+  "dependencies": {
+    "hono-openapi": "^0.4.6",
+    "ulid": "^2.3.0",
+    "zod": "^3.24.2",
+    "zod-openapi": "^4.2.4"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.6.10",
+    "@hono/node-server": "^1.13.7",
+    "@hono/zod-validator": "^0.4.2",
+    "miniflare": "^3.20250124.1",
+    "tsx": "^4.19.2"
+  }
+}

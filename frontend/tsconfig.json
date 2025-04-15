@@ -1,0 +1,39 @@
+// based on:
+//  - https://typescriptbook.jp/reference/tsconfig/tsconfig.json-settings
+//  - npm create vue@latest
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "esnext",
+    "lib": ["es2020", "dom"],
+    "rootDir": "./src",
+    "strict": true,
+    "moduleResolution": "bundler",
+    "baseUrl": "./",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@routes": ["../backend/src/index.ts"]
+    },
+    "types": [
+      "unplugin-vue-router/client",
+      "element-plus/global"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "./typed-router.d.ts",
+    "./auto-imports.d.ts",
+    "./components.d.ts",
+  ],
+  "exclude": ["dist", "node_modules"],
+  "references": [{ "path": "../backend" }],
+  "compileOnSave": false
+}
