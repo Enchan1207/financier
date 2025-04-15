@@ -11,7 +11,7 @@ jobs:
     env:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-      DEPLOY_ENV: ${{ github.ref == 'refs/heads/master' && 'staging' || github.ref == 'refs/heads/release' && 'production' || '' }}
+      DEPLOY_ENV: ${{ github.ref == 'refs/heads/main' && 'staging' || github.ref == 'refs/heads/release' && 'production' || '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
