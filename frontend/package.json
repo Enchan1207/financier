@@ -4,12 +4,13 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "prebuild": "npm run -w backend build",
-    "build": "npx vue-tsc && vite build",
-    "dev": "vite dev",
+    "build": "npx vue-tsc && vite build --mode ${MODE:-production}",
+    "dev": "vite dev --mode development",
     "predeploy": "npm run build",
     "deploy": "wrangler pages deploy"
   },
   "dependencies": {
+    "@auth0/auth0-vue": "^2.4.0",
     "@vueuse/core": "^12.5.0",
     "bootstrap-icons-vue": "^1.11.3",
     "dayjs": "^1.11.13",

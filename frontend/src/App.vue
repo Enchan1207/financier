@@ -6,6 +6,7 @@ import { BIconList } from 'bootstrap-icons-vue'
 import { ref, watch } from 'vue'
 
 import Sidebar from '@/components/SideBar.vue'
+import UserButton from '@/components/UserButton.vue'
 
 useDark()
 
@@ -26,14 +27,12 @@ const isSidebarVisible = ref(!isSmartphone.value)
       <el-row>
         <span class="sidebar-button-wrapper">
           <el-button
-            type="info"
-            plain
+            :icon="BIconList"
             @click="isSidebarVisible = !isSidebarVisible"
-          >
-            <el-icon size="large"><BIconList /></el-icon>
-          </el-button>
+          />
         </span>
-        <h1>Financier</h1>
+        <h1>Tasks</h1>
+        <UserButton />
       </el-row>
     </el-header>
     <el-container>

@@ -1,28 +1,46 @@
 name = "financier-backend"
 compatibility_date = "2025-01-28"
 compatibility_flags = [ "nodejs_compat" ]
-main = "./src/presentations/index.ts"
+main = "./src/index.ts"
 preview_urls = false
 workers_dev = false
 
 [observability]
 enabled = true
 
-# local
+# development (ローカル)
 [env.development.vars]
 CORS_ALLOW_ORIGINS = "http://localhost:5173"
+AUTH_DOMAIN = "enchan.jp.auth0.com"
+AUTH_AUDIENCE = "http://localhost:8787"
 
 [[env.development.d1_databases]]
 binding = "D1"
-database_name = "financier-backend-db"
-database_id = "f1f9bbae-f053-4de7-a05d-0462b76185fe"
+migrations_dir = "./src/migrations"
+database_name = "financier-backend-db-development"
+database_id = "00000000-0000-0000-0000-000000000000"
+
+# staging
+[env.staging.vars]
+CORS_ALLOW_ORIGINS = "https://master.financier-frontend.pages.dev"
+AUTH_DOMAIN = "enchan.jp.auth0.com"
+AUTH_AUDIENCE = "https://stg.api.financier.enchan.me"
+
+[[env.staging.routes]]
+pattern = "stg.api.financier.enchan.me"
+custom_domain = true
+
+[[env.staging.d1_databases]]
+binding = "D1"
+migrations_dir = "./src/migrations"
+database_name = "financier-backend-db-staging"
+database_id = "00000000-0000-0000-0000-000000000000"
 
 # Cloudflare
 [env.production.vars]
-CORS_ALLOW_ORIGINS = [
-  "https://financier.enchan.me",
-  "https://master.financier-frontend.pages.dev"
-]
+CORS_ALLOW_ORIGINS = "https://financier.enchan.me"
+AUTH_DOMAIN = "enchan.jp.auth0.com"
+AUTH_AUDIENCE = "https://api.financier.enchan.me"
 
 [[env.production.routes]]
 pattern = "api.financier.enchan.me"
@@ -30,5 +48,6 @@ custom_domain = true
 
 [[env.production.d1_databases]]
 binding = "D1"
-database_name = "financier-backend-db"
-database_id = "f1f9bbae-f053-4de7-a05d-0462b76185fe"
+migrations_dir = "./src/migrations"
+database_name = "financier-backend-db-production"
+database_id = "00000000-0000-0000-0000-000000000000"

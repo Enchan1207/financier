@@ -1,17 +1,48 @@
 <script setup lang="ts">
-import { useDark, useToggle } from '@vueuse/core'
+import { useAuth0 } from '@auth0/auth0-vue'
 import {
-  BIconHouseFill, BIconMoonFill, BIconSunFill,
+  breakpointsElement, useBreakpoints, useDark, useToggle,
+} from '@vueuse/core'
+import {
+  BIconHouseFill, BIconListTask, BIconMoonFill, BIconPencilSquare, BIconSunFill,
 } from 'bootstrap-icons-vue'
+import { useRouter } from 'vue-router'
+
+const breakpoints = useBreakpoints(breakpointsElement)
+const isSmartphone = breakpoints.smaller('sm')
+
+const router = useRouter()
 
 const emits = defineEmits(['select'])
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
+
+const { isAuthenticated } = useAuth0()
+
+const onClickNew = () => {
+  emits('select')
+  router.push('/tasks/new')
+}
 </script>
 
 <template>
   <div class="sidebar-container">
+    <div
+      v-if="!isSmartphone"
+      class="add-button-container sidebar-button-container"
+    >
+      <el-button
+        type="primary"
+        :icon="BIconPencilSquare"
+        size="large"
+        round
+        @click="onClickNew"
+      >
+        追加
+      </el-button>
+    </div>
+
     <el-menu
       :router="true"
       @select="emits('select')"
@@ -19,6 +50,14 @@ const toggleDark = useToggle(isDark)
       <el-menu-item index="/">
         <el-icon><b-icon-house-fill /></el-icon>
         <span>ホーム</span>
+      </el-menu-item>
+
+      <el-menu-item
+        v-if="isAuthenticated"
+        index="/tasks"
+      >
+        <el-icon><b-icon-list-task /></el-icon>
+        <span>タスク一覧</span>
       </el-menu-item>
     </el-menu>
 
@@ -60,12 +99,12 @@ const toggleDark = useToggle(isDark)
   user-select: none;
 }
 
-.sidebar-container .sidebar-button-container .el-text {
-    white-space: nowrap;
-    overflow-x: hidden;
-}
-
 .sidebar-container .appearance-switch-container {
   gap: 10px
+}
+
+.sidebar-container .add-button-container .el-button {
+  height: 40px;
+  justify-content: left;
 }
 </style>
