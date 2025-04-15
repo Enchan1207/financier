@@ -34,7 +34,7 @@ custom_domain = true
 binding = "D1"
 migrations_dir = "./src/migrations"
 database_name = "financier-backend-db-staging"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "939b406b-2cbe-40cd-8cda-496dc16e445d"
 
 # Cloudflare
 [env.production.vars]
@@ -50,4 +50,4 @@ custom_domain = true
 binding = "D1"
 migrations_dir = "./src/migrations"
 database_name = "financier-backend-db-production"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "4a850573-58bd-498d-a42b-57bbd5409625"
