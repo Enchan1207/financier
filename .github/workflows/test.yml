@@ -7,7 +7,7 @@ on:
       - './eslint.config.mjs'
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   test:
