@@ -22,7 +22,7 @@ database_id = "00000000-0000-0000-0000-000000000000"
 
 # staging
 [env.staging.vars]
-CORS_ALLOW_ORIGINS = "https://master.financier-frontend.pages.dev"
+CORS_ALLOW_ORIGINS = "https://main.financier-frontend.pages.dev"
 AUTH_DOMAIN = "enchan.jp.auth0.com"
 AUTH_AUDIENCE = "https://stg.api.financier.enchan.me"
 
