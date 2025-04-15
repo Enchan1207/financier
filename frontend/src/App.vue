@@ -31,7 +31,7 @@ const isSidebarVisible = ref(!isSmartphone.value)
             @click="isSidebarVisible = !isSidebarVisible"
           />
         </span>
-        <h1>Tasks</h1>
+        <h1>Financier</h1>
         <UserButton />
       </el-row>
     </el-header>
@@ -46,14 +46,12 @@ const isSidebarVisible = ref(!isSmartphone.value)
       <template v-else>
         <el-drawer
           v-model="isSidebarVisible"
-          title="Tasks"
+          title="Financier"
           direction="ltr"
           size="var(--el-aside-width)"
           body-class="drawer-body"
         >
-          <Sidebar
-            @select="isSidebarVisible = false"
-          />
+          <Sidebar @select="isSidebarVisible = false" />
         </el-drawer>
       </template>
 
@@ -99,6 +97,7 @@ const isSidebarVisible = ref(!isSmartphone.value)
 .sidebar-slide-leave-active {
   transition: all 0.2s ease-out;
 }
+
 .sidebar-slide-enter-from,
 .sidebar-slide-leave-to {
   --el-aside-width: 0;

@@ -4,7 +4,7 @@ import {
   breakpointsElement, useBreakpoints, useDark, useToggle,
 } from '@vueuse/core'
 import {
-  BIconHouseFill, BIconListTask, BIconMoonFill, BIconPencilSquare, BIconSunFill,
+  BIconHouseFill, BIconMoonFill, BIconPencilSquare, BIconSunFill,
 } from 'bootstrap-icons-vue'
 import { useRouter } from 'vue-router'
 
@@ -18,8 +18,6 @@ const emits = defineEmits(['select'])
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
 
-const { isAuthenticated } = useAuth0()
-
 const onClickNew = () => {
   emits('select')
   router.push('/tasks/new')
@@ -28,36 +26,16 @@ const onClickNew = () => {
 
 <template>
   <div class="sidebar-container">
-    <div
-      v-if="!isSmartphone"
-      class="add-button-container sidebar-button-container"
-    >
-      <el-button
-        type="primary"
-        :icon="BIconPencilSquare"
-        size="large"
-        round
-        @click="onClickNew"
-      >
+    <div v-if="!isSmartphone" class="add-button-container sidebar-button-container">
+      <el-button type="primary" :icon="BIconPencilSquare" size="large" round @click="onClickNew">
         追加
       </el-button>
     </div>
 
-    <el-menu
-      :router="true"
-      @select="emits('select')"
-    >
+    <el-menu :router="true" @select="emits('select')">
       <el-menu-item index="/">
         <el-icon><b-icon-house-fill /></el-icon>
         <span>ホーム</span>
-      </el-menu-item>
-
-      <el-menu-item
-        v-if="isAuthenticated"
-        index="/tasks"
-      >
-        <el-icon><b-icon-list-task /></el-icon>
-        <span>タスク一覧</span>
       </el-menu-item>
     </el-menu>
 
@@ -65,13 +43,8 @@ const onClickNew = () => {
       <el-text>
         外観:
       </el-text>
-      <el-switch
-        :model-value="isDark"
-        :active-icon="BIconMoonFill"
-        :inactive-icon="BIconSunFill"
-        class="color-mode-switch"
-        @change="toggleDark()"
-      />
+      <el-switch :model-value="isDark" :active-icon="BIconMoonFill" :inactive-icon="BIconSunFill"
+        class="color-mode-switch" @change="toggleDark()" />
     </div>
   </div>
 </template>
