@@ -3,6 +3,8 @@
 CREATE TABLE financial_months (
     id TEXT PRIMARY KEY NOT NULL,
 
+    user_id TEXT NOT NULL,
+
     financial_year INT NOT NULL,
     month INT NOT NULL,
 

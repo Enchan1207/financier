@@ -33,6 +33,7 @@ describe('エンティティの生成', () => {
     financialYear, month, expectedStartedAt, expectedEndedAt,
   }) => {
     const entity = createFinancialMonth({
+      userId: 'test_user',
       financialYear,
       month: month as Months,
     })

@@ -8,6 +8,8 @@ export type Months = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
 export type FinancialMonth = {
   id: string
 
+  userId: string
+
   financialYear: number
   month: Months
 
@@ -16,6 +18,7 @@ export type FinancialMonth = {
 }
 
 export const createFinancialMonth = (props: {
+  userId: string
   financialYear: number
   month: Months
 }): FinancialMonth => {
@@ -28,6 +31,8 @@ export const createFinancialMonth = (props: {
 
   return {
     id: ulid(),
+
+    userId: props.userId,
 
     financialYear,
     month,

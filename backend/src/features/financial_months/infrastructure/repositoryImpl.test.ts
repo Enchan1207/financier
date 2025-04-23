@@ -12,22 +12,27 @@ describe('会計年度と月に基づく項目の選択', () => {
 
   const dummyEntities: FinancialMonth[] = [
     createFinancialMonth({
+      userId: 'test_user',
       financialYear: 2024,
       month: 1,
     }),
     createFinancialMonth({
+      userId: 'test_user',
       financialYear: 2024,
       month: 2,
     }),
     createFinancialMonth({
+      userId: 'test_user',
       financialYear: 2025,
       month: 1,
     }),
     createFinancialMonth({
+      userId: 'test_user',
       financialYear: 2025,
       month: 2,
     }),
     createFinancialMonth({
+      userId: 'test_user',
       financialYear: 2025,
       month: 3,
     }),
@@ -40,22 +45,22 @@ describe('会計年度と月に基づく項目の選択', () => {
   })
 
   test('FY2024の項目数は2であること', async () => {
-    const actual = await repo.findByFinancialYear(2024)
+    const actual = await repo.findByFinancialYear('test_user', 2024)
     expect(actual).toHaveLength(2)
   })
 
   test('FY2024の項目数は3であること', async () => {
-    const actual = await repo.findByFinancialYear(2025)
+    const actual = await repo.findByFinancialYear('test_user', 2025)
     expect(actual).toHaveLength(3)
   })
 
   test('FY2024 1月の項目を取得できること', async () => {
-    const actual = await repo.findByFinancialYearAndMonth(2024, 1)
+    const actual = await repo.findByFinancialYearAndMonth('test_user', 2024, 1)
     expect(actual).toBeDefined()
   })
 
   test('FY2024 3月の項目は取得できないこと', async () => {
-    const actual = await repo.findByFinancialYearAndMonth(2024, 3)
+    const actual = await repo.findByFinancialYearAndMonth('test_user', 2024, 3)
     expect(actual).toBeUndefined()
   })
 })
@@ -64,11 +69,13 @@ describe('日付に基づく項目の選択', () => {
   let repo: FinancialMonthRepository
 
   const dummyEntityApril = createFinancialMonth({
+    userId: 'test_user',
     financialYear: 2024,
     month: 4,
   })
 
   const dummyEntityMay = createFinancialMonth({
+    userId: 'test_user',
     financialYear: 2024,
     month: 5,
   })
@@ -99,7 +106,7 @@ describe('日付に基づく項目の選択', () => {
       expected: dummyEntityMay,
     },
   ])('$date の場合、 $expected が取得されること', async ({ date, expected }) => {
-    const actual = await repo.findByDate(date)
+    const actual = await repo.findByDate('test_user', date)
 
     // dayjsオブジェクトについては内部のプロパティが細かく変わっているので、タイムスタンプで比較
     expect({
