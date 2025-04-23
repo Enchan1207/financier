@@ -12,7 +12,7 @@ export type Workday = {
   financialMonthId: string
   count: number
 
-  updatedAt: number
+  updatedAt: dayjs.Dayjs
 }
 
 export const createWorkday = (props: {
@@ -25,6 +25,6 @@ export const createWorkday = (props: {
     userId: props.userId,
     financialMonthId: props.financialMonth.id,
     count: props.count,
-    updatedAt: dayjs().valueOf(),
+    updatedAt: dayjs(),
   }
 }
