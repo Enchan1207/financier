@@ -35,10 +35,10 @@ const saveWorkday = (db: D1Database): WorkdayRepository['saveWorkday'] => async 
   return item
 }
 
-const findByFinancialMonth = (db: D1Database): WorkdayRepository['findByFinancialMonth'] => async (month) => {
+const findByFinancialMonthId = (db: D1Database): WorkdayRepository['findByFinancialMonthId'] => async (financialMonthId) => {
   const stmt = d1(db)
     .select(WorkdayRecord, 'workdays')
-    .where(condition('financial_month_id', '==', month.id))
+    .where(condition('financial_month_id', '==', financialMonthId))
     .build()
 
   const record = await stmt.first<WorkdayRecord>()
@@ -49,6 +49,6 @@ const findByFinancialMonth = (db: D1Database): WorkdayRepository['findByFinancia
 export const useWorkdayRepositoryD1 = (db: D1Database): WorkdayRepository => {
   return {
     saveWorkday: saveWorkday(db),
-    findByFinancialMonth: findByFinancialMonth(db),
+    findByFinancialMonthId: findByFinancialMonthId(db),
   }
 }
