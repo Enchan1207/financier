@@ -11,5 +11,5 @@ CREATE TABLE financial_months (
     started_at INT NOT NULL,
     ended_at INT NOT NULL,
 
-    unique(financial_year, month)
+    unique(user_id, financial_year, month)
 );
