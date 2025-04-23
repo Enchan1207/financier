@@ -64,8 +64,8 @@ const findByDate = (db: D1Database): FinancialMonthRepository['findByDate'] => a
   const stmt = d1(db)
     .select(FinancialMonthRecord, 'financial_months')
     .where(every(
-      condition('started_at', '>=', timestamp),
-      condition('ended_at', '<=', timestamp),
+      condition('started_at', '<=', timestamp),
+      condition('ended_at', '>=', timestamp),
     ))
     .build()
 
