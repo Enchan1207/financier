@@ -161,7 +161,7 @@ export default tseslint.config(
         patterns: [
           {
             group: ['@routes/**'],
-            message: 'dont use backend types',
+            message: 'Do not use backend types.',
             allowTypeImports: false,
           },
         ],
@@ -191,7 +191,16 @@ export default tseslint.config(
   {
     name: 'backend rules',
     files: ['backend/**/*.ts', 'backend/**/*.vue'],
-    rules: {}, // there is no rules for backend yet...
+    rules: {
+      '@typescript-eslint/no-restricted-imports': ['error', {
+        paths: [
+          {
+            name: 'dayjs',
+            message: 'Use @/logic/dayjs instead.',
+          },
+        ],
+      }],
+    }, // there is no rules for backend yet...
   },
 
   {
