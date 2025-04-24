@@ -69,12 +69,13 @@ describe('現在時刻に基づくエンティティの取得', () => {
 
   test('月度エンティティを取得できること', async () => {
     const now = dayjs.tz('2025-05-01T00:00:00.000', 'Asia/Tokyo')
-    const actual = await usecase.getCurrentFinancialMonth(testUser1, now)
+    const result = await usecase.getCurrentFinancialMonth(testUser1, now)
+    const actual = result._unsafeUnwrap()
 
     expect({
-      userId: actual?.userId,
-      financialYear: actual?.financialYear,
-      month: actual?.month,
+      userId: actual.userId,
+      financialYear: actual.financialYear,
+      month: actual.month,
     }).toStrictEqual({
       userId: testUser1.id,
       financialYear: 2025,
