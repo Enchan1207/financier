@@ -1,3 +1,4 @@
+import { ResultAsync } from 'neverthrow'
 import { ulid } from 'ulid'
 import { z } from 'zod'
 
@@ -17,26 +18,32 @@ type Auth0UserInfo = z.infer<typeof Auth0UserInfoSchema>
 
 export interface UserUsecase {
   /** Auth0のユーザIDからユーザを取得する */
-  lookupUserByAuth0Id(auth0UserId: string): Promise<User | undefined>
+  lookupUserByAuth0Id(auth0UserId: string): ResultAsync<User, Error>
 
   /** 認証トークンをAuth0に投げ、暫定ユーザを作成する */
   createTentativeUser(props: {
     authDomain: string
     token: string
-  }): Promise<User>
+  }): ResultAsync<User, Error>
 }
 
+class UserUsecaseError extends Error {}
+
 const lookupUserByAuth0Id = (repository: UserRepository): UserUsecase['lookupUserByAuth0Id'] =>
-  async (auth0UserId: string) => {
+  ResultAsync.fromThrowable(async (auth0UserId) => {
     const user = await repository.getUserByAuth0Id(auth0UserId)
+    if (user === undefined) {
+      throw new UserUsecaseError('ユーザが登録されていない')
+    }
+
     return user
-  }
+  }, e => e instanceof UserUsecaseError ? e : new Error('unexpected error'))
 
 const createTentativeUser = (repository: UserRepository): UserUsecase['createTentativeUser'] =>
-  async (props) => {
+  ResultAsync.fromThrowable(async (props) => {
     const userInfo = await fetchUserInfo(props)
     if (userInfo === undefined) {
-      throw new Error('ユーザ情報の取得に失敗')
+      throw new UserUsecaseError('Auth0からユーザ情報を取得できなかった')
     }
 
     const newUser: User = {
@@ -45,21 +52,20 @@ const createTentativeUser = (repository: UserRepository): UserUsecase['createTen
       auth0_user_id: userInfo.sub,
       email: userInfo.email,
     }
-    const registered = await repository.saveUser(newUser)
-    return registered
-  }
+
+    return repository.saveUser(newUser)
+  }, e => e instanceof UserUsecaseError ? e : new Error('unexpected error'))
 
 const fetchUserInfo = async (props: {
   authDomain: string
   token: string
-}):
-Promise<Auth0UserInfo | undefined> => {
+}): Promise<Auth0UserInfo | undefined> => {
   const response = await fetch(`https://${props.authDomain}/userinfo`,
     { headers: { Authorization: props.token } })
     .then(response => response.json())
 
-  const userInfo = Auth0UserInfoSchema.parse(response)
-  return userInfo
+  const { success, data } = Auth0UserInfoSchema.safeParse(response)
+  return success ? data : undefined
 }
 
 export const useUserUsecase = (repository: UserRepository): UserUsecase => ({
