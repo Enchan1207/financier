@@ -86,6 +86,6 @@ describe('現在時刻に基づくエンティティの取得', () => {
   test('同じ時期であっても他人のエンティティは取得できないこと', async () => {
     const now = dayjs.tz('2025-05-01T00:00:00.000', 'Asia/Tokyo')
     const actual = await usecase.getCurrentFinancialMonth(testUser2, now)
-    expect(actual).toBeUndefined()
+    expect(actual.isOk()).toBeFalsy()
   })
 })
