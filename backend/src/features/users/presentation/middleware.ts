@@ -1,6 +1,7 @@
 import type { MiddlewareHandler } from 'hono'
 import { every } from 'hono/combine'
 import { createMiddleware } from 'hono/factory'
+import { ok } from 'neverthrow'
 
 import type { User } from '@/features/users/domain/entity'
 import { useUserUsecase } from '@/features/users/domain/usecase'
@@ -16,25 +17,24 @@ const userMiddleware = createMiddleware<{
     user: User
   }
 }>(async (c, next) => {
-  const { sub } = c.get('jwtPayload')
+  const { sub: auth0UserId } = c.get('jwtPayload')
   const repo = useUserRepositoryD1(c.env.D1)
   const usecase = useUserUsecase(repo)
 
-  const storedUser = await usecase.lookupUserByAuth0Id(sub)
-  if (storedUser !== undefined) {
-    c.set('user', storedUser)
-    await next()
-    return
+  const result = await ok(auth0UserId)
+    .asyncAndThen(auth0UserId => usecase.lookupUserByAuth0Id(auth0UserId))
+    .orElse(() => usecase.createTentativeUser({
+      authDomain: c.env.AUTH_DOMAIN,
+      token: c.req.header('Authorization') ?? '',
+    }).andTee((newUser) => {
+      console.log(`New user registered. ${JSON.stringify(newUser)}`)
+    }))
+
+  if (result.isErr()) {
+    throw result.error
   }
 
-  const token = c.req.header('Authorization') ?? ''
-  const newUser = await usecase.createTentativeUser({
-    authDomain: c.env.AUTH_DOMAIN,
-    token,
-  })
-  console.log(`New user registered. ${JSON.stringify(newUser)}`)
-
-  c.set('user', newUser)
+  c.set('user', result.value)
   await next()
 })
 

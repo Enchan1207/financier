@@ -1,3 +1,5 @@
+import { ResultAsync } from 'neverthrow'
+
 import type { User } from '@/features/users/domain/entity'
 import dayjs from '@/logic/dayjs'
 
@@ -12,29 +14,38 @@ export interface FinancialMonthUsecase {
    * @returns 作成されたエンティティの配列
    */
   initializeFinancialYear(user: User, financialYear: number):
-  Promise<FinancialMonth[]>
+  ResultAsync<FinancialMonth[], Error>
 
   /**
    * 現在時刻に基づく会計月度エンティティを返す
    * @param now 現在時刻
    */
   getCurrentFinancialMonth(user: User, now?: dayjs.Dayjs):
-  Promise<FinancialMonth | undefined>
+  ResultAsync<FinancialMonth, Error>
 }
 
-const initializeFinancialYear = (repo: FinancialMonthRepository): FinancialMonthUsecase['initializeFinancialYear'] => (user, financialYear) => {
-  const entities = Months.map(month => createFinancialMonth({
-    userId: user.id,
-    financialYear,
-    month,
-  }))
+class FinancialMonthUsecaseError extends Error {}
 
-  return Promise.all(entities.map(entity => repo.insertFinancialMonth(entity)))
-}
+const initializeFinancialYear = (repo: FinancialMonthRepository): FinancialMonthUsecase['initializeFinancialYear'] =>
+  ResultAsync.fromThrowable((user, financialYear) => {
+    const entities = Months.map(month => createFinancialMonth({
+      userId: user.id,
+      financialYear,
+      month,
+    }))
 
-const getCurrentFinancialMonth = (repo: FinancialMonthRepository): FinancialMonthUsecase['getCurrentFinancialMonth'] => (user, now) => {
-  return repo.findByDate(user.id, now ?? dayjs())
-}
+    return Promise.all(entities.map(entity => repo.insertFinancialMonth(entity)))
+  })
+
+const getCurrentFinancialMonth = (repo: FinancialMonthRepository): FinancialMonthUsecase['getCurrentFinancialMonth'] =>
+  ResultAsync.fromThrowable(async (user, now) => {
+    const record = await repo.findByDate(user.id, now ?? dayjs())
+    if (record === undefined) {
+      throw new FinancialMonthUsecaseError('該当する会計月度は登録されていない')
+    }
+
+    return record
+  }, e => e instanceof FinancialMonthUsecaseError ? e : new Error('unexpected error'))
 
 export const useFinancialMonthUsecase = (repo: FinancialMonthRepository): FinancialMonthUsecase => {
   return {
