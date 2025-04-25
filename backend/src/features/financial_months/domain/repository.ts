@@ -1,6 +1,7 @@
 import type dayjs from '@/logic/dayjs'
 
-import type { FinancialMonth, Months } from './entity'
+import type { FinancialMonth } from './entity'
+import type { Months } from './valueObject'
 
 export interface FinancialMonthRepository {
   insertFinancialMonth(item: FinancialMonth): Promise<FinancialMonth>
