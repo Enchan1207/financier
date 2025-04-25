@@ -1,36 +1,51 @@
-import dayjs from '@/logic/dayjs'
 import { condition, every } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
 
-import type { FinancialMonth, Months } from '../domain/entity'
+import type { FinancialMonth } from '../domain/entity'
 import type { FinancialMonthRepository } from '../domain/repository'
+import type { Months } from '../domain/valueObject'
+import { getPeriodByFinancialMonth } from '../domain/valueObject'
 import { FinancialMonthRecord } from './entity'
 
 const makeFinancialMonth = (entity: FinancialMonthRecord): FinancialMonth => {
-  const {
-    started_at, ended_at, user_id,
-  } = entity
-
   return {
     id: entity.id,
-    userId: user_id,
+    userId: entity.user_id,
     financialYear: entity.financial_year,
     month: entity.month as Months,
-    startedAt: dayjs(started_at),
-    endedAt: dayjs(ended_at),
+  }
+}
+
+const makeFinancialMonthRecord = ({
+  id, userId, financialYear, month,
+}: FinancialMonth): FinancialMonthRecord => {
+  const { start, end } = getPeriodByFinancialMonth({
+    financialYear,
+    month,
+  })
+
+  return {
+    id,
+    user_id: userId,
+    financial_year: financialYear,
+    month,
+    started_at: start.valueOf(),
+    ended_at: end.valueOf(),
   }
 }
 
 const insertFinancialMonth = (db: D1Database): FinancialMonthRepository['insertFinancialMonth'] => async (item) => {
   const stmt = 'INSERT INTO financial_months VALUES (?1,?2,?3,?4,?5,?6)'
 
+  const record = makeFinancialMonthRecord(item)
+
   await db.prepare(stmt).bind(
-    item.id,
-    item.userId,
-    item.financialYear,
-    item.month,
-    item.startedAt.valueOf(),
-    item.endedAt.valueOf(),
+    record.id,
+    record.user_id,
+    record.financial_year,
+    record.month,
+    record.started_at,
+    record.ended_at,
   ).run()
 
   return item
@@ -51,7 +66,7 @@ const findByFinancialYear = (db: D1Database): FinancialMonthRepository['findByFi
   return items
 }
 
-const findByFinancialYearAndMonth = (db: D1Database): FinancialMonthRepository['findByFinancialYearAndMonth'] => async (userId, financialYear, month) => {
+const findByFinancialMonth = (db: D1Database): FinancialMonthRepository['findByFinancialMonth'] => async (userId, { financialYear, month }) => {
   const stmt = d1(db)
     .select(FinancialMonthRecord, 'financial_months')
     .where(every(
@@ -87,7 +102,7 @@ export const useFinancialMonthRepositoryD1 = (db: D1Database): FinancialMonthRep
   return {
     insertFinancialMonth: insertFinancialMonth(db),
     findByFinancialYear: findByFinancialYear(db),
-    findByFinancialYearAndMonth: findByFinancialYearAndMonth(db),
+    findByFinancialMonth: findByFinancialMonth(db),
     findByDate: findByDate(db),
   }
 }

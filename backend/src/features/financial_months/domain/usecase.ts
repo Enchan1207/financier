@@ -4,8 +4,9 @@ import type { User } from '@/features/users/domain/entity'
 import dayjs from '@/logic/dayjs'
 
 import type { FinancialMonth } from './entity'
-import { createFinancialMonth, Months } from './entity'
+import { createFinancialMonth } from './entity'
 import type { FinancialMonthRepository } from './repository'
+import { Months } from './valueObject'
 
 export interface FinancialMonthUsecase {
   /**
