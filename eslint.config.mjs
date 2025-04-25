@@ -208,6 +208,7 @@ export default tseslint.config(
     files: ['**/*.ts', '**/*.vue'],
     rules: {
       'eqeqeq': ['error', 'always'],
+      'no-useless-rename': 'error',
       '@typescript-eslint/restrict-template-expressions': [
         'error',
         { allowNumber: true },
