@@ -11,5 +11,5 @@ CREATE TABLE income_definitions (
 
     enabled_at INT NOT NULL,
     disabled_at INT NOT NULL,
-    updated_at INT NOT NULL,
+    updated_at INT NOT NULL
 );
