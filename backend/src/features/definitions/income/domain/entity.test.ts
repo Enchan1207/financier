@@ -17,6 +17,7 @@ describe('報酬定義エンティティの生成', () => {
   const entity = createIncomeDefinition({
     from,
     to,
+    name: 'test',
     kind: 'absolute',
     value: 0,
     userId: 'test_user',

@@ -11,6 +11,7 @@ export type IncomeDefinition = {
   id: string
   userId: string
 
+  name: string
   kind: IncomeDefinitionKind
   value: number
 
@@ -22,13 +23,14 @@ export type IncomeDefinition = {
 
 export const createIncomeDefinition = (props: {
   userId: string
+  name: string
   kind: IncomeDefinitionKind
   value: number
   from: FinancialMonthData
   to: FinancialMonthData
 }): IncomeDefinition => {
   const {
-    userId, kind, value, from, to,
+    userId, name, kind, value, from, to,
   } = props
 
   const { start } = getPeriodByFinancialMonth(from)
@@ -37,6 +39,7 @@ export const createIncomeDefinition = (props: {
   return {
     id: ulid(),
     userId,
+    name,
     kind,
     value,
     enabledAt: start,

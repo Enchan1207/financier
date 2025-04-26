@@ -5,6 +5,7 @@ import { IncomeDefinitionKind } from '../domain/entity'
 export const IncomeDefinitionRecord = z.object({
   id: z.string(),
   user_id: z.string(),
+  name: z.string(),
   kind: z.enum(IncomeDefinitionKind),
   value: z.number(),
   enabled_at: z.number(),

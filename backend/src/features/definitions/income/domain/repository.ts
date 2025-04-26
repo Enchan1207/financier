@@ -3,14 +3,18 @@ import type { User } from '@/features/users/domain/entity'
 
 import type { IncomeDefinition, IncomeDefinitionKind } from './entity'
 
+export type IncomeDefinitionSortKey = keyof Pick<IncomeDefinition, 'enabledAt' | 'disabledAt' | 'updatedAt'>
+
 export interface IncomeDefinitionRepository {
   insertIncomeDefinition(item: IncomeDefinition): Promise<IncomeDefinition>
 
-  updateIncomeDefinition(id: IncomeDefinition['id'], input: Omit<IncomeDefinition, 'id'>): Promise<IncomeDefinition>
+  updateIncomeDefinition(id: IncomeDefinition['id'], input: Partial<Omit<IncomeDefinition, 'id' | 'userId'>>): Promise<IncomeDefinition | undefined>
+
+  deleteIncomeDefinition(id: IncomeDefinition['id']): Promise<IncomeDefinition | undefined>
 
   findByUserId(props: {
     userId: User['id']
-    sortBy: keyof Pick<IncomeDefinition, 'enabledAt' | 'disabledAt' | 'updatedAt'>
+    sortBy: IncomeDefinitionSortKey
     filter?: IncomeDefinitionKind
     order: 'asc' | 'desc'
     limit: number
@@ -22,6 +26,8 @@ export interface IncomeDefinitionRepository {
   findByFinancialMonth(props: {
     userId: User['id']
     financialMonth: FinancialMonthData
+    sortBy: IncomeDefinitionSortKey
+    filter?: IncomeDefinitionKind
     order: 'asc' | 'desc'
     limit: number
     offset?: number
@@ -30,6 +36,8 @@ export interface IncomeDefinitionRepository {
   findByFinancialYear(props: {
     userId: User['id']
     financialYear: number
+    sortBy: IncomeDefinitionSortKey
+    filter?: IncomeDefinitionKind
     order: 'asc' | 'desc'
     limit: number
     offset?: number
