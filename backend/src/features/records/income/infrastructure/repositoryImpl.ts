@@ -57,9 +57,28 @@ const findById = (db: D1Database): IncomeRecordRepository['findById'] => async (
   return record ? makeIncomeRecord(record) : undefined
 }
 
-export const useIncomeRecordRepositoryD1 = (db: D1Database) => {
+const updateIncomeDefinitionValue = (db: D1Database): IncomeRecordRepository['updateIncomeDefinitionValue'] => async (id, value) => {
+  const stmt = `UPDATE income_records SET value=?, updated_at=? WHERE id=?`
+
+  await db
+    .prepare(stmt)
+    .bind(value, dayjs().valueOf(), id)
+    .run()
+
+  const updated = d1(db)
+    .select(IncomeRecordRecord, 'income_records')
+    .where(condition('id', '==', id))
+    .build()
+    .first<IncomeRecordRecord>()
+    .then(record => record ? makeIncomeRecord(record) : undefined)
+
+  return updated
+}
+
+export const useIncomeRecordRepositoryD1 = (db: D1Database): IncomeRecordRepository => {
   return {
     insertIncomeRecord: insertIncomeRecord(db),
     findById: findById(db),
+    updateIncomeDefinitionValue: updateIncomeDefinitionValue(db),
   }
 }

@@ -66,7 +66,7 @@ const updateIncomeRecordValue = (repo: IncomeRecordRepository): IncomeRecordUsec
       throw new AuthorizationError(user, stored)
     }
 
-    const updated = await repo.updateIncomeDefinition(id, { value })
+    const updated = await repo.updateIncomeDefinitionValue(id, value)
     if (updated === undefined) {
       throw new NoSuchItemError(id)
     }

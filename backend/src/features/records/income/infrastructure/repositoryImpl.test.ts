@@ -67,4 +67,17 @@ describe('報酬定義の操作', () => {
 
     expect(actual).toStrictEqual(dummyIncomeRecord)
   })
+
+  test('項目を更新できること', async () => {
+    const actual = await repository.updateIncomeDefinitionValue(
+      dummyIncomeRecord.id,
+      200,
+    )
+
+    expect(actual).toStrictEqual({
+      ...dummyIncomeRecord,
+      updatedAt: actual?.updatedAt,
+      value: 200,
+    })
+  })
 })
