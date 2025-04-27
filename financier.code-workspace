@@ -51,6 +51,12 @@
     },
     "[scss]": {
       "editor.defaultFormatter": "vscode.css-language-features"
+    },
+    "github.copilot.enable": {
+      "*": false,
+      "plaintext": false,
+      "markdown": false,
+      "scminput": false
     }
   },
   "extensions": {

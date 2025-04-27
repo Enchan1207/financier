@@ -119,6 +119,7 @@ export default tseslint.config(
           code: 80,
           ignoreUrls: true,
           ignoreStrings: true,
+          ignoreTemplateLiterals: true,
           ignorePattern: '=>',
         },
       ],
@@ -208,6 +209,7 @@ export default tseslint.config(
     files: ['**/*.ts', '**/*.vue'],
     rules: {
       'eqeqeq': ['error', 'always'],
+      'no-useless-rename': 'error',
       '@typescript-eslint/restrict-template-expressions': [
         'error',
         { allowNumber: true },

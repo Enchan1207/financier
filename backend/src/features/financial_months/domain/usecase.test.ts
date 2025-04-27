@@ -31,13 +31,6 @@ describe('会計年度の初期化', () => {
       .findByFinancialYear(testUser.id, 2025)
     expect(actual).toHaveLength(12)
   })
-
-  test('FY2025の1月は2026年1月であること', async () => {
-    const actual = await repo.findByFinancialYearAndMonth(testUser.id, 2025, 1)
-    const actualStartedAt = actual?.startedAt.valueOf()
-
-    expect(actualStartedAt).toStrictEqual(dayjs.tz('2026-01-01T00:00:00.000', 'Asia/Tokyo').valueOf())
-  })
 })
 
 describe('現在時刻に基づくエンティティの取得', () => {

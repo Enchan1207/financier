@@ -55,12 +55,18 @@ describe('会計年度と月に基づく項目の選択', () => {
   })
 
   test('FY2024 1月の項目を取得できること', async () => {
-    const actual = await repo.findByFinancialYearAndMonth('test_user', 2024, 1)
+    const actual = await repo.findByFinancialMonth('test_user', {
+      financialYear: 2024,
+      month: 1,
+    })
     expect(actual).toBeDefined()
   })
 
   test('FY2024 3月の項目は取得できないこと', async () => {
-    const actual = await repo.findByFinancialYearAndMonth('test_user', 2024, 3)
+    const actual = await repo.findByFinancialMonth('test_user', {
+      financialYear: 2024,
+      month: 3,
+    })
     expect(actual).toBeUndefined()
   })
 })
@@ -109,14 +115,6 @@ describe('日付に基づく項目の選択', () => {
     const actual = await repo.findByDate('test_user', date)
 
     // dayjsオブジェクトについては内部のプロパティが細かく変わっているので、タイムスタンプで比較
-    expect({
-      ...actual,
-      startedAt: actual?.startedAt.valueOf(),
-      endedAt: actual?.endedAt.valueOf(),
-    }).toStrictEqual({
-      ...expected,
-      startedAt: expected.startedAt.valueOf(),
-      endedAt: expected.endedAt.valueOf(),
-    })
+    expect(actual).toStrictEqual(expected)
   })
 })
