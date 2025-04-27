@@ -174,15 +174,15 @@ const findByFinancialMonth = (db: D1Database): IncomeDefinitionRepository['findB
         condition('user_id', '==', userId),
         condition('kind', '==', filter),
         every(
-          condition('enabled_at', '>=', start),
-          condition('disabled_at', '<=', end),
+          condition('enabled_at', '<=', start),
+          condition('disabled_at', '>=', end),
         ),
       ))
     : base.where(every(
         condition('user_id', '==', userId),
         every(
-          condition('enabled_at', '>=', start),
-          condition('disabled_at', '<=', end),
+          condition('enabled_at', '<=', start),
+          condition('disabled_at', '>=', end),
         ),
       ))
 
