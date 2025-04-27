@@ -63,7 +63,7 @@ describe('報酬定義の操作', () => {
   })
 
   test('挿入した項目を取得できること', async () => {
-    const actual = await repository.findIncomeRecordById(dummyIncomeRecord.id)
+    const actual = await repository.findById(dummyIncomeRecord.id)
 
     expect(actual).toStrictEqual(dummyIncomeRecord)
   })

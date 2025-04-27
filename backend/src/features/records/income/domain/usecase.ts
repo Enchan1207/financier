@@ -1,8 +1,9 @@
-import type { ResultAsync } from 'neverthrow'
+import { ResultAsync } from 'neverthrow'
 
 import type { User } from '@/features/users/domain/entity'
 
 import type { IncomeRecord, IncomeRecordUpdator } from './entity'
+import type { IncomeRecordRepository } from './repository'
 
 export class IncomeRecordUsecaseError extends Error {}
 
@@ -38,4 +39,44 @@ export interface IncomeRecordUsecase {
     value: number,
     updator: IncomeRecordUpdator
   ): ResultAsync<IncomeRecord, NoSuchItemError | AuthorizationError>
+}
+
+const getIncomeRecord = (repo: IncomeRecordRepository): IncomeRecordUsecase['getIncomeRecord'] =>
+  ResultAsync.fromThrowable(async (user, id) => {
+    const record = await repo.findById(id)
+    if (record === undefined) {
+      throw new NoSuchItemError(id)
+    }
+
+    if (record.userId !== user.id) {
+      throw new AuthorizationError(user, record)
+    }
+
+    return record
+  })
+
+const updateIncomeRecordValue = (repo: IncomeRecordRepository): IncomeRecordUsecase['updateIncomeRecordValue'] =>
+  ResultAsync.fromThrowable(async (user, id, value) => {
+    const stored = await repo.findById(id)
+    if (stored === undefined) {
+      throw new NoSuchItemError(id)
+    }
+
+    if (stored.userId !== user.id) {
+      throw new AuthorizationError(user, stored)
+    }
+
+    const updated = await repo.updateIncomeDefinition(id, { value })
+    if (updated === undefined) {
+      throw new NoSuchItemError(id)
+    }
+
+    return updated
+  })
+
+export const useIncomeRecordUsecase = (repo: IncomeRecordRepository): IncomeRecordUsecase => {
+  return {
+    getIncomeRecord: getIncomeRecord(repo),
+    updateIncomeRecordValue: updateIncomeRecordValue(repo),
+  }
 }

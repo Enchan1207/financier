@@ -47,7 +47,7 @@ const insertIncomeRecord = (db: D1Database): IncomeRecordRepository['insertIncom
   return record
 }
 
-const findIncomeRecordById = (db: D1Database): IncomeRecordRepository['findIncomeRecordById'] => async (id) => {
+const findById = (db: D1Database): IncomeRecordRepository['findById'] => async (id) => {
   const stmt = d1(db)
     .select(IncomeRecordRecord, 'income_records')
     .where(condition('id', '==', id))
@@ -60,6 +60,6 @@ const findIncomeRecordById = (db: D1Database): IncomeRecordRepository['findIncom
 export const useIncomeRecordRepositoryD1 = (db: D1Database) => {
   return {
     insertIncomeRecord: insertIncomeRecord(db),
-    findIncomeRecordById: findIncomeRecordById(db),
+    findById: findById(db),
   }
 }
