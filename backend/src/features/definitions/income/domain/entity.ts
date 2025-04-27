@@ -14,6 +14,7 @@ export type IncomeDefinition = {
   name: string
   kind: IncomeDefinitionKind
   value: number
+  isTaxable: boolean
 
   enabledAt: dayjs.Dayjs
   disabledAt: dayjs.Dayjs
@@ -25,12 +26,13 @@ export const createIncomeDefinition = (props: {
   userId: string
   name: string
   kind: IncomeDefinitionKind
+  isTaxable: boolean
   value: number
   from: FinancialMonthData
   to: FinancialMonthData
 }): IncomeDefinition => {
   const {
-    userId, name, kind, value, from, to,
+    userId, name, kind, value, isTaxable, from, to,
   } = props
 
   const { start } = getPeriodByFinancialMonth(from)
@@ -42,6 +44,7 @@ export const createIncomeDefinition = (props: {
     name,
     kind,
     value,
+    isTaxable,
     enabledAt: start,
     disabledAt: end,
     updatedAt: dayjs(),

@@ -8,6 +8,7 @@ export const IncomeDefinitionRecord = z.object({
   name: z.string(),
   kind: z.enum(IncomeDefinitionKind),
   value: z.number(),
+  is_taxable: z.number(),
   enabled_at: z.number(),
   disabled_at: z.number(),
   updated_at: z.number(),

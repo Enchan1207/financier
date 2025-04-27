@@ -36,6 +36,7 @@ describe('権限まわり', () => {
       kind: 'absolute',
       name: 'テスト定義',
       value: 100000,
+      isTaxable: true,
       from: {
         financialYear: 2024,
         month: 4,

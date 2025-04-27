@@ -34,6 +34,7 @@ describe('基本的なCRUD', () => {
     name: '基本給',
     kind: 'absolute',
     value: 230000,
+    isTaxable: true,
     from: {
       financialYear: 2025,
       month: 4,
@@ -100,6 +101,7 @@ describe('基本的なCRUD', () => {
         kind: 'related_by_workday',
         name: '通勤手当',
         value: 300,
+        isTaxable: true,
         enabledAt: start.valueOf(),
         disabledAt: end.valueOf(),
         updatedAt: actual?.updatedAt.valueOf(),
@@ -133,6 +135,7 @@ describe('詳細な検索', () => {
     name: '手当1',
     kind: 'related_by_workday',
     value: 380,
+    isTaxable: false,
     from: {
       financialYear: 2025,
       month: 4,
@@ -148,6 +151,7 @@ describe('詳細な検索', () => {
     name: '手当2',
     kind: 'related_by_workday',
     value: 380,
+    isTaxable: true,
     from: {
       financialYear: 2025,
       month: 8,
