@@ -1,6 +1,8 @@
 import { env } from 'cloudflare:test'
 
 import type { User } from '@/features/users/domain/entity'
+import { createUserEntity } from '@/features/users/domain/entity'
+import { useUserRepositoryD1 } from '@/features/users/infrastructure/repositoryImpl'
 
 import { useIncomeDefinitionRepositoryD1 } from '../infrastructure/repositoryImpl'
 import { createIncomeDefinition } from './entity'
@@ -11,15 +13,20 @@ describe('権限まわり', () => {
 
   const usecase = useIncomeDefinitionUsecase(repo)
 
-  const testUser: User = {
-    id: 'test_user_id',
+  const dummyUser: User = createUserEntity({
     name: 'test user',
     auth0_user_id: 'auth0_test_user',
     email: 'test@example.com',
-  }
+  })
+
+  const dummyOtherUser: User = createUserEntity({
+    name: 'test user',
+    auth0_user_id: 'auth0_test_user',
+    email: 'test@example.com',
+  })
 
   const dummyIncomeDefinition = createIncomeDefinition({
-    userId: testUser.id,
+    userId: dummyUser.id,
     name: 'ダミー定義',
     kind: 'absolute',
     value: 100000,
@@ -34,7 +41,7 @@ describe('権限まわり', () => {
   })
 
   const dummyOtherIncomeDefinition = createIncomeDefinition({
-    userId: 'other_user',
+    userId: dummyOtherUser.id,
     name: 'ダミー定義',
     kind: 'absolute',
     value: 100000,
@@ -49,13 +56,17 @@ describe('権限まわり', () => {
   })
 
   beforeAll(async () => {
+    const userRepository = useUserRepositoryD1(env.D1)
+    await userRepository.saveUser(dummyUser)
+    await userRepository.saveUser(dummyOtherUser)
+
     await repo.insertIncomeDefinition(dummyIncomeDefinition)
     await repo.insertIncomeDefinition(dummyOtherIncomeDefinition)
   })
 
   test('他人のエンティティは取得できないこと', async () => {
     const actual = await usecase.getIncomeDefinition(
-      testUser,
+      dummyUser,
       dummyOtherIncomeDefinition.id,
     )
 
@@ -65,7 +76,7 @@ describe('権限まわり', () => {
 
   test('他人のエンティティは更新できないこと', async () => {
     const actual = await usecase.updateIncomeDefinition(
-      testUser,
+      dummyUser,
       dummyOtherIncomeDefinition.id,
       {},
     )
@@ -76,7 +87,7 @@ describe('権限まわり', () => {
 
   test('他人のエンティティは無効化できないこと', async () => {
     const actual = await usecase.invalidateIncomeDefinition(
-      testUser,
+      dummyUser,
       dummyOtherIncomeDefinition.id,
       {
         financialYear: 2025,
@@ -90,7 +101,7 @@ describe('権限まわり', () => {
 
   test('他人のエンティティは削除できないこと', async () => {
     const actual = await usecase.deleteIncomeDefinition(
-      testUser,
+      dummyUser,
       dummyOtherIncomeDefinition.id,
     )
 
@@ -100,7 +111,7 @@ describe('権限まわり', () => {
 
   test('他人のエンティティは期間が被っていても取得されないこと (会計月度)', async () => {
     const actual = await usecase.findIncomeDefinitionsByFinancialMonth(
-      testUser,
+      dummyUser,
       {
         financialYear: 2025,
         month: 7,
@@ -114,7 +125,7 @@ describe('権限まわり', () => {
 
   test('他人のエンティティは期間が被っていても取得されないこと (会計年度)', async () => {
     const actual = await usecase.findIncomeDefinitionsByFinancialYear(
-      testUser,
+      dummyUser,
       2025,
     )
 
