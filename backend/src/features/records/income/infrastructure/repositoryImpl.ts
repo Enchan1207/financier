@@ -3,6 +3,7 @@ import { d1 } from '@/logic/queryBuilder/d1';
 import dayjs from '@/logic/dayjs';
 
 import type { IncomeRecord } from '../domain/entity';
+import type { IncomeRecordRepository } from '../domain/repository';
 import { IncomeRecordRecord } from './entity';
 
 const makeIncomeRecord = (record: IncomeRecordRecord): IncomeRecord => {
@@ -29,7 +30,7 @@ const makeIncomeRecordRecord = (entity: IncomeRecord): IncomeRecordRecord => {
   };
 };
 
-const insertIncomeRecord = (db: D1Database) => async (record: IncomeRecord): Promise<IncomeRecord> => {
+const insertIncomeRecord = (db: D1Database): IncomeRecordRepository['insertIncomeRecord'] => async (record) => {
   const stmt = `INSERT INTO income_records VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)`;
   const recordData = makeIncomeRecordRecord(record);
 
@@ -46,7 +47,7 @@ const insertIncomeRecord = (db: D1Database) => async (record: IncomeRecord): Pro
   return record;
 };
 
-const findIncomeRecordById = (db: D1Database) => async (id: string): Promise<IncomeRecord | undefined> => {
+const findIncomeRecordById = (db: D1Database): IncomeRecordRepository['findIncomeRecordById'] => async (id) => {
   const stmt = d1(db)
     .select(IncomeRecordRecord, 'income_records')
     .where(condition('id', '==', id))
