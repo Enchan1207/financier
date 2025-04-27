@@ -1,6 +1,6 @@
 import { ResultAsync } from 'neverthrow'
 
-import type { FinancialMonth } from '@/features/financial_months/domain/entity'
+import type { FinancialMonthData } from '@/features/financial_months/domain/valueObject'
 import type { User } from '@/features/users/domain/entity'
 
 import type { IncomeDefinition, IncomeDefinitionKind } from './entity'
@@ -44,8 +44,8 @@ export interface IncomeDefinitionUsecase {
     name?: string
     kind?: IncomeDefinitionKind
     value?: number
-    enabledAt?: FinancialMonth
-    disabledAt?: FinancialMonth
+    enabledAt?: FinancialMonthData
+    disabledAt?: FinancialMonthData
   }): ResultAsync<IncomeDefinition, NoSuchItemError | AuthorizationError>
 
   /**
@@ -54,7 +54,7 @@ export interface IncomeDefinitionUsecase {
    * @param at 無効化する会計月度
    * @note `at` に指定した月度の末まで定義は有効です。
    */
-  invalidateIncomeDefinition(user: User, id: IncomeDefinition['id'], at: FinancialMonth):
+  invalidateIncomeDefinition(user: User, id: IncomeDefinition['id'], at: FinancialMonthData):
   ResultAsync<IncomeDefinition, NoSuchItemError | AuthorizationError>
 
   /**
@@ -70,7 +70,7 @@ export interface IncomeDefinitionUsecase {
    */
   findIncomeDefinitionsByFinancialMonth(
     user: User,
-    at: FinancialMonth,
+    at: FinancialMonthData,
     filter?: IncomeDefinitionFilter
   ):
   ResultAsync<IncomeDefinition[], Error>
