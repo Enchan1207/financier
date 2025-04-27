@@ -127,17 +127,17 @@ const deleteIncomeDefinition = (db: D1Database): IncomeDefinitionRepository['del
 }
 
 const findByUserId = (db: D1Database): IncomeDefinitionRepository['findByUserId'] => async ({
-  sortBy, userId, limit, order, offset, filter,
+  sortBy, userId, limit, order, offset, kind,
 }) => {
   const base = d1(db)
     .select(IncomeDefinitionRecord, 'income_definitions')
     .limit(limit, offset)
     .orderBy(sortKeyMap[sortBy], order)
 
-  const filtered = filter
+  const filtered = kind
     ? base.where(every(
         condition('user_id', '==', userId),
-        condition('kind', '==', filter),
+        condition('kind', '==', kind),
       ))
     : base.where(condition('user_id', '==', userId))
 
@@ -158,7 +158,7 @@ const findById = (db: D1Database): IncomeDefinitionRepository['findById'] => asy
 }
 
 const findByFinancialMonth = (db: D1Database): IncomeDefinitionRepository['findByFinancialMonth'] => async ({
-  userId, financialMonth, sortBy, filter, order, limit, offset,
+  userId, financialMonth, sortBy, kind, order, limit, offset,
 }) => {
   const period = getPeriodByFinancialMonth(financialMonth)
   const start = period.start.valueOf()
@@ -169,10 +169,10 @@ const findByFinancialMonth = (db: D1Database): IncomeDefinitionRepository['findB
     .limit(limit, offset)
     .orderBy(sortKeyMap[sortBy], order)
 
-  const filtered = filter
+  const filtered = kind
     ? base.where(every(
         condition('user_id', '==', userId),
-        condition('kind', '==', filter),
+        condition('kind', '==', kind),
         every(
           condition('enabled_at', '<=', start),
           condition('disabled_at', '>=', end),
@@ -193,7 +193,7 @@ const findByFinancialMonth = (db: D1Database): IncomeDefinitionRepository['findB
 }
 
 const findByFinancialYear = (db: D1Database): IncomeDefinitionRepository['findByFinancialYear'] => async ({
-  userId, financialYear, sortBy, filter, order, limit, offset,
+  userId, financialYear, sortBy, kind, order, limit, offset,
 }) => {
   const { start } = getPeriodByFinancialMonth({
     financialYear,
@@ -210,10 +210,10 @@ const findByFinancialYear = (db: D1Database): IncomeDefinitionRepository['findBy
     .limit(limit, offset)
     .orderBy(sortKeyMap[sortBy], order)
 
-  const filtered = filter
+  const filtered = kind
     ? base.where(every(
         condition('user_id', '==', userId),
-        condition('kind', '==', filter),
+        condition('kind', '==', kind),
         every(
           condition('enabled_at', '>=', start.valueOf()),
           condition('disabled_at', '<=', end.valueOf()),

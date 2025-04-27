@@ -7,6 +7,14 @@ import type {
 
 export type IncomeDefinitionSortKey = keyof Pick<IncomeDefinition, 'enabledAt' | 'disabledAt' | 'updatedAt'>
 
+export type IncomeDefinitionFilter = {
+  sortBy: IncomeDefinitionSortKey
+  kind?: IncomeDefinitionKind
+  order: 'asc' | 'desc'
+  limit: number
+  offset?: number
+}
+
 export interface IncomeDefinitionRepository {
   insertIncomeDefinition(item: IncomeDefinition): Promise<IncomeDefinition>
 
@@ -15,34 +23,17 @@ export interface IncomeDefinitionRepository {
   // NOTE: 定義を消すと実績を戻せなくなるリスクがある(というか外部キー定義でエラーになるはず)。要検討
   deleteIncomeDefinition(id: IncomeDefinition['id']): Promise<IncomeDefinition | undefined>
 
-  findByUserId(props: {
-    userId: User['id']
-    sortBy: IncomeDefinitionSortKey
-    filter?: IncomeDefinitionKind
-    order: 'asc' | 'desc'
-    limit: number
-    offset?: number
-  }): Promise<IncomeDefinition[]>
+  findByUserId(props: { userId: User['id'] } & IncomeDefinitionFilter): Promise<IncomeDefinition[]>
 
   findById(id: string): Promise<IncomeDefinition | undefined>
 
   findByFinancialMonth(props: {
     userId: User['id']
     financialMonth: FinancialMonthData
-    sortBy: IncomeDefinitionSortKey
-    filter?: IncomeDefinitionKind
-    order: 'asc' | 'desc'
-    limit: number
-    offset?: number
-  }): Promise<IncomeDefinition[]>
+  } & IncomeDefinitionFilter): Promise<IncomeDefinition[]>
 
   findByFinancialYear(props: {
     userId: User['id']
     financialYear: number
-    sortBy: IncomeDefinitionSortKey
-    filter?: IncomeDefinitionKind
-    order: 'asc' | 'desc'
-    limit: number
-    offset?: number
-  }): Promise<IncomeDefinition[]>
+  } & IncomeDefinitionFilter): Promise<IncomeDefinition[]>
 }
