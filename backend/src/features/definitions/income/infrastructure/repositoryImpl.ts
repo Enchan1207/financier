@@ -61,47 +61,69 @@ const insertIncomeDefinition = (db: D1Database): IncomeDefinitionRepository['ins
 
 const updateIncomeDefinition = (db: D1Database): IncomeDefinitionRepository['updateIncomeDefinition'] => async (id, input) => {
   const {
-    name, kind, value, enabledAt, disabledAt, updatedAt,
+    name, kind, value, from, to,
   } = input
 
-  const fragments = [
-    'UPDATE income_definitions SET',
+  const fromDate = from ? getPeriodByFinancialMonth(from) : undefined
+  const toDate = to ? getPeriodByFinancialMonth(to) : undefined
+
+  const updatePart = [
     name ? 'name=?' : undefined,
     kind ? 'kind=?' : undefined,
     value ? 'value=?' : undefined,
-    enabledAt ? 'enabled_at=?' : undefined,
-    disabledAt ? 'disabled_at=?' : undefined,
-    updatedAt ? 'updated_at=?' : undefined,
-    'WHERE id=?',
-  ].filter(fragment => fragment !== undefined)
+    fromDate ? 'enabled_at=?' : undefined,
+    toDate ? 'disabled_at=?' : undefined,
+    'updated_at=?',
+  ]
+    .filter(fragment => fragment !== undefined)
+    .join(', ')
+
+  const stmt = `UPDATE income_definitions SET ${updatePart} WHERE id=?`
 
   const params = [
     name,
     kind,
     value,
-    enabledAt?.valueOf(),
-    disabledAt?.valueOf(),
-    updatedAt?.valueOf(),
+    fromDate?.start.valueOf(),
+    toDate?.end.valueOf(),
+    dayjs().valueOf(),
     id,
   ].filter(fragment => fragment !== undefined)
 
-  const stmt = fragments.join(' ')
-  const updated = await db
+  await db
     .prepare(stmt)
     .bind(...params)
-    .first<IncomeDefinitionRecord>()
+    .run()
 
-  return updated ? makeIncomeDefinition(updated) : undefined
+  const updated = d1(db)
+    .select(IncomeDefinitionRecord, 'income_definitions')
+    .where(condition('id', '==', id))
+    .build()
+    .first<IncomeDefinitionRecord>()
+    .then(record => record ? makeIncomeDefinition(record) : undefined)
+
+  return updated
 }
 
 const deleteIncomeDefinition = (db: D1Database): IncomeDefinitionRepository['deleteIncomeDefinition'] => async (id) => {
+  const candidate = await d1(db)
+    .select(IncomeDefinitionRecord, 'income_definitions')
+    .where(condition('id', '==', id))
+    .build()
+    .first<IncomeDefinitionRecord>()
+    .then(record => record ? makeIncomeDefinition(record) : undefined)
+
+  if (candidate === undefined) {
+    return undefined
+  }
+
   const stmt = 'DELETE FROM income_definitions WHERE id=?'
-  const deleted = await db
+  await db
     .prepare(stmt)
     .bind(id)
-    .first<IncomeDefinitionRecord>()
+    .run()
 
-  return deleted ? makeIncomeDefinition(deleted) : undefined
+  return candidate
 }
 
 const findByUserId = (db: D1Database): IncomeDefinitionRepository['findByUserId'] => async ({

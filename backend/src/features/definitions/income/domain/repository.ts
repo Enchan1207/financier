@@ -1,15 +1,18 @@
 import type { FinancialMonthData } from '@/features/financial_months/domain/valueObject'
 import type { User } from '@/features/users/domain/entity'
 
-import type { IncomeDefinition, IncomeDefinitionKind } from './entity'
+import type {
+  createIncomeDefinition, IncomeDefinition, IncomeDefinitionKind,
+} from './entity'
 
 export type IncomeDefinitionSortKey = keyof Pick<IncomeDefinition, 'enabledAt' | 'disabledAt' | 'updatedAt'>
 
 export interface IncomeDefinitionRepository {
   insertIncomeDefinition(item: IncomeDefinition): Promise<IncomeDefinition>
 
-  updateIncomeDefinition(id: IncomeDefinition['id'], input: Partial<Omit<IncomeDefinition, 'id' | 'userId'>>): Promise<IncomeDefinition | undefined>
+  updateIncomeDefinition(id: IncomeDefinition['id'], input: Partial<Omit<Parameters<typeof createIncomeDefinition>[0], 'userId'>>): Promise<IncomeDefinition | undefined>
 
+  // NOTE: 定義を消すと実績を戻せなくなるリスクがある(というか外部キー定義でエラーになるはず)。要検討
   deleteIncomeDefinition(id: IncomeDefinition['id']): Promise<IncomeDefinition | undefined>
 
   findByUserId(props: {
