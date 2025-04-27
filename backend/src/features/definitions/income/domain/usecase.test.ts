@@ -30,6 +30,7 @@ describe('権限まわり', () => {
     name: 'ダミー定義',
     kind: 'absolute',
     value: 100000,
+    isTaxable: true,
     from: {
       financialYear: 2025,
       month: 4,
@@ -45,6 +46,7 @@ describe('権限まわり', () => {
     name: 'ダミー定義',
     kind: 'absolute',
     value: 100000,
+    isTaxable: true,
     from: {
       financialYear: 2025,
       month: 6,

@@ -14,6 +14,7 @@ const makeIncomeDefinitionRecord = (entity: IncomeDefinition): IncomeDefinitionR
     name: entity.name,
     kind: entity.kind,
     value: entity.value,
+    is_taxable: entity.isTaxable ? 1 : 0,
     enabled_at: entity.enabledAt.valueOf(),
     disabled_at: entity.disabledAt.valueOf(),
     updated_at: entity.updatedAt.valueOf(),
@@ -27,6 +28,7 @@ const makeIncomeDefinition = (record: IncomeDefinitionRecord): IncomeDefinition 
     name: record.name,
     kind: record.kind,
     value: record.value,
+    isTaxable: record.is_taxable === 1,
     enabledAt: dayjs(record.enabled_at),
     disabledAt: dayjs(record.disabled_at),
     updatedAt: dayjs(record.updated_at),
@@ -41,7 +43,7 @@ const sortKeyMap: Record<IncomeDefinitionSortKey, keyof IncomeDefinitionRecord>
 }
 
 const insertIncomeDefinition = (db: D1Database): IncomeDefinitionRepository['insertIncomeDefinition'] => async (incomeDefinition) => {
-  const stmt = 'INSERT INTO income_definitions VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+  const stmt = 'INSERT INTO income_definitions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
 
   const record = makeIncomeDefinitionRecord(incomeDefinition)
 
@@ -54,6 +56,7 @@ const insertIncomeDefinition = (db: D1Database): IncomeDefinitionRepository['ins
     record.enabled_at,
     record.disabled_at,
     record.updated_at,
+    record.is_taxable,
   ).run()
 
   return incomeDefinition
@@ -61,7 +64,7 @@ const insertIncomeDefinition = (db: D1Database): IncomeDefinitionRepository['ins
 
 const updateIncomeDefinition = (db: D1Database): IncomeDefinitionRepository['updateIncomeDefinition'] => async (id, input) => {
   const {
-    name, kind, value, from, to,
+    name, kind, value, isTaxable, from, to,
   } = input
 
   const fromDate = from ? getPeriodByFinancialMonth(from) : undefined
@@ -73,6 +76,7 @@ const updateIncomeDefinition = (db: D1Database): IncomeDefinitionRepository['upd
     value ? 'value=?' : undefined,
     fromDate ? 'enabled_at=?' : undefined,
     toDate ? 'disabled_at=?' : undefined,
+    isTaxable ? 'is_taxable=?' : undefined,
     'updated_at=?',
   ]
     .filter(fragment => fragment !== undefined)
@@ -84,6 +88,7 @@ const updateIncomeDefinition = (db: D1Database): IncomeDefinitionRepository['upd
     name,
     kind,
     value,
+    isTaxable,
     fromDate?.start.valueOf(),
     toDate?.end.valueOf(),
     dayjs().valueOf(),

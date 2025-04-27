@@ -20,6 +20,7 @@ describe('報酬定義エンティティの生成', () => {
     name: 'test',
     kind: 'absolute',
     value: 0,
+    isTaxable: true,
     userId: 'test_user',
   })
 
