@@ -1,10 +1,10 @@
-import { condition } from '@/logic/queryBuilder/conditionTree';
-import { d1 } from '@/logic/queryBuilder/d1';
-import dayjs from '@/logic/dayjs';
+import dayjs from '@/logic/dayjs'
+import { condition } from '@/logic/queryBuilder/conditionTree'
+import { d1 } from '@/logic/queryBuilder/d1'
 
-import type { IncomeRecord } from '../domain/entity';
-import type { IncomeRecordRepository } from '../domain/repository';
-import { IncomeRecordRecord } from './entity';
+import type { IncomeRecord } from '../domain/entity'
+import type { IncomeRecordRepository } from '../domain/repository'
+import { IncomeRecordRecord } from './entity'
 
 const makeIncomeRecord = (record: IncomeRecordRecord): IncomeRecord => {
   return {
@@ -15,8 +15,8 @@ const makeIncomeRecord = (record: IncomeRecordRecord): IncomeRecord => {
     value: record.value,
     updatedAt: dayjs(record.updated_at),
     updatedBy: record.updated_by,
-  };
-};
+  }
+}
 
 const makeIncomeRecordRecord = (entity: IncomeRecord): IncomeRecordRecord => {
   return {
@@ -27,12 +27,12 @@ const makeIncomeRecordRecord = (entity: IncomeRecord): IncomeRecordRecord => {
     value: entity.value,
     updated_at: entity.updatedAt.valueOf(),
     updated_by: entity.updatedBy,
-  };
-};
+  }
+}
 
 const insertIncomeRecord = (db: D1Database): IncomeRecordRepository['insertIncomeRecord'] => async (record) => {
-  const stmt = `INSERT INTO income_records VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)`;
-  const recordData = makeIncomeRecordRecord(record);
+  const stmt = `INSERT INTO income_records VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)`
+  const recordData = makeIncomeRecordRecord(record)
 
   await db.prepare(stmt).bind(
     recordData.id,
@@ -41,25 +41,25 @@ const insertIncomeRecord = (db: D1Database): IncomeRecordRepository['insertIncom
     recordData.definition_id,
     recordData.value,
     recordData.updated_at,
-    recordData.updated_by
-  ).run();
+    recordData.updated_by,
+  ).run()
 
-  return record;
-};
+  return record
+}
 
 const findIncomeRecordById = (db: D1Database): IncomeRecordRepository['findIncomeRecordById'] => async (id) => {
   const stmt = d1(db)
     .select(IncomeRecordRecord, 'income_records')
     .where(condition('id', '==', id))
-    .build();
+    .build()
 
-  const record = await stmt.first<IncomeRecordRecord>();
-  return record ? makeIncomeRecord(record) : undefined;
-};
+  const record = await stmt.first<IncomeRecordRecord>()
+  return record ? makeIncomeRecord(record) : undefined
+}
 
 export const useIncomeRecordRepositoryD1 = (db: D1Database) => {
   return {
     insertIncomeRecord: insertIncomeRecord(db),
     findIncomeRecordById: findIncomeRecordById(db),
-  };
-};
+  }
+}
