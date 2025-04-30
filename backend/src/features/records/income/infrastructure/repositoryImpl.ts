@@ -1,5 +1,5 @@
 import dayjs from '@/logic/dayjs'
-import { condition } from '@/logic/queryBuilder/conditionTree'
+import { condition, every } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
 
 import type { IncomeRecord } from '../domain/entity'
@@ -8,7 +8,6 @@ import { IncomeRecordRecord } from './entity'
 
 const makeIncomeRecord = (record: IncomeRecordRecord): IncomeRecord => {
   return {
-    id: record.id,
     userId: record.user_id,
     financialMonthId: record.financial_month_id,
     definitionId: record.definition_id,
@@ -20,7 +19,6 @@ const makeIncomeRecord = (record: IncomeRecordRecord): IncomeRecord => {
 
 const makeIncomeRecordRecord = (entity: IncomeRecord): IncomeRecordRecord => {
   return {
-    id: entity.id,
     user_id: entity.userId,
     financial_month_id: entity.financialMonthId,
     definition_id: entity.definitionId,
@@ -31,11 +29,15 @@ const makeIncomeRecordRecord = (entity: IncomeRecord): IncomeRecordRecord => {
 }
 
 const insertIncomeRecord = (db: D1Database): IncomeRecordRepository['insertIncomeRecord'] => async (record) => {
-  const stmt = `INSERT INTO income_records VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)`
+  const stmt = `
+  INSERT INTO
+    income_records
+  VALUES
+    (?1, ?2, ?3, ?4, ?5, ?6)
+  `
   const recordData = makeIncomeRecordRecord(record)
 
   await db.prepare(stmt).bind(
-    recordData.id,
     recordData.user_id,
     recordData.financial_month_id,
     recordData.definition_id,
@@ -47,27 +49,45 @@ const insertIncomeRecord = (db: D1Database): IncomeRecordRepository['insertIncom
   return record
 }
 
-const findById = (db: D1Database): IncomeRecordRepository['findById'] => async (id) => {
+const findBy = (db: D1Database): IncomeRecordRepository['findBy'] => async ({ financialMonthId, definitionId }) => {
   const stmt = d1(db)
     .select(IncomeRecordRecord, 'income_records')
-    .where(condition('id', '==', id))
+    .where(every(
+      condition('financial_month_id', '==', financialMonthId),
+      condition('definition_id', '==', definitionId),
+    ))
     .build()
 
   const record = await stmt.first<IncomeRecordRecord>()
   return record ? makeIncomeRecord(record) : undefined
 }
 
-const updateIncomeDefinitionValue = (db: D1Database): IncomeRecordRepository['updateIncomeDefinitionValue'] => async (id, value) => {
-  const stmt = `UPDATE income_records SET value=?, updated_at=? WHERE id=?`
+const updateIncomeRecordValue = (db: D1Database): IncomeRecordRepository['updateIncomeRecordValue'] => async ({ financialMonthId, definitionId }, value) => {
+  const stmt = `
+  UPDATE income_records
+  SET
+    value = ?,
+    updated_at = ?
+  WHERE
+    financial_month_id = ?
+    AND definition_id = ?
+  `
 
   await db
     .prepare(stmt)
-    .bind(value, dayjs().valueOf(), id)
+    .bind(
+      value,
+      dayjs().valueOf(),
+      financialMonthId,
+      definitionId)
     .run()
 
   const updated = d1(db)
     .select(IncomeRecordRecord, 'income_records')
-    .where(condition('id', '==', id))
+    .where(every(
+      condition('financial_month_id', '==', financialMonthId),
+      condition('definition_id', '==', definitionId),
+    ))
     .build()
     .first<IncomeRecordRecord>()
     .then(record => record ? makeIncomeRecord(record) : undefined)
@@ -78,7 +98,7 @@ const updateIncomeDefinitionValue = (db: D1Database): IncomeRecordRepository['up
 export const useIncomeRecordRepositoryD1 = (db: D1Database): IncomeRecordRepository => {
   return {
     insertIncomeRecord: insertIncomeRecord(db),
-    findById: findById(db),
-    updateIncomeDefinitionValue: updateIncomeDefinitionValue(db),
+    findBy: findBy(db),
+    updateIncomeRecordValue: updateIncomeRecordValue(db),
   }
 }

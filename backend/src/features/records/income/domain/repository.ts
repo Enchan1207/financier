@@ -1,7 +1,18 @@
+import type { IncomeDefinition } from '@/features/definitions/income/domain/entity'
+import type { FinancialMonth } from '@/features/financial_months/domain/entity'
+
 import type { IncomeRecord } from './entity'
 
 export interface IncomeRecordRepository {
   insertIncomeRecord(record: IncomeRecord): Promise<IncomeRecord>
-  findById(id: IncomeRecord['id']): Promise<IncomeRecord | undefined>
-  updateIncomeDefinitionValue(id: IncomeRecord['id'], value: number): Promise<IncomeRecord | undefined>
+
+  findBy(key: {
+    financialMonthId: FinancialMonth['id']
+    definitionId: IncomeDefinition['id']
+  }): Promise<IncomeRecord | undefined>
+
+  updateIncomeRecordValue(key: {
+    financialMonthId: FinancialMonth['id']
+    definitionId: IncomeDefinition['id']
+  }, value: number): Promise<IncomeRecord | undefined>
 }

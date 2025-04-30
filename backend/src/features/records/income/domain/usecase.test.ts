@@ -74,7 +74,10 @@ describe('権限まわり', () => {
   test('他人のエンティティは取得できないこと', async () => {
     const actual = await usecase.getIncomeRecord(
       dummyUsers[0],
-      dummyIncomeRecords[1].id,
+      {
+        financialMonthId: dummyIncomeRecords[1].financialMonthId,
+        definitionId: dummyIncomeRecords[1].definitionId,
+      },
     )
 
     const error = actual.isErr() ? actual.error : undefined
@@ -84,7 +87,10 @@ describe('権限まわり', () => {
   test('他人のエンティティは更新できないこと', async () => {
     const actual = await usecase.updateIncomeRecordValue(
       dummyUsers[0],
-      dummyIncomeRecords[1].id,
+      {
+        financialMonthId: dummyIncomeRecords[1].financialMonthId,
+        definitionId: dummyIncomeRecords[1].definitionId,
+      },
       200,
       'system',
     )

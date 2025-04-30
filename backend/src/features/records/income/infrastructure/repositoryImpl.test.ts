@@ -64,14 +64,20 @@ describe('報酬定義の操作', () => {
   })
 
   test('挿入した項目を取得できること', async () => {
-    const actual = await repository.findById(dummyIncomeRecord.id)
+    const actual = await repository.findBy({
+      financialMonthId: dummyIncomeRecord.financialMonthId,
+      definitionId: dummyIncomeRecord.definitionId,
+    })
 
     expect(actual).toStrictEqual(dummyIncomeRecord)
   })
 
   test('項目を更新できること', async () => {
-    const actual = await repository.updateIncomeDefinitionValue(
-      dummyIncomeRecord.id,
+    const actual = await repository.updateIncomeRecordValue(
+      {
+        financialMonthId: dummyIncomeRecord.financialMonthId,
+        definitionId: dummyIncomeRecord.definitionId,
+      },
       200,
     )
 
