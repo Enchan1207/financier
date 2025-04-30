@@ -208,10 +208,9 @@ erDiagram
 
 |name                   |type   |note|
 |-----------------------|-------|-|
-|id                     |string |エンティティ識別子, プライマリキー|
 |user_id                |string |ユーザ識別子, 外部キー|
-|financial_month_id     |string |会計月度識別子, 外部キー|
-|income_definition_id   |string |報酬定義識別子, 外部キー|
+|financial_month_id     |string |会計月度識別子, 外部キー, 複合主キー|
+|income_definition_id   |string |報酬定義識別子, 外部キー, 複合主キー|
 |value                  |number |報酬額|
 |updated_at             |number |最終更新日時(timestamp)|
 |updated_by             |string |最終更新者|
