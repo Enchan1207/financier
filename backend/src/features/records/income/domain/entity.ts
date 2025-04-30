@@ -1,5 +1,3 @@
-import { ulid } from 'ulid'
-
 import type { IncomeDefinition } from '@/features/definitions/income/domain/entity'
 import type { FinancialMonth } from '@/features/financial_months/domain/entity'
 import dayjs from '@/logic/dayjs'
@@ -9,7 +7,6 @@ export type IncomeRecordUpdator = typeof IncomeRecordUpdator[number]
 
 /** 報酬実績 */
 export type IncomeRecord = {
-  id: string
   userId: string
 
   financialMonthId: FinancialMonth['id']
@@ -33,7 +30,6 @@ export const createIncomeRecord = (props: {
   } = props
 
   return {
-    id: ulid(),
     userId,
     financialMonthId,
     definitionId,

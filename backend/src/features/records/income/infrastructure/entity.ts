@@ -4,7 +4,6 @@ import { IncomeRecordUpdator } from '../domain/entity'
 
 // 草
 export const IncomeRecordRecord = z.object({
-  id: z.string(),
   user_id: z.string(),
 
   financial_month_id: z.string(),
