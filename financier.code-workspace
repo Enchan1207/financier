@@ -1,16 +1,18 @@
 {
   "folders": [
     {
-      "name": "frontend",
       "path": "frontend"
     },
     {
-      "name": "backend",
       "path": "backend"
     },
     {
+      
       "name": "actions",
       "path": ".github/workflows"
+    },
+    {
+      "path": "spec"
     },
     {
       "name": "(root)",
