@@ -1,15 +1,25 @@
+import { ulid } from 'ulid'
+
 import dayjs from '@/logic/dayjs'
 
-export const Months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const
-export type Months = typeof Months[number]
-
-/** 会計月度 */
-export type FinancialMonthData = {
-  financialYear: number
-  month: Months
-}
+import type {
+  FinancialMonth, FinancialMonthData, Months,
+} from '.'
 
 const financialTimezone = 'Asia/Tokyo'
+
+export const createFinancialMonth = (props: FinancialMonthData & { userId: string }): FinancialMonth => {
+  const {
+    month, financialYear, userId,
+  } = props
+
+  return {
+    id: ulid(),
+    userId: userId,
+    financialYear,
+    month,
+  }
+}
 
 /** 会計月度オブジェクトが開始・終了する日時を取得する */
 export const getPeriodByFinancialMonth = (fm: FinancialMonthData): {

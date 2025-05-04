@@ -1,15 +1,15 @@
 import { env } from 'cloudflare:test'
 
+import type { FinancialMonth } from '@/domain/financial_month'
+import { createFinancialMonth } from '@/domain/financial_month/logic'
 import type { User } from '@/domain/user'
 import { createUser } from '@/domain/user/logic'
 import type { Workday } from '@/domain/workday'
 import { createWorkday } from '@/domain/workday/logic'
-import type { FinancialMonth } from '@/features/financial_months/domain/entity'
-import { createFinancialMonth } from '@/features/financial_months/domain/entity'
-import { useFinancialMonthRepositoryD1 } from '@/features/financial_months/infrastructure/repositoryImpl'
 import dayjs from '@/logic/dayjs'
 
 import { saveUser } from '../authorize/dao'
+import { insertFinancialMonth } from '../financial_months/dao'
 import { findWorkdayByFinancialMonthId, saveWorkday } from './dao'
 
 describe('勤務日数エントリの操作', () => {
@@ -34,8 +34,7 @@ describe('勤務日数エントリの操作', () => {
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)
 
-    const financialMonthRepository = useFinancialMonthRepositoryD1(env.D1)
-    await financialMonthRepository.insertFinancialMonth(dummyFinancialMonth)
+    await insertFinancialMonth(env.D1)(dummyFinancialMonth)
 
     await saveWorkday(env.D1)(dummyWorkday)
   })

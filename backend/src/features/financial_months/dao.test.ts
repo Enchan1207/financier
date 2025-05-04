@@ -1,22 +1,22 @@
 import { env } from 'cloudflare:test'
 
-import type { User } from '@/features/users/domain/entity'
-import { createUser } from '@/features/users/domain/entity'
-import { useUserRepositoryD1 } from '@/features/users/infrastructure/repositoryImpl'
+import type { FinancialMonth } from '@/domain/financial_month'
+import { createFinancialMonth } from '@/domain/financial_month/logic'
+import type { User } from '@/domain/user'
+import { createUser } from '@/domain/user/logic'
 import dayjs from '@/logic/dayjs'
 
-import type { FinancialMonth } from '../domain/entity'
-import { createFinancialMonth } from '../domain/entity'
-import type { FinancialMonthRepository } from '../domain/repository'
-import { useFinancialMonthRepositoryD1 } from './repositoryImpl'
+import { saveUser } from '../authorize/dao'
+import {
+  findFinancialMonthsByDate,
+  findFinancialMonthsByMonth, findFinancialMonthsByYear, insertFinancialMonth,
+} from './dao'
 
 describe('会計年度と月に基づく項目の選択', () => {
-  let repo: FinancialMonthRepository
-
   const dummyUser: User = createUser({
     name: 'testuser',
     email: 'test@example.com',
-    auth0_user_id: 'auth0_test_user',
+    auth0UserId: 'auth0_test_user',
   })
 
   const dummyEntities: FinancialMonth[] = [
@@ -48,25 +48,23 @@ describe('会計年度と月に基づく項目の選択', () => {
   ]
 
   beforeAll(async () => {
-    const userRepository = useUserRepositoryD1(env.D1)
-    await userRepository.saveUser(dummyUser)
+    await saveUser(env.D1)(dummyUser)
 
-    repo = useFinancialMonthRepositoryD1(env.D1)
-    await Promise.all(dummyEntities.map(entity => repo.insertFinancialMonth(entity)))
+    await Promise.all(dummyEntities.map(entity => insertFinancialMonth(env.D1)(entity)))
   })
 
   test('FY2024の項目数は2であること', async () => {
-    const actual = await repo.findByFinancialYear(dummyUser.id, 2024)
+    const actual = await findFinancialMonthsByYear(env.D1)(dummyUser.id, 2024)
     expect(actual).toHaveLength(2)
   })
 
   test('FY2024の項目数は3であること', async () => {
-    const actual = await repo.findByFinancialYear(dummyUser.id, 2025)
+    const actual = await findFinancialMonthsByYear(env.D1)(dummyUser.id, 2025)
     expect(actual).toHaveLength(3)
   })
 
   test('FY2024 1月の項目を取得できること', async () => {
-    const actual = await repo.findByFinancialMonth(dummyUser.id, {
+    const actual = await findFinancialMonthsByMonth(env.D1)(dummyUser.id, {
       financialYear: 2024,
       month: 1,
     })
@@ -74,7 +72,7 @@ describe('会計年度と月に基づく項目の選択', () => {
   })
 
   test('FY2024 3月の項目は取得できないこと', async () => {
-    const actual = await repo.findByFinancialMonth(dummyUser.id, {
+    const actual = await findFinancialMonthsByMonth(env.D1)(dummyUser.id, {
       financialYear: 2024,
       month: 3,
     })
@@ -83,12 +81,10 @@ describe('会計年度と月に基づく項目の選択', () => {
 })
 
 describe('日付に基づく項目の選択', () => {
-  let repo: FinancialMonthRepository
-
   const dummyUser: User = createUser({
     name: 't_est_user',
     email: 'test@example.com',
-    auth0_user_id: 'auth0_test_user',
+    auth0UserId: 'auth0_test_user',
   })
 
   const dummyEntityApril = createFinancialMonth({
@@ -106,11 +102,8 @@ describe('日付に基づく項目の選択', () => {
   const dummyEntities = [dummyEntityApril, dummyEntityMay]
 
   beforeAll(async () => {
-    const userRepository = useUserRepositoryD1(env.D1)
-    await userRepository.saveUser(dummyUser)
-
-    repo = useFinancialMonthRepositoryD1(env.D1)
-    await Promise.all(dummyEntities.map(entity => repo.insertFinancialMonth(entity)))
+    await saveUser(env.D1)(dummyUser)
+    await Promise.all(dummyEntities.map(entity => insertFinancialMonth(env.D1)(entity)))
   })
 
   test.each([
@@ -131,7 +124,7 @@ describe('日付に基づく項目の選択', () => {
       expected: dummyEntityMay,
     },
   ])('$date の場合、 $expected が取得されること', async ({ date, expected }) => {
-    const actual = await repo.findByDate(dummyUser.id, date)
+    const actual = await findFinancialMonthsByDate(env.D1)(dummyUser.id, date)
 
     // dayjsオブジェクトについては内部のプロパティが細かく変わっているので、タイムスタンプで比較
     expect(actual).toStrictEqual(expected)

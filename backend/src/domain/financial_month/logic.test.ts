@@ -1,7 +1,7 @@
 import dayjs from '@/logic/dayjs'
 
-import type { Months } from './valueObject'
-import { getFinancialMonthFromDate, getPeriodByFinancialMonth } from './valueObject'
+import type { Months } from '.'
+import { getFinancialMonthFromDate, getPeriodByFinancialMonth } from './logic'
 
 describe('会計月度と日時情報の相互変換', () => {
   describe.each([
