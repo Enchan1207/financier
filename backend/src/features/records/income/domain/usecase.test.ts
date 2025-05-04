@@ -4,7 +4,7 @@ import { createIncomeDefinition } from '@/features/definitions/income/domain/ent
 import { useIncomeDefinitionRepositoryD1 } from '@/features/definitions/income/infrastructure/repositoryImpl'
 import { createFinancialMonth } from '@/features/financial_months/domain/entity'
 import { useFinancialMonthRepositoryD1 } from '@/features/financial_months/infrastructure/repositoryImpl'
-import { createUserEntity } from '@/features/users/domain/entity'
+import { createUser } from '@/features/users/domain/entity'
 import { useUserRepositoryD1 } from '@/features/users/infrastructure/repositoryImpl'
 
 import { useIncomeRecordRepositoryD1 } from '../infrastructure/repositoryImpl'
@@ -17,7 +17,7 @@ describe('権限まわり', () => {
   const usecase = useIncomeRecordUsecase(repo)
 
   const dummyUsers = Array.from({ length: 2 }).map((_, i) =>
-    createUserEntity({
+    createUser({
       name: `testuser_${i}`,
       email: `test${i}@example.com`,
       auth0_user_id: `auth0_user_id_${i}`,

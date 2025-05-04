@@ -1,26 +1,21 @@
 import { env } from 'cloudflare:test'
 import { ulid } from 'ulid'
 
-import type { User } from '@/features/users/domain/entity'
-import type { UserRepository } from '@/features/users/domain/repository'
+import type { User } from '@/domain/user'
 
-import { useUserRepositoryD1 } from './repositoryImpl'
+import {
+  getUserByAuth0Id, getUserById, saveUser,
+} from './dao'
 
 describe('単一項目のCRUD', () => {
-  let repo: UserRepository
-
-  beforeAll(() => {
-    repo = useUserRepositoryD1(env.D1)
-  })
-
   test('項目を作成できること', async () => {
     const user: User = {
       id: ulid(),
       name: 'test-user',
-      auth0_user_id: 'auth0|0123456789',
+      auth0UserId: 'auth0|0123456789',
       email: 'test@example.com',
     }
-    const inserted = await repo.saveUser(user)
+    const inserted = await saveUser(env.D1)(user)
     expect(user).toStrictEqual(inserted)
   })
 
@@ -28,12 +23,12 @@ describe('単一項目のCRUD', () => {
     const user: User = {
       id: ulid(),
       name: 'test-user',
-      auth0_user_id: 'auth0|0123456789',
+      auth0UserId: 'auth0|0123456789',
       email: 'test@example.com',
     }
-    const { id } = await repo.saveUser(user)
+    const { id } = await saveUser(env.D1)(user)
 
-    const stored = await repo.getUserById(id)
+    const stored = await getUserById(env.D1)(id)
     expect(stored).toBeDefined()
   })
 
@@ -41,12 +36,12 @@ describe('単一項目のCRUD', () => {
     const user: User = {
       id: ulid(),
       name: 'test-user',
-      auth0_user_id: 'auth0|0123456789',
+      auth0UserId: 'auth0|0123456789',
       email: 'test@example.com',
     }
-    const { auth0_user_id } = await repo.saveUser(user)
+    const { auth0UserId } = await saveUser(env.D1)(user)
 
-    const stored = await repo.getUserByAuth0Id(auth0_user_id)
+    const stored = await getUserByAuth0Id(env.D1)(auth0UserId)
     expect(stored).toBeDefined()
   })
 
@@ -54,17 +49,17 @@ describe('単一項目のCRUD', () => {
     const user: User = {
       id: ulid(),
       name: 'test-user',
-      auth0_user_id: 'auth0|0123456789',
+      auth0UserId: 'auth0|0123456789',
       email: 'test@example.com',
     }
-    const stored = await repo.saveUser(user)
+    const stored = await saveUser(env.D1)(user)
 
     const input: User = {
       ...stored,
       name: 'updated',
-      auth0_user_id: 'auth0|9876543210',
+      auth0UserId: 'auth0|9876543210',
     }
-    const updated = await repo.saveUser(input)
+    const updated = await saveUser(env.D1)(input)
     expect(updated).toStrictEqual(input)
   })
 })

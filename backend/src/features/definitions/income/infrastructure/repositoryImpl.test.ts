@@ -3,7 +3,7 @@ import { env } from 'cloudflare:test'
 import type { Months } from '@/features/financial_months/domain/valueObject'
 import { getPeriodByFinancialMonth } from '@/features/financial_months/domain/valueObject'
 import type { User } from '@/features/users/domain/entity'
-import { createUserEntity } from '@/features/users/domain/entity'
+import { createUser } from '@/features/users/domain/entity'
 import { useUserRepositoryD1 } from '@/features/users/infrastructure/repositoryImpl'
 
 import type { IncomeDefinition } from '../domain/entity'
@@ -23,7 +23,7 @@ const makeComparable = (entity?: IncomeDefinition) => {
 describe('基本的なCRUD', () => {
   const repository = useIncomeDefinitionRepositoryD1(env.D1)
 
-  const dummyUser: User = createUserEntity({
+  const dummyUser: User = createUser({
     name: 'testuser',
     email: 'test@example.com',
     auth0_user_id: 'auth0_test_user',
@@ -124,7 +124,7 @@ describe('基本的なCRUD', () => {
 describe('詳細な検索', () => {
   const repository = useIncomeDefinitionRepositoryD1(env.D1)
 
-  const dummyUser: User = createUserEntity({
+  const dummyUser: User = createUser({
     name: 'testuser',
     email: 'test@example.com',
     auth0_user_id: 'auth0_test_user',

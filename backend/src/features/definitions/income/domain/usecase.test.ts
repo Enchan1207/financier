@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:test'
 
 import type { User } from '@/features/users/domain/entity'
-import { createUserEntity } from '@/features/users/domain/entity'
+import { createUser } from '@/features/users/domain/entity'
 import { useUserRepositoryD1 } from '@/features/users/infrastructure/repositoryImpl'
 
 import { useIncomeDefinitionRepositoryD1 } from '../infrastructure/repositoryImpl'
@@ -13,13 +13,13 @@ describe('権限まわり', () => {
 
   const usecase = useIncomeDefinitionUsecase(repo)
 
-  const dummyUser: User = createUserEntity({
+  const dummyUser: User = createUser({
     name: 'test user',
     auth0_user_id: 'auth0_test_user',
     email: 'test@example.com',
   })
 
-  const dummyOtherUser: User = createUserEntity({
+  const dummyOtherUser: User = createUser({
     name: 'test user',
     auth0_user_id: 'auth0_test_user',
     email: 'test@example.com',

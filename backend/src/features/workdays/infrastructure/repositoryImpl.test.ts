@@ -4,7 +4,7 @@ import type { FinancialMonth } from '@/features/financial_months/domain/entity'
 import { createFinancialMonth } from '@/features/financial_months/domain/entity'
 import { useFinancialMonthRepositoryD1 } from '@/features/financial_months/infrastructure/repositoryImpl'
 import type { User } from '@/features/users/domain/entity'
-import { createUserEntity } from '@/features/users/domain/entity'
+import { createUser } from '@/features/users/domain/entity'
 import { useUserRepositoryD1 } from '@/features/users/infrastructure/repositoryImpl'
 import dayjs from '@/logic/dayjs'
 
@@ -16,7 +16,7 @@ import { useWorkdayRepositoryD1 } from './repositoryImpl'
 describe('勤務日数エントリの操作', () => {
   let repo: WorkdayRepository
 
-  const dummyUser: User = createUserEntity({
+  const dummyUser: User = createUser({
     name: 'testuser',
     email: 'test@example.com',
     auth0_user_id: 'auth0_test_user',

@@ -4,7 +4,7 @@ import { createIncomeDefinition } from '@/features/definitions/income/domain/ent
 import { useIncomeDefinitionRepositoryD1 } from '@/features/definitions/income/infrastructure/repositoryImpl'
 import { createFinancialMonth } from '@/features/financial_months/domain/entity'
 import { useFinancialMonthRepositoryD1 } from '@/features/financial_months/infrastructure/repositoryImpl'
-import { createUserEntity } from '@/features/users/domain/entity'
+import { createUser } from '@/features/users/domain/entity'
 import { useUserRepositoryD1 } from '@/features/users/infrastructure/repositoryImpl'
 
 import { createIncomeRecord } from '../domain/entity'
@@ -13,7 +13,7 @@ import { useIncomeRecordRepositoryD1 } from './repositoryImpl'
 describe('報酬定義の操作', () => {
   const repository = useIncomeRecordRepositoryD1(env.D1)
 
-  const dummyUser = createUserEntity({
+  const dummyUser = createUser({
     name: 'testuser',
     email: 'test@example.com',
     auth0_user_id: 'auth0_user_id',
