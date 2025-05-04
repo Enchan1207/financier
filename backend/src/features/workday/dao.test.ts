@@ -9,7 +9,7 @@ import { createWorkday } from '@/domains/workday/logic'
 import dayjs from '@/logic/dayjs'
 
 import { saveUser } from '../authorize/dao'
-import { insertFinancialMonth } from '../financial_months/dao'
+import { insertFinancialMonth } from '../financial_month/dao'
 import { findWorkdayByFinancialMonthId, saveWorkday } from './dao'
 
 describe('勤務日数エントリの操作', () => {
