@@ -1,14 +1,17 @@
 import { env } from 'cloudflare:test'
 
-import type { Months } from '@/features/financial_months/domains/valueObject'
-import { getPeriodByFinancialMonth } from '@/features/financial_months/domains/valueObject'
-import type { User } from '@/features/users/domains/entity'
-import { createUser } from '@/features/users/domains/entity'
-import { useUserRepositoryD1 } from '@/features/users/infrastructure/repositoryImpl'
+import type { Months } from '@/domains/financial_month'
+import { getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
+import type { IncomeDefinition } from '@/domains/income_definition'
+import { createIncomeDefinition } from '@/domains/income_definition/logic'
+import type { User } from '@/domains/user'
+import { createUser } from '@/domains/user/logic'
 
-import type { IncomeDefinition } from '../domains/entity'
-import { createIncomeDefinition } from '../domains/entity'
-import { useIncomeDefinitionRepositoryD1 } from './repositoryImpl'
+import { saveUser } from '../authorize/dao'
+import {
+  findIncomeDefinitions,
+  getIncomeDefinitionById, insertIncomeDefinition, updateIncomeDefinition,
+} from './dao'
 
 /** エンティティを相互変換可能な型に変換する */
 const makeComparable = (entity?: IncomeDefinition) => {
@@ -21,12 +24,10 @@ const makeComparable = (entity?: IncomeDefinition) => {
 }
 
 describe('基本的なCRUD', () => {
-  const repository = useIncomeDefinitionRepositoryD1(env.D1)
-
   const dummyUser: User = createUser({
     name: 'testuser',
     email: 'test@example.com',
-    auth0_user_id: 'auth0_test_user',
+    auth0UserId: 'auth0_test_user',
   })
 
   const dummyDefinition = createIncomeDefinition({
@@ -46,17 +47,16 @@ describe('基本的なCRUD', () => {
   })
 
   beforeAll(async () => {
-    const userRepository = useUserRepositoryD1(env.D1)
-    await userRepository.saveUser(dummyUser)
+    await saveUser(env.D1)(dummyUser)
 
-    await repository.insertIncomeDefinition(dummyDefinition)
+    await insertIncomeDefinition(env.D1)(dummyDefinition)
   })
 
   describe('id直打ちで取得', () => {
     let actual: IncomeDefinition | undefined
 
     beforeAll(async () => {
-      actual = await repository.findById(dummyDefinition.id)
+      actual = await getIncomeDefinitionById(env.D1)(dummyDefinition.id)
     })
 
     test('同じ項目を取得できること', () => {
@@ -69,7 +69,7 @@ describe('基本的なCRUD', () => {
     let actual: IncomeDefinition | undefined
 
     beforeAll(async () => {
-      actual = await repository.updateIncomeDefinition(dummyDefinition.id, {
+      actual = await updateIncomeDefinition(env.D1)(dummyDefinition.id, {
         kind: 'related_by_workday',
         name: '通勤手当',
         value: 300,
@@ -108,26 +108,13 @@ describe('基本的なCRUD', () => {
       })
     })
   })
-
-  describe('項目の削除', () => {
-    beforeAll(async () => {
-      await repository.deleteIncomeDefinition(dummyDefinition.id)
-    })
-
-    test('削除済みの項目は取得できないこと', async () => {
-      const actual = await repository.findById(dummyDefinition.id)
-      expect(actual).toBeUndefined()
-    })
-  })
 })
 
 describe('詳細な検索', () => {
-  const repository = useIncomeDefinitionRepositoryD1(env.D1)
-
   const dummyUser: User = createUser({
     name: 'testuser',
     email: 'test@example.com',
-    auth0_user_id: 'auth0_test_user',
+    auth0UserId: 'auth0_test_user',
   })
 
   const dummyDefinition1 = createIncomeDefinition({
@@ -163,11 +150,10 @@ describe('詳細な検索', () => {
   })
 
   beforeAll(async () => {
-    const userRepository = useUserRepositoryD1(env.D1)
-    await userRepository.saveUser(dummyUser)
+    await saveUser(env.D1)(dummyUser)
 
-    await repository.insertIncomeDefinition(dummyDefinition1)
-    await repository.insertIncomeDefinition(dummyDefinition2)
+    await insertIncomeDefinition(env.D1)(dummyDefinition1)
+    await insertIncomeDefinition(env.D1)(dummyDefinition2)
   })
 
   test.each([
@@ -184,15 +170,18 @@ describe('詳細な検索', () => {
       expected: [dummyDefinition2],
     },
   ])('単月検索 $month月度', async ({ month, expected }) => {
-    const actual = await repository.findByFinancialMonth({
+    const actual = await findIncomeDefinitions(env.D1)({
       userId: dummyUser.id,
-      financialMonth: {
-        financialYear: 2025,
-        month: month as Months,
-      },
       sortBy: 'enabledAt',
       order: 'asc',
       limit: 100,
+      period: {
+        at: {
+          financialYear: 2025,
+          month: month as Months,
+        },
+      },
+
     })
 
     expect(actual.map(makeComparable))
@@ -200,12 +189,12 @@ describe('詳細な検索', () => {
   })
 
   test('年度全体での検索', async () => {
-    const actual = await repository.findByFinancialYear({
+    const actual = await findIncomeDefinitions(env.D1)({
       userId: dummyUser.id,
-      financialYear: 2025,
       sortBy: 'enabledAt',
       order: 'asc',
       limit: 100,
+      period: { at: 2025 },
     })
 
     expect(actual.map(makeComparable))

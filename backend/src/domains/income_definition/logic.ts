@@ -1,27 +1,12 @@
 import { ulid } from 'ulid'
 
-import type { FinancialMonthData } from '@/features/financial_months/domains/valueObject'
-import { getPeriodByFinancialMonth } from '@/features/financial_months/domains/valueObject'
 import dayjs from '@/logic/dayjs'
 
-export const IncomeDefinitionKind = ['absolute', 'related_by_workday'] as const
-export type IncomeDefinitionKind = typeof IncomeDefinitionKind[number]
+import type { FinancialMonthData } from '../financial_month'
+import { getPeriodByFinancialMonth } from '../financial_month/logic'
+import type { IncomeDefinition, IncomeDefinitionKind } from '.'
 
-export type IncomeDefinition = {
-  id: string
-  userId: string
-
-  name: string
-  kind: IncomeDefinitionKind
-  value: number
-  isTaxable: boolean
-
-  enabledAt: dayjs.Dayjs
-  disabledAt: dayjs.Dayjs
-
-  updatedAt: dayjs.Dayjs
-}
-
+// TODO: from > to ならドメインエラーにすべきでは?
 export const createIncomeDefinition = (props: {
   userId: string
   name: string

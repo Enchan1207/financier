@@ -1,7 +1,7 @@
-import type { FinancialMonthData } from '@/features/financial_months/domains/valueObject'
 import dayjs from '@/logic/dayjs'
 
-import { createIncomeDefinition } from './entity'
+import type { FinancialMonthData } from '../financial_month'
+import { createIncomeDefinition } from './logic'
 
 describe('報酬定義エンティティの生成', () => {
   const from: FinancialMonthData = {

@@ -1,10 +1,11 @@
 import { ulid } from 'ulid'
 
-import type { FinancialMonth } from '@/features/financial_months/domains/entity'
 import dayjs from '@/logic/dayjs'
 
+import type { FinancialMonth } from '../financial_month'
 import type { Workday } from '.'
 
+// TODO: countの値域チェックを挟んでも良いのでは?
 export const createWorkday = (props: {
   userId: string
   financialMonth: FinancialMonth
