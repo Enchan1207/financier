@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:test'
 
-import type { User } from '@/features/users/domain/entity'
+import type { User } from '@/features/users/domains/entity'
 import { useUserRepositoryD1 } from '@/features/users/infrastructure/repositoryImpl'
 import dayjs from '@/logic/dayjs'
 

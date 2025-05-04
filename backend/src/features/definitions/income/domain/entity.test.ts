@@ -1,4 +1,4 @@
-import type { FinancialMonthData } from '@/features/financial_months/domain/valueObject'
+import type { FinancialMonthData } from '@/features/financial_months/domains/valueObject'
 import dayjs from '@/logic/dayjs'
 
 import { createIncomeDefinition } from './entity'

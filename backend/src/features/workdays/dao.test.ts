@@ -1,11 +1,11 @@
 import { env } from 'cloudflare:test'
 
-import type { FinancialMonth } from '@/domain/financial_month'
-import { createFinancialMonth } from '@/domain/financial_month/logic'
-import type { User } from '@/domain/user'
-import { createUser } from '@/domain/user/logic'
-import type { Workday } from '@/domain/workday'
-import { createWorkday } from '@/domain/workday/logic'
+import type { FinancialMonth } from '@/domains/financial_month'
+import { createFinancialMonth } from '@/domains/financial_month/logic'
+import type { User } from '@/domains/user'
+import { createUser } from '@/domains/user/logic'
+import type { Workday } from '@/domains/workday'
+import { createWorkday } from '@/domains/workday/logic'
 import dayjs from '@/logic/dayjs'
 
 import { saveUser } from '../authorize/dao'

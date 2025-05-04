@@ -2,8 +2,8 @@ import dayjs from '@/logic/dayjs'
 import { condition, every } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
 
-import type { IncomeRecord } from '../domain/entity'
-import type { IncomeRecordRepository } from '../domain/repository'
+import type { IncomeRecord } from '../domains/entity'
+import type { IncomeRecordRepository } from '../domains/repository'
 import { IncomeRecordRecord } from './entity'
 
 const makeIncomeRecord = (record: IncomeRecordRecord): IncomeRecord => {

@@ -1,13 +1,13 @@
 import { env } from 'cloudflare:test'
 
-import type { Months } from '@/features/financial_months/domain/valueObject'
-import { getPeriodByFinancialMonth } from '@/features/financial_months/domain/valueObject'
-import type { User } from '@/features/users/domain/entity'
-import { createUser } from '@/features/users/domain/entity'
+import type { Months } from '@/features/financial_months/domains/valueObject'
+import { getPeriodByFinancialMonth } from '@/features/financial_months/domains/valueObject'
+import type { User } from '@/features/users/domains/entity'
+import { createUser } from '@/features/users/domains/entity'
 import { useUserRepositoryD1 } from '@/features/users/infrastructure/repositoryImpl'
 
-import type { IncomeDefinition } from '../domain/entity'
-import { createIncomeDefinition } from '../domain/entity'
+import type { IncomeDefinition } from '../domains/entity'
+import { createIncomeDefinition } from '../domains/entity'
 import { useIncomeDefinitionRepositoryD1 } from './repositoryImpl'
 
 /** エンティティを相互変換可能な型に変換する */

@@ -2,7 +2,7 @@ import type { ResultAsync } from 'neverthrow'
 import { err, ok } from 'neverthrow'
 import { ulid } from 'ulid'
 
-import type { User } from '@/domain/user'
+import type { User } from '@/domains/user'
 import { fromSafePromise } from '@/logic/neverthrow'
 
 import type { Auth0UserInfo } from './dao'

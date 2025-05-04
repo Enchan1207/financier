@@ -2,7 +2,7 @@ import { env, fetchMock } from 'cloudflare:test'
 import { sign } from 'hono/jwt'
 import { testClient } from 'hono/testing'
 
-import type { User } from '@/domain/user'
+import type { User } from '@/domains/user'
 
 import { getUserById, saveUser } from '../authorize/dao'
 import users from './route'

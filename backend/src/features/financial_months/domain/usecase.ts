@@ -1,6 +1,6 @@
 import { ResultAsync } from 'neverthrow'
 
-import type { User } from '@/features/users/domain/entity'
+import type { User } from '@/features/users/domains/entity'
 import dayjs from '@/logic/dayjs'
 
 import type { FinancialMonth } from './entity'

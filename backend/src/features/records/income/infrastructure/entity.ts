@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { IncomeRecordUpdator } from '../domain/entity'
+import { IncomeRecordUpdator } from '../domains/entity'
 
 // 草
 export const IncomeRecordRecord = z.object({

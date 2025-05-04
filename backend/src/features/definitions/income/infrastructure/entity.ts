@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { IncomeDefinitionKind } from '../domain/entity'
+import { IncomeDefinitionKind } from '../domains/entity'
 
 export const IncomeDefinitionRecord = z.object({
   id: z.string(),

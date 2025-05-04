@@ -1,10 +1,10 @@
-import { getPeriodByFinancialMonth } from '@/features/financial_months/domain/valueObject'
+import { getPeriodByFinancialMonth } from '@/features/financial_months/domains/valueObject'
 import dayjs from '@/logic/dayjs'
 import { condition, every } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
 
-import type { IncomeDefinition } from '../domain/entity'
-import type { IncomeDefinitionRepository, IncomeDefinitionSortKey } from '../domain/repository'
+import type { IncomeDefinition } from '../domains/entity'
+import type { IncomeDefinitionRepository, IncomeDefinitionSortKey } from '../domains/repository'
 import { IncomeDefinitionRecord } from './entity'
 
 const makeIncomeDefinitionRecord = (entity: IncomeDefinition): IncomeDefinitionRecord => {

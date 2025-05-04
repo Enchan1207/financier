@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:test'
 
-import type { User } from '@/features/users/domain/entity'
-import { createUser } from '@/features/users/domain/entity'
+import type { User } from '@/features/users/domains/entity'
+import { createUser } from '@/features/users/domains/entity'
 import { useUserRepositoryD1 } from '@/features/users/infrastructure/repositoryImpl'
 
 import { useIncomeDefinitionRepositoryD1 } from '../infrastructure/repositoryImpl'

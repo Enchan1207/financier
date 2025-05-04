@@ -1,10 +1,10 @@
 import { env } from 'cloudflare:test'
 
-import { createIncomeDefinition } from '@/features/definitions/income/domain/entity'
+import { createIncomeDefinition } from '@/features/definitions/income/domains/entity'
 import { useIncomeDefinitionRepositoryD1 } from '@/features/definitions/income/infrastructure/repositoryImpl'
-import { createFinancialMonth } from '@/features/financial_months/domain/entity'
+import { createFinancialMonth } from '@/features/financial_months/domains/entity'
 import { useFinancialMonthRepositoryD1 } from '@/features/financial_months/infrastructure/repositoryImpl'
-import { createUser } from '@/features/users/domain/entity'
+import { createUser } from '@/features/users/domains/entity'
 import { useUserRepositoryD1 } from '@/features/users/infrastructure/repositoryImpl'
 
 import { useIncomeRecordRepositoryD1 } from '../infrastructure/repositoryImpl'

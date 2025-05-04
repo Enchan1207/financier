@@ -1,6 +1,6 @@
 import { ulid } from 'ulid'
 
-import type { FinancialMonth } from '@/features/financial_months/domain/entity'
+import type { FinancialMonth } from '@/features/financial_months/domains/entity'
 import dayjs from '@/logic/dayjs'
 
 import type { Workday } from '.'

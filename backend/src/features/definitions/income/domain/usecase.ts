@@ -1,7 +1,7 @@
 import { ResultAsync } from 'neverthrow'
 
-import type { FinancialMonthData } from '@/features/financial_months/domain/valueObject'
-import type { User } from '@/features/users/domain/entity'
+import type { FinancialMonthData } from '@/features/financial_months/domains/valueObject'
+import type { User } from '@/features/users/domains/entity'
 
 import type { IncomeDefinition, IncomeDefinitionKind } from './entity'
 import type { IncomeDefinitionFilter, IncomeDefinitionRepository } from './repository'

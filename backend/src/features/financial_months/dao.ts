@@ -2,8 +2,8 @@ import { z } from 'zod'
 
 import type {
   FinancialMonth, FinancialMonthData, Months,
-} from '@/domain/financial_month'
-import { getPeriodByFinancialMonth } from '@/domain/financial_month/logic'
+} from '@/domains/financial_month'
+import { getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
 import type dayjs from '@/logic/dayjs'
 import { condition, every } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'

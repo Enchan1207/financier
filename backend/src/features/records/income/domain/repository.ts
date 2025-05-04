@@ -1,5 +1,5 @@
-import type { IncomeDefinition } from '@/features/definitions/income/domain/entity'
-import type { FinancialMonth } from '@/features/financial_months/domain/entity'
+import type { IncomeDefinition } from '@/features/definitions/income/domains/entity'
+import type { FinancialMonth } from '@/features/financial_months/domains/entity'
 
 import type { IncomeRecord } from './entity'
 

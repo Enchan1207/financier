@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import type { User } from '@/domain/user'
+import type { User } from '@/domains/user'
 import { condition } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
 

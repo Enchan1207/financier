@@ -1,7 +1,7 @@
 import { ulid } from 'ulid'
 
-import type { FinancialMonthData } from '@/features/financial_months/domain/valueObject'
-import { getPeriodByFinancialMonth } from '@/features/financial_months/domain/valueObject'
+import type { FinancialMonthData } from '@/features/financial_months/domains/valueObject'
+import { getPeriodByFinancialMonth } from '@/features/financial_months/domains/valueObject'
 import dayjs from '@/logic/dayjs'
 
 export const IncomeDefinitionKind = ['absolute', 'related_by_workday'] as const

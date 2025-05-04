@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:test'
 import { ulid } from 'ulid'
 
-import type { User } from '@/domain/user'
+import type { User } from '@/domains/user'
 
 import {
   getUserByAuth0Id, getUserById, saveUser,

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import type { Workday } from '@/domain/workday'
+import type { Workday } from '@/domains/workday'
 import dayjs from '@/logic/dayjs'
 import { condition } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
