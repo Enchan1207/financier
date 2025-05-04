@@ -1,12 +1,14 @@
+import type { Result } from 'neverthrow'
+import { err, ok } from 'neverthrow'
 import { ulid } from 'ulid'
 
 import dayjs from '@/logic/dayjs'
+import { ValidationError } from '@/logic/errors'
 
 import type { FinancialMonthData } from '../financial_month'
 import { getPeriodByFinancialMonth } from '../financial_month/logic'
 import type { IncomeDefinition, IncomeDefinitionKind } from '.'
 
-// TODO: from > to ならドメインエラーにすべきでは?
 export const createIncomeDefinition = (props: {
   userId: string
   name: string
@@ -15,23 +17,29 @@ export const createIncomeDefinition = (props: {
   value: number
   from: FinancialMonthData
   to: FinancialMonthData
-}): IncomeDefinition => {
+}): Result<IncomeDefinition, ValidationError> => {
   const {
     userId, name, kind, value, isTaxable, from, to,
   } = props
 
-  const { start } = getPeriodByFinancialMonth(from)
-  const { end } = getPeriodByFinancialMonth(to)
+  const { start: fromStart } = getPeriodByFinancialMonth(from)
+  const { start: toStart, end } = getPeriodByFinancialMonth(to)
 
-  return {
+  if (toStart.isBefore(fromStart)) {
+    const startTime = fromStart.valueOf()
+    const endTime = toStart.valueOf()
+    return err(new ValidationError(`from must be earlier than to (${startTime} -> ${endTime})`))
+  }
+
+  return ok({
     id: ulid(),
     userId,
     name,
     kind,
     value,
     isTaxable,
-    enabledAt: start,
+    enabledAt: fromStart,
     disabledAt: end,
     updatedAt: dayjs(),
-  }
+  })
 }

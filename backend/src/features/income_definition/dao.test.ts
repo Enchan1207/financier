@@ -44,7 +44,7 @@ describe('基本的なCRUD', () => {
       financialYear: 2025,
       month: 3,
     },
-  })
+  })._unsafeUnwrap()
 
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)
@@ -131,7 +131,7 @@ describe('詳細な検索', () => {
       financialYear: 2025,
       month: 12,
     },
-  })
+  })._unsafeUnwrap()
 
   const dummyDefinition2 = createIncomeDefinition({
     userId: dummyUser.id,
@@ -147,7 +147,7 @@ describe('詳細な検索', () => {
       financialYear: 2025,
       month: 2,
     },
-  })
+  })._unsafeUnwrap()
 
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)

@@ -1,12 +1,35 @@
+import type { Result } from 'neverthrow'
+import { err, ok } from 'neverthrow'
 import { ulid } from 'ulid'
 
 import dayjs from '@/logic/dayjs'
+import { ValidationError } from '@/logic/errors'
 
 import type {
   FinancialMonth, FinancialMonthData, Months,
 } from '.'
 
 const financialTimezone = 'Asia/Tokyo'
+
+const isValidMonth = (month: number): month is Months => month >= 1 && month <= 12
+
+export const validateFinancialMonthData = (unvalidated: {
+  financialYear: number
+  month: number
+}): Result<FinancialMonthData, ValidationError> => {
+  if (unvalidated.financialYear < 0) {
+    return err(new ValidationError())
+  }
+
+  if (!isValidMonth(unvalidated.month)) {
+    return err(new ValidationError())
+  }
+
+  return ok({
+    financialYear: unvalidated.financialYear,
+    month: unvalidated.month,
+  })
+}
 
 export const createFinancialMonth = (props: FinancialMonthData & { userId: string }): FinancialMonth => {
   const {
@@ -28,7 +51,8 @@ export const getPeriodByFinancialMonth = (fm: FinancialMonthData): {
 } => {
   const actualYear = fm.month < 4 ? fm.financialYear + 1 : fm.financialYear
 
-  const start = dayjs.tz(`${actualYear}-${String(fm.month).padStart(2, '0')}-01T00:00:00`, financialTimezone)
+  const startDateString = `${actualYear}-${String(fm.month).padStart(2, '0')}-01T00:00:00`
+  const start = dayjs.tz(startDateString, financialTimezone)
   const end = start.endOf('month')
 
   return {

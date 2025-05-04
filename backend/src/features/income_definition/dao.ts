@@ -25,8 +25,8 @@ const IncomeDefinitionRecord = z.object({
 
 type IncomeDefinitionRecord = z.infer<typeof IncomeDefinitionRecord>
 
-const IncomeDefinitionSortKey = ['enabledAt', 'disabledAt', 'updatedAt'] as const
-type IncomeDefinitionSortKey = typeof IncomeDefinitionSortKey[number]
+export const IncomeDefinitionSortKey = ['enabledAt', 'disabledAt', 'updatedAt'] as const
+export type IncomeDefinitionSortKey = typeof IncomeDefinitionSortKey[number]
 
 type MultilpleMonthsPeriod<T> = {
   from: T
@@ -37,9 +37,9 @@ type SingleMonthPeriod<T> = { at: T }
 
 type Period<T> = MultilpleMonthsPeriod<T> | SingleMonthPeriod<T>
 
-type IncomeDefinitionFindPeriod = Period<FinancialMonthData | number>
+export type IncomeDefinitionFindPeriod = Period<FinancialMonthData | number>
 
-type IncomeDefinitionFindCondition = {
+export type IncomeDefinitionFindCondition = {
   userId: User['id']
   sortBy: IncomeDefinitionSortKey
   kind?: IncomeDefinitionKind
@@ -82,15 +82,12 @@ const makeEntity = (record: IncomeDefinitionRecord): IncomeDefinition => ({
 
 // TODO: daoレベルで報酬実績の自動挿入を試みてもよいのでは?
 
-/** 報酬定義を挿入する */
-export const insertIncomeDefinition = (db: D1Database):
-(entity: IncomeDefinition) => Promise<IncomeDefinition> =>
-  async (entity) => {
-    const stmt = 'INSERT INTO income_definitions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+const buildIncomeDefinitionInsertionQuery = (db: D1Database):
+(_: IncomeDefinitionRecord) => D1PreparedStatement =>
+  (record) => {
+    const base = 'INSERT INTO income_definitions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
 
-    const record = makeRecord(entity)
-
-    await db.prepare(stmt).bind(
+    const stmt = db.prepare(base).bind(
       record.id,
       record.user_id,
       record.name,
@@ -100,7 +97,47 @@ export const insertIncomeDefinition = (db: D1Database):
       record.disabled_at,
       record.updated_at,
       record.is_taxable,
-    ).run()
+    )
+    return stmt
+  }
+
+const buildIncomeRecordInsertionQuery = (db: D1Database):
+(_: IncomeDefinitionRecord) => D1PreparedStatement =>
+  (record) => {
+    const base = `
+    SELECT
+      m.user_id,
+      m.id AS financial_month_id,
+      d.id AS definition_id,
+      CASE
+        WHEN d.kind = "related_by_workday" THEN d.value * w.count
+        ELSE d.value
+      END value,
+      0 updated_at,
+      "system" updated_by
+    FROM
+      financial_months m
+      LEFT JOIN workdays w ON m.id = w.financial_month_id
+      LEFT JOIN income_definitions d ON d.disabled_at > m.started_at
+      AND d.enabled_at < m.ended_at
+    WHERE d.id=?
+  `
+
+    const stmt = db.prepare(base).bind(record.id)
+    return stmt
+  }
+
+/** 報酬定義を挿入する */
+export const insertIncomeDefinition = (db: D1Database):
+(_: IncomeDefinition) => Promise<IncomeDefinition> =>
+  async (entity) => {
+    const record = makeRecord(entity)
+
+    const r = await db.batch([
+      buildIncomeDefinitionInsertionQuery(db)(record),
+      buildIncomeRecordInsertionQuery(db)(record),
+    ])
+    console.log(r)
 
     return entity
   }
@@ -192,7 +229,7 @@ const getActualPeriod = (period: IncomeDefinitionFindPeriod): {
 } => {
   const { from, to } = toMultipleMonthPeriod(period)
 
-  const isNumber = (n: unknown): n is number => !Number.isNaN(n)
+  const isNumber = (n: unknown): n is number => !Number.isNaN(Number(n))
 
   const startMonth: FinancialMonthData = isNumber(from)
     ? {
