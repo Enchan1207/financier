@@ -67,6 +67,4 @@ export const createAuthorizeWorkflow = (effects: {
   .orElse(() => createTentativeUser({
     //
     fetchUserInfo: fetchUserInfo(command.state.authDomain),
-  })(command).andTee((newUser) => {
-    console.log(`新規ユーザが登録されました。${JSON.stringify(newUser)}`)
-  }))
+  })(command))

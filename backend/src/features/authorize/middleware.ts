@@ -6,7 +6,7 @@ import type { User } from '@/domains/user'
 import type { Auth0JWTPayload } from '@/logic/middlewares/jwk'
 import { jwkMiddleware, jwkValidationMiddleware } from '@/logic/middlewares/jwk'
 
-import { getUserByAuth0Id } from './dao'
+import { getUserByAuth0Id, saveUser } from './dao'
 import type { Command } from './workflow'
 import { createAuthorizeWorkflow } from './workflow'
 
@@ -32,6 +32,12 @@ const userMiddleware = createMiddleware<{
   })
 
   const result = await workflow(command)
+    .andTee(async (command) => {
+      const newUser = command.input.user
+
+      await saveUser(c.env.D1)(newUser)
+      console.log(`新規ユーザが登録されました。${JSON.stringify(newUser)}`)
+    })
   if (result.isErr()) {
     throw result.error
   }
