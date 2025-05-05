@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 
-import users from '@/features/users/presentation/route'
+import users from '@/features/profile/route'
 import { corsMiddleware } from '@/logic/middlewares/cors'
 
 const app = new Hono()
