@@ -59,6 +59,9 @@
       "plaintext": false,
       "markdown": false,
       "scminput": false
+    },
+    "[sql]": {
+      "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc"
     }
   },
   "extensions": {
