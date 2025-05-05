@@ -80,8 +80,6 @@ const makeEntity = (record: IncomeDefinitionRecord): IncomeDefinition => ({
   updatedAt: dayjs(record.updated_at),
 })
 
-// TODO: daoレベルで報酬実績の自動挿入を試みてもよいのでは?
-
 const buildIncomeDefinitionInsertionQuery = (db: D1Database):
 (_: IncomeDefinitionRecord) => D1PreparedStatement =>
   (record) => {
@@ -105,6 +103,8 @@ const buildIncomeRecordInsertionQuery = (db: D1Database):
 (_: IncomeDefinitionRecord) => D1PreparedStatement =>
   (record) => {
     const base = `
+    INSERT INTO
+      income_records
     SELECT
       m.user_id,
       m.id AS financial_month_id,
@@ -113,17 +113,23 @@ const buildIncomeRecordInsertionQuery = (db: D1Database):
         WHEN d.kind = "related_by_workday" THEN d.value * w.count
         ELSE d.value
       END value,
-      0 updated_at,
+      ? updated_at,
       "system" updated_by
     FROM
       financial_months m
       LEFT JOIN workdays w ON m.id = w.financial_month_id
       LEFT JOIN income_definitions d ON d.disabled_at > m.started_at
       AND d.enabled_at < m.ended_at
-    WHERE d.id=?
+    WHERE
+      d.id = ?
   `
 
-    const stmt = db.prepare(base).bind(record.id)
+    const stmt = db
+      .prepare(base)
+      .bind(
+        dayjs().valueOf(),
+        record.id,
+      )
     return stmt
   }
 
@@ -133,11 +139,10 @@ export const insertIncomeDefinition = (db: D1Database):
   async (entity) => {
     const record = makeRecord(entity)
 
-    const r = await db.batch([
+    await db.batch([
       buildIncomeDefinitionInsertionQuery(db)(record),
       buildIncomeRecordInsertionQuery(db)(record),
     ])
-    console.log(r)
 
     return entity
   }

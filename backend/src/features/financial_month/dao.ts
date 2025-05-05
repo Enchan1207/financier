@@ -47,6 +47,7 @@ const makeEntity = ({
 })
 
 // TODO: ビジネスロジック上12件単位で突っ込むのが当たり前なので、そうしたい
+// TODO: ここで勤務日数も初期化したい、というかこのメソッド自体financial_yearにいるべきかも
 export const insertFinancialMonth = (db: D1Database):
 (item: FinancialMonth) => Promise<FinancialMonth> =>
   async (entity) => {
