@@ -11,6 +11,12 @@ import type { UnvalidatedListIncomeDefinitionCommand } from './workflow/list'
 import { createIncomeDefinitionListWorkflow, ListIncomeDefinitionSchema } from './workflow/list'
 import type { UnvalidatedPostIncomeDefinitionCommand } from './workflow/post'
 import { createIncomeDefinitionPostWorkflow, PostIncomeDefinitionSchema } from './workflow/post'
+import type { UnvalidatedPutIncomeDefinitionCommand } from './workflow/put'
+import {
+  createIncomeDefinitionPutWorkflow,
+  PutIncomeDefinitionBodySchema,
+  PutIncomeDefinitionQuerySchema,
+} from './workflow/put'
 
 const app = new Hono<{ Bindings: Env }>()
   .use(userAuthMiddleware)
@@ -75,6 +81,34 @@ const app = new Hono<{ Bindings: Env }>()
 
       const response = await workflow(command)
         .asyncMap(({ entity }) => insertIncomeDefinition(c.env.D1)(entity))
+        .match(entity => c.json(entity), (error) => {
+          console.error(error)
+          return c.json({ error: 'bad request' }, 400)
+        })
+
+      return response
+    },
+  )
+  .put(
+    '/:id',
+    zValidator('query', PutIncomeDefinitionQuerySchema),
+    zValidator('json', PutIncomeDefinitionBodySchema),
+    async (c) => {
+      const command: UnvalidatedPutIncomeDefinitionCommand = {
+        input: c.req.valid('json'),
+        state: {
+          id: c.req.valid('query').id,
+          user: c.get('user'),
+        },
+      }
+
+      const workflow = createIncomeDefinitionPutWorkflow({
+        //
+        getIncomeDefinitionById: getIncomeDefinitionById(c.env.D1),
+      })
+
+      const response = await workflow(command)
+      // TODO: event process
         .match(entity => c.json(entity), (error) => {
           console.error(error)
           return c.json({ error: 'bad request' }, 400)
