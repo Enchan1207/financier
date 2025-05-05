@@ -2,10 +2,10 @@ import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { err, ok } from 'neverthrow'
 
+import { EntityNotFoundError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
 
 import { userAuthMiddleware } from '../authorize/middleware'
-import { NoSuchItemError } from '../definitions/income/domain/usecase'
 import {
   findIncomeDefinitions, getIncomeDefinitionById, insertIncomeDefinition,
   updateIncomeDefinition,
@@ -121,7 +121,7 @@ const app = new Hono<{ Bindings: Env }>()
         .match(entity => c.json(entity), (error) => {
           console.error(error)
 
-          if (error instanceof NoSuchItemError) {
+          if (error instanceof EntityNotFoundError) {
             return c.json({ error: 'not found' }, 404)
           }
 

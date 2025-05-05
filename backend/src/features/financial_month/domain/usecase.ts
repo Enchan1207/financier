@@ -1,12 +1,10 @@
-import { ResultAsync } from 'neverthrow'
+import type { ResultAsync } from 'neverthrow'
 
-import type { User } from '@/features/users/domains/entity'
-import dayjs from '@/logic/dayjs'
+import type { FinancialMonth } from '@/domains/financial_month'
+import type { User } from '@/domains/user'
+import type dayjs from '@/logic/dayjs'
 
-import type { FinancialMonth } from './entity'
-import { createFinancialMonth } from './entity'
-import type { FinancialMonthRepository } from './repository'
-import { Months } from './valueObject'
+// FIXME: ドメインモデル financial_year に移動する
 
 export interface FinancialMonthUsecase {
   /**
@@ -23,34 +21,4 @@ export interface FinancialMonthUsecase {
    */
   getCurrentFinancialMonth(user: User, now?: dayjs.Dayjs):
   ResultAsync<FinancialMonth, Error>
-}
-
-class FinancialMonthUsecaseError extends Error {}
-
-const initializeFinancialYear = (repo: FinancialMonthRepository): FinancialMonthUsecase['initializeFinancialYear'] =>
-  ResultAsync.fromThrowable((user, financialYear) => {
-    const entities = Months.map(month => createFinancialMonth({
-      userId: user.id,
-      financialYear,
-      month,
-    }))
-
-    return Promise.all(entities.map(entity => repo.insertFinancialMonth(entity)))
-  })
-
-const getCurrentFinancialMonth = (repo: FinancialMonthRepository): FinancialMonthUsecase['getCurrentFinancialMonth'] =>
-  ResultAsync.fromThrowable(async (user, now) => {
-    const record = await repo.findByDate(user.id, now ?? dayjs())
-    if (record === undefined) {
-      throw new FinancialMonthUsecaseError('該当する会計月度は登録されていない')
-    }
-
-    return record
-  }, e => e instanceof FinancialMonthUsecaseError ? e : new Error('unexpected error'))
-
-export const useFinancialMonthUsecase = (repo: FinancialMonthRepository): FinancialMonthUsecase => {
-  return {
-    initializeFinancialYear: initializeFinancialYear(repo),
-    getCurrentFinancialMonth: getCurrentFinancialMonth(repo),
-  }
 }
