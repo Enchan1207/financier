@@ -1,9 +1,14 @@
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
+import { err, ok } from 'neverthrow'
+
+import { fromSafePromise } from '@/logic/neverthrow'
 
 import { userAuthMiddleware } from '../authorize/middleware'
+import { NoSuchItemError } from '../definitions/income/domain/usecase'
 import {
   findIncomeDefinitions, getIncomeDefinitionById, insertIncomeDefinition,
+  updateIncomeDefinition,
 } from './dao'
 import type { GetIncomeDefinitionCommand } from './workflow/get'
 import { createIncomeDefinitionGetWorkflow, GetIncomeDefinitionSchema } from './workflow/get'
@@ -108,9 +113,18 @@ const app = new Hono<{ Bindings: Env }>()
       })
 
       const response = await workflow(command)
-      // TODO: event process
+        .andThen(fromSafePromise(async (event) => {
+          const id = event.current.id
+          const updated = await updateIncomeDefinition(c.env.D1)(id, event)
+          return updated ? ok (updated) : err(new Error('unexpected update error'))
+        }))
         .match(entity => c.json(entity), (error) => {
           console.error(error)
+
+          if (error instanceof NoSuchItemError) {
+            return c.json({ error: 'not found' }, 404)
+          }
+
           return c.json({ error: 'bad request' }, 400)
         })
 

@@ -138,10 +138,10 @@ const createUpdateEvent = (command: CurrentDefinitionQueried): IncomeDefinitionU
   return {
     current,
     update: {
-      name: input.name ?? current.name,
-      kind: input.kind ?? current.kind,
-      value: input.value ?? current.value,
-      isTaxable: input.isTaxable ?? current.isTaxable,
+      name: input.name,
+      kind: input.kind,
+      value: input.value,
+      isTaxable: input.isTaxable,
       from: input.from,
       to: input.to,
     },

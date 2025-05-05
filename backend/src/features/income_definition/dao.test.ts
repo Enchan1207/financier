@@ -70,16 +70,20 @@ describe('基本的なCRUD', () => {
 
     beforeAll(async () => {
       actual = await updateIncomeDefinition(env.D1)(dummyDefinition.id, {
-        kind: 'related_by_workday',
-        name: '通勤手当',
-        value: 300,
-        from: {
-          financialYear: 2025,
-          month: 6,
-        },
-        to: {
-          financialYear: 2025,
-          month: 1,
+        current: dummyDefinition,
+        update: {
+          kind: 'related_by_workday',
+          name: '通勤手当',
+          isTaxable: undefined,
+          value: 300,
+          from: {
+            financialYear: 2025,
+            month: 6,
+          },
+          to: {
+            financialYear: 2025,
+            month: 1,
+          },
         },
       })
     })

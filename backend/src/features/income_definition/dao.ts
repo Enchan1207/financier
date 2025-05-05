@@ -4,7 +4,6 @@ import type { FinancialMonthData } from '@/domains/financial_month'
 import { getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { IncomeDefinitionKind } from '@/domains/income_definition'
-import type { createIncomeDefinition } from '@/domains/income_definition/logic'
 import type { User } from '@/domains/user'
 import dayjs from '@/logic/dayjs'
 import type { ConditionNode } from '@/logic/queryBuilder/conditionTree'
@@ -99,9 +98,10 @@ const buildIncomeDefinitionInsertionQuery = (db: D1Database):
     return stmt
   }
 
+/** 報酬定義に基づく報酬実績をUPSERTするクエリを構築する */
 const buildIncomeRecordInsertionQuery = (db: D1Database):
-(_: IncomeDefinitionRecord) => D1PreparedStatement =>
-  (record) => {
+(id: IncomeDefinitionRecord['id']) => D1PreparedStatement =>
+  (id) => {
     const base = `
     INSERT INTO
       income_records
@@ -121,14 +121,21 @@ const buildIncomeRecordInsertionQuery = (db: D1Database):
       LEFT JOIN income_definitions d ON d.disabled_at > m.started_at
       AND d.enabled_at < m.ended_at
     WHERE
-      d.id = ?
+      d.id = ? ON CONFLICT (financial_month_id, definition_id) DO
+    UPDATE
+    SET
+      updated_at = excluded.updated_at,
+      value = excluded.value
+    WHERE
+      excluded.updated_by != "user"
   `
 
+    const updatedAt = dayjs().valueOf()
     const stmt = db
       .prepare(base)
       .bind(
-        dayjs().valueOf(),
-        record.id,
+        updatedAt,
+        id,
       )
     return stmt
   }
@@ -141,61 +148,135 @@ export const insertIncomeDefinition = (db: D1Database):
 
     await db.batch([
       buildIncomeDefinitionInsertionQuery(db)(record),
-      buildIncomeRecordInsertionQuery(db)(record),
+      buildIncomeRecordInsertionQuery(db)(record.id),
     ])
 
     return entity
   }
 
+interface IncomeDefinitionUpdateCondition {
+  current: IncomeDefinition
+  update: {
+    name: string | undefined
+    kind: IncomeDefinitionKind | undefined
+    value: number | undefined
+    isTaxable: boolean | undefined
+    from: FinancialMonthData | undefined
+    to: FinancialMonthData | undefined
+  }
+}
+
+const buildIncomeDefinitionUpdateQuery = (db: D1Database):
+(id: IncomeDefinition['id'], props: IncomeDefinitionUpdateCondition['update']) => D1PreparedStatement => (id, {
+  name, kind, value, isTaxable, from, to,
+}) => {
+  const fromDate = from ? getPeriodByFinancialMonth(from) : undefined
+  const toDate = to ? getPeriodByFinancialMonth(to) : undefined
+
+  const updatePart = [
+    name ? 'name=?' : undefined,
+    kind ? 'kind=?' : undefined,
+    value ? 'value=?' : undefined,
+    fromDate ? 'enabled_at=?' : undefined,
+    toDate ? 'disabled_at=?' : undefined,
+    isTaxable ? 'is_taxable=?' : undefined,
+    'updated_at=?',
+  ]
+    .filter(fragment => fragment !== undefined)
+    .join(', ')
+
+  const stmt = `UPDATE income_definitions SET ${updatePart} WHERE id=?`
+
+  const params = [
+    name,
+    kind,
+    value,
+    isTaxable,
+    fromDate?.start.valueOf(),
+    toDate?.end.valueOf(),
+    dayjs().valueOf(),
+    id,
+  ].filter(fragment => fragment !== undefined)
+
+  const prepared = db
+    .prepare(stmt)
+    .bind(...params)
+
+  return prepared
+}
+
+/** 現在の範囲から外れる定義をクリーンアップする */
+const buildIncomeRecordCleanupQuery = (db: D1Database):
+(id: IncomeDefinition['id']) => D1PreparedStatement => (id) => {
+  const stmt = `
+  DELETE from income_records
+  WHERE
+      EXISTS (
+          SELECT
+              1
+          FROM
+              income_records r
+              LEFT JOIN financial_months m ON m.id = r.financial_month_id
+              LEFT JOIN income_definitions d ON d.id = r.definition_id
+          WHERE
+              r.definition_id = ?
+              AND (
+                  m.started_at < d.enabled_at
+                  OR m.started_at > d.disabled_at
+              )
+      )
+  `
+
+  return db
+    .prepare(stmt)
+    .bind(id)
+}
+
 /** 報酬定義を更新する */
 export const updateIncomeDefinition = (db: D1Database):
-(id: IncomeDefinition['id'], input: Partial<Omit<Parameters<typeof createIncomeDefinition>[0], 'userId'>>) => Promise<IncomeDefinition | undefined> =>
+(id: IncomeDefinition['id'], props: IncomeDefinitionUpdateCondition) => Promise<IncomeDefinition | undefined> =>
   async (id, input) => {
     const {
-      name, kind, value, isTaxable, from, to,
+      update,
+      current,
     } = input
 
-    const fromDate = from ? getPeriodByFinancialMonth(from) : undefined
-    const toDate = to ? getPeriodByFinancialMonth(to) : undefined
+    // 何も更新しないなら戻る
+    const isEmpty = Object.values(update).every(param => param === undefined)
+    if (isEmpty) {
+      return current
+    }
 
-    const updatePart = [
-      name ? 'name=?' : undefined,
-      kind ? 'kind=?' : undefined,
-      value ? 'value=?' : undefined,
-      fromDate ? 'enabled_at=?' : undefined,
-      toDate ? 'disabled_at=?' : undefined,
-      isTaxable ? 'is_taxable=?' : undefined,
-      'updated_at=?',
+    const batchQueries: D1PreparedStatement[] = [
+      buildIncomeDefinitionUpdateQuery(db)(current.id, update),
+      buildIncomeRecordInsertionQuery(db)(current.id),
+      buildIncomeRecordCleanupQuery(db)(current.id),
+      d1(db)
+        .select(IncomeDefinitionRecord, 'income_definitions')
+        .where(condition('id', '==', id))
+        .build(),
     ]
-      .filter(fragment => fragment !== undefined)
-      .join(', ')
 
-    const stmt = `UPDATE income_definitions SET ${updatePart} WHERE id=?`
+    const results = await db.batch<IncomeDefinitionRecord>(batchQueries)
+    const totalOperatedRows = results
+      .map(({ meta: { rows_read, rows_written } }) => ({
+        rows_read,
+        rows_written,
+      }))
+      .reduce((prev, next) => ({
+        rows_read: prev.rows_read + next.rows_read,
+        rows_written: prev.rows_written + next.rows_written,
+      }), {
+        rows_read: 0,
+        rows_written: 0,
+      })
 
-    const params = [
-      name,
-      kind,
-      value,
-      isTaxable,
-      fromDate?.start.valueOf(),
-      toDate?.end.valueOf(),
-      dayjs().valueOf(),
-      id,
-    ].filter(fragment => fragment !== undefined)
+    // TODO: こういう処理をデカいクエリの各所に置きたい
+    console.log(totalOperatedRows)
 
-    await db
-      .prepare(stmt)
-      .bind(...params)
-      .run()
+    const record = results.at(-1)?.results.at(0)
 
-    const updated = d1(db)
-      .select(IncomeDefinitionRecord, 'income_definitions')
-      .where(condition('id', '==', id))
-      .build()
-      .first<IncomeDefinitionRecord>()
-      .then(record => record ? makeEntity(record) : undefined)
-
-    return updated
+    return record ? makeEntity(record) : undefined
   }
 
 /** idを指定して報酬定義を取得する */
