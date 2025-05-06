@@ -1,9 +1,23 @@
+import { z } from 'zod'
+
 import type { FinancialMonth, FinancialMonthData } from '@/domains/financial_month'
+import { FinancialMonthValueSchema } from '@/domains/financial_month'
+import { FinancialYearValueSchema } from '@/domains/financial_year'
 import type dayjs from '@/logic/dayjs'
 import { condition, every } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
 
-import { FinancialMonthRecord, makeFinancialMonthEntity } from '../financial_year/dao'
+import { makeFinancialMonthEntity } from '../financial_year/dao'
+
+export const FinancialMonthRecord = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  financial_year: FinancialYearValueSchema,
+  month: FinancialMonthValueSchema,
+  started_at: z.number(),
+  ended_at: z.number(),
+})
+export type FinancialMonthRecord = z.infer<typeof FinancialMonthRecord>
 
 export const findFinancialMonthsByMonth = (db: D1Database):
 (userId: string, financialMonth: FinancialMonthData) => Promise<FinancialMonth | undefined> =>

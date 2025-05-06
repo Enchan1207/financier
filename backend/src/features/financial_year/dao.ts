@@ -1,29 +1,14 @@
-import { z } from 'zod'
-
 import type { FinancialMonth } from '@/domains/financial_month'
-import { FinancialMonthValueSchema } from '@/domains/financial_month'
 import { getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
 import type { FinancialYear, FinancialYearValue } from '@/domains/financial_year'
-import { FinancialYearValueSchema } from '@/domains/financial_year'
 import type { User } from '@/domains/user'
 import type { Workday } from '@/domains/workday'
 import { createWorkday } from '@/domains/workday/logic'
 import { condition, every } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
 
+import { FinancialMonthRecord } from '../financial_month/dao'
 import type { WorkdayRecord } from '../workday/dao'
-
-// TODO: exportを外す
-export const FinancialMonthRecord = z.object({
-  id: z.string(),
-  user_id: z.string(),
-  financial_year: FinancialYearValueSchema,
-  month: FinancialMonthValueSchema,
-  started_at: z.number(),
-  ended_at: z.number(),
-})
-
-export type FinancialMonthRecord = z.infer<typeof FinancialMonthRecord>
 
 const makeFinancialMonthRecord = ({
   id, userId, financialYear, month,
