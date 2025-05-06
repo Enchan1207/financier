@@ -27,6 +27,9 @@ const makeEntity = ({
   month: month as Months,
 })
 
+/**
+ * @deprecated この関数、必要か?
+ */
 export const findFinancialMonthsByYear = (db: D1Database):
 (userId: string, financialYear: number) => Promise<FinancialMonth[]> =>
   async (userId, financialYear) => {
@@ -44,6 +47,9 @@ export const findFinancialMonthsByYear = (db: D1Database):
     return items
   }
 
+/**
+ * @deprecated この関数、必要か?
+ */
 export const findFinancialMonthsByMonth = (db: D1Database):
 (userId: string, financialMonth: FinancialMonthData) => Promise<FinancialMonth | undefined> =>
   async (userId, { financialYear, month }) => {
