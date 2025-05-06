@@ -1,6 +1,7 @@
 import type { FinancialMonth } from '@/domains/financial_month'
 import { getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
-import type { FinancialYear } from '@/domains/financial_year'
+import type { FinancialYear, FinancialYearValue } from '@/domains/financial_year'
+import type { User } from '@/domains/user'
 import type { Workday } from '@/domains/workday'
 import { createWorkday } from '@/domains/workday/logic'
 
@@ -81,4 +82,31 @@ export const insertFinancialYear = (db: D1Database):
     await db.batch(queries)
 
     return entity
+  }
+
+export const listFinancialYears = (db: D1Database):
+(props: {
+  userId: User['id']
+  order?: 'asc' | 'desc'
+}) => Promise<FinancialYearValue[]> =>
+  async (props) => {
+    const order = props.order ?? 'asc'
+    const stmt = `
+    SELECT DISTINCT
+        financial_year
+    FROM
+        financial_months
+    WHERE
+        user_id = ?
+    ORDER BY
+        financial_year ${order}
+    `
+
+    const result = await db
+      .prepare(stmt)
+      .bind(props.userId)
+      .all<{ financial_year: FinancialYearValue }>()
+
+    const financialYears = result.results.map(({ financial_year }) => financial_year)
+    return financialYears
   }
