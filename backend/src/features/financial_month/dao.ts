@@ -5,9 +5,6 @@ import { d1 } from '@/logic/queryBuilder/d1'
 
 import { FinancialMonthRecord, makeFinancialMonthEntity } from '../financial_year/dao'
 
-/**
- * @deprecated この関数、必要か?
- */
 export const findFinancialMonthsByMonth = (db: D1Database):
 (userId: string, financialMonth: FinancialMonthData) => Promise<FinancialMonth | undefined> =>
   async (userId, { financialYear, month }) => {

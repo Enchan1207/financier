@@ -1,5 +1,6 @@
 import { env } from 'cloudflare:test'
 
+import { createFinancialMonthData } from '@/domains/financial_month/logic'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
@@ -7,7 +8,7 @@ import dayjs from '@/logic/dayjs'
 
 import { saveUser } from '../authorize/dao'
 import { insertFinancialYear } from '../financial_year/dao'
-import { findFinancialMonthsByDate } from './dao'
+import { findFinancialMonthsByDate, findFinancialMonthsByMonth } from './dao'
 
 describe('日付に基づく項目の選択', () => {
   const dummyUser: User = createUser({
@@ -51,5 +52,51 @@ describe('日付に基づく項目の選択', () => {
 
     // dayjsオブジェクトについては内部のプロパティが細かく変わっているので、タイムスタンプで比較
     expect(actual).toStrictEqual(expected)
+  })
+})
+
+describe('月度情報からエンティティを得る', () => {
+  const dummyUser: User = createUser({
+    name: 't_est_user',
+    email: 'test@example.com',
+    auth0UserId: 'auth0_test_user',
+  })
+
+  const dummyFinancialYear = createFinancialYear({
+    userId: dummyUser.id,
+    year: 2024,
+  })._unsafeUnwrap()
+
+  beforeAll(async () => {
+    await saveUser(env.D1)(dummyUser)
+    await insertFinancialYear(env.D1)(dummyFinancialYear)
+  })
+
+  test('範囲内なら取得できること', async () => {
+    const targetMonth = createFinancialMonthData({
+      financialYear: 2024,
+      month: 4,
+    })._unsafeUnwrap()
+
+    const entity = await findFinancialMonthsByMonth(env.D1)(
+      dummyUser.id,
+      targetMonth,
+    )
+
+    expect(entity).toBeDefined()
+  })
+
+  test('範囲外なら取得できないこと', async () => {
+    const targetMonth = createFinancialMonthData({
+      financialYear: 2025,
+      month: 4,
+    })._unsafeUnwrap()
+
+    const entity = await findFinancialMonthsByMonth(env.D1)(
+      dummyUser.id,
+      targetMonth,
+    )
+
+    expect(entity).toBeUndefined()
   })
 })
