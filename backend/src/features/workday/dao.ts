@@ -6,7 +6,6 @@ import { condition } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
 
 export const WorkdayRecord = z.object({
-  id: z.string(),
   user_id: z.string(),
   financial_month_id: z.string(),
   count: z.number(),
@@ -16,9 +15,8 @@ export const WorkdayRecord = z.object({
 export type WorkdayRecord = z.infer<typeof WorkdayRecord>
 
 const makeEntity = ({
-  id, user_id, financial_month_id, count, updated_at,
+  user_id, financial_month_id, count, updated_at,
 }: WorkdayRecord): Workday => ({
-  id,
   userId: user_id,
   financialMonthId: financial_month_id,
   count,

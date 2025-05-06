@@ -1,5 +1,3 @@
-import { ulid } from 'ulid'
-
 import dayjs from '@/logic/dayjs'
 
 import type { FinancialMonth } from '../financial_month'
@@ -12,7 +10,6 @@ export const createWorkday = (props: {
   count: number
 }): Workday => {
   return {
-    id: ulid(),
     userId: props.userId,
     financialMonthId: props.financialMonth.id,
     count: props.count,

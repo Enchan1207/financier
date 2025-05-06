@@ -26,9 +26,8 @@ const makeFinancialMonthRecord = ({
 }
 
 const makeWorkdayRecord = ({
-  id, userId, financialMonthId, count, updatedAt,
+  userId, financialMonthId, count, updatedAt,
 }: Workday): WorkdayRecord => ({
-  id,
   user_id: userId,
   financial_month_id: financialMonthId,
   count,
@@ -60,11 +59,10 @@ const buildWorkdayInsertionQuery = (db: D1Database):
     count: 20, // NOTE: 本来はカレンダーライブラリ等を使うべき
   })).map(makeWorkdayRecord)
 
-  const stmt = 'INSERT INTO workdays VALUES (?1,?2,?3,?4,?5)'
+  const stmt = 'INSERT INTO workdays VALUES (?1,?2,?3,?4)'
   const base = db.prepare(stmt)
 
   return workdayRecords.map(record => base.bind(
-    record.id,
     record.user_id,
     record.financial_month_id,
     record.count,
