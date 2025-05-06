@@ -88,6 +88,7 @@ export const insertFinancialYear = (db: D1Database):
     const queries: D1PreparedStatement[] = [
       ...buildFinancialMonthInsertionQuery(db)(entity),
       ...buildWorkdayInsertionQuery(db)(entity),
+      // TODO: 報酬定義に基づく実績の挿入
     ]
 
     await db.batch(queries)

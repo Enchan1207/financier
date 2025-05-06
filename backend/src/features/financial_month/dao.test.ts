@@ -8,7 +8,7 @@ import dayjs from '@/logic/dayjs'
 
 import { saveUser } from '../authorize/dao'
 import { insertFinancialYear } from '../financial_year/dao'
-import { findFinancialMonthsByDate, findFinancialMonthsByMonth } from './dao'
+import { findFinancialMonthsByDate, getFinancialMonthByFinancialMonth } from './dao'
 
 describe('日付に基づく項目の選択', () => {
   const dummyUser: User = createUser({
@@ -78,7 +78,7 @@ describe('月度情報からエンティティを得る', () => {
       month: 4,
     })._unsafeUnwrap()
 
-    const entity = await findFinancialMonthsByMonth(env.D1)(
+    const entity = await getFinancialMonthByFinancialMonth(env.D1)(
       dummyUser.id,
       targetMonth,
     )
@@ -92,7 +92,7 @@ describe('月度情報からエンティティを得る', () => {
       month: 4,
     })._unsafeUnwrap()
 
-    const entity = await findFinancialMonthsByMonth(env.D1)(
+    const entity = await getFinancialMonthByFinancialMonth(env.D1)(
       dummyUser.id,
       targetMonth,
     )

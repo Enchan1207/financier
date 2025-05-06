@@ -19,7 +19,7 @@ export const FinancialMonthRecord = z.object({
 })
 export type FinancialMonthRecord = z.infer<typeof FinancialMonthRecord>
 
-export const findFinancialMonthsByMonth = (db: D1Database):
+export const getFinancialMonthByFinancialMonth = (db: D1Database):
 (userId: string, financialMonth: FinancialMonthData) => Promise<FinancialMonth | undefined> =>
   async (userId, { financialYear, month }) => {
     const stmt = d1(db)
