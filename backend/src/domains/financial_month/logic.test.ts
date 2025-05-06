@@ -1,7 +1,10 @@
 import dayjs from '@/logic/dayjs'
 
-import type { Months } from '.'
-import { getFinancialMonthFromDate, getPeriodByFinancialMonth } from './logic'
+import {
+  createFinancialMonthData,
+  getFinancialMonthFromDate,
+  getPeriodByFinancialMonth,
+} from './logic'
 
 describe('会計月度と日時情報の相互変換', () => {
   describe.each([
@@ -32,10 +35,11 @@ describe('会計月度と日時情報の相互変換', () => {
   ])('$financialYear年度 $month月', ({
     financialYear, month, expectedStart, expectedEnd,
   }) => {
-    const period = getPeriodByFinancialMonth({
+    const financialMonthData = createFinancialMonthData({
       financialYear,
-      month: month as Months,
-    })
+      month,
+    })._unsafeUnwrap()
+    const period = getPeriodByFinancialMonth(financialMonthData)
 
     const financialMonth = getFinancialMonthFromDate(expectedStart)
 

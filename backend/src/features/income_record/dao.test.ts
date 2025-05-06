@@ -1,5 +1,6 @@
 import { env } from 'cloudflare:test'
 
+import { createFinancialMonthData } from '@/domains/financial_month/logic'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
 import { createUser } from '@/domains/user/logic'
@@ -19,7 +20,7 @@ describe('報酬定義の操作', () => {
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
     year: 2024,
-  })
+  })._unsafeUnwrap()
 
   const dummyFinancialMonth = dummyFinancialYear.months[0]
 
@@ -29,14 +30,14 @@ describe('報酬定義の操作', () => {
     name: 'テスト定義',
     value: 100000,
     isTaxable: true,
-    from: {
+    from: createFinancialMonthData({
       financialYear: 2024,
       month: 4,
-    },
-    to: {
+    })._unsafeUnwrap(),
+    to: createFinancialMonthData({
       financialYear: 2024,
       month: 3,
-    },
+    })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
   beforeAll(async () => {

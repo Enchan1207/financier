@@ -14,9 +14,9 @@ import type { GetIncomeDefinitionCommand } from './workflow/get'
 import { createIncomeDefinitionGetWorkflow, GetIncomeDefinitionSchema } from './workflow/get'
 import type { UnvalidatedListIncomeDefinitionCommand } from './workflow/list'
 import { createIncomeDefinitionListWorkflow, ListIncomeDefinitionSchema } from './workflow/list'
-import type { UnvalidatedPostIncomeDefinitionCommand } from './workflow/post'
+import type { PostIncomeDefinitionCommand } from './workflow/post'
 import { createIncomeDefinitionPostWorkflow, PostIncomeDefinitionSchema } from './workflow/post'
-import type { UnvalidatedPutIncomeDefinitionCommand } from './workflow/put'
+import type { PutIncomeDefinitionCommand } from './workflow/put'
 import {
   createIncomeDefinitionPutWorkflow,
   PutIncomeDefinitionBodySchema,
@@ -77,7 +77,7 @@ const app = new Hono<{ Bindings: Env }>()
     '/',
     zValidator('json', PostIncomeDefinitionSchema),
     async (c) => {
-      const command: UnvalidatedPostIncomeDefinitionCommand = {
+      const command: PostIncomeDefinitionCommand = {
         input: c.req.valid('json'),
         state: { user: c.get('user') },
       }
@@ -99,7 +99,7 @@ const app = new Hono<{ Bindings: Env }>()
     zValidator('query', PutIncomeDefinitionQuerySchema),
     zValidator('json', PutIncomeDefinitionBodySchema),
     async (c) => {
-      const command: UnvalidatedPutIncomeDefinitionCommand = {
+      const command: PutIncomeDefinitionCommand = {
         input: c.req.valid('json'),
         state: {
           id: c.req.valid('query').id,

@@ -19,7 +19,7 @@ describe('日付に基づく項目の選択', () => {
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
     year: 2024,
-  })
+  })._unsafeUnwrap()
 
   const dummyEntityApril = dummyFinancialYear.months.find(month => month.month === 4)
   const dummyEntityMay = dummyFinancialYear.months.find(month => month.month === 5)

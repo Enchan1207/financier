@@ -18,7 +18,7 @@ describe('勤務日数エントリの操作', () => {
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
     year: 2025,
-  })
+  })._unsafeUnwrap()
 
   const dummyFinancialMonth = dummyFinancialYear.months[0]
 

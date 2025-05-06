@@ -27,17 +27,6 @@ type IncomeDefinitionRecord = z.infer<typeof IncomeDefinitionRecord>
 export const IncomeDefinitionSortKey = ['enabledAt', 'disabledAt', 'updatedAt'] as const
 export type IncomeDefinitionSortKey = typeof IncomeDefinitionSortKey[number]
 
-type MultilpleMonthsPeriod<T> = {
-  from: T
-  to: T
-}
-
-type SingleMonthPeriod<T> = { at: T }
-
-type Period<T> = MultilpleMonthsPeriod<T> | SingleMonthPeriod<T>
-
-export type IncomeDefinitionFindPeriod = Period<FinancialMonthData | number>
-
 export type IncomeDefinitionFindCondition = {
   userId: User['id']
   sortBy: IncomeDefinitionSortKey
@@ -45,7 +34,10 @@ export type IncomeDefinitionFindCondition = {
   order: 'asc' | 'desc'
   limit: number
   offset?: number
-  period?: IncomeDefinitionFindPeriod
+  period?: {
+    start: dayjs.Dayjs
+    end: dayjs.Dayjs
+  }
 }
 
 const sortKeyMap: Record<IncomeDefinitionSortKey, keyof IncomeDefinitionRecord>
@@ -292,53 +284,6 @@ export const getIncomeDefinitionById = (db: D1Database):
     return result ? makeEntity(result) : undefined
   }
 
-/** 単月指定を範囲表現に変換 */
-const toMultipleMonthPeriod = <T>(period: Period<T>): MultilpleMonthsPeriod<T> => {
-  const isMultipleMonthPeriod = <T>(period: unknown): period is MultilpleMonthsPeriod<T> =>
-    (period as MultilpleMonthsPeriod<T>).from !== undefined
-
-  if (isMultipleMonthPeriod(period)) {
-    return period
-  }
-  else {
-    return {
-      from: period.at,
-      to: period.at,
-    }
-  }
-}
-
-/** 期間情報からその開始・終了日時を計算 */
-const getActualPeriod = (period: IncomeDefinitionFindPeriod): {
-  start: dayjs.Dayjs
-  end: dayjs.Dayjs
-} => {
-  const { from, to } = toMultipleMonthPeriod(period)
-
-  const isNumber = (n: unknown): n is number => !Number.isNaN(Number(n))
-
-  const startMonth: FinancialMonthData = isNumber(from)
-    ? {
-        financialYear: from,
-        month: 4,
-      }
-    : from
-
-  const endMonth: FinancialMonthData = isNumber(to)
-    ? {
-        financialYear: to,
-        month: 3,
-      }
-    : to
-
-  const { start } = getPeriodByFinancialMonth(startMonth)
-  const { end } = getPeriodByFinancialMonth(endMonth)
-  return {
-    start,
-    end,
-  }
-}
-
 /** 報酬定義を検索する */
 export const findIncomeDefinitions = (db: D1Database):
 (props: IncomeDefinitionFindCondition) => Promise<IncomeDefinition[]> =>
@@ -354,10 +299,9 @@ export const findIncomeDefinitions = (db: D1Database):
     }
 
     if (period) {
-      const { start, end } = getActualPeriod(period)
       conditionNodes.push(
-        condition('disabled_at', '>=', start.valueOf()),
-        condition('enabled_at', '<=', end.valueOf()),
+        condition('disabled_at', '>=', period.start.valueOf()),
+        condition('enabled_at', '<=', period.end.valueOf()),
       )
     }
 

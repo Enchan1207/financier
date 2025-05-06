@@ -1,8 +1,9 @@
 import { z } from 'zod'
 
-import type {
-  FinancialMonth, FinancialMonthData, Months,
-} from '@/domains/financial_month'
+import type { FinancialMonth, FinancialMonthData } from '@/domains/financial_month'
+import { FinancialMonthValueSchema } from '@/domains/financial_month'
+import type { FinancialYearValue } from '@/domains/financial_year'
+import { FinancialYearValueSchema } from '@/domains/financial_year'
 import type dayjs from '@/logic/dayjs'
 import { condition, every } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
@@ -10,8 +11,8 @@ import { d1 } from '@/logic/queryBuilder/d1'
 const FinancialMonthRecord = z.object({
   id: z.string(),
   user_id: z.string(),
-  financial_year: z.number(),
-  month: z.number(),
+  financial_year: FinancialYearValueSchema,
+  month: FinancialMonthValueSchema,
   started_at: z.number(),
   ended_at: z.number(),
 })
@@ -24,14 +25,14 @@ const makeEntity = ({
   id,
   userId: user_id,
   financialYear: financial_year,
-  month: month as Months,
+  month: month,
 })
 
 /**
  * @deprecated この関数、必要か?
  */
 export const findFinancialMonthsByYear = (db: D1Database):
-(userId: string, financialYear: number) => Promise<FinancialMonth[]> =>
+(userId: string, financialYear: FinancialYearValue) => Promise<FinancialMonth[]> =>
   async (userId, financialYear) => {
     const stmt = d1(db)
       .select(FinancialMonthRecord, 'financial_months')

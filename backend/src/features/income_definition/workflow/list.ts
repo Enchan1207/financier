@@ -4,14 +4,14 @@ import {
 } from 'neverthrow'
 import { z } from 'zod'
 
-import type { FinancialMonthData } from '@/domains/financial_month'
-import { validateFinancialMonthData } from '@/domains/financial_month/logic'
+import { createFinancialMonthData, getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { IncomeDefinitionKind } from '@/domains/income_definition'
 import type { User } from '@/domains/user'
+import type dayjs from '@/logic/dayjs'
 import { ValidationError } from '@/logic/errors'
 
-import type { IncomeDefinitionFindCondition, IncomeDefinitionFindPeriod } from '../dao'
+import type { IncomeDefinitionFindCondition } from '../dao'
 import { IncomeDefinitionSortKey } from '../dao'
 
 export const ListIncomeDefinitionSchema = z.object({
@@ -38,7 +38,10 @@ interface ValidatedListIncomeDefinitionCommand {
     offset: number | undefined
     order: 'asc' | 'desc'
     kind: IncomeDefinitionKind | undefined
-    period?: IncomeDefinitionFindPeriod
+    period?: {
+      start: dayjs.Dayjs
+      end: dayjs.Dayjs
+    }
   }
   state: { user: User }
 }
@@ -60,44 +63,53 @@ const parsePeriodString = (periodRaw: string): Result<{
   })
 }
 
-// TODO: ドメインモデル"会計年度"を定義するタイミングでそっちに移動するか?
-const validateFinancialYear = (financialYear: number): Result<number, ValidationError> =>
-  financialYear > 0 ? ok(financialYear) : err(new ValidationError())
-
-const validatePeriod = (parsed: {
-  financialYear: number
-  month: number | undefined
-}): Result<number | FinancialMonthData, ValidationError> =>
-  ok(parsed)
-    .andThen(({ financialYear, month }) =>
-      month
-        ? validateFinancialMonthData({
-            financialYear,
-            month,
-          })
-        : validateFinancialYear(financialYear))
-
 const buildPeriod = (props: {
   from: string | undefined
   to: string | undefined
   at: string | undefined
-}) => ok(props)
+}): Result<{
+  start: dayjs.Dayjs
+  end: dayjs.Dayjs
+}, ValidationError> => ok(props)
   .andThen(({
     from, to, at,
   }) => {
     if (from !== undefined && to !== undefined && at === undefined) {
-      return Result.combine([from, to].map(periodRaw => parsePeriodString(periodRaw).andThen(validatePeriod)))
-        .map(([from, to]) => ({
-          from,
-          to,
-        }))
+      return ok({
+        from,
+        to,
+      })
     }
 
     if (from === undefined && to === undefined && at !== undefined) {
-      return parsePeriodString(at).andThen(validatePeriod).map(at => ({ at }))
+      return ok({
+        from: at,
+        to: at,
+      })
     }
 
     return err(new ValidationError())
+  })
+  .andThen(({ from, to }) => Result.combine([from, to].map(parsePeriodString))
+    .andThen(([from, to]) => Result.combine(
+      [
+        {
+          financialYear: from.financialYear,
+          month: from.month ?? 4,
+        },
+        {
+          financialYear: to.financialYear,
+          month: to.month ?? 3,
+        },
+      ].map(createFinancialMonthData),
+    )))
+  .map(([from, to]) => {
+    const { start } = getPeriodByFinancialMonth(from)
+    const { end } = getPeriodByFinancialMonth(to)
+    return {
+      start,
+      end,
+    }
   })
 
 const validateCommand = (command: UnvalidatedListIncomeDefinitionCommand):

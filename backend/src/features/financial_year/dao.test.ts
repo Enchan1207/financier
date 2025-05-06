@@ -17,7 +17,7 @@ describe('会計年度の生成', () => {
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
     year: 2024,
-  })
+  })._unsafeUnwrap()
 
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)
