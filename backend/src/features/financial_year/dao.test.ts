@@ -29,4 +29,10 @@ describe('会計年度の生成', () => {
     const result = await env.D1.prepare(stmt).first<{ count: number }>()
     expect(result?.count).toBe(12)
   })
+
+  test('12個の勤務日数エンティティが登録されていること', async () => {
+    const stmt = 'SELECT COUNT(*) count FROM workdays'
+    const result = await env.D1.prepare(stmt).first<{ count: number }>()
+    expect(result?.count).toBe(12)
+  })
 })

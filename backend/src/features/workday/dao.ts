@@ -13,7 +13,7 @@ export const WorkdayRecord = z.object({
   updated_at: z.number(),
 })
 
-type WorkdayRecord = z.infer<typeof WorkdayRecord>
+export type WorkdayRecord = z.infer<typeof WorkdayRecord>
 
 const makeEntity = ({
   id, user_id, financial_month_id, count, updated_at,
@@ -25,35 +25,35 @@ const makeEntity = ({
   updatedAt: dayjs(updated_at),
 })
 
-const makeRecord = ({
-  id, userId, financialMonthId, count, updatedAt,
-}: Workday): WorkdayRecord => ({
-  id,
-  user_id: userId,
-  financial_month_id: financialMonthId,
-  count,
-  updated_at: updatedAt.valueOf(),
-})
-
-export const saveWorkday = (db: D1Database): (entity: Workday) => Promise<Workday> => async (entity) => {
-  const stmt = `INSERT INTO workdays 
-  VALUES (?1,?2,?3,?4,?5)
-  ON CONFLICT (id) DO UPDATE SET
-      count = ?4,
-      updated_at = ?5
+export const updateWorkday = (db: D1Database):
+(props: Pick<Workday, 'userId' | 'financialMonthId' | 'count'>) => Promise<Workday | undefined> => async (props) => {
+  const stmt = `
+  UPDATE workdays SET
+    count = ?1,
+    updated_at = ?2
+  WHERE
+    user_id = ?3
+    AND financial_month_id = ?4
   `
 
-  const record = makeRecord(entity)
+  const insertionQuery = db
+    .prepare(stmt)
+    .bind(
+      props.count,
+      dayjs().valueOf(),
+      props.userId,
+      props.financialMonthId,
+    )
 
-  await db.prepare(stmt).bind(
-    record.id,
-    record.user_id,
-    record.financial_month_id,
-    record.count,
-    record.updated_at,
-  ).run()
+  const findQuery = d1(db)
+    .select(WorkdayRecord, 'workdays')
+    .where(condition('financial_month_id', '==', props.financialMonthId))
+    .build()
 
-  return entity
+  const results = await db.batch<Workday>([insertionQuery, findQuery])
+  const updated = results.at(0)?.results.at(0)
+
+  return updated
 }
 
 export const findWorkdayByFinancialMonthId = (db: D1Database): (financialMonthId: string) => Promise<Workday | undefined> => async (financialMonthId) => {
