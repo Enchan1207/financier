@@ -1,52 +1,9 @@
-import { z } from 'zod'
-
 import type { FinancialMonth, FinancialMonthData } from '@/domains/financial_month'
-import { FinancialMonthValueSchema } from '@/domains/financial_month'
-import type { FinancialYearValue } from '@/domains/financial_year'
-import { FinancialYearValueSchema } from '@/domains/financial_year'
 import type dayjs from '@/logic/dayjs'
 import { condition, every } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
 
-const FinancialMonthRecord = z.object({
-  id: z.string(),
-  user_id: z.string(),
-  financial_year: FinancialYearValueSchema,
-  month: FinancialMonthValueSchema,
-  started_at: z.number(),
-  ended_at: z.number(),
-})
-
-export type FinancialMonthRecord = z.infer<typeof FinancialMonthRecord>
-
-const makeEntity = ({
-  id, user_id, financial_year, month,
-}: FinancialMonthRecord): FinancialMonth => ({
-  id,
-  userId: user_id,
-  financialYear: financial_year,
-  month: month,
-})
-
-/**
- * @deprecated この関数、必要か?
- */
-export const findFinancialMonthsByYear = (db: D1Database):
-(userId: string, financialYear: FinancialYearValue) => Promise<FinancialMonth[]> =>
-  async (userId, financialYear) => {
-    const stmt = d1(db)
-      .select(FinancialMonthRecord, 'financial_months')
-      .where(every(
-        condition('user_id', '==', userId),
-        condition('financial_year', '==', financialYear),
-      ))
-      .build()
-
-    const { results } = await stmt.run<FinancialMonthRecord>()
-    const items = results.map(makeEntity)
-
-    return items
-  }
+import { FinancialMonthRecord, makeFinancialMonthEntity } from '../financial_year/dao'
 
 /**
  * @deprecated この関数、必要か?
@@ -64,7 +21,7 @@ export const findFinancialMonthsByMonth = (db: D1Database):
       .build()
 
     const record = await stmt.first<FinancialMonthRecord>()
-    const item = record ? makeEntity(record) : undefined
+    const item = record ? makeFinancialMonthEntity(record) : undefined
     return item
   }
 
@@ -83,6 +40,6 @@ export const findFinancialMonthsByDate = (db: D1Database):
       .build()
 
     const record = await stmt.first<FinancialMonthRecord>()
-    const item = record ? makeEntity(record) : undefined
+    const item = record ? makeFinancialMonthEntity(record) : undefined
     return item
   }

@@ -1,11 +1,14 @@
 import { env } from 'cloudflare:test'
 
+import type { FinancialYearValue } from '@/domains/financial_year'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 
 import { saveUser } from '../authorize/dao'
-import { insertFinancialYear, listFinancialYears } from './dao'
+import {
+  getFinancialYear, insertFinancialYear, listFinancialYears,
+} from './dao'
 
 describe('会計年度の生成', () => {
   const dummyUser: User = createUser({
@@ -65,5 +68,23 @@ describe('会計年度の取得', () => {
     })
 
     expect(entities).toStrictEqual([2025, 2024, 2023])
+  })
+
+  test('単一の会計年度を取得できること', async () => {
+    const entity = await getFinancialYear(env.D1)({
+      userId: dummyUser.id,
+      financialYear: 2023 as FinancialYearValue,
+    })
+
+    expect(entity?.year).toBe(2023)
+  })
+
+  test('存在しないなら取得できないこと', async () => {
+    const entity = await getFinancialYear(env.D1)({
+      userId: dummyUser.id,
+      financialYear: 2026 as FinancialYearValue,
+    })
+
+    expect(entity).toBeUndefined()
   })
 })

@@ -1,12 +1,29 @@
+import { z } from 'zod'
+
 import type { FinancialMonth } from '@/domains/financial_month'
+import { FinancialMonthValueSchema } from '@/domains/financial_month'
 import { getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
 import type { FinancialYear, FinancialYearValue } from '@/domains/financial_year'
+import { FinancialYearValueSchema } from '@/domains/financial_year'
 import type { User } from '@/domains/user'
 import type { Workday } from '@/domains/workday'
 import { createWorkday } from '@/domains/workday/logic'
+import { condition, every } from '@/logic/queryBuilder/conditionTree'
+import { d1 } from '@/logic/queryBuilder/d1'
 
-import type { FinancialMonthRecord } from '../financial_month/dao'
 import type { WorkdayRecord } from '../workday/dao'
+
+// TODO: exportを外す
+export const FinancialMonthRecord = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  financial_year: FinancialYearValueSchema,
+  month: FinancialMonthValueSchema,
+  started_at: z.number(),
+  ended_at: z.number(),
+})
+
+export type FinancialMonthRecord = z.infer<typeof FinancialMonthRecord>
 
 const makeFinancialMonthRecord = ({
   id, userId, financialYear, month,
@@ -25,6 +42,15 @@ const makeFinancialMonthRecord = ({
     ended_at: end.valueOf(),
   }
 }
+
+export const makeFinancialMonthEntity = ({
+  id, user_id, financial_year, month,
+}: FinancialMonthRecord): FinancialMonth => ({
+  id,
+  userId: user_id,
+  financialYear: financial_year,
+  month: month,
+})
 
 const makeWorkdayRecord = ({
   userId, financialMonthId, count, updatedAt,
@@ -109,4 +135,31 @@ export const listFinancialYears = (db: D1Database):
 
     const financialYears = result.results.map(({ financial_year }) => financial_year)
     return financialYears
+  }
+
+export const getFinancialYear = (db: D1Database):
+(props: {
+  userId: User['id']
+  financialYear: FinancialYearValue
+}) => Promise<FinancialYear | undefined> =>
+  async ({ userId, financialYear }) => {
+    const stmt = d1(db)
+      .select(FinancialMonthRecord, 'financial_months')
+      .where(every(
+        condition('user_id', '==', userId),
+        condition('financial_year', '==', financialYear),
+      ))
+      .build()
+
+    const { results } = await stmt.run<FinancialMonthRecord>()
+    const months = results.map(makeFinancialMonthEntity)
+
+    if (months.length === 0) {
+      return undefined
+    }
+
+    return {
+      year: financialYear,
+      months,
+    }
   }
