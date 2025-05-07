@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import type { Workday } from '@/domains/workday'
+import type { WorkdayValue } from '@/domains/workday/logic'
 import dayjs from '@/logic/dayjs'
 import { condition } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
@@ -19,7 +20,7 @@ const makeEntity = ({
 }: WorkdayRecord): Workday => ({
   userId: user_id,
   financialMonthId: financial_month_id,
-  count,
+  count: count as WorkdayValue,
   updatedAt: dayjs(updated_at),
 })
 
@@ -42,6 +43,8 @@ export const updateWorkday = (db: D1Database):
       props.userId,
       props.financialMonthId,
     )
+
+  // TODO: 報酬実績値の更新
 
   const findQuery = d1(db)
     .select(WorkdayRecord, 'workdays')

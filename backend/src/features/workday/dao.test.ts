@@ -3,6 +3,7 @@ import { env } from 'cloudflare:test'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
+import type { WorkdayValue } from '@/domains/workday/logic'
 
 import { saveUser } from '../authorize/dao'
 import { insertFinancialYear } from '../financial_year/dao'
@@ -37,7 +38,7 @@ describe('勤務日数エントリの操作', () => {
     await updateWorkday(env.D1)({
       userId: dummyUser.id,
       financialMonthId: dummyFinancialMonth.id,
-      count: 17,
+      count: 17 as WorkdayValue,
     })
 
     const actual
@@ -52,3 +53,5 @@ describe('勤務日数エントリの操作', () => {
     })
   })
 })
+
+// TODO: 報酬実績が更新される(or ユーザ更新なら変更しない)ことを確認する

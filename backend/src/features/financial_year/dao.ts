@@ -70,7 +70,9 @@ const buildWorkdayInsertionQuery = (db: D1Database):
     userId: month.userId,
     financialMonth: month,
     count: 20, // NOTE: 本来はカレンダーライブラリ等を使うべき
-  })).map(makeWorkdayRecord)
+  }).unwrapOr(undefined))
+    .filter(workday => workday !== undefined)
+    .map(makeWorkdayRecord)
 
   const stmt = 'INSERT INTO workdays VALUES (?1,?2,?3,?4)'
   const base = db.prepare(stmt)
