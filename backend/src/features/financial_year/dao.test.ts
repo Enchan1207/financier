@@ -1,4 +1,5 @@
 import { env } from 'cloudflare:test'
+import type { z } from 'zod'
 
 import { createFinancialMonthData } from '@/domains/financial_month/logic'
 import type { FinancialYearValue } from '@/domains/financial_year'
@@ -9,6 +10,7 @@ import { createUser } from '@/domains/user/logic'
 
 import { saveUser } from '../authorize/dao'
 import { insertIncomeDefinition } from '../income_definition/dao'
+import type { IncomeRecordRecord } from '../income_record/dao'
 import {
   getFinancialYear, insertFinancialYear, listFinancialYears,
 } from './dao'
@@ -167,8 +169,120 @@ describe('報酬定義が存在する場合', () => {
       year: 2024,
     })._unsafeUnwrap()
 
+    let records: z.infer<typeof IncomeRecordRecord>[]
+
     beforeAll(async () => {
       await insertFinancialYear(env.D1)(dummyFinancialYear)
+
+      const stmt = 'SELECT * FROM income_records WHERE user_id=?'
+      const { results } = await env.D1
+        .prepare(stmt)
+        .bind(dummyUser.id)
+        .all<z.infer<typeof IncomeRecordRecord>>()
+      records = results
+    })
+
+    test('FY24-09 ~ FY25-09 までに定義された7件の実績が記録されること', () => {
+      const actual = records.filter(record => record.definition_id === dummyDefinition1.id)
+      expect(actual).toHaveLength(7)
+    })
+
+    test('FY24全体に定義された12件の実績が記録されること', () => {
+      const actual = records.filter(record => record.definition_id === dummyDefinition2.id)
+      expect(actual).toHaveLength(12)
+    })
+
+    test('FY25全体に定義された0件の実績が記録されること', () => {
+      const actual = records.filter(record => record.definition_id === dummyDefinition3.id)
+      expect(actual).toHaveLength(0)
+    })
+
+    test('実績の合計レコード数は19であること', () => {
+      expect(records).toHaveLength(19)
+    })
+  })
+
+  describe('2025年度を挿入した場合', () => {
+    const dummyFinancialYear = createFinancialYear({
+      userId: dummyUser.id,
+      year: 2025,
+    })._unsafeUnwrap()
+
+    let records: z.infer<typeof IncomeRecordRecord>[]
+
+    beforeAll(async () => {
+      await insertFinancialYear(env.D1)(dummyFinancialYear)
+
+      const stmt = 'SELECT * FROM income_records WHERE user_id=?'
+      const { results } = await env.D1
+        .prepare(stmt)
+        .bind(dummyUser.id)
+        .all<z.infer<typeof IncomeRecordRecord>>()
+      records = results
+    })
+
+    test('FY24-09 ~ FY25-09 までに定義された6件の実績が記録されること', () => {
+      const actual = records.filter(record => record.definition_id === dummyDefinition1.id)
+      expect(actual).toHaveLength(6)
+    })
+
+    test('FY24全体に定義された0件の実績が記録されること', () => {
+      const actual = records.filter(record => record.definition_id === dummyDefinition2.id)
+      expect(actual).toHaveLength(0)
+    })
+
+    test('FY25全体に定義された12件の実績が記録されること', () => {
+      const actual = records.filter(record => record.definition_id === dummyDefinition3.id)
+      expect(actual).toHaveLength(12)
+    })
+
+    test('実績の合計レコード数は18であること', () => {
+      expect(records).toHaveLength(18)
+    })
+  })
+
+  describe('2024年度と2025年度を挿入した場合', () => {
+    const dummyFinancialYear24 = createFinancialYear({
+      userId: dummyUser.id,
+      year: 2024,
+    })._unsafeUnwrap()
+
+    const dummyFinancialYear25 = createFinancialYear({
+      userId: dummyUser.id,
+      year: 2025,
+    })._unsafeUnwrap()
+
+    let records: z.infer<typeof IncomeRecordRecord>[]
+
+    beforeAll(async () => {
+      await insertFinancialYear(env.D1)(dummyFinancialYear24)
+      await insertFinancialYear(env.D1)(dummyFinancialYear25)
+
+      const stmt = 'SELECT * FROM income_records WHERE user_id=?'
+      const { results } = await env.D1
+        .prepare(stmt)
+        .bind(dummyUser.id)
+        .all<z.infer<typeof IncomeRecordRecord>>()
+      records = results
+    })
+
+    test('FY24-09 ~ FY25-09 までに定義された13件の実績が記録されること', () => {
+      const actual = records.filter(record => record.definition_id === dummyDefinition1.id)
+      expect(actual).toHaveLength(13)
+    })
+
+    test('FY24全体に定義された12件の実績が記録されること', () => {
+      const actual = records.filter(record => record.definition_id === dummyDefinition2.id)
+      expect(actual).toHaveLength(12)
+    })
+
+    test('FY25全体に定義された12件の実績が記録されること', () => {
+      const actual = records.filter(record => record.definition_id === dummyDefinition3.id)
+      expect(actual).toHaveLength(12)
+    })
+
+    test('実績の合計レコード数は37であること', () => {
+      expect(records).toHaveLength(37)
     })
   })
 })

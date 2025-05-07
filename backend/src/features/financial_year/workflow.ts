@@ -1,5 +1,3 @@
-// TODO: 会計年度初期化ワークフローの実装
-
 import type { Result, ResultAsync } from 'neverthrow'
 import { err, ok } from 'neverthrow'
 import { z } from 'zod'
