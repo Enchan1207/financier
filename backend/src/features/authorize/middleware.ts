@@ -33,8 +33,11 @@ const userMiddleware = createMiddleware<{
 
   const result = await workflow(command)
     .andTee(async (command) => {
-      const newUser = command.input.user
+      if (command.state.stored) {
+        return
+      }
 
+      const newUser = command.input.user
       await saveUser(c.env.D1)(newUser)
       console.log(`新規ユーザが登録されました。${JSON.stringify(newUser)}`)
     })

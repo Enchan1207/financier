@@ -1,0 +1,42 @@
+import { zValidator } from '@hono/zod-validator'
+import { Hono } from 'hono'
+
+import { FinancialMonthDataSchema } from '@/domains/financial_month'
+
+import { userAuthMiddleware } from '../authorize/middleware'
+import { getFinancialMonthByFinancialMonth } from '../financial_month/dao'
+import { findWorkdayByFinancialMonthId } from './dao'
+import type { GetWorkdayCommand } from './workflow/get'
+import { createGetWorkdayWorkflow } from './workflow/get'
+
+const app = new Hono<{ Bindings: Env }>()
+  .use(userAuthMiddleware)
+  .get(
+    '/:financialYear/:month',
+    zValidator('param', FinancialMonthDataSchema),
+    async (c) => {
+      const command: GetWorkdayCommand = {
+        input: { financialMonth: c.req.valid('param') },
+        state: { user: c.get('user') },
+      }
+
+      const workflow = createGetWorkdayWorkflow({
+        getFinancialMonthByFinancialMonth:
+        getFinancialMonthByFinancialMonth(c.env.D1),
+        findWorkdayByFinancialMonthId: findWorkdayByFinancialMonthId(c.env.D1),
+      })
+
+      const response = workflow(command)
+        .match(
+          entity => c.json(entity),
+          (error) => {
+            console.error(error)
+            return c.json({ error: 'not found' }, 404)
+          },
+        )
+
+      return response
+    },
+  )
+
+export default app

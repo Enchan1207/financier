@@ -1,84 +1,14 @@
 import { env } from 'cloudflare:test'
 
-import type { FinancialMonth } from '@/domains/financial_month'
-import { createFinancialMonth } from '@/domains/financial_month/logic'
+import { createFinancialMonthData } from '@/domains/financial_month/logic'
+import { createFinancialYear } from '@/domains/financial_year/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 import dayjs from '@/logic/dayjs'
 
 import { saveUser } from '../authorize/dao'
-import {
-  findFinancialMonthsByDate,
-  findFinancialMonthsByMonth, findFinancialMonthsByYear, insertFinancialMonth,
-} from './dao'
-
-describe('会計年度と月に基づく項目の選択', () => {
-  const dummyUser: User = createUser({
-    name: 'testuser',
-    email: 'test@example.com',
-    auth0UserId: 'auth0_test_user',
-  })
-
-  const dummyEntities: FinancialMonth[] = [
-    createFinancialMonth({
-      userId: dummyUser.id,
-      financialYear: 2024,
-      month: 1,
-    }),
-    createFinancialMonth({
-      userId: dummyUser.id,
-      financialYear: 2024,
-      month: 2,
-    }),
-    createFinancialMonth({
-      userId: dummyUser.id,
-      financialYear: 2025,
-      month: 1,
-    }),
-    createFinancialMonth({
-      userId: dummyUser.id,
-      financialYear: 2025,
-      month: 2,
-    }),
-    createFinancialMonth({
-      userId: dummyUser.id,
-      financialYear: 2025,
-      month: 3,
-    }),
-  ]
-
-  beforeAll(async () => {
-    await saveUser(env.D1)(dummyUser)
-
-    await Promise.all(dummyEntities.map(entity => insertFinancialMonth(env.D1)(entity)))
-  })
-
-  test('FY2024の項目数は2であること', async () => {
-    const actual = await findFinancialMonthsByYear(env.D1)(dummyUser.id, 2024)
-    expect(actual).toHaveLength(2)
-  })
-
-  test('FY2024の項目数は3であること', async () => {
-    const actual = await findFinancialMonthsByYear(env.D1)(dummyUser.id, 2025)
-    expect(actual).toHaveLength(3)
-  })
-
-  test('FY2024 1月の項目を取得できること', async () => {
-    const actual = await findFinancialMonthsByMonth(env.D1)(dummyUser.id, {
-      financialYear: 2024,
-      month: 1,
-    })
-    expect(actual).toBeDefined()
-  })
-
-  test('FY2024 3月の項目は取得できないこと', async () => {
-    const actual = await findFinancialMonthsByMonth(env.D1)(dummyUser.id, {
-      financialYear: 2024,
-      month: 3,
-    })
-    expect(actual).toBeUndefined()
-  })
-})
+import { insertFinancialYear } from '../financial_year/dao'
+import { findFinancialMonthsByDate, getFinancialMonthByFinancialMonth } from './dao'
 
 describe('日付に基づく項目の選択', () => {
   const dummyUser: User = createUser({
@@ -87,23 +17,17 @@ describe('日付に基づく項目の選択', () => {
     auth0UserId: 'auth0_test_user',
   })
 
-  const dummyEntityApril = createFinancialMonth({
+  const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
-    financialYear: 2024,
-    month: 4,
-  })
+    year: 2024,
+  })._unsafeUnwrap()
 
-  const dummyEntityMay = createFinancialMonth({
-    userId: dummyUser.id,
-    financialYear: 2024,
-    month: 5,
-  })
-
-  const dummyEntities = [dummyEntityApril, dummyEntityMay]
+  const dummyEntityApril = dummyFinancialYear.months.find(month => month.month === 4)
+  const dummyEntityMay = dummyFinancialYear.months.find(month => month.month === 5)
 
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)
-    await Promise.all(dummyEntities.map(entity => insertFinancialMonth(env.D1)(entity)))
+    await insertFinancialYear(env.D1)(dummyFinancialYear)
   })
 
   test.each([
@@ -128,5 +52,51 @@ describe('日付に基づく項目の選択', () => {
 
     // dayjsオブジェクトについては内部のプロパティが細かく変わっているので、タイムスタンプで比較
     expect(actual).toStrictEqual(expected)
+  })
+})
+
+describe('月度情報からエンティティを得る', () => {
+  const dummyUser: User = createUser({
+    name: 't_est_user',
+    email: 'test@example.com',
+    auth0UserId: 'auth0_test_user',
+  })
+
+  const dummyFinancialYear = createFinancialYear({
+    userId: dummyUser.id,
+    year: 2024,
+  })._unsafeUnwrap()
+
+  beforeAll(async () => {
+    await saveUser(env.D1)(dummyUser)
+    await insertFinancialYear(env.D1)(dummyFinancialYear)
+  })
+
+  test('範囲内なら取得できること', async () => {
+    const targetMonth = createFinancialMonthData({
+      financialYear: 2024,
+      month: 4,
+    })._unsafeUnwrap()
+
+    const entity = await getFinancialMonthByFinancialMonth(env.D1)(
+      dummyUser.id,
+      targetMonth,
+    )
+
+    expect(entity).toBeDefined()
+  })
+
+  test('範囲外なら取得できないこと', async () => {
+    const targetMonth = createFinancialMonthData({
+      financialYear: 2025,
+      month: 4,
+    })._unsafeUnwrap()
+
+    const entity = await getFinancialMonthByFinancialMonth(env.D1)(
+      dummyUser.id,
+      targetMonth,
+    )
+
+    expect(entity).toBeUndefined()
   })
 })

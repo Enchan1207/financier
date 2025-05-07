@@ -1,11 +1,12 @@
 import { env } from 'cloudflare:test'
 
-import { createFinancialMonth } from '@/domains/financial_month/logic'
+import { createFinancialMonthData } from '@/domains/financial_month/logic'
+import { createFinancialYear } from '@/domains/financial_year/logic'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
 import { createUser } from '@/domains/user/logic'
 
 import { saveUser } from '../authorize/dao'
-import { insertFinancialMonth } from '../financial_month/dao'
+import { insertFinancialYear } from '../financial_year/dao'
 import { insertIncomeDefinition } from '../income_definition/dao'
 import { findIncomeRecord, updateIncomeRecordValue } from './dao'
 
@@ -16,11 +17,12 @@ describe('報酬定義の操作', () => {
     auth0UserId: 'auth0_user_id',
   })
 
-  const dummyFinancialMonth = createFinancialMonth({
+  const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
-    financialYear: 2024,
-    month: 2,
-  })
+    year: 2024,
+  })._unsafeUnwrap()
+
+  const dummyFinancialMonth = dummyFinancialYear.months[0]
 
   const dummyIncomeDefinition = createIncomeDefinition({
     userId: dummyUser.id,
@@ -28,19 +30,19 @@ describe('報酬定義の操作', () => {
     name: 'テスト定義',
     value: 100000,
     isTaxable: true,
-    from: {
+    from: createFinancialMonthData({
       financialYear: 2024,
       month: 4,
-    },
-    to: {
+    })._unsafeUnwrap(),
+    to: createFinancialMonthData({
       financialYear: 2024,
       month: 3,
-    },
+    })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)
-    await insertFinancialMonth(env.D1)(dummyFinancialMonth)
+    await insertFinancialYear(env.D1)(dummyFinancialYear)
     await insertIncomeDefinition(env.D1)(dummyIncomeDefinition)
   })
 

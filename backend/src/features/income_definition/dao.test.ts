@@ -1,11 +1,11 @@
 import { env } from 'cloudflare:test'
 
-import type { Months } from '@/domains/financial_month'
-import { getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
+import { createFinancialMonthData, getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
+import dayjs from '@/logic/dayjs'
 
 import { saveUser } from '../authorize/dao'
 import {
@@ -36,14 +36,14 @@ describe('基本的なCRUD', () => {
     kind: 'absolute',
     value: 230000,
     isTaxable: true,
-    from: {
+    from: createFinancialMonthData({
       financialYear: 2025,
       month: 4,
-    },
-    to: {
+    })._unsafeUnwrap(),
+    to: createFinancialMonthData({
       financialYear: 2025,
       month: 3,
-    },
+    })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
   beforeAll(async () => {
@@ -76,28 +76,28 @@ describe('基本的なCRUD', () => {
           name: '通勤手当',
           isTaxable: undefined,
           value: 300,
-          from: {
+          from: createFinancialMonthData({
             financialYear: 2025,
             month: 6,
-          },
-          to: {
+          })._unsafeUnwrap(),
+          to: createFinancialMonthData({
             financialYear: 2025,
             month: 1,
-          },
+          })._unsafeUnwrap(),
         },
       })
     })
 
     test('値が更新されていること', () => {
-      const { start } = getPeriodByFinancialMonth({
+      const { start } = getPeriodByFinancialMonth(createFinancialMonthData({
         financialYear: 2025,
         month: 6,
-      })
+      })._unsafeUnwrap())
 
-      const { end } = getPeriodByFinancialMonth({
+      const { end } = getPeriodByFinancialMonth(createFinancialMonthData({
         financialYear: 2025,
         month: 1,
-      })
+      })._unsafeUnwrap())
 
       expect(makeComparable(actual)).toStrictEqual({
         id: dummyDefinition.id,
@@ -127,14 +127,14 @@ describe('詳細な検索', () => {
     kind: 'related_by_workday',
     value: 380,
     isTaxable: false,
-    from: {
+    from: createFinancialMonthData({
       financialYear: 2025,
       month: 4,
-    },
-    to: {
+    })._unsafeUnwrap(),
+    to: createFinancialMonthData({
       financialYear: 2025,
       month: 12,
-    },
+    })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
   const dummyDefinition2 = createIncomeDefinition({
@@ -143,14 +143,14 @@ describe('詳細な検索', () => {
     kind: 'related_by_workday',
     value: 380,
     isTaxable: true,
-    from: {
+    from: createFinancialMonthData({
       financialYear: 2025,
       month: 8,
-    },
-    to: {
+    })._unsafeUnwrap(),
+    to: createFinancialMonthData({
       financialYear: 2025,
       month: 2,
-    },
+    })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
   beforeAll(async () => {
@@ -174,18 +174,21 @@ describe('詳細な検索', () => {
       expected: [dummyDefinition2],
     },
   ])('単月検索 $month月度', async ({ month, expected }) => {
+    const financialMonth = createFinancialMonthData({
+      financialYear: 2025,
+      month,
+    })._unsafeUnwrap()
+    const { start, end } = getPeriodByFinancialMonth(financialMonth)
+
     const actual = await findIncomeDefinitions(env.D1)({
       userId: dummyUser.id,
       sortBy: 'enabledAt',
       order: 'asc',
       limit: 100,
       period: {
-        at: {
-          financialYear: 2025,
-          month: month as Months,
-        },
+        start,
+        end,
       },
-
     })
 
     expect(actual.map(makeComparable))
@@ -198,10 +201,15 @@ describe('詳細な検索', () => {
       sortBy: 'enabledAt',
       order: 'asc',
       limit: 100,
-      period: { at: 2025 },
+      period: {
+        start: dayjs.tz('2025-04-01T00:00:00.000', 'Asia/Tokyo'),
+        end: dayjs.tz('2026-03-31T23:59:59.999', 'Asia/Tokyo'),
+      },
     })
 
     expect(actual.map(makeComparable))
       .toStrictEqual([dummyDefinition1, dummyDefinition2].map(makeComparable))
   })
 })
+
+// TODO: 報酬定義の更新テストケース
