@@ -85,7 +85,10 @@ const app = new Hono<{ Bindings: Env }>()
         .map(({ entity }) => insertFinancialYear(c.env.D1)(entity))
         .match(
           created => c.json(created),
-          () => c.json({ error: 'bad request' }, 400),
+          (error) => {
+            console.error(error)
+            return c.json({ error: 'bad request' }, 400)
+          },
         )
     },
   )

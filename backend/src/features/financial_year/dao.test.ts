@@ -94,3 +94,5 @@ describe('会計年度の取得', () => {
     expect(entity).toBeUndefined()
   })
 })
+
+// TODO: 報酬定義がある状態のテストケース

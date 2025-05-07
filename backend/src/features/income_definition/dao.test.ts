@@ -211,3 +211,5 @@ describe('詳細な検索', () => {
       .toStrictEqual([dummyDefinition1, dummyDefinition2].map(makeComparable))
   })
 })
+
+// TODO: 報酬定義の更新テストケース
