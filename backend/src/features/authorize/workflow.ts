@@ -18,7 +18,10 @@ export interface Command {
 
 export interface UserPrepared {
   input: { user: User }
-  state: { authDomain: string }
+  state: {
+    authDomain: string
+    stored: boolean
+  }
 }
 
 export type AuthorizeWorkflow = (command: Command) => ResultAsync<UserPrepared, Error>
@@ -30,7 +33,10 @@ const lookupUserByAuth0Id = (effects: { getUserByAuth0Id: (id: string) => Promis
     return user
       ? ok({
           input: { user },
-          state: command.state,
+          state: {
+            authDomain: command.state.authDomain,
+            stored: true,
+          },
         })
       : err(new Error('与えられたidに合致するユーザは存在しない', { cause: command }))
   })
@@ -52,7 +58,10 @@ const createTentativeUser = (effects: { fetchUserInfo: (token: string) => Promis
 
     return ok({
       input: { user: newUser },
-      state: command.state,
+      state: {
+        authDomain: command.state.authDomain,
+        stored: false,
+      },
     })
   })
 
