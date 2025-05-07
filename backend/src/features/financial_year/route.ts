@@ -8,7 +8,11 @@ import dayjs from '@/logic/dayjs'
 
 import { userAuthMiddleware } from '../authorize/middleware'
 import { findFinancialMonthsByDate, getFinancialMonthByFinancialMonth } from '../financial_month/dao'
-import { getFinancialYear, listFinancialYears } from './dao'
+import {
+  getFinancialYear, insertFinancialYear, listFinancialYears,
+} from './dao'
+import type { PostFinancialYearCommand } from './workflow'
+import { createFinancialYearPostWorkflow, PostFinancialYearSchema } from './workflow'
 
 const app = new Hono<{ Bindings: Env }>()
   .use(userAuthMiddleware)
@@ -65,9 +69,24 @@ const app = new Hono<{ Bindings: Env }>()
   )
   .post(
     '/:year',
-    zValidator('param', z.object({ year: FinancialYearValueSchema })),
+    zValidator('param', PostFinancialYearSchema),
     async (c) => {
-      // TODO: ワークフロー起動
+      const command: PostFinancialYearCommand = {
+        input: { year: c.req.valid('param').year },
+        state: { user: c.get('user') },
+      }
+
+      const workflow = createFinancialYearPostWorkflow({
+        //
+        listFinancialYears: listFinancialYears(c.env.D1),
+      })
+
+      return workflow(command)
+        .map(({ entity }) => insertFinancialYear(c.env.D1)(entity))
+        .match(
+          created => c.json(created),
+          () => c.json({ error: 'bad request' }, 400),
+        )
     },
   )
 
