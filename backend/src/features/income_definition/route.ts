@@ -39,7 +39,7 @@ const app = new Hono<{ Bindings: Env }>()
         findIncomeDefinitions: findIncomeDefinitions(c.env.D1),
       })
 
-      const response = await workflow(command)
+      const response = workflow(command)
         .match(
           entities => c.json(entities),
           (error) => {
@@ -64,7 +64,7 @@ const app = new Hono<{ Bindings: Env }>()
         getIncomeDefinitionById: getIncomeDefinitionById(c.env.D1),
       })
 
-      const response = await workflow(command)
+      const response = workflow(command)
         .match(entity => c.json(entity), (error) => {
           console.error(error)
           return c.json({ error: 'not found' }, 404)
@@ -84,7 +84,7 @@ const app = new Hono<{ Bindings: Env }>()
 
       const workflow = createIncomeDefinitionPostWorkflow()
 
-      const response = await workflow(command)
+      const response = workflow(command)
         .asyncMap(({ entity }) => insertIncomeDefinition(c.env.D1)(entity))
         .match(entity => c.json(entity), (error) => {
           console.error(error)
@@ -112,7 +112,7 @@ const app = new Hono<{ Bindings: Env }>()
         getIncomeDefinitionById: getIncomeDefinitionById(c.env.D1),
       })
 
-      const response = await workflow(command)
+      const response = workflow(command)
         .andThen(fromSafePromise(async (event) => {
           const id = event.current.id
           const updated = await updateIncomeDefinition(c.env.D1)(id, event)
