@@ -38,6 +38,12 @@ describe('会計年度の生成', () => {
     const result = await env.D1.prepare(stmt).first<{ count: number }>()
     expect(result?.count).toBe(12)
   })
+
+  test('報酬定義がないので実績は生成されないこと', async () => {
+    const stmt = 'SELECT COUNT(*) count FROM income_records'
+    const result = await env.D1.prepare(stmt).first<{ count: number }>()
+    expect(result?.count).toBe(0)
+  })
 })
 
 describe('会計年度の取得', () => {
