@@ -1,11 +1,14 @@
 import { env } from 'cloudflare:test'
 
+import { createFinancialMonthData } from '@/domains/financial_month/logic'
 import type { FinancialYearValue } from '@/domains/financial_year'
 import { createFinancialYear } from '@/domains/financial_year/logic'
+import { createIncomeDefinition } from '@/domains/income_definition/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 
 import { saveUser } from '../authorize/dao'
+import { insertIncomeDefinition } from '../income_definition/dao'
 import {
   getFinancialYear, insertFinancialYear, listFinancialYears,
 } from './dao'
@@ -95,4 +98,77 @@ describe('会計年度の取得', () => {
   })
 })
 
-// TODO: 報酬定義がある状態のテストケース
+describe('報酬定義が存在する場合', () => {
+  const dummyUser: User = createUser({
+    name: 't_est_user',
+    email: 'test@example.com',
+    auth0UserId: 'auth0_test_user',
+  })
+
+  const dummyDefinition1 = createIncomeDefinition({
+    userId: dummyUser.id,
+    name: '',
+    kind: 'absolute',
+    value: 123456,
+    isTaxable: true,
+    from: createFinancialMonthData({
+      financialYear: 2024,
+      month: 9,
+    })._unsafeUnwrap(),
+    to: createFinancialMonthData({
+      financialYear: 2025,
+      month: 9,
+    })._unsafeUnwrap(),
+  })._unsafeUnwrap()
+
+  const dummyDefinition2 = createIncomeDefinition({
+    userId: dummyUser.id,
+    name: '',
+    kind: 'related_by_workday',
+    value: 123,
+    isTaxable: true,
+    from: createFinancialMonthData({
+      financialYear: 2024,
+      month: 4,
+    })._unsafeUnwrap(),
+    to: createFinancialMonthData({
+      financialYear: 2024,
+      month: 3,
+    })._unsafeUnwrap(),
+  })._unsafeUnwrap()
+
+  const dummyDefinition3 = createIncomeDefinition({
+    userId: dummyUser.id,
+    name: '',
+    kind: 'related_by_workday',
+    value: 123,
+    isTaxable: true,
+    from: createFinancialMonthData({
+      financialYear: 2025,
+      month: 4,
+    })._unsafeUnwrap(),
+    to: createFinancialMonthData({
+      financialYear: 2025,
+      month: 3,
+    })._unsafeUnwrap(),
+  })._unsafeUnwrap()
+
+  beforeAll(async () => {
+    await saveUser(env.D1)(dummyUser)
+    await Promise.all([
+      dummyDefinition1,
+      dummyDefinition2,
+      dummyDefinition3].map(insertIncomeDefinition(env.D1)))
+  })
+
+  describe('2024年度を挿入した場合', () => {
+    const dummyFinancialYear = createFinancialYear({
+      userId: dummyUser.id,
+      year: 2024,
+    })._unsafeUnwrap()
+
+    beforeAll(async () => {
+      await insertFinancialYear(env.D1)(dummyFinancialYear)
+    })
+  })
+})
