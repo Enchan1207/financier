@@ -1,9 +1,7 @@
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
-import { z } from 'zod'
 
-import { FinancialMonthValueSchema } from '@/domains/financial_month'
-import { FinancialYearValueSchema } from '@/domains/financial_year'
+import { FinancialMonthDataSchema } from '@/domains/financial_month'
 
 import { userAuthMiddleware } from '../authorize/middleware'
 import { getFinancialMonthByFinancialMonth } from '../financial_month/dao'
@@ -15,10 +13,7 @@ const app = new Hono<{ Bindings: Env }>()
   .use(userAuthMiddleware)
   .get(
     '/:financialYear/:month',
-    zValidator('param', z.object({
-      financialYear: FinancialYearValueSchema,
-      month: FinancialMonthValueSchema,
-    })),
+    zValidator('param', FinancialMonthDataSchema),
     async (c) => {
       const command: GetWorkdayCommand = {
         input: { financialMonth: c.req.valid('param') },

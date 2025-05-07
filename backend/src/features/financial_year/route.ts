@@ -2,7 +2,7 @@ import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
-import { FinancialMonthValueSchema } from '@/domains/financial_month'
+import { FinancialMonthDataSchema } from '@/domains/financial_month'
 import { FinancialYearValueSchema } from '@/domains/financial_year'
 import dayjs from '@/logic/dayjs'
 
@@ -44,10 +44,7 @@ const app = new Hono<{ Bindings: Env }>()
     })
   .get(
     '/:financialYear/:month',
-    zValidator('param', z.object({
-      financialYear: FinancialYearValueSchema,
-      month: FinancialMonthValueSchema,
-    })),
+    zValidator('param', FinancialMonthDataSchema),
     async (c) => {
       const financialMonthData = c.req.valid('param')
 
