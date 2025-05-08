@@ -53,43 +53,64 @@ const buildWorkdayUpdateQuery = (db: D1Database):
 }
 
 const buildIncomeRecordUpdateQuery = (db: D1Database):
-(props: {}) => D1PreparedStatement => (props) => {
-  /*
-   なんもわからん
-
-   workdayに対応するfinancial_monthに関連するincome_recordsについて、
-   workdayとdefinitionをjoinしてvalueを再計算する クエリ
-
-   更新対象は workday.financial_month_id=? のレコードのみ
-
-   financial_monthはidを持つ、workdayはfinancial_month_idを持つ
-   income_definitinionはidを持つ、income_recordはfinancial_month_idとdefinition_idを持つ
-   */
+(props: {
+  updatedAt: dayjs.Dayjs
+  userId: User['id']
+  financialMonthId: FinancialMonth['id']
+}) => D1PreparedStatement => (props) => {
   const stmt = `
+  UPDATE income_records SET
+    value = CASE
+      WHEN d.kind = "related_by_workday" THEN d.value * w.count
+      ELSE d.value
+    END,
+    updated_at = ?
+  FROM
+    financial_months m
+    INNER JOIN workdays w ON m.id = w.financial_month_id
+    INNER JOIN income_definitions d ON d.disabled_at > m.started_at
+      AND d.enabled_at < m.ended_at
+  WHERE
+    income_records.financial_month_id = m.id
+    AND income_records.updated_by != "user"
+    AND d.kind == "related_by_workday"
+    AND income_records.financial_month_id = ?
+    AND income_records.user_id = ?
+    AND income_records.definition_id = d.id
   `
+
+  return db
+    .prepare(stmt)
+    .bind(
+      props.updatedAt.valueOf(),
+      props.financialMonthId,
+      props.userId,
+    )
 }
 
 export const updateWorkday = (db: D1Database):
-(props: Pick<Workday, 'userId' | 'financialMonthId' | 'count'>) => Promise<Workday | undefined> => async (props) => {
+(props: Pick<Workday, 'userId' | 'financialMonthId' | 'count'>) => Promise<Workday | undefined> => async ({
+  userId, financialMonthId, count,
+}) => {
   const updatedAt = dayjs()
 
   const queries: D1PreparedStatement[] = [
     buildWorkdayUpdateQuery(db)({
-      userId: props.userId,
-      count: props.count,
-      financialMonthId: props.financialMonthId,
+      userId,
+      count,
+      financialMonthId,
       updatedAt,
     }),
     buildIncomeRecordUpdateQuery(db)({
-      //
+      userId,
+      financialMonthId,
+      updatedAt,
     }),
     d1(db)
       .select(WorkdayRecord, 'workdays')
-      .where(condition('financial_month_id', '==', props.financialMonthId))
+      .where(condition('financial_month_id', '==', financialMonthId))
       .build(),
   ]
-
-  // TODO: 報酬実績値の更新
 
   const results = await db.batch<Workday>(queries)
   const updated = results.at(-1)?.results.at(0)
