@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import type { FinancialMonth } from '@/domains/financial_month'
+import type { User } from '@/domains/user'
 import type { Workday } from '@/domains/workday'
 import type { WorkdayValue } from '@/domains/workday/logic'
 import dayjs from '@/logic/dayjs'
@@ -24,8 +26,13 @@ const makeEntity = ({
   updatedAt: dayjs(updated_at),
 })
 
-export const updateWorkday = (db: D1Database):
-(props: Pick<Workday, 'userId' | 'financialMonthId' | 'count'>) => Promise<Workday | undefined> => async (props) => {
+const buildWorkdayUpdateQuery = (db: D1Database):
+(props: {
+  count: WorkdayValue
+  updatedAt: dayjs.Dayjs
+  userId: User['id']
+  financialMonthId: FinancialMonth['id']
+}) => D1PreparedStatement => (props) => {
   const stmt = `
   UPDATE workdays SET
     count = ?1,
@@ -35,24 +42,57 @@ export const updateWorkday = (db: D1Database):
     AND financial_month_id = ?4
   `
 
-  const insertionQuery = db
+  return db
     .prepare(stmt)
     .bind(
       props.count,
-      dayjs().valueOf(),
+      props.updatedAt.valueOf(),
       props.userId,
       props.financialMonthId,
     )
+}
+
+const buildIncomeRecordUpdateQuery = (db: D1Database):
+(props: {}) => D1PreparedStatement => (props) => {
+  /*
+   なんもわからん
+
+   workdayに対応するfinancial_monthに関連するincome_recordsについて、
+   workdayとdefinitionをjoinしてvalueを再計算する クエリ
+
+   更新対象は workday.financial_month_id=? のレコードのみ
+
+   financial_monthはidを持つ、workdayはfinancial_month_idを持つ
+   income_definitinionはidを持つ、income_recordはfinancial_month_idとdefinition_idを持つ
+   */
+  const stmt = `
+  `
+}
+
+export const updateWorkday = (db: D1Database):
+(props: Pick<Workday, 'userId' | 'financialMonthId' | 'count'>) => Promise<Workday | undefined> => async (props) => {
+  const updatedAt = dayjs()
+
+  const queries: D1PreparedStatement[] = [
+    buildWorkdayUpdateQuery(db)({
+      userId: props.userId,
+      count: props.count,
+      financialMonthId: props.financialMonthId,
+      updatedAt,
+    }),
+    buildIncomeRecordUpdateQuery(db)({
+      //
+    }),
+    d1(db)
+      .select(WorkdayRecord, 'workdays')
+      .where(condition('financial_month_id', '==', props.financialMonthId))
+      .build(),
+  ]
 
   // TODO: 報酬実績値の更新
 
-  const findQuery = d1(db)
-    .select(WorkdayRecord, 'workdays')
-    .where(condition('financial_month_id', '==', props.financialMonthId))
-    .build()
-
-  const results = await db.batch<Workday>([insertionQuery, findQuery])
-  const updated = results.at(0)?.results.at(0)
+  const results = await db.batch<Workday>(queries)
+  const updated = results.at(-1)?.results.at(0)
 
   return updated
 }
