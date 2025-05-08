@@ -93,3 +93,5 @@ export const updateIncomeRecordValue = (db: D1Database):
 
   return updatedRaw ? makeEntity(updatedRaw) : undefined
 }
+
+// TODO: 報酬実績のリセット (システム自動計算に戻す)
