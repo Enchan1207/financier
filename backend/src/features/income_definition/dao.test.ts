@@ -1,6 +1,7 @@
 import { env } from 'cloudflare:test'
 
 import { createFinancialMonthData, getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
+import { createFinancialYear } from '@/domains/financial_year/logic'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
 import type { User } from '@/domains/user'
@@ -8,6 +9,7 @@ import { createUser } from '@/domains/user/logic'
 import dayjs from '@/logic/dayjs'
 
 import { saveUser } from '../authorize/dao'
+import { insertFinancialYear } from '../financial_year/dao'
 import {
   findIncomeDefinitions,
   getIncomeDefinitionById, insertIncomeDefinition, updateIncomeDefinition,
@@ -30,6 +32,11 @@ describe('基本的なCRUD', () => {
     auth0UserId: 'auth0_test_user',
   })
 
+  const dummyFinancialYear = createFinancialYear({
+    userId: dummyUser.id,
+    year: 2025,
+  })._unsafeUnwrap()
+
   const dummyDefinition = createIncomeDefinition({
     userId: dummyUser.id,
     name: '基本給',
@@ -49,7 +56,15 @@ describe('基本的なCRUD', () => {
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)
 
+    await insertFinancialYear(env.D1)(dummyFinancialYear)
+
     await insertIncomeDefinition(env.D1)(dummyDefinition)
+  })
+
+  test('報酬実績が登録されていないこと', async () => {
+    const stmt = 'SELECT COUNT(*) count FROM income_records'
+    const result = await env.D1.prepare(stmt).first<{ count: number }>()
+    expect(result?.count).toBe(0)
   })
 
   describe('id直打ちで取得', () => {
