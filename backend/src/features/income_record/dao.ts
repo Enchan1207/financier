@@ -29,6 +29,15 @@ const makeEntity = (record: IncomeRecordRecord): IncomeRecord => ({
   updatedBy: record.updated_by,
 })
 
+const makeRecord = (entity: IncomeRecord): IncomeRecordRecord => ({
+  user_id: entity.userId,
+  financial_month_id: entity.financialMonthId,
+  definition_id: entity.definitionId,
+  value: entity.value,
+  updated_at: entity.updatedAt.valueOf(),
+  updated_by: entity.updatedBy,
+})
+
 /** 月度idと定義idから実績を取得 */
 export const findIncomeRecord = (db: D1Database):
 (_: {
@@ -45,6 +54,32 @@ export const findIncomeRecord = (db: D1Database):
 
   const record = await stmt.first<IncomeRecordRecord>()
   return record ? makeEntity(record) : undefined
+}
+
+/**
+ * 報酬実績を挿入する
+ * @warning このメソッドは定義と実績の正しさ (期間が被っているかなど) を保証しません。
+ * そういうのはワークフローでやってください。
+ */
+export const insertIncomeRecord = (db: D1Database):
+(_: IncomeRecord) => Promise<IncomeRecord> => async (entity) => {
+  const record = makeRecord(entity)
+
+  const insertStmt = 'INSERT INTO income_records VALUES (?, ?, ?, ?, ?, ?)'
+
+  await db
+    .prepare(insertStmt)
+    .bind(
+      record.user_id,
+      record.financial_month_id,
+      record.definition_id,
+      record.value,
+      record.updated_at,
+      record.updated_by,
+    )
+    .run()
+
+  return entity
 }
 
 export const updateIncomeRecordValue = (db: D1Database):
