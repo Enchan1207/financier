@@ -3,12 +3,15 @@ import { env } from 'cloudflare:test'
 import { createFinancialMonthData } from '@/domains/financial_month/logic'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
+import { createIncomeRecord } from '@/domains/income_record/logic'
 import { createUser } from '@/domains/user/logic'
 
 import { saveUser } from '../authorize/dao'
 import { insertFinancialYear } from '../financial_year/dao'
 import { insertIncomeDefinition } from '../income_definition/dao'
-import { findIncomeRecord, updateIncomeRecordValue } from './dao'
+import {
+  findIncomeRecord, insertIncomeRecord, updateIncomeRecordValue,
+} from './dao'
 
 describe('報酬定義の操作', () => {
   const dummyUser = createUser({
@@ -40,10 +43,27 @@ describe('報酬定義の操作', () => {
     })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
+  const dummyIncomeRecord = createIncomeRecord({
+    userId: dummyUser.id,
+    financialMonthId: dummyFinancialMonth.id,
+    definitionId: dummyIncomeDefinition.id,
+    value: 100,
+    updatedBy: 'user',
+  })
+
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)
     await insertFinancialYear(env.D1)(dummyFinancialYear)
     await insertIncomeDefinition(env.D1)(dummyIncomeDefinition)
+
+    // ユーザが挿入したテイで実績を追加する
+    await insertIncomeRecord(env.D1)(dummyIncomeRecord)
+  })
+
+  test('実績レコードは1件しか存在しないこと', async () => {
+    const stmt = 'SELECT COUNT(*) count FROM income_records'
+    const result = await env.D1.prepare(stmt).first<{ count: number }>()
+    expect(result?.count).toBe(1)
   })
 
   test('挿入した項目を取得できること', async () => {
@@ -56,9 +76,9 @@ describe('報酬定義の操作', () => {
       userId: dummyUser.id,
       financialMonthId: dummyFinancialMonth.id,
       definitionId: dummyIncomeDefinition.id,
-      value: 100000,
+      value: 100,
       updatedAt: actual?.updatedAt,
-      updatedBy: 'system',
+      updatedBy: 'user',
     })
   })
 
@@ -80,4 +100,6 @@ describe('報酬定義の操作', () => {
         updatedBy: 'user',
       })
   })
+
+  // TODO: 本来、実績はUPSERTであるべき。レコードが存在しない月度ならINSERTする
 })
