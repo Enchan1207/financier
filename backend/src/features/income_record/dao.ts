@@ -82,6 +82,9 @@ export const insertIncomeRecord = (db: D1Database):
   return entity
 }
 
+/**
+ * 報酬実績の値を更新する
+ */
 export const updateIncomeRecordValue = (db: D1Database):
 (_: {
   userId: string
@@ -91,26 +94,23 @@ export const updateIncomeRecordValue = (db: D1Database):
 }) => Promise<IncomeRecord | undefined> => async ({
   userId, financialMonthId, definitionId, value,
 }) => {
-  const updateStmt = `
-  UPDATE income_records
-  SET
-    value = ?,
-    updated_at = ?,
-    updated_by = "user"
-  WHERE
-    financial_month_id = ?
-    AND definition_id = ?
-    AND user_id = ?
+  const upsertStmt = `
+  INSERT INTO income_records
+  VALUES (?, ?, ?, ?, ?, "user")
+  ON CONFLICT (financial_month_id, definition_id) DO UPDATE SET 
+    value = excluded.value,
+    updated_at = excluded.updated_at,
+    updated_by = excluded.updated_by
   `
 
-  const updateQuery = db
-    .prepare(updateStmt)
+  const upsertQuery = db
+    .prepare(upsertStmt)
     .bind(
-      value,
-      dayjs().valueOf(),
+      userId,
       financialMonthId,
       definitionId,
-      userId,
+      value,
+      dayjs().valueOf(),
     )
 
   const getQuery = d1(db)
@@ -123,7 +123,7 @@ export const updateIncomeRecordValue = (db: D1Database):
     .build()
 
   const queryResults = await db
-    .batch<IncomeRecordRecord>([updateQuery, getQuery])
+    .batch<IncomeRecordRecord>([upsertQuery, getQuery])
   const updatedRaw = queryResults[1].results.at(0)
 
   return updatedRaw ? makeEntity(updatedRaw) : undefined
