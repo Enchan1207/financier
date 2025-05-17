@@ -4,7 +4,6 @@ import type { FinancialYear, FinancialYearValue } from '@/domains/financial_year
 import type { User } from '@/domains/user'
 import type { Workday } from '@/domains/workday'
 import { createWorkday } from '@/domains/workday/logic'
-import dayjs from '@/logic/dayjs'
 import { condition, every } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
 
@@ -85,51 +84,12 @@ const buildWorkdayInsertionQuery = (db: D1Database):
   ))
 }
 
-const buildIncomeRecordInsertionQuery = (db: D1Database):
-(entity: FinancialYear) => D1PreparedStatement => (entity) => {
-  const stmt = `
-  INSERT INTO
-    income_records
-  SELECT
-    m.user_id,
-    m.id AS financial_month_id,
-    d.id AS definition_id,
-    CASE
-      WHEN d.kind = "related_by_workday" THEN d.value * w.count
-      ELSE d.value
-    END value,
-    ? updated_at,
-    "system" updated_by
-  FROM
-    financial_months m
-    INNER JOIN workdays w ON m.id = w.financial_month_id
-    INNER JOIN income_definitions d ON d.disabled_at > m.started_at
-    AND d.enabled_at < m.ended_at
-  WHERE
-    m.financial_year = ? ON CONFLICT (financial_month_id, definition_id) DO
-  UPDATE
-  SET
-    updated_at = excluded.updated_at,
-    value = excluded.value
-  WHERE
-    excluded.updated_by != "user"
-  `
-
-  return db
-    .prepare(stmt)
-    .bind(
-      dayjs().valueOf(),
-      entity.year,
-    )
-}
-
 export const insertFinancialYear = (db: D1Database):
 (item: FinancialYear) => Promise<FinancialYear> =>
   async (entity) => {
     const queries: D1PreparedStatement[] = [
       ...buildFinancialMonthInsertionQuery(db)(entity),
       ...buildWorkdayInsertionQuery(db)(entity),
-      buildIncomeRecordInsertionQuery(db)(entity),
     ]
 
     await db.batch(queries)
