@@ -13,6 +13,7 @@ const financialTimezone = 'Asia/Tokyo'
 export const createFinancialMonthData = (input: {
   financialYear: number
   month: number
+  workday: number
 }): Result<FinancialMonthData, ValidationError> =>
   parseSchema(FinancialMonthDataSchema, input).mapErr(() => new ValidationError())
 
@@ -20,14 +21,16 @@ export const createFinancialMonth = (props: {
   userId: string
   financialYear: number
   month: number
+  workday: number
 }): Result<FinancialMonth, ValidationError> => {
   const {
-    month, financialYear, userId,
+    month, financialYear, workday, userId,
   } = props
 
   return createFinancialMonthData({
     financialYear,
     month,
+    workday,
   }).map(entity => ({
     ...entity,
     id: ulid(),
