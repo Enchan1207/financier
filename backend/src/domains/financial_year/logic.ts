@@ -27,6 +27,7 @@ export const createFinancialYear = (props: {
     financialYear: yearParseResult.value,
     userId,
     month,
+    workday: 20, // TODO: 本来は各月の祝日を参照するべき
   }))
 
   return Result.combine(results)

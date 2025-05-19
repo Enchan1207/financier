@@ -71,77 +71,27 @@ const makeEntity = (record: IncomeDefinitionRecord): IncomeDefinition => ({
   updatedAt: dayjs(record.updated_at),
 })
 
-const buildIncomeDefinitionInsertionQuery = (db: D1Database):
-(_: IncomeDefinitionRecord) => D1PreparedStatement =>
-  (record) => {
-    const base = 'INSERT INTO income_definitions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-
-    const stmt = db.prepare(base).bind(
-      record.id,
-      record.user_id,
-      record.name,
-      record.kind,
-      record.value,
-      record.enabled_at,
-      record.disabled_at,
-      record.updated_at,
-      record.is_taxable,
-    )
-    return stmt
-  }
-
-/** 報酬定義に基づく報酬実績をUPSERTするクエリを構築する */
-const buildIncomeRecordInsertionQuery = (db: D1Database):
-(id: IncomeDefinitionRecord['id']) => D1PreparedStatement =>
-  (id) => {
-    const base = `
-    INSERT INTO
-      income_records
-    SELECT
-      m.user_id,
-      m.id AS financial_month_id,
-      d.id AS definition_id,
-      CASE
-        WHEN d.kind = "related_by_workday" THEN d.value * w.count
-        ELSE d.value
-      END value,
-      ? updated_at,
-      "system" updated_by
-    FROM
-      financial_months m
-      LEFT JOIN workdays w ON m.id = w.financial_month_id
-      LEFT JOIN income_definitions d ON d.disabled_at > m.started_at
-      AND d.enabled_at < m.ended_at
-    WHERE
-      d.id = ? ON CONFLICT (financial_month_id, definition_id) DO
-    UPDATE
-    SET
-      updated_at = excluded.updated_at,
-      value = excluded.value
-    WHERE
-      excluded.updated_by != "user"
-  `
-
-    const updatedAt = dayjs().valueOf()
-    const stmt = db
-      .prepare(base)
-      .bind(
-        updatedAt,
-        id,
-      )
-    return stmt
-  }
-
 /** 報酬定義を挿入する */
 export const insertIncomeDefinition = (db: D1Database):
 (_: IncomeDefinition) => Promise<IncomeDefinition> =>
   async (entity) => {
     const record = makeRecord(entity)
 
-    await db.batch([
-      buildIncomeDefinitionInsertionQuery(db)(record),
-      buildIncomeRecordInsertionQuery(db)(record.id),
-    ])
+    const base = 'INSERT INTO income_definitions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+
+    await db
+      .prepare(base)
+      .bind(
+        record.id,
+        record.user_id,
+        record.name,
+        record.kind,
+        record.value,
+        record.enabled_at,
+        record.disabled_at,
+        record.updated_at,
+        record.is_taxable,
+      ).run()
 
     return entity
   }
@@ -241,7 +191,6 @@ export const updateIncomeDefinition = (db: D1Database):
 
     const batchQueries: D1PreparedStatement[] = [
       buildIncomeDefinitionUpdateQuery(db)(current.id, update),
-      buildIncomeRecordInsertionQuery(db)(current.id),
       buildIncomeRecordCleanupQuery(db)(current.id),
       d1(db)
         .select(IncomeDefinitionRecord, 'income_definitions')
