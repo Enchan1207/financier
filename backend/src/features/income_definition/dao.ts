@@ -147,7 +147,7 @@ const buildIncomeDefinitionUpdateQuery = (db: D1Database):
   return prepared
 }
 
-/** 現在の範囲から外れる定義をクリーンアップする */
+/** 現在の範囲から外れる実績をクリーンアップする */
 const buildIncomeRecordCleanupQuery = (db: D1Database):
 (id: IncomeDefinition['id']) => D1PreparedStatement => (id) => {
   const stmt = `

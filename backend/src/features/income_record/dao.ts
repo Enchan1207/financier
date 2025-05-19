@@ -29,6 +29,15 @@ const makeEntity = (record: IncomeRecordRecord): IncomeRecord => ({
   updatedBy: record.updated_by,
 })
 
+const makeRecord = (entity: IncomeRecord): IncomeRecordRecord => ({
+  user_id: entity.userId,
+  financial_month_id: entity.financialMonthId,
+  definition_id: entity.definitionId,
+  value: entity.value,
+  updated_at: entity.updatedAt.valueOf(),
+  updated_by: entity.updatedBy,
+})
+
 /** 月度idと定義idから実績を取得 */
 export const findIncomeRecord = (db: D1Database):
 (_: {
@@ -47,6 +56,35 @@ export const findIncomeRecord = (db: D1Database):
   return record ? makeEntity(record) : undefined
 }
 
+/**
+ * 報酬実績を挿入する
+ * @warning このメソッドは定義と実績の正しさ (期間が被っているかなど) を保証しません。
+ * そういうのはワークフローでやってください。
+ */
+export const insertIncomeRecord = (db: D1Database):
+(_: IncomeRecord) => Promise<IncomeRecord> => async (entity) => {
+  const record = makeRecord(entity)
+
+  const insertStmt = 'INSERT INTO income_records VALUES (?, ?, ?, ?, ?, ?)'
+
+  await db
+    .prepare(insertStmt)
+    .bind(
+      record.user_id,
+      record.financial_month_id,
+      record.definition_id,
+      record.value,
+      record.updated_at,
+      record.updated_by,
+    )
+    .run()
+
+  return entity
+}
+
+/**
+ * 報酬実績の値を更新する
+ */
 export const updateIncomeRecordValue = (db: D1Database):
 (_: {
   userId: string
@@ -56,26 +94,23 @@ export const updateIncomeRecordValue = (db: D1Database):
 }) => Promise<IncomeRecord | undefined> => async ({
   userId, financialMonthId, definitionId, value,
 }) => {
-  const updateStmt = `
-  UPDATE income_records
-  SET
-    value = ?,
-    updated_at = ?,
-    updated_by = "user"
-  WHERE
-    financial_month_id = ?
-    AND definition_id = ?
-    AND user_id = ?
+  const upsertStmt = `
+  INSERT INTO income_records
+  VALUES (?, ?, ?, ?, ?, "user")
+  ON CONFLICT (financial_month_id, definition_id) DO UPDATE SET 
+    value = excluded.value,
+    updated_at = excluded.updated_at,
+    updated_by = excluded.updated_by
   `
 
-  const updateQuery = db
-    .prepare(updateStmt)
+  const upsertQuery = db
+    .prepare(upsertStmt)
     .bind(
-      value,
-      dayjs().valueOf(),
+      userId,
       financialMonthId,
       definitionId,
-      userId,
+      value,
+      dayjs().valueOf(),
     )
 
   const getQuery = d1(db)
@@ -88,7 +123,7 @@ export const updateIncomeRecordValue = (db: D1Database):
     .build()
 
   const queryResults = await db
-    .batch<IncomeRecordRecord>([updateQuery, getQuery])
+    .batch<IncomeRecordRecord>([upsertQuery, getQuery])
   const updatedRaw = queryResults[1].results.at(0)
 
   return updatedRaw ? makeEntity(updatedRaw) : undefined

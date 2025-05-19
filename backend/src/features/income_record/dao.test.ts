@@ -3,15 +3,18 @@ import { env } from 'cloudflare:test'
 import { createFinancialMonthData } from '@/domains/financial_month/logic'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
+import type { IncomeRecord } from '@/domains/income_record'
+import { createIncomeRecord } from '@/domains/income_record/logic'
 import { createUser } from '@/domains/user/logic'
 
 import { saveUser } from '../authorize/dao'
 import { insertFinancialYear } from '../financial_year/dao'
 import { insertIncomeDefinition } from '../income_definition/dao'
-import { findIncomeRecord, updateIncomeRecordValue } from './dao'
+import {
+  findIncomeRecord, insertIncomeRecord, updateIncomeRecordValue,
+} from './dao'
 
-// FIXME: 報酬定義挿入メソッドを生やすまでskipにしている
-describe.skip('報酬定義の操作', () => {
+describe('報酬定義の操作', () => {
   const dummyUser = createUser({
     name: 'testuser',
     email: 'test@example.com',
@@ -23,7 +26,8 @@ describe.skip('報酬定義の操作', () => {
     year: 2024,
   })._unsafeUnwrap()
 
-  const dummyFinancialMonth = dummyFinancialYear.months[0]
+  const dummyFinancialMonth1 = dummyFinancialYear.months[0]
+  const dummyFinancialMonth2 = dummyFinancialYear.months[1]
 
   const dummyIncomeDefinition = createIncomeDefinition({
     userId: dummyUser.id,
@@ -43,44 +47,94 @@ describe.skip('報酬定義の操作', () => {
     })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
+  const dummyIncomeRecord = createIncomeRecord({
+    userId: dummyUser.id,
+    financialMonthId: dummyFinancialMonth1.id,
+    definitionId: dummyIncomeDefinition.id,
+    value: 100,
+    updatedBy: 'user',
+  })
+
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)
     await insertFinancialYear(env.D1)(dummyFinancialYear)
     await insertIncomeDefinition(env.D1)(dummyIncomeDefinition)
+
+    // ユーザが挿入したテイで実績を追加する
+    await insertIncomeRecord(env.D1)(dummyIncomeRecord)
   })
 
-  test('挿入した項目を取得できること', async () => {
-    const actual = await findIncomeRecord(env.D1)({
-      financialMonthId: dummyFinancialMonth.id,
-      definitionId: dummyIncomeDefinition.id,
-    })
-
-    expect(actual).toStrictEqual({
-      userId: dummyUser.id,
-      financialMonthId: dummyFinancialMonth.id,
-      definitionId: dummyIncomeDefinition.id,
-      value: 100000,
-      updatedAt: actual?.updatedAt,
-      updatedBy: 'system',
-    })
+  test('実績レコードは1件しか存在しないこと', async () => {
+    const stmt = 'SELECT COUNT(*) count FROM income_records'
+    const result = await env.D1.prepare(stmt).first<{ count: number }>()
+    expect(result?.count).toBe(1)
   })
 
-  test('項目を更新できること', async () => {
-    const actual = await updateIncomeRecordValue(env.D1)({
-      userId: dummyUser.id,
-      financialMonthId: dummyFinancialMonth.id,
-      definitionId: dummyIncomeDefinition.id,
-      value: 200,
-    })
-
-    expect(actual).toStrictEqual(
-      {
-        userId: dummyUser.id,
-        financialMonthId: dummyFinancialMonth.id,
+  describe('既存の実績レコードに対する操作', () => {
+    test('挿入した項目を取得できること', async () => {
+      const actual = await findIncomeRecord(env.D1)({
+        financialMonthId: dummyFinancialMonth1.id,
         definitionId: dummyIncomeDefinition.id,
+      })
+
+      expect(actual).toStrictEqual({
+        userId: dummyUser.id,
+        financialMonthId: dummyFinancialMonth1.id,
+        definitionId: dummyIncomeDefinition.id,
+        value: 100,
         updatedAt: actual?.updatedAt,
-        value: 200,
         updatedBy: 'user',
       })
+    })
+
+    test('項目を更新できること', async () => {
+      const actual = await updateIncomeRecordValue(env.D1)({
+        userId: dummyUser.id,
+        financialMonthId: dummyFinancialMonth1.id,
+        definitionId: dummyIncomeDefinition.id,
+        value: 200,
+      })
+
+      expect(actual).toStrictEqual(
+        {
+          userId: dummyUser.id,
+          financialMonthId: dummyFinancialMonth1.id,
+          definitionId: dummyIncomeDefinition.id,
+          updatedAt: actual?.updatedAt,
+          value: 200,
+          updatedBy: 'user',
+        })
+    })
+  })
+
+  describe('存在しない実績レコードに対する操作', () => {
+    let actual: IncomeRecord | undefined
+
+    beforeAll(async () => {
+      actual = await updateIncomeRecordValue(env.D1)({
+        userId: dummyUser.id,
+        financialMonthId: dummyFinancialMonth2.id,
+        definitionId: dummyIncomeDefinition.id,
+        value: 400,
+      })
+    })
+
+    test('実績値が更新されていること', () => {
+      expect(actual).toStrictEqual(
+        {
+          userId: dummyUser.id,
+          financialMonthId: dummyFinancialMonth2.id,
+          definitionId: dummyIncomeDefinition.id,
+          updatedAt: actual?.updatedAt,
+          value: 400,
+          updatedBy: 'user',
+        })
+    })
+
+    test('操作後、実績レコードは1件増えていること', async () => {
+      const stmt = 'SELECT COUNT(*) count FROM income_records'
+      const result = await env.D1.prepare(stmt).first<{ count: number }>()
+      expect(result?.count).toBe(2)
+    })
   })
 })
