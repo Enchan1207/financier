@@ -14,8 +14,7 @@ import {
   findIncomeRecord, insertIncomeRecord, updateIncomeRecordValue,
 } from './dao'
 
-// FIXME: 報酬定義挿入メソッドを生やすまでskipにしている
-describe.skip('報酬定義の操作', () => {
+describe('報酬定義の操作', () => {
   const dummyUser = createUser({
     name: 'testuser',
     email: 'test@example.com',
