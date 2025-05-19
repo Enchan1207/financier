@@ -79,17 +79,19 @@ export const insertIncomeDefinition = (db: D1Database):
 
     const base = 'INSERT INTO income_definitions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
 
-    await db.prepare(base).bind(
-      record.id,
-      record.user_id,
-      record.name,
-      record.kind,
-      record.value,
-      record.enabled_at,
-      record.disabled_at,
-      record.updated_at,
-      record.is_taxable,
-    ).run()
+    await db
+      .prepare(base)
+      .bind(
+        record.id,
+        record.user_id,
+        record.name,
+        record.kind,
+        record.value,
+        record.enabled_at,
+        record.disabled_at,
+        record.updated_at,
+        record.is_taxable,
+      ).run()
 
     return entity
   }

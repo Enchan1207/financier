@@ -2,6 +2,9 @@ import { z } from 'zod'
 
 import { FinancialYearValueSchema } from '../financial_year'
 
+export const WorkdayValueSchema = z.number().int().min(0).max(31).brand()
+export type WorkdayValue = z.infer<typeof WorkdayValueSchema>
+
 export const FinancialMonthValueSchema = z
   .number()
   .int()
@@ -15,6 +18,7 @@ export const Months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const
 export const FinancialMonthDataSchema = z.object({
   financialYear: FinancialYearValueSchema,
   month: FinancialMonthValueSchema,
+  workday: WorkdayValueSchema,
 })
 
 /** 会計月度 */

@@ -46,10 +46,12 @@ describe('基本的なCRUD', () => {
     from: createFinancialMonthData({
       financialYear: 2025,
       month: 4,
+      workday: 20,
     })._unsafeUnwrap(),
     to: createFinancialMonthData({
       financialYear: 2025,
       month: 3,
+      workday: 20,
     })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
@@ -94,10 +96,12 @@ describe('基本的なCRUD', () => {
           from: createFinancialMonthData({
             financialYear: 2025,
             month: 6,
+            workday: 20,
           })._unsafeUnwrap(),
           to: createFinancialMonthData({
             financialYear: 2025,
             month: 1,
+            workday: 20,
           })._unsafeUnwrap(),
         },
       })
@@ -107,11 +111,13 @@ describe('基本的なCRUD', () => {
       const { start } = getPeriodByFinancialMonth(createFinancialMonthData({
         financialYear: 2025,
         month: 6,
+        workday: 20,
       })._unsafeUnwrap())
 
       const { end } = getPeriodByFinancialMonth(createFinancialMonthData({
         financialYear: 2025,
         month: 1,
+        workday: 20,
       })._unsafeUnwrap())
 
       expect(makeComparable(actual)).toStrictEqual({
@@ -145,10 +151,12 @@ describe('詳細な検索', () => {
     from: createFinancialMonthData({
       financialYear: 2025,
       month: 4,
+      workday: 20,
     })._unsafeUnwrap(),
     to: createFinancialMonthData({
       financialYear: 2025,
       month: 12,
+      workday: 20,
     })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
@@ -161,10 +169,12 @@ describe('詳細な検索', () => {
     from: createFinancialMonthData({
       financialYear: 2025,
       month: 8,
+      workday: 20,
     })._unsafeUnwrap(),
     to: createFinancialMonthData({
       financialYear: 2025,
       month: 2,
+      workday: 20,
     })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
@@ -192,6 +202,7 @@ describe('詳細な検索', () => {
     const financialMonth = createFinancialMonthData({
       financialYear: 2025,
       month,
+      workday: 20,
     })._unsafeUnwrap()
     const { start, end } = getPeriodByFinancialMonth(financialMonth)
 

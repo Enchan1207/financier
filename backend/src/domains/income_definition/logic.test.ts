@@ -7,11 +7,13 @@ describe('正常系', () => {
   const from = createFinancialMonthData({
     financialYear: 2024,
     month: 12,
+    workday: 20,
   })._unsafeUnwrap()
 
   const to = createFinancialMonthData({
     financialYear: 2024,
     month: 1,
+    workday: 20,
   })._unsafeUnwrap()
 
   const result = createIncomeDefinition({
@@ -58,11 +60,13 @@ describe('異常系 - 終了が開始より前', () => {
   const from = createFinancialMonthData({
     financialYear: 2024,
     month: 12,
+    workday: 20,
   })._unsafeUnwrap()
 
   const to = createFinancialMonthData({
     financialYear: 2024,
     month: 11,
+    workday: 20,
   })._unsafeUnwrap()
 
   const result = createIncomeDefinition({

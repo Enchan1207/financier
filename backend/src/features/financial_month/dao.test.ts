@@ -1,5 +1,6 @@
 import { env } from 'cloudflare:test'
 
+import type { WorkdayValue } from '@/domains/financial_month'
 import { createFinancialMonthData } from '@/domains/financial_month/logic'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import type { User } from '@/domains/user'
@@ -8,7 +9,11 @@ import dayjs from '@/logic/dayjs'
 
 import { saveUser } from '../authorize/dao'
 import { insertFinancialYear } from '../financial_year/dao'
-import { findFinancialMonthsByDate, getFinancialMonthByFinancialMonth } from './dao'
+import {
+  findFinancialMonthsByDate,
+  getFinancialMonthByFinancialMonth,
+  updateFinancialMonth,
+} from './dao'
 
 describe('日付に基づく項目の選択', () => {
   const dummyUser: User = createUser({
@@ -76,6 +81,7 @@ describe('月度情報からエンティティを得る', () => {
     const targetMonth = createFinancialMonthData({
       financialYear: 2024,
       month: 4,
+      workday: 20,
     })._unsafeUnwrap()
 
     const entity = await getFinancialMonthByFinancialMonth(env.D1)(
@@ -90,6 +96,7 @@ describe('月度情報からエンティティを得る', () => {
     const targetMonth = createFinancialMonthData({
       financialYear: 2025,
       month: 4,
+      workday: 20,
     })._unsafeUnwrap()
 
     const entity = await getFinancialMonthByFinancialMonth(env.D1)(
@@ -98,5 +105,39 @@ describe('月度情報からエンティティを得る', () => {
     )
 
     expect(entity).toBeUndefined()
+  })
+})
+
+describe('勤務日数の更新', () => {
+  const dummyUser: User = createUser({
+    name: 't_est_user',
+    email: 'test@example.com',
+    auth0UserId: 'auth0_test_user',
+  })
+
+  const dummyFinancialYear = createFinancialYear({
+    userId: dummyUser.id,
+    year: 2024,
+  })._unsafeUnwrap()
+
+  const dummyFinancialMonth = dummyFinancialYear.months[0]
+
+  beforeAll(async () => {
+    await saveUser(env.D1)(dummyUser)
+    await insertFinancialYear(env.D1)(dummyFinancialYear)
+  })
+
+  test('初期値として20が入っていること', () => {
+    expect(dummyFinancialMonth.workday).toBe(20)
+  })
+
+  test('更新でき、反映されていること', async () => {
+    const result = await updateFinancialMonth(env.D1)(
+      dummyUser.id,
+      dummyFinancialMonth.id,
+      { workday: 10 as WorkdayValue },
+    )
+
+    expect(result?.workday).toBe(10)
   })
 })
