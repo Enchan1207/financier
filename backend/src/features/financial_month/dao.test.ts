@@ -10,7 +10,9 @@ import dayjs from '@/logic/dayjs'
 import { saveUser } from '../authorize/dao'
 import { insertFinancialYear } from '../financial_year/dao'
 import {
-  findFinancialMonthsByDate, getFinancialMonthByFinancialMonth, updateFinancialMonth,
+  findFinancialMonthsByDate,
+  getFinancialMonthByFinancialMonth,
+  updateFinancialMonth,
 } from './dao'
 
 describe('日付に基づく項目の選択', () => {
