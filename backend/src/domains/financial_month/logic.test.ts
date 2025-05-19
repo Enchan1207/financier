@@ -38,6 +38,7 @@ describe('会計月度と日時情報の相互変換', () => {
     const financialMonthData = createFinancialMonthData({
       financialYear,
       month,
+      workday: 20,
     })._unsafeUnwrap()
     const period = getPeriodByFinancialMonth(financialMonthData)
 
@@ -56,6 +57,7 @@ describe('会計月度と日時情報の相互変換', () => {
       expect(financialMonth).toStrictEqual({
         financialYear,
         month,
+        workday: 20,
       })
     })
   })
@@ -85,6 +87,7 @@ describe('月度内からの会計月度の参照', () => {
     expect(actual).toStrictEqual({
       financialYear,
       month,
+      workday: 20,
     })
   })
 })

@@ -96,10 +96,12 @@ const buildPeriod = (props: {
         {
           financialYear: from.financialYear,
           month: from.month ?? 4,
+          workday: 0,
         },
         {
           financialYear: to.financialYear,
           month: to.month ?? 3,
+          workday: 0,
         },
       ].map(createFinancialMonthData),
     )))

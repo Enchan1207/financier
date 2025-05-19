@@ -67,6 +67,6 @@ export const getFinancialMonthFromDate = (date: dayjs.Dayjs): FinancialMonthData
   return parseSchema(FinancialMonthDataSchema, {
     financialYear,
     month,
-  }).match(validated => validated,
-    () => undefined)
+    workday: 20,
+  }).match(validated => validated, () => undefined)
 }

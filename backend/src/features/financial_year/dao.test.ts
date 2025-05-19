@@ -36,12 +36,6 @@ describe('会計年度の生成', () => {
     expect(result?.count).toBe(12)
   })
 
-  test('12個の勤務日数エンティティが登録されていること', async () => {
-    const stmt = 'SELECT COUNT(*) count FROM workdays'
-    const result = await env.D1.prepare(stmt).first<{ count: number }>()
-    expect(result?.count).toBe(12)
-  })
-
   test('報酬実績は生成されないこと', async () => {
     const stmt = 'SELECT COUNT(*) count FROM income_records'
     const result = await env.D1.prepare(stmt).first<{ count: number }>()
@@ -114,10 +108,12 @@ describe('報酬定義が存在する場合', () => {
     from: createFinancialMonthData({
       financialYear: 2024,
       month: 9,
+      workday: 20,
     })._unsafeUnwrap(),
     to: createFinancialMonthData({
       financialYear: 2025,
       month: 9,
+      workday: 20,
     })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
@@ -130,10 +126,12 @@ describe('報酬定義が存在する場合', () => {
     from: createFinancialMonthData({
       financialYear: 2024,
       month: 4,
+      workday: 20,
     })._unsafeUnwrap(),
     to: createFinancialMonthData({
       financialYear: 2024,
       month: 3,
+      workday: 20,
     })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
@@ -146,10 +144,12 @@ describe('報酬定義が存在する場合', () => {
     from: createFinancialMonthData({
       financialYear: 2025,
       month: 4,
+      workday: 20,
     })._unsafeUnwrap(),
     to: createFinancialMonthData({
       financialYear: 2025,
       month: 3,
+      workday: 20,
     })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
