@@ -147,31 +147,39 @@ const buildIncomeDefinitionUpdateQuery = (db: D1Database):
   return prepared
 }
 
-/** 現在の範囲から外れる実績をクリーンアップする */
+/** 更新後の範囲から外れる実績をクリーンアップする */
 const buildIncomeRecordCleanupQuery = (db: D1Database):
-(id: IncomeDefinition['id']) => D1PreparedStatement => (id) => {
+(id: IncomeDefinition['id'], props: {
+  from: dayjs.Dayjs
+  to: dayjs.Dayjs
+}) => D1PreparedStatement => (id, { from, to }) => {
   const stmt = `
   DELETE from income_records
   WHERE
-      EXISTS (
-          SELECT
-              1
-          FROM
-              income_records r
-              LEFT JOIN financial_months m ON m.id = r.financial_month_id
-              LEFT JOIN income_definitions d ON d.id = r.definition_id
-          WHERE
-              r.definition_id = ?
-              AND (
-                  m.started_at < d.enabled_at
-                  OR m.started_at > d.disabled_at
-              )
-      )
+    definition_id = ?1
+    AND financial_month_id IN (
+      SELECT
+        r.financial_month_id
+      FROM
+        income_records r
+        LEFT JOIN financial_months m ON m.id = r.financial_month_id
+        LEFT JOIN income_definitions d ON d.id = r.definition_id
+      WHERE
+        r.definition_id = ?1
+        AND (
+          m.ended_at < ?2
+          OR m.started_at > ?3
+        )
+    )
   `
 
   return db
     .prepare(stmt)
-    .bind(id)
+    .bind(
+      id,
+      from.valueOf(),
+      to.valueOf(),
+    )
 }
 
 /** 報酬定義を更新する */
@@ -189,9 +197,20 @@ export const updateIncomeDefinition = (db: D1Database):
       return current
     }
 
+    const newFrom = update.from
+      ? getPeriodByFinancialMonth(update.from).start
+      : current.enabledAt
+
+    const newTo = update.to
+      ? getPeriodByFinancialMonth(update.to).end
+      : current.disabledAt
+
     const batchQueries: D1PreparedStatement[] = [
       buildIncomeDefinitionUpdateQuery(db)(current.id, update),
-      buildIncomeRecordCleanupQuery(db)(current.id),
+      buildIncomeRecordCleanupQuery(db)(current.id, {
+        from: newFrom,
+        to: newTo,
+      }),
       d1(db)
         .select(IncomeDefinitionRecord, 'income_definitions')
         .where(condition('id', '==', id))
