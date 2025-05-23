@@ -4,12 +4,14 @@ import { createFinancialMonthData, getPeriodByFinancialMonth } from '@/domains/f
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
+import { createIncomeRecord } from '@/domains/income_record/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 import dayjs from '@/logic/dayjs'
 
 import { saveUser } from '../authorize/dao'
 import { insertFinancialYear } from '../financial_year/dao'
+import { findIncomeRecord, insertIncomeRecord } from '../income_record/dao'
 import {
   findIncomeDefinitions,
   getIncomeDefinitionById, insertIncomeDefinition, updateIncomeDefinition,
@@ -238,4 +240,172 @@ describe('詳細な検索', () => {
   })
 })
 
-// TODO: 報酬定義の更新テストケース
+describe('定義期間の更新', () => {
+  const dummyUser: User = createUser({
+    name: 'testuser',
+    email: 'test@example.com',
+    auth0UserId: 'auth0_test_user',
+  })
+
+  const dummyFinancialYear = createFinancialYear({
+    userId: dummyUser.id,
+    year: 2025,
+  })._unsafeUnwrap()
+
+  const dummyDefinition = createIncomeDefinition({
+    userId: dummyUser.id,
+    name: '基本給',
+    kind: 'absolute',
+    value: 230000,
+    isTaxable: true,
+    from: createFinancialMonthData({
+      financialYear: 2025,
+      month: 4,
+      workday: 20,
+    })._unsafeUnwrap(),
+    to: createFinancialMonthData({
+      financialYear: 2025,
+      month: 3,
+      workday: 20,
+    })._unsafeUnwrap(),
+  })._unsafeUnwrap()
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const dummyApril = dummyFinancialYear.months.find(({ month }) => month === 4)!
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const dummySeptember = dummyFinancialYear.months.find(({ month }) => month === 9)!
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const dummyFebruary = dummyFinancialYear.months.find(({ month }) => month === 2)!
+
+  // 4月度の実績
+  const dummyRecord1 = createIncomeRecord({
+    userId: dummyUser.id,
+    definitionId: dummyDefinition.id,
+    financialMonthId: dummyApril.id,
+    updatedBy: 'user',
+    value: 12345,
+  })
+
+  // 9月度の実績
+  const dummyRecord2 = createIncomeRecord({
+    userId: dummyUser.id,
+    definitionId: dummyDefinition.id,
+    financialMonthId: dummySeptember.id,
+    updatedBy: 'user',
+    value: 12345,
+  })
+
+  // 2月度の実績
+  const dummyRecord3 = createIncomeRecord({
+    userId: dummyUser.id,
+    definitionId: dummyDefinition.id,
+    financialMonthId: dummyFebruary.id,
+    updatedBy: 'user',
+    value: 12345,
+  })
+
+  beforeAll(async () => {
+    await Promise.all([
+      saveUser(env.D1)(dummyUser),
+
+      insertFinancialYear(env.D1)(dummyFinancialYear),
+      insertIncomeDefinition(env.D1)(dummyDefinition),
+
+      insertIncomeRecord(env.D1)(dummyRecord1),
+      insertIncomeRecord(env.D1)(dummyRecord2),
+      insertIncomeRecord(env.D1)(dummyRecord3),
+    ])
+  })
+
+  describe('定義の開始月を5月にした場合', () => {
+    beforeAll(async () => {
+      await updateIncomeDefinition(env.D1)(dummyDefinition.id, {
+        current: dummyDefinition,
+        update: {
+          kind: undefined,
+          name: undefined,
+          isTaxable: undefined,
+          value: undefined,
+          from: createFinancialMonthData({
+            financialYear: dummyFinancialYear.year,
+            month: 5,
+            workday: 20,
+          })._unsafeUnwrap(),
+          to: undefined,
+        },
+      })
+    })
+
+    test('実績1は削除されていること', async () => {
+      const record = await findIncomeRecord(env.D1)({
+        financialMonthId: dummyApril.id,
+        definitionId: dummyDefinition.id,
+      })
+
+      expect(record).toBeUndefined()
+    })
+
+    test('実績2は削除されていないこと', async () => {
+      const record = await findIncomeRecord(env.D1)({
+        financialMonthId: dummySeptember.id,
+        definitionId: dummyDefinition.id,
+      })
+      expect(record).toBeDefined()
+    })
+
+    test('実績3は削除されていないこと', async () => {
+      const record = await findIncomeRecord(env.D1)({
+        financialMonthId: dummyFebruary.id,
+        definitionId: dummyDefinition.id,
+      })
+      expect(record).toBeDefined()
+    })
+  })
+
+  describe('定義の終了月を1月にした場合', () => {
+    beforeAll(async () => {
+      await updateIncomeDefinition(env.D1)(dummyDefinition.id, {
+        current: dummyDefinition,
+        update: {
+          kind: undefined,
+          name: undefined,
+          isTaxable: undefined,
+          value: undefined,
+          from: undefined,
+          to: createFinancialMonthData({
+            financialYear: dummyFinancialYear.year,
+            month: 1,
+            workday: 20,
+          })._unsafeUnwrap(),
+        },
+      })
+    })
+
+    test('実績1は削除されていないこと', async () => {
+      const record = await findIncomeRecord(env.D1)({
+        financialMonthId: dummyApril.id,
+        definitionId: dummyDefinition.id,
+      })
+
+      expect(record).toBeDefined()
+    })
+
+    test('実績2は削除されていないこと', async () => {
+      const record = await findIncomeRecord(env.D1)({
+        financialMonthId: dummySeptember.id,
+        definitionId: dummyDefinition.id,
+      })
+      expect(record).toBeDefined()
+    })
+
+    test('実績3は削除されていること', async () => {
+      const record = await findIncomeRecord(env.D1)({
+        financialMonthId: dummyFebruary.id,
+        definitionId: dummyDefinition.id,
+      })
+      expect(record).toBeUndefined()
+    })
+  })
+})
