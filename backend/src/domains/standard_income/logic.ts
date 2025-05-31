@@ -4,27 +4,24 @@ import { ulid } from 'ulid'
 import { ValidationError } from '@/logic/errors'
 import { parseSchema } from '@/logic/zod'
 
-import type { StandardIncome, StandardIncomeData } from '.'
-import { StandardIncomeDataSchema } from '.'
+import type { StandardIncomeGrade, StandardIncomeTable } from '.'
+import { StandardIncomeGradeSchema, StandardIncomeTableSchema } from '.'
 
-export const createStandardIncomeData = (input: {
-  tableId: string
-  min: number
-  value: number
-}): Result<StandardIncomeData, ValidationError> =>
-  parseSchema(StandardIncomeDataSchema, input).mapErr(() => new ValidationError())
+export const createStandardIncomeGrade = (props: {
+  threshold: number
+  standardIncome: number
+}): Result<StandardIncomeGrade, ValidationError> =>
+  parseSchema(StandardIncomeGradeSchema, props).mapErr(() => new ValidationError())
 
-export const createStandardIncome = (props: {
+export const createStandardIncomeTable = (props: {
   userId: string
-  tableId: string
-  min: number
-  value: number
-}): Result<StandardIncome, ValidationError> => {
-  const { userId, ...input } = props
-
-  return createStandardIncomeData(input).map(entity => ({
-    ...entity,
+  name: string
+  grades: {
+    threshold: number
+    standardIncome: number
+  }[]
+}): Result<StandardIncomeTable, ValidationError> =>
+  parseSchema(StandardIncomeTableSchema, {
+    ...props,
     id: ulid(),
-    userId,
-  }))
-}
+  }).mapErr(() => new ValidationError())

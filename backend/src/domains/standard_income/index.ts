@@ -1,17 +1,19 @@
 import { z } from 'zod'
 
-export const StandardIncomeDataSchema = z.object({
-  tableId: z.string().ulid(),
-  min: z.number().int().positive(),
-  value: z.number().int().positive(),
+export const StandardIncomeGradeSchema = z.object({
+  threshold: z.number().int().positive(),
+  standardIncome: z.number().int().positive(),
+}).brand()
+
+export const StandardIncomeTableSchema = z.object({
+  id: z.string().ulid(),
+  userId: z.string().ulid(),
+  name: z.string(),
+  grades: z.array(StandardIncomeGradeSchema),
 })
 
-/** 標準報酬月額情報 */
-export type StandardIncomeData =
-  z.infer<typeof StandardIncomeDataSchema>
+/** 標準報酬月額の等級 */
+export type StandardIncomeGrade = z.infer<typeof StandardIncomeGradeSchema>
 
-/** 標準報酬月額 */
-export type StandardIncome = StandardIncomeData & {
-  id: string
-  userId: string
-}
+/** 標準報酬月額表 */
+export type StandardIncomeTable = z.infer<typeof StandardIncomeTableSchema>
