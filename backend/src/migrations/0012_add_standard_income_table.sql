@@ -3,7 +3,7 @@ CREATE TABLE standard_income_tables (
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,
     name TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT
 );
 
 CREATE TABLE standard_income_grades (

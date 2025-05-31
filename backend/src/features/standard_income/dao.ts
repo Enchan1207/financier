@@ -134,12 +134,8 @@ export const updateStandardIncomeTableGrades = (db: D1Database):
         record.standard_income,
       ))
 
-    const gradeCleanupStmt = 'DELETE from standard_income_grades WHERE id=? AND user_id=?'
-    const gradeCleanupQuery = db
-      .prepare(gradeCleanupStmt).bind(
-        props.id,
-        props.userId,
-      )
+    const gradeCleanupStmt = 'DELETE from standard_income_grades WHERE income_table_id=?'
+    const gradeCleanupQuery = db.prepare(gradeCleanupStmt).bind(props.id)
 
     const tableFetchQuery = d1(db)
       .select(StandardIncomeTableRecord, 'standard_income_tables')
@@ -150,7 +146,7 @@ export const updateStandardIncomeTableGrades = (db: D1Database):
       .limit(1)
       .build()
 
-    const queries = [...gradeInsertQueries, gradeCleanupQuery, tableFetchQuery]
+    const queries = [gradeCleanupQuery, ...gradeInsertQueries, tableFetchQuery]
     const results = await db.batch<StandardIncomeTableRecord>(queries)
 
     const result = results.at(-1)?.results.at(0)
