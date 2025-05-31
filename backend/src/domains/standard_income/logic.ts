@@ -1,4 +1,5 @@
 import type { Result } from 'neverthrow'
+import { ok } from 'neverthrow'
 import { ulid } from 'ulid'
 
 import { ValidationError } from '@/logic/errors'
@@ -24,4 +25,11 @@ export const createStandardIncomeTable = (props: {
   parseSchema(StandardIncomeTableSchema, {
     ...props,
     id: ulid(),
-  }).mapErr(() => new ValidationError())
+  })
+    .mapErr(() => new ValidationError())
+    .andThen(validateGradeContinuity)
+
+const validateGradeContinuity = (table: StandardIncomeTable): Result<StandardIncomeTable, ValidationError> => {
+  // TODO: gradeの連続性チェック
+  return ok(table)
+}
