@@ -1,17 +1,17 @@
 import { z } from 'zod'
 
-export const StandardRemunerationDataSchema = z.object({
+export const StandardIncomeDataSchema = z.object({
   tableId: z.string().ulid(),
   min: z.number().int().positive(),
   value: z.number().int().positive(),
 })
 
 /** 標準報酬月額情報 */
-export type StandardRemunerationData =
-  z.infer<typeof StandardRemunerationDataSchema>
+export type StandardIncomeData =
+  z.infer<typeof StandardIncomeDataSchema>
 
 /** 標準報酬月額 */
-export type StandardRemuneration = StandardRemunerationData & {
+export type StandardIncome = StandardIncomeData & {
   id: string
   userId: string
 }
