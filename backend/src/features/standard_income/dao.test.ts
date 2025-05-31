@@ -99,23 +99,23 @@ describe('基本的なCRUD', () => {
     })
   })
 
-  describe('項目の更新', () => {
-    test('名前が更新できること', async () => {
-      const actual = await updateStandardIncomeTableName(env.D1)({
-        userId: dummyUser.id,
-        id: dummyEntity.id,
-        name: 'updated name',
-      })
-
-      expect(actual).toStrictEqual({
-        id: dummyEntity.id,
-        userId: dummyEntity.userId,
-        name: 'updated name',
-      })
+  test('名前を更新できること', async () => {
+    const actual = await updateStandardIncomeTableName(env.D1)({
+      userId: dummyUser.id,
+      id: dummyEntity.id,
+      name: 'updated name',
     })
 
-    test('階級が更新できること', async () => {
-      const actual = await updateStandardIncomeTableGrades(env.D1)({
+    expect(actual).toStrictEqual({
+      id: dummyEntity.id,
+      userId: dummyEntity.userId,
+      name: 'updated name',
+    })
+  })
+
+  describe('階級を更新できること', () => {
+    beforeAll(async () => {
+      await updateStandardIncomeTableGrades(env.D1)({
         userId: dummyUser.id,
         id: dummyEntity.id,
         grades: [
@@ -129,9 +129,9 @@ describe('基本的なCRUD', () => {
           },
         ].map(grade => createStandardIncomeGrade(grade)._unsafeUnwrap()),
       })
+    })
 
-      expect(actual).toBeDefined()
-
+    test('階級が更新できること', async () => {
       const updated = await getStandardIncomeTable(env.D1)({
         userId: dummyUser.id,
         id: dummyEntity.id,
