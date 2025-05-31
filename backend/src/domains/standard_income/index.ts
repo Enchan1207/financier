@@ -17,3 +17,6 @@ export type StandardIncomeGrade = z.infer<typeof StandardIncomeGradeSchema>
 
 /** 標準報酬月額表 */
 export type StandardIncomeTable = z.infer<typeof StandardIncomeTableSchema>
+
+/** 標準報酬月額表 (サマリ) */
+export type StandardIncomeTableSummary = Omit<StandardIncomeTable, 'grades'>
