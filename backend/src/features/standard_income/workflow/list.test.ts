@@ -27,6 +27,10 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
     name: 'test table 1',
     grades: [
       {
+        threshold: 0,
+        standardIncome: 50000,
+      },
+      {
         threshold: 100000,
         standardIncome: 100000,
       },
@@ -37,6 +41,10 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
     userId: dummyUser.id,
     name: 'test table 2',
     grades: [
+      {
+        threshold: 0,
+        standardIncome: 50000,
+      },
       {
         threshold: 200000,
         standardIncome: 200000,

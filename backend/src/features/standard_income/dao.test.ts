@@ -27,16 +27,16 @@ describe('基本的なCRUD', () => {
     name: 'test table',
     grades: [
       {
+        threshold: 0,
+        standardIncome: 50000,
+      },
+      {
         threshold: 100000,
         standardIncome: 100000,
       },
       {
         threshold: 200000,
         standardIncome: 200000,
-      },
-      {
-        threshold: 300000,
-        standardIncome: 300000,
       },
     ],
   })._unsafeUnwrap()
@@ -120,6 +120,10 @@ describe('基本的なCRUD', () => {
         id: dummyEntity.id,
         grades: [
           {
+            threshold: 0,
+            standardIncome: 50000,
+          },
+          {
             threshold: 100000,
             standardIncome: 100000,
           },
@@ -131,13 +135,17 @@ describe('基本的なCRUD', () => {
       })
     })
 
-    test('階級が更新できること', async () => {
+    test('階級が更新されていること', async () => {
       const updated = await getStandardIncomeTable(env.D1)({
         userId: dummyUser.id,
         id: dummyEntity.id,
       })
 
       expect(updated?.grades).toStrictEqual([
+        {
+          threshold: 0,
+          standardIncome: 50000,
+        },
         {
           threshold: 100000,
           standardIncome: 100000,

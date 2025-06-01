@@ -17,8 +17,8 @@ type StandardIncomeTableRecord = z.infer<typeof StandardIncomeTableRecord>
 
 const StandardIncomeGradeRecord = z.object({
   income_table_id: z.string().ulid(),
-  threshold: z.number().int().positive(),
-  standard_income: z.number().int().positive(),
+  threshold: z.number().int().min(0),
+  standard_income: z.number().int().min(0),
 })
 
 type StandardIncomeGradeRecord = z.infer<typeof StandardIncomeGradeRecord>
@@ -199,9 +199,7 @@ export const getStandardIncomeTable = (db: D1Database):
       .build()
     const gradesFetchQuery = d1(db)
       .select(StandardIncomeGradeRecord, 'standard_income_grades')
-      .where(every(
-        condition('income_table_id', '==', props.id),
-      ))
+      .where(condition('income_table_id', '==', props.id))
       .build()
 
     const queries = [tableFetchQuery, gradesFetchQuery]

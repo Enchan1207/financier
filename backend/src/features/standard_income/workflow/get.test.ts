@@ -27,6 +27,10 @@ describe('標準報酬月額表取得ワークフロー', () => {
     name: 'test table',
     grades: [
       {
+        threshold: 0,
+        standardIncome: 50000,
+      },
+      {
         threshold: 100000,
         standardIncome: 100000,
       },
