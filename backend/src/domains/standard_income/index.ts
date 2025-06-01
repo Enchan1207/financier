@@ -1,15 +1,15 @@
 import { z } from 'zod'
 
 export const StandardIncomeGradeSchema = z.object({
-  threshold: z.number().int().positive(),
-  standardIncome: z.number().int().positive(),
+  threshold: z.number().int().min(0),
+  standardIncome: z.number().int().min(0),
 }).brand()
 
 export const StandardIncomeTableSchema = z.object({
   id: z.string().ulid(),
   userId: z.string().ulid(),
   name: z.string(),
-  grades: z.array(StandardIncomeGradeSchema),
+  grades: z.array(StandardIncomeGradeSchema).min(1),
 })
 
 /** 標準報酬月額の等級 */
