@@ -139,6 +139,7 @@ CREATE TABLE standard_income_grades (
 - 非バリデーションコマンドの生成
   - 入力をスキーマでパース (Honoが担保)
     - 順序(asc / desc)
+  - `state.user` にリクエスト元のユーザを設定
 - ワークフロー
   - 既存エンティティ取得
 - エンティティをレスポンスとして返す
