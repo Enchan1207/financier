@@ -49,4 +49,4 @@ jobs:
 
       - run: |
           npm -w '.github/scripts' run coverage-diff '${{ needs.emit-coverage.outputs.summary_source }}' '${{ needs.emit-coverage.outputs.summary_target }}'
-          cat coverage-summary.txt
+          cat .github/scripts/coverage-summary.txt
