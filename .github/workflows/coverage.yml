@@ -1,0 +1,59 @@
+name: build coverage report
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  emit-coverage:
+    outputs:
+      summary_target: ${{ steps.emit.outputs.summary_target }}
+      summary_source: ${{ steps.emit.outputs.summary_source }}
+    strategy:
+      matrix:
+        ref: ['target', 'source']
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{matrix.ref == 'target' && github.base_ref || github.head_ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: install
+        run: npm i
+
+      - name: generate coverage
+        run: npm run -w backend test:coverage
+
+      - name: emit coverage
+        id: emit
+        run: |
+          summary="$( cat ./backend/coverage/coverage-summary.json | jq -rc '.total' )"
+          echo "summary_${{ matrix.ref }}=$summary" >> "$GITHUB_OUTPUT"
+
+  create_report:
+    runs-on: ubuntu-latest
+    needs: [emit-coverage]
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: install
+        run: npm i
+
+      - run: |
+          npm -w '.github/scripts' run coverage-diff '${{ needs.emit-coverage.outputs.summary_source }}' '${{ needs.emit-coverage.outputs.summary_target }}'
+          echo '## Test coverage report' > issue-header.txt
+          cat issue-header.txt .github/scripts/coverage-summary.txt > issue-body.txt
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --edit-last \
+            --create-if-none \
+            --body-file issue-body.txt

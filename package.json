@@ -8,7 +8,8 @@
   },
   "workspaces": [
     "backend",
-    "frontend"
+    "frontend",
+    ".github/scripts"
   ],
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250129.0",
