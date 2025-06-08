@@ -37,6 +37,8 @@ jobs:
   list:
     runs-on: ubuntu-latest
     needs: [emit-coverage]
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -49,4 +51,4 @@ jobs:
 
       - run: |
           npm -w '.github/scripts' run coverage-diff '${{ needs.emit-coverage.outputs.summary_source }}' '${{ needs.emit-coverage.outputs.summary_target }}'
-          cat .github/scripts/coverage-summary.txt
+          gh issue comment --edit-last --body-file .github/scripts/coverage-summary.txt
