@@ -2,9 +2,8 @@ import { env } from 'cloudflare:test'
 import type { InferResponseType } from 'hono'
 import { sign } from 'hono/jwt'
 import { testClient } from 'hono/testing'
+import { ulid } from 'ulid'
 
-import type { FinancialMonthData } from '@/domains/financial_month'
-import { createFinancialMonthData } from '@/domains/financial_month/logic'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
 import type { User } from '@/domains/user'
@@ -14,41 +13,38 @@ import { insertFinancialYear } from '@/features/financial_year/dao'
 
 import { insertIncomeDefinition } from './dao'
 import incomeDefinitions from './route'
+import type { PutIncomeDefinitionCommand } from './workflow/put'
 
 describe('報酬定義API', () => {
   const client = testClient(incomeDefinitions, env)
 
-  const testUser: User = createUser({
+  const dummyUser: User = createUser({
     name: 'test user',
     email: 'test@example.com',
     auth0UserId: 'test_user',
   })
 
-  const testFinancialYear = createFinancialYear({
-    userId: testUser.id,
+  const dummyFinancialYear = createFinancialYear({
+    userId: dummyUser.id,
     year: 2025,
   })._unsafeUnwrap()
 
-  const testStartMonth: FinancialMonthData = createFinancialMonthData({
-    financialYear: 2025,
-    month: 4,
-    workday: 20,
-  })._unsafeUnwrap()
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const dummyMay = dummyFinancialYear.months.find(({ month }) => month === 5)!
 
-  const testEndMonth: FinancialMonthData = createFinancialMonthData({
-    financialYear: 2025,
-    month: 12,
-    workday: 20,
-  })._unsafeUnwrap()
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const dummyNovember = dummyFinancialYear.months.find(
+    ({ month }) => month === 11,
+  )!
 
-  const testDefinition = createIncomeDefinition({
-    userId: testUser.id,
+  const dummyDefinition = createIncomeDefinition({
+    userId: dummyUser.id,
     name: 'test allowance',
     kind: 'absolute',
     value: 100000,
     isTaxable: true,
-    from: testStartMonth,
-    to: testEndMonth,
+    from: dummyMay,
+    to: dummyNovember,
   })._unsafeUnwrap()
 
   let token: string
@@ -58,16 +54,16 @@ describe('報酬定義API', () => {
       {
         exp: Math.floor(Date.now() / 1000) + 60 * 60,
         iss: `https://${env.AUTH_DOMAIN}/`,
-        sub: testUser.auth0UserId,
+        sub: dummyUser.auth0UserId,
         aud: [env.AUTH_AUDIENCE],
       },
       env.TEST_PRIVATE_KEY,
       'RS256',
     )
 
-    await saveUser(env.D1)(testUser)
-    await insertFinancialYear(env.D1)(testFinancialYear)
-    await insertIncomeDefinition(env.D1)(testDefinition)
+    await saveUser(env.D1)(dummyUser)
+    await insertFinancialYear(env.D1)(dummyFinancialYear)
+    await insertIncomeDefinition(env.D1)(dummyDefinition)
   })
 
   describe('収入定義一覧の取得', () => {
@@ -76,7 +72,10 @@ describe('報酬定義API', () => {
     beforeAll(async () => {
       actual = await client.index.$get(
         {
-          query: { order: 'asc' },
+          query: {
+            order: 'asc',
+            at: '2025_06',
+          },
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -88,17 +87,13 @@ describe('報酬定義API', () => {
       expect(actual.status).toBe(200)
     })
 
-    test('配列が返ること', async () => {
-      const result = await actual.json()
-      expect(Array.isArray(result)).toBe(true)
-    })
-
-    test('定義が含まれていること', async () => {
+    test('定義の配列が得られること', async () => {
       const result = (await actual.json()) as InferResponseType<
         typeof client.index.$get,
         200
       >
-      expect(result.some(({ id }) => id === testDefinition.id)).toBe(true)
+
+      expect(result).toStrictEqual([dummyDefinition])
     })
   })
 
@@ -109,7 +104,7 @@ describe('報酬定義API', () => {
       beforeAll(async () => {
         actual = await client[':id'].$get(
           {
-            param: { id: testDefinition.id },
+            param: { id: dummyDefinition.id },
           },
           { headers: { Authorization: `Bearer ${token}` } },
         )
@@ -124,7 +119,7 @@ describe('報酬定義API', () => {
           (typeof client)[':id']['$get'],
           200
         >
-        expect(result.id).toBe(testDefinition.id)
+        expect(result.id).toBe(dummyDefinition.id)
       })
     })
 
@@ -155,8 +150,8 @@ describe('報酬定義API', () => {
         kind: 'absolute',
         value: 50000,
         isTaxable: true,
-        from: testStartMonth,
-        to: testEndMonth,
+        from: dummyMay,
+        to: dummyNovember,
       } as const
 
       beforeAll(async () => {
@@ -194,8 +189,8 @@ describe('報酬定義API', () => {
               kind: 'absolute',
               value: 0,
               isTaxable: true,
-              from: testEndMonth,
-              to: testStartMonth,
+              from: dummyNovember,
+              to: dummyMay,
             },
           },
           { headers: { Authorization: `Bearer ${token}` } },
@@ -212,7 +207,7 @@ describe('報酬定義API', () => {
     describe('正常系', () => {
       let actual: Awaited<ReturnType<(typeof client)[':id']['$put']>>
 
-      const input = {
+      const input: PutIncomeDefinitionCommand['input'] = {
         name: 'updated allowance',
         kind: 'related_by_workday',
         value: 5000,
@@ -222,7 +217,7 @@ describe('報酬定義API', () => {
       beforeAll(async () => {
         actual = await client[':id'].$put(
           {
-            param: { id: testDefinition.id },
+            param: { id: dummyDefinition.id },
             json: input,
           },
           { headers: { Authorization: `Bearer ${token}` } },
@@ -252,9 +247,8 @@ describe('報酬定義API', () => {
       beforeAll(async () => {
         actual = await client[':id'].$put(
           {
-            query: { id: 'invalid_id' },
             param: {
-              id: '',
+              id: ulid(),
             },
             json: {
               name: 'should not update',
@@ -275,8 +269,7 @@ describe('報酬定義API', () => {
       beforeAll(async () => {
         actual = await client[':id'].$put(
           {
-            query: { id: testDefinition.id },
-            param: { id: testDefinition.id },
+            param: { id: dummyDefinition.id },
             json: {
               value: -1,
             },

@@ -87,7 +87,7 @@ const app = new Hono<{ Bindings: Env }>()
     const response = workflow(command)
       .asyncMap(({ entity }) => insertIncomeDefinition(c.env.D1)(entity))
       .match(
-        (entity) => c.json(entity),
+        (entity) => c.json(entity, 201),
         (error) => {
           console.error(error)
           return c.json({ error: 'bad request' }, 400)
@@ -98,13 +98,13 @@ const app = new Hono<{ Bindings: Env }>()
   })
   .put(
     '/:id',
-    zValidator('query', PutIncomeDefinitionQuerySchema),
+    zValidator('param', PutIncomeDefinitionQuerySchema),
     zValidator('json', PutIncomeDefinitionBodySchema),
     async (c) => {
       const command: PutIncomeDefinitionCommand = {
         input: c.req.valid('json'),
         state: {
-          id: c.req.valid('query').id,
+          id: c.req.valid('param').id,
           user: c.get('user'),
         },
       }
