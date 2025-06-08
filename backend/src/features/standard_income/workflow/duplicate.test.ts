@@ -41,7 +41,6 @@ describe('標準報酬月額表複製ワークフロー', () => {
   })._unsafeUnwrap()
 
   const workflow = createStandardIncomeTableDuplicateWorkflow({
-    //
     getStandardIncomeTable: getStandardIncomeTable(env.D1),
   })
 

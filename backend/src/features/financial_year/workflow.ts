@@ -15,7 +15,6 @@ import { ValidationError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
 
 export const PostFinancialYearSchema = z.object({
-  //
   year: FinancialYearValueSchema,
 })
 type PostFinancialYearSchema = z.infer<typeof PostFinancialYearSchema>
@@ -43,7 +42,6 @@ export interface FinancialYearPostEvent {
 }
 
 const queryLatestFinancialYear = (effects: {
-  //
   listFinancialYears: (props: {
     userId: User['id']
     order?: 'asc' | 'desc'
@@ -118,7 +116,6 @@ type FinancialYearPostWorkflow = (
 
 export const createFinancialYearPostWorkflow =
   (effects: {
-    //
     listFinancialYears: (props: {
       userId: User['id']
       order?: 'asc' | 'desc'

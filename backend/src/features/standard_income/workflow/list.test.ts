@@ -9,6 +9,7 @@ import { createUser } from '@/domains/user/logic'
 import { saveUser } from '@/features/authorize/dao'
 
 import { insertStandardIncomeTable, listStandardIncomeTables } from '../dao'
+import type { UnvalidatedListStandardIncomeTablesCommand } from './list'
 import { createStandardIncomeTablesListWorkflow } from './list'
 
 describe('標準報酬月額表一覧取得ワークフロー', () => {
@@ -56,7 +57,6 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
   })._unsafeUnwrap()
 
   const workflow = createStandardIncomeTablesListWorkflow({
-    //
     listStandardIncomeTables: listStandardIncomeTables(env.D1),
   })
 
@@ -68,8 +68,8 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
 
   describe('自分の項目の取得', () => {
     test('自分の項目の件数が正しいこと', async () => {
-      const command = {
-        input: { order: 'asc' as const },
+      const command: UnvalidatedListStandardIncomeTablesCommand = {
+        input: { order: 'asc' },
         state: { user: dummyUser },
       }
 
@@ -78,8 +78,8 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
     })
 
     test('昇順で取得した場合、正しい順序で項目が取得できること', async () => {
-      const command = {
-        input: { order: 'asc' as const },
+      const command: UnvalidatedListStandardIncomeTablesCommand = {
+        input: { order: 'asc' },
         state: { user: dummyUser },
       }
 
@@ -88,27 +88,27 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
       const actualNames = actual.map((entity) => entity.name)
       expect(actualNames).toStrictEqual([dummyTable1.name, dummyTable2.name])
     })
+
+    test('降順で取得した場合、正しい順序で項目が取得できること', async () => {
+      const command: UnvalidatedListStandardIncomeTablesCommand = {
+        input: { order: 'desc' },
+        state: { user: dummyUser },
+      }
+
+      const actual = await workflow(command)
+
+      const actualNames = actual.map((entity) => entity.name)
+      expect(actualNames).toStrictEqual([dummyTable2.name, dummyTable1.name])
+    })
   })
 
   test('他人の項目は取得されないこと', async () => {
-    const command = {
-      input: { order: 'asc' as const },
+    const command: UnvalidatedListStandardIncomeTablesCommand = {
+      input: { order: 'asc' },
       state: { user: anotherUser },
     }
 
     const actual = await workflow(command)
     expect(actual).toHaveLength(0)
-  })
-
-  test('降順で取得した場合、正しい順序で項目が取得できること', async () => {
-    const command = {
-      input: { order: 'desc' as const },
-      state: { user: dummyUser },
-    }
-
-    const actual = await workflow(command)
-
-    const actualNames = actual.map((entity) => entity.name)
-    expect(actualNames).toStrictEqual([dummyTable2.name, dummyTable1.name])
   })
 })

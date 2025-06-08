@@ -132,9 +132,9 @@ const buildIncomeDefinitionUpdateQuery =
       name ? 'name=?' : undefined,
       kind ? 'kind=?' : undefined,
       value ? 'value=?' : undefined,
+      isTaxable !== undefined ? 'is_taxable=?' : undefined,
       fromDate ? 'enabled_at=?' : undefined,
       toDate ? 'disabled_at=?' : undefined,
-      isTaxable ? 'is_taxable=?' : undefined,
       'updated_at=?',
     ]
       .filter((fragment) => fragment !== undefined)

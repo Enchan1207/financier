@@ -19,7 +19,6 @@ describe('会計年度生成ワークフロー', () => {
   })
 
   const workflow = createFinancialYearPostWorkflow({
-    //
     listFinancialYears: listFinancialYears(env.D1),
   })
 

@@ -152,7 +152,6 @@ const validateCommand = (
 
 const listIncomeDefinitions =
   (effects: {
-    //
     findIncomeDefinitions: (
       _: IncomeDefinitionFindCondition,
     ) => Promise<IncomeDefinition[]>
@@ -174,7 +173,6 @@ type ListIncomeDefinitionWorkflow = (
 
 export const createIncomeDefinitionListWorkflow =
   (effects: {
-    //
     findIncomeDefinitions: (
       _: IncomeDefinitionFindCondition,
     ) => Promise<IncomeDefinition[]>

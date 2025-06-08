@@ -27,7 +27,6 @@ const userMiddleware = createMiddleware<{
   }
 
   const workflow = createAuthorizeWorkflow({
-    //
     getUserByAuth0Id: getUserByAuth0Id(c.env.D1),
   })
 

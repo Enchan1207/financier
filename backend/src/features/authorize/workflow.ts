@@ -77,20 +77,17 @@ const createTentativeUser = (effects: {
 
 export const createAuthorizeWorkflow =
   (effects: {
-    //
     getUserByAuth0Id: (id: string) => Promise<User | undefined>
   }): AuthorizeWorkflow =>
   (command: Command) =>
     ok(command)
       .asyncAndThen(
         lookupUserByAuth0Id({
-          //
           getUserByAuth0Id: effects.getUserByAuth0Id,
         }),
       )
       .orElse(() =>
         createTentativeUser({
-          //
           fetchUserInfo: fetchUserInfo(command.state.authDomain),
         })(command),
       )
