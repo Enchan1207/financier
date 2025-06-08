@@ -1,4 +1,4 @@
-name: coverage difference on PR
+name: build coverage report
 on:
   pull_request:
     branches:
@@ -20,7 +20,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: install
         run: npm i
@@ -34,7 +34,7 @@ jobs:
           summary="$( cat ./backend/coverage/coverage-summary.json | jq -rc '.total' )"
           echo "summary_${{ matrix.ref }}=$summary" >> "$GITHUB_OUTPUT"
 
-  list:
+  create_report:
     runs-on: ubuntu-latest
     needs: [emit-coverage]
     env:
@@ -44,14 +44,16 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: install
         run: npm i
 
       - run: |
           npm -w '.github/scripts' run coverage-diff '${{ needs.emit-coverage.outputs.summary_source }}' '${{ needs.emit-coverage.outputs.summary_target }}'
+          echo '## Test coverage report' > issue-header.txt
+          cat issue-header.txt .github/scripts/coverage-summary.txt > issue-body.txt
           gh pr comment ${{ github.event.pull_request.number }} \
             --edit-last \
             --create-if-none \
-            --body-file .github/scripts/coverage-summary.txt
+            --body-file issue-body.txt
