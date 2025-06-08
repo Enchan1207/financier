@@ -1,6 +1,9 @@
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
+import { err, ok } from 'neverthrow'
 import { z } from 'zod'
+
+import { EntityNotFoundError } from '@/logic/errors'
 
 import { userAuthMiddleware } from '../authorize/middleware'
 import {
@@ -99,11 +102,12 @@ const app = new Hono<{ Bindings: Env }>()
     zValidator('json', z.object({
       name: z.string().optional(),
       grades: z.array(z.object({
-        threshold: z.number().int().positive(),
-        standardIncome: z.number().int().positive(),
+        threshold: z.number().int().min(0),
+        standardIncome: z.number().int().min(0),
       })).optional(),
     })),
     async (c) => {
+      const id = c.req.valid('param').id
       const { name, grades } = c.req.valid('json')
 
       // いずれか一方しか更新できない
@@ -114,7 +118,7 @@ const app = new Hono<{ Bindings: Env }>()
       if (name !== undefined) {
         const command: UpdateStandardIncomeTableNameCommand = {
           input: {
-            id: c.req.valid('param').id,
+            id,
             name,
           },
           state: { user: c.get('user') },
@@ -132,6 +136,7 @@ const app = new Hono<{ Bindings: Env }>()
               id,
               name,
             }))
+          .andThen(updated => updated ? ok(updated) : err(new EntityNotFoundError({ id })))
           .match(entity => c.json(entity), (error) => {
             console.error(error)
             return c.json({ error: 'not found' }, 404)
@@ -143,7 +148,7 @@ const app = new Hono<{ Bindings: Env }>()
       if (grades !== undefined) {
         const command: UpdateStandardIncomeTableGradesCommand = {
           input: {
-            id: c.req.valid('param').id,
+            id,
             grades,
           },
           state: { user: c.get('user') },
@@ -161,6 +166,7 @@ const app = new Hono<{ Bindings: Env }>()
               id,
               grades,
             }))
+          .andThen(updated => updated ? ok(updated) : err(new EntityNotFoundError({ id })))
           .match(entity => c.json(entity), (error) => {
             console.error(error)
             return c.json({ error: 'not found' }, 404)

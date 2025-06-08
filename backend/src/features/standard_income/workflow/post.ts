@@ -9,8 +9,8 @@ import type { ValidationError } from '@/logic/errors'
 export const PostStandardIncomeTableSchema = z.object({
   name: z.string(),
   grades: z.array(z.object({
-    threshold: z.number().int().positive(),
-    standardIncome: z.number().int().positive(),
+    threshold: z.number().int().min(0),
+    standardIncome: z.number().int().min(0),
   })),
 })
 type PostStandardIncomeTableSchema =

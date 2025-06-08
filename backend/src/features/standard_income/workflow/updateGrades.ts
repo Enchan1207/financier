@@ -12,8 +12,8 @@ import { fromSafePromise } from '@/logic/neverthrow'
 export const UpdateStandardIncomeTableGradesSchema = z.object({
   id: z.string().ulid(),
   grades: z.array(z.object({
-    threshold: z.number().int().positive(),
-    standardIncome: z.number().int().positive(),
+    threshold: z.number().int().min(0),
+    standardIncome: z.number().int().min(0),
   })),
 })
 type UpdateStandardIncomeTableGradesSchema =
