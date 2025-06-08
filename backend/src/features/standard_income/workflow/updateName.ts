@@ -4,7 +4,6 @@ import { z } from 'zod'
 
 import type { StandardIncomeTable } from '@/domains/standard_income'
 import type { User } from '@/domains/user'
-import type { EntityAuthorizationError } from '@/logic/errors'
 import { EntityNotFoundError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
 
@@ -64,12 +63,9 @@ CurrentTableQueried): TableNameUpdateEvent => ({
   update: { name },
 })
 
-type WorkflowError =
-  | EntityNotFoundError
-  | EntityAuthorizationError
 type UpdateStandardIncomeTableNameWorkflow =
 (command: UpdateStandardIncomeTableNameCommand) =>
-ResultAsync<TableNameUpdateEvent, WorkflowError>
+ResultAsync<TableNameUpdateEvent, EntityNotFoundError>
 
 export const createStandardIncomeTableNameUpdateWorkflow = (effects: {
   getStandardIncomeTable: (props: {

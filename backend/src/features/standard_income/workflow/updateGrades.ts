@@ -5,7 +5,7 @@ import { z } from 'zod'
 import type { StandardIncomeGrade, StandardIncomeTable } from '@/domains/standard_income'
 import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
-import type { EntityAuthorizationError, ValidationError } from '@/logic/errors'
+import type { ValidationError } from '@/logic/errors'
 import { EntityNotFoundError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
 
@@ -72,10 +72,7 @@ CurrentTableQueried): Result<TableGradesUpdateEvent, ValidationError> => createS
   update: { grades },
 }))
 
-type WorkflowError =
-  | EntityNotFoundError
-  | EntityAuthorizationError
-  | ValidationError
+type WorkflowError = EntityNotFoundError | ValidationError
 type UpdateStandardIncomeTableGradesWorkflow =
 (command: UpdateStandardIncomeTableGradesCommand) =>
 ResultAsync<TableGradesUpdateEvent, WorkflowError>

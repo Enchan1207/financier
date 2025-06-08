@@ -109,7 +109,7 @@ interface IncomeDefinitionUpdateCondition {
 }
 
 const buildIncomeDefinitionUpdateQuery = (db: D1Database):
-(id: IncomeDefinition['id'], props: IncomeDefinitionUpdateCondition['update']) => D1PreparedStatement => (id, {
+(userId: User['id'], id: IncomeDefinition['id'], props: IncomeDefinitionUpdateCondition['update']) => D1PreparedStatement => (userId, id, {
   name, kind, value, isTaxable, from, to,
 }) => {
   const fromDate = from ? getPeriodByFinancialMonth(from) : undefined
@@ -127,7 +127,7 @@ const buildIncomeDefinitionUpdateQuery = (db: D1Database):
     .filter(fragment => fragment !== undefined)
     .join(', ')
 
-  const stmt = `UPDATE income_definitions SET ${updatePart} WHERE id=?`
+  const stmt = `UPDATE income_definitions SET ${updatePart} WHERE id=? AND user_id=?`
 
   const params = [
     name,
@@ -138,6 +138,7 @@ const buildIncomeDefinitionUpdateQuery = (db: D1Database):
     toDate?.end.valueOf(),
     dayjs().valueOf(),
     id,
+    userId,
   ].filter(fragment => fragment !== undefined)
 
   const prepared = db
@@ -149,14 +150,15 @@ const buildIncomeDefinitionUpdateQuery = (db: D1Database):
 
 /** 更新後の範囲から外れる実績をクリーンアップする */
 const buildIncomeRecordCleanupQuery = (db: D1Database):
-(id: IncomeDefinition['id'], props: {
+(userId: User['id'], id: IncomeDefinition['id'], props: {
   from: dayjs.Dayjs
   to: dayjs.Dayjs
-}) => D1PreparedStatement => (id, { from, to }) => {
+}) => D1PreparedStatement => (userId, id, { from, to }) => {
   const stmt = `
   DELETE from income_records
   WHERE
-    definition_id = ?1
+    user_id = ?4
+    AND definition_id = ?1
     AND financial_month_id IN (
       SELECT
         r.financial_month_id
@@ -179,13 +181,14 @@ const buildIncomeRecordCleanupQuery = (db: D1Database):
       id,
       from.valueOf(),
       to.valueOf(),
+      userId,
     )
 }
 
 /** 報酬定義を更新する */
 export const updateIncomeDefinition = (db: D1Database):
-(id: IncomeDefinition['id'], props: IncomeDefinitionUpdateCondition) => Promise<IncomeDefinition | undefined> =>
-  async (id, input) => {
+(userId: User['id'], id: IncomeDefinition['id'], props: IncomeDefinitionUpdateCondition) => Promise<IncomeDefinition | undefined> =>
+  async (userId, id, input) => {
     const {
       update,
       current,
@@ -206,14 +209,17 @@ export const updateIncomeDefinition = (db: D1Database):
       : current.disabledAt
 
     const batchQueries: D1PreparedStatement[] = [
-      buildIncomeDefinitionUpdateQuery(db)(current.id, update),
-      buildIncomeRecordCleanupQuery(db)(current.id, {
+      buildIncomeDefinitionUpdateQuery(db)(userId, current.id, update),
+      buildIncomeRecordCleanupQuery(db)(userId, current.id, {
         from: newFrom,
         to: newTo,
       }),
       d1(db)
         .select(IncomeDefinitionRecord, 'income_definitions')
-        .where(condition('id', '==', id))
+        .where(every(
+          condition('id', '==', id),
+          condition('user_id', '==', userId),
+        ))
         .build(),
     ]
 
@@ -241,11 +247,14 @@ export const updateIncomeDefinition = (db: D1Database):
 
 /** idを指定して報酬定義を取得する */
 export const getIncomeDefinitionById = (db: D1Database):
-(id: IncomeDefinition['id']) => Promise<IncomeDefinition | undefined> =>
-  async (id) => {
+(userId: User['id'], id: IncomeDefinition['id']) => Promise<IncomeDefinition | undefined> =>
+  async (userId, id) => {
     const stmt = d1(db)
       .select(IncomeDefinitionRecord, 'income_definitions')
-      .where(condition('id', '==', id))
+      .where(every(
+        condition('id', '==', id),
+        condition('user_id', '==', userId),
+      ))
       .build()
 
     const result = await stmt.first<IncomeDefinitionRecord>()

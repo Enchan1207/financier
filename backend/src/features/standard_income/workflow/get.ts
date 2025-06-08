@@ -4,10 +4,7 @@ import { z } from 'zod'
 
 import type { StandardIncomeTable } from '@/domains/standard_income'
 import type { User } from '@/domains/user'
-import {
-  EntityAuthorizationError,
-  EntityNotFoundError,
-} from '@/logic/errors'
+import { EntityNotFoundError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
 
 export const GetStandardIncomeTableSchema = z.object({ id: z.string().ulid() })
@@ -35,18 +32,11 @@ const getStandardIncomeTable = (effects: {
     return err(new EntityNotFoundError({ id }))
   }
 
-  if (stored.userId !== userId) {
-    return err(new EntityAuthorizationError({
-      id,
-      userId,
-    }))
-  }
-
   return ok(stored)
 })
 
 type GetStandardIncomeTableWorkflow = (command: GetStandardIncomeTableCommand) =>
-ResultAsync<StandardIncomeTable, EntityNotFoundError | EntityAuthorizationError>
+ResultAsync<StandardIncomeTable, EntityNotFoundError>
 
 export const createStandardIncomeTableGetWorkflow = (effects: {
   getStandardIncomeTable: (props: {

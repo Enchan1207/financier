@@ -114,8 +114,9 @@ const app = new Hono<{ Bindings: Env }>()
 
       const response = workflow(command)
         .andThen(fromSafePromise(async (event) => {
-          const id = event.current.id
-          const updated = await updateIncomeDefinition(c.env.D1)(id, event)
+          const { id, userId } = event.current
+          const updated = await updateIncomeDefinition(c.env.D1)(
+            userId, id, event)
           return updated ? ok (updated) : err(new Error('unexpected update error'))
         }))
         .match(entity => c.json(entity), (error) => {

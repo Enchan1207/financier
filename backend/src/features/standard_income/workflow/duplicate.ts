@@ -5,7 +5,7 @@ import { z } from 'zod'
 import type { StandardIncomeTable } from '@/domains/standard_income'
 import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
-import type { EntityAuthorizationError, ValidationError } from '@/logic/errors'
+import type { ValidationError } from '@/logic/errors'
 import { EntityNotFoundError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
 
@@ -63,10 +63,7 @@ const duplicateTable = (queried: SourceTableQueried): Result<TableDuplicateEvent
     grades: queried.state.current.grades,
   }).map(entity => ({ entity }))
 
-type WorkflowError =
-  | EntityNotFoundError
-  | EntityAuthorizationError
-  | ValidationError
+type WorkflowError = EntityNotFoundError | ValidationError
 type DuplicateStandardIncomeTableWorkflow =
 (command: DuplicateStandardIncomeTableCommand) => ResultAsync<TableDuplicateEvent, WorkflowError>
 

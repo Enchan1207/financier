@@ -6,7 +6,7 @@ import { createIncomeDefinition } from '@/domains/income_definition/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 import { saveUser } from '@/features/authorize/dao'
-import { EntityAuthorizationError, EntityNotFoundError } from '@/logic/errors'
+import { EntityNotFoundError } from '@/logic/errors'
 
 import { getIncomeDefinitionById, insertIncomeDefinition } from '../dao'
 import { createIncomeDefinitionGetWorkflow } from './get'
@@ -74,7 +74,7 @@ describe('報酬定義取得ワークフロー', () => {
     }
 
     const result = await workflow(command)
-    expect(result._unsafeUnwrapErr()).toBeInstanceOf(EntityAuthorizationError)
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(EntityNotFoundError)
   })
 
   test('自分の項目を取得できること', async () => {
