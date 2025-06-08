@@ -1,0 +1,12 @@
+{
+    "name": "workflow-scripts",
+    "scripts": {
+        "coverage-diff": "tsx src/coverage-diff.ts"
+    },
+    "devDependencies": {
+        "tsx": "^4.19.4"
+    },
+    "dependencies": {
+        "zod": "^3.25.56"
+    }
+}

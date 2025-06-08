@@ -33,7 +33,6 @@ jobs:
         run: |
           summary="$( cat ./backend/coverage/coverage-summary.json | jq -rc '.total' )"
           echo "summary_${{ matrix.ref }}=$summary" >> "$GITHUB_OUTPUT"
-          echo ${{matrix.ref == 'target' && github.base_ref || github.head_ref }}
 
   list:
     runs-on: ubuntu-latest

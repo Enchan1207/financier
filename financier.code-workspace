@@ -7,8 +7,12 @@
       "path": "backend",
     },
     {
-      "name": "actions",
+      "name": "workflows",
       "path": ".github/workflows",
+    },
+    {
+      "name": "workflow-scripts",
+      "path": ".github/scripts",
     },
     {
       "path": "spec",
