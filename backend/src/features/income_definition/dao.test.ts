@@ -75,7 +75,8 @@ describe('基本的なCRUD', () => {
     let actual: IncomeDefinition | undefined
 
     beforeAll(async () => {
-      actual = await getIncomeDefinitionById(env.D1)(dummyDefinition.id)
+      actual = await getIncomeDefinitionById(env.D1)(
+        dummyUser.id, dummyDefinition.id)
     })
 
     test('同じ項目を取得できること', () => {
@@ -88,25 +89,26 @@ describe('基本的なCRUD', () => {
     let actual: IncomeDefinition | undefined
 
     beforeAll(async () => {
-      actual = await updateIncomeDefinition(env.D1)(dummyDefinition.id, {
-        current: dummyDefinition,
-        update: {
-          kind: 'related_by_workday',
-          name: '通勤手当',
-          isTaxable: undefined,
-          value: 300,
-          from: createFinancialMonthData({
-            financialYear: 2025,
-            month: 6,
-            workday: 20,
-          })._unsafeUnwrap(),
-          to: createFinancialMonthData({
-            financialYear: 2025,
-            month: 1,
-            workday: 20,
-          })._unsafeUnwrap(),
-        },
-      })
+      actual = await updateIncomeDefinition(env.D1)(dummyUser.id,
+        dummyDefinition.id, {
+          current: dummyDefinition,
+          update: {
+            kind: 'related_by_workday',
+            name: '通勤手当',
+            isTaxable: undefined,
+            value: 300,
+            from: createFinancialMonthData({
+              financialYear: 2025,
+              month: 6,
+              workday: 20,
+            })._unsafeUnwrap(),
+            to: createFinancialMonthData({
+              financialYear: 2025,
+              month: 1,
+              workday: 20,
+            })._unsafeUnwrap(),
+          },
+        })
     })
 
     test('値が更新されていること', () => {
@@ -321,7 +323,7 @@ describe('定義期間の更新', () => {
 
   describe('定義の開始月を5月にした場合', () => {
     beforeAll(async () => {
-      await updateIncomeDefinition(env.D1)(dummyDefinition.id, {
+      await updateIncomeDefinition(env.D1)(dummyUser.id, dummyDefinition.id, {
         current: dummyDefinition,
         update: {
           kind: undefined,
@@ -366,7 +368,7 @@ describe('定義期間の更新', () => {
 
   describe('定義の終了月を1月にした場合', () => {
     beforeAll(async () => {
-      await updateIncomeDefinition(env.D1)(dummyDefinition.id, {
+      await updateIncomeDefinition(env.D1)(dummyUser.id, dummyDefinition.id, {
         current: dummyDefinition,
         update: {
           kind: undefined,

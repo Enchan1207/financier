@@ -1,17 +1,15 @@
 import { env } from 'cloudflare:test'
 
-import type { FinancialMonthData } from '@/domains/financial_month'
-import { createFinancialMonthData } from '@/domains/financial_month/logic'
-import { createIncomeDefinition } from '@/domains/income_definition/logic'
+import { createStandardIncomeGrade, createStandardIncomeTable } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 import { saveUser } from '@/features/authorize/dao'
 import { EntityNotFoundError } from '@/logic/errors'
 
-import { getIncomeDefinitionById, insertIncomeDefinition } from '../dao'
-import { createIncomeDefinitionGetWorkflow } from './get'
+import { getStandardIncomeTable, insertStandardIncomeTable } from '../dao'
+import { createStandardIncomeTableGetWorkflow } from './get'
 
-describe('報酬定義取得ワークフロー', () => {
+describe('標準報酬月額表取得ワークフロー', () => {
   const dummyUser: User = createUser({
     name: 'testuser',
     email: 'test@example.com',
@@ -24,37 +22,34 @@ describe('報酬定義取得ワークフロー', () => {
     auth0UserId: 'auth0_another_user',
   })
 
-  const fromMonth: FinancialMonthData = createFinancialMonthData({
-    financialYear: 2025,
-    month: 4,
-    workday: 20,
-  })._unsafeUnwrap()
-
-  const toMonth: FinancialMonthData = createFinancialMonthData({
-    financialYear: 2025,
-    month: 12,
-    workday: 20,
-  })._unsafeUnwrap()
-
-  const dummyEntity = createIncomeDefinition({
+  const dummyEntity = createStandardIncomeTable({
     userId: dummyUser.id,
-    name: '手当1',
-    kind: 'related_by_workday',
-    value: 350,
-    isTaxable: true,
-    from: fromMonth,
-    to: toMonth,
+    name: 'test table',
+    grades: [
+      {
+        threshold: 0,
+        standardIncome: 50000,
+      },
+      {
+        threshold: 100000,
+        standardIncome: 100000,
+      },
+      {
+        threshold: 200000,
+        standardIncome: 200000,
+      },
+    ].map(grade => createStandardIncomeGrade(grade)._unsafeUnwrap()),
   })._unsafeUnwrap()
 
-  const workflow = createIncomeDefinitionGetWorkflow({
+  const workflow = createStandardIncomeTableGetWorkflow({
     //
-    getIncomeDefinitionById: getIncomeDefinitionById(env.D1),
+    getStandardIncomeTable: getStandardIncomeTable(env.D1),
   })
 
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)
     await saveUser(env.D1)(anotherUser)
-    await insertIncomeDefinition(env.D1)(dummyEntity)
+    await insertStandardIncomeTable(env.D1)(dummyEntity)
   })
 
   test('存在しない項目は取得できないこと', async () => {
@@ -84,6 +79,6 @@ describe('報酬定義取得ワークフロー', () => {
     }
 
     const actual = (await workflow(command))._unsafeUnwrap()
-    expect(actual.id).toStrictEqual(dummyEntity.id)
+    expect(actual).toStrictEqual(dummyEntity)
   })
 })

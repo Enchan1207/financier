@@ -6,6 +6,7 @@
     "build": "tsc",
     "dev": "wrangler --env=development dev",
     "test": "vitest",
+    "test:coverage": "vitest --coverage",
     "predeploy": "npm run build",
     "deploy": "wrangler deploy",
     "db:migrations:create": "wrangler --env=development d1 migrations create financier-backend-db-development",
@@ -21,6 +22,7 @@
     "@cloudflare/vitest-pool-workers": "0.8.32",
     "@hono/node-server": "^1.13.7",
     "@hono/zod-validator": "^0.4.2",
+    "@vitest/coverage-istanbul": "^3.1.4",
     "miniflare": "^3.20250124.1",
     "tsx": "^4.19.2"
   }
