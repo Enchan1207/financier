@@ -1,5 +1,6 @@
 // テストカバレッジのdiffをとる
 
+import * as fs from 'fs/promises'
 import { z } from 'zod'
 
 const CoverageSchema = z.object({
@@ -21,7 +22,7 @@ const CoverageSummarySchema = z.object({
 
 type CoverageSummary = z.infer<typeof CoverageSummarySchema>
 
-const main = (args: string[]): number => {
+const main = async (args: string[]): Promise<number> => {
   if (args.length !== 4) {
     console.error('Usage: coverage-diff [source] [target]')
     return 1
@@ -44,11 +45,15 @@ const main = (args: string[]): number => {
     .map(() => '-')
     .join('|')
 
-  console.log('branch |', headers.join(' | '))
-  console.log(separator)
-  console.log('target |', stringifyCoverageSummary(target))
-  console.log('source |', stringifyCoverageSummary(source))
-  console.log('diff |', stringifyCoverageSummaryDiff(diff))
+  const lines = [
+    `branch | ${headers.join(' | ')}`,
+    separator,
+    `target | ${stringifyCoverageSummary(target)}`,
+    `source | ${stringifyCoverageSummary(source)}`,
+    `diff | ${stringifyCoverageSummaryDiff(diff)}`,
+  ]
+  const commentBody = lines.join('\n')
+  await fs.writeFile('coverage-summary.txt', commentBody)
 
   return 0
 }
@@ -99,4 +104,9 @@ const compareCoverage = (source: Coverage, target: Coverage): Coverage => ({
   pct: target.pct - source.pct,
 })
 
-process.exit(main(process.argv))
+main(process.argv)
+  .then((exitCode) => process.exit(exitCode))
+  .catch((e: unknown) => {
+    console.error(e)
+    process.exit(1)
+  })
