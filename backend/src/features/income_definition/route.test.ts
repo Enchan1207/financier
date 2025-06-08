@@ -93,7 +93,14 @@ describe('報酬定義API', () => {
         200
       >
 
-      expect(result).toStrictEqual([dummyDefinition])
+      const expected = {
+        ...dummyDefinition,
+        enabledAt: dummyDefinition.enabledAt.toISOString(),
+        disabledAt: dummyDefinition.disabledAt.toISOString(),
+        updatedAt: dummyDefinition.updatedAt.toISOString(),
+      }
+
+      expect(result).toStrictEqual([expected])
     })
   })
 
@@ -119,7 +126,14 @@ describe('報酬定義API', () => {
           (typeof client)[':id']['$get'],
           200
         >
-        expect(result.id).toBe(dummyDefinition.id)
+        const expected = {
+          ...dummyDefinition,
+          enabledAt: dummyDefinition.enabledAt.toISOString(),
+          disabledAt: dummyDefinition.disabledAt.toISOString(),
+          updatedAt: dummyDefinition.updatedAt.toISOString(),
+        }
+
+        expect(result).toStrictEqual(expected)
       })
     })
 
