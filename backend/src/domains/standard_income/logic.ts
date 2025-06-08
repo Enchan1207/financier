@@ -12,7 +12,9 @@ export const createStandardIncomeGrade = (props: {
   threshold: number
   standardIncome: number
 }): Result<StandardIncomeGrade, ValidationError> =>
-  parseSchema(StandardIncomeGradeSchema, props).mapErr(() => new ValidationError())
+  parseSchema(StandardIncomeGradeSchema, props).mapErr(
+    () => new ValidationError(),
+  )
 
 export const createStandardIncomeTable = (props: {
   userId: string
@@ -29,18 +31,30 @@ export const createStandardIncomeTable = (props: {
     .mapErr(() => new ValidationError())
     .andThen(validateGradeContinuity)
 
-const validateGradeContinuity = (table: StandardIncomeTable): Result<StandardIncomeTable, ValidationError> => {
+const validateGradeContinuity = (
+  table: StandardIncomeTable,
+): Result<StandardIncomeTable, ValidationError> => {
   const grades = table.grades
 
   // 最初の階級における閾値はゼロ円から始まる
   if (grades[0].threshold !== 0) {
-    return err(new ValidationError('最小値の階級における閾値はゼロ円でなければなりません'))
+    return err(
+      new ValidationError(
+        '最小値の階級における閾値はゼロ円でなければなりません',
+      ),
+    )
   }
 
   // ある階級における標準報酬月額は、その閾値以上でなければならない
-  const isIncludesInvalidStandardIncome = grades.some(grade => grade.standardIncome < grade.threshold)
+  const isIncludesInvalidStandardIncome = grades.some(
+    (grade) => grade.standardIncome < grade.threshold,
+  )
   if (isIncludesInvalidStandardIncome) {
-    return err(new ValidationError('階級における標準報酬月額が閾値を下回ってはなりません'))
+    return err(
+      new ValidationError(
+        '階級における標準報酬月額が閾値を下回ってはなりません',
+      ),
+    )
   }
 
   // ある階級における閾値が、前の階級における標準報酬月額以下であってはならない
@@ -52,7 +66,11 @@ const validateGradeContinuity = (table: StandardIncomeTable): Result<StandardInc
     return isValid || grade.threshold <= grades[index - 1].standardIncome
   }, false)
   if (isIncludesInvalidThreshold) {
-    return err(new ValidationError('ある階級の閾値は前の階級における標準報酬月額を下回ってはなりません'))
+    return err(
+      new ValidationError(
+        'ある階級の閾値は前の階級における標準報酬月額を下回ってはなりません',
+      ),
+    )
   }
 
   return ok(table)

@@ -3,7 +3,10 @@ import type { InferResponseType } from 'hono'
 import { sign } from 'hono/jwt'
 import { testClient } from 'hono/testing'
 
-import { createStandardIncomeGrade, createStandardIncomeTable } from '@/domains/standard_income/logic'
+import {
+  createStandardIncomeGrade,
+  createStandardIncomeTable,
+} from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 
@@ -41,12 +44,16 @@ describe('標準報酬月額表API', () => {
   })._unsafeUnwrap()
 
   beforeAll(async () => {
-    token = await sign({
-      exp: Math.floor(Date.now() / 1000) + 60 * 60,
-      iss: `https://${env.AUTH_DOMAIN}/`,
-      sub: testUser.auth0UserId,
-      aud: [env.AUTH_AUDIENCE],
-    }, env.TEST_PRIVATE_KEY, 'RS256')
+    token = await sign(
+      {
+        exp: Math.floor(Date.now() / 1000) + 60 * 60,
+        iss: `https://${env.AUTH_DOMAIN}/`,
+        sub: testUser.auth0UserId,
+        aud: [env.AUTH_AUDIENCE],
+      },
+      env.TEST_PRIVATE_KEY,
+      'RS256',
+    )
 
     // テストユーザとテスト用月額表を登録
     await saveUser(env.D1)(testUser)
@@ -58,7 +65,10 @@ describe('標準報酬月額表API', () => {
   })
 
   test('単一の月額表を取得できること', async () => {
-    const result = await client[':id'].$get({ param: { id: testTable.id } }, { headers: { Authorization: `Bearer ${token}` } })
+    const result = await client[':id'].$get(
+      { param: { id: testTable.id } },
+      { headers: { Authorization: `Bearer ${token}` } },
+    )
 
     const stored = await result.json()
     expect(stored).toStrictEqual(testTable)
@@ -73,11 +83,14 @@ describe('標準報酬月額表API', () => {
           threshold: 0,
           standardIncome: 50000,
         },
-      ].map(grade => createStandardIncomeGrade(grade)._unsafeUnwrap()),
+      ].map((grade) => createStandardIncomeGrade(grade)._unsafeUnwrap()),
     })._unsafeUnwrap()
     await insertStandardIncomeTable(env.D1)(anotherTable)
 
-    const result = await client['index'].$get({ query: { order: 'asc' } }, { headers: { Authorization: `Bearer ${token}` } })
+    const result = await client['index'].$get(
+      { query: { order: 'asc' } },
+      { headers: { Authorization: `Bearer ${token}` } },
+    )
 
     const stored = await result.json()
     expect(stored).toStrictEqual([
@@ -114,7 +127,10 @@ describe('標準報酬月額表API', () => {
     }
 
     beforeAll(async () => {
-      actual = await client.index.$post({ json: input }, { headers: { Authorization: `Bearer ${token}` } })
+      actual = await client.index.$post(
+        { json: input },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
     })
 
     test('201が返ること', () => {
@@ -122,7 +138,7 @@ describe('標準報酬月額表API', () => {
     })
 
     test('作成されたエンティティを取得できること', async () => {
-      const created = await actual.json() as ResponseType
+      const created = (await actual.json()) as ResponseType
 
       const stored = await getStandardIncomeTable(env.D1)({
         userId: created.userId,
@@ -134,17 +150,20 @@ describe('標準報酬月額表API', () => {
   })
 
   describe('月額表の名前を更新できること', () => {
-    type ResponseType = InferResponseType<typeof client[':id']['$patch'], 200>
+    type ResponseType = InferResponseType<(typeof client)[':id']['$patch'], 200>
 
-    let actual: Awaited<ReturnType<typeof client[':id']['$patch']>>
+    let actual: Awaited<ReturnType<(typeof client)[':id']['$patch']>>
 
     const input = { name: '更新後の名前' }
 
     beforeAll(async () => {
-      actual = await client[':id'].$patch({
-        param: { id: testTable.id },
-        json: input,
-      }, { headers: { Authorization: `Bearer ${token}` } })
+      actual = await client[':id'].$patch(
+        {
+          param: { id: testTable.id },
+          json: input,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
     })
 
     test('200が返ること', () => {
@@ -152,7 +171,7 @@ describe('標準報酬月額表API', () => {
     })
 
     test('名前が更新されていること', async () => {
-      const updated = await actual.json() as ResponseType
+      const updated = (await actual.json()) as ResponseType
 
       const stored = await getStandardIncomeTable(env.D1)({
         userId: updated.userId,
@@ -168,9 +187,9 @@ describe('標準報酬月額表API', () => {
   })
 
   describe('月額表の等級を更新できること', () => {
-    type ResponseType = InferResponseType<typeof client[':id']['$patch'], 200>
+    type ResponseType = InferResponseType<(typeof client)[':id']['$patch'], 200>
 
-    let actual: Awaited<ReturnType<typeof client[':id']['$patch']>>
+    let actual: Awaited<ReturnType<(typeof client)[':id']['$patch']>>
 
     const input = {
       grades: [
@@ -190,10 +209,13 @@ describe('標準報酬月額表API', () => {
     }
 
     beforeAll(async () => {
-      actual = await client[':id'].$patch({
-        param: { id: testTable.id },
-        json: input,
-      }, { headers: { Authorization: `Bearer ${token}` } })
+      actual = await client[':id'].$patch(
+        {
+          param: { id: testTable.id },
+          json: input,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      )
     })
 
     test('200が返ること', () => {
@@ -201,7 +223,7 @@ describe('標準報酬月額表API', () => {
     })
 
     test('階級が更新されていること', async () => {
-      const updated = await actual.json() as ResponseType
+      const updated = (await actual.json()) as ResponseType
 
       const stored = await getStandardIncomeTable(env.D1)({
         userId: updated.userId,

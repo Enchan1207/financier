@@ -20,29 +20,37 @@ const getStandardIncomeTable = (effects: {
     userId: User['id']
     id: StandardIncomeTable['id']
   }) => Promise<StandardIncomeTable | undefined>
-}) => fromSafePromise(async (command: GetStandardIncomeTableCommand) => {
-  const { input: { id }, state: { user: { id: userId } } } = command
+}) =>
+  fromSafePromise(async (command: GetStandardIncomeTableCommand) => {
+    const {
+      input: { id },
+      state: {
+        user: { id: userId },
+      },
+    } = command
 
-  const stored = await effects.getStandardIncomeTable({
-    userId,
-    id,
+    const stored = await effects.getStandardIncomeTable({
+      userId,
+      id,
+    })
+
+    if (stored === undefined) {
+      return err(new EntityNotFoundError({ id }))
+    }
+
+    return ok(stored)
   })
 
-  if (stored === undefined) {
-    return err(new EntityNotFoundError({ id }))
-  }
+type GetStandardIncomeTableWorkflow = (
+  command: GetStandardIncomeTableCommand,
+) => ResultAsync<StandardIncomeTable, EntityNotFoundError>
 
-  return ok(stored)
-})
-
-type GetStandardIncomeTableWorkflow = (command: GetStandardIncomeTableCommand) =>
-ResultAsync<StandardIncomeTable, EntityNotFoundError>
-
-export const createStandardIncomeTableGetWorkflow = (effects: {
-  getStandardIncomeTable: (props: {
-    userId: User['id']
-    id: StandardIncomeTable['id']
-  }) => Promise<StandardIncomeTable | undefined>
-}): GetStandardIncomeTableWorkflow => command =>
-  ok(command)
-    .asyncAndThen(getStandardIncomeTable(effects))
+export const createStandardIncomeTableGetWorkflow =
+  (effects: {
+    getStandardIncomeTable: (props: {
+      userId: User['id']
+      id: StandardIncomeTable['id']
+    }) => Promise<StandardIncomeTable | undefined>
+  }): GetStandardIncomeTableWorkflow =>
+  (command) =>
+    ok(command).asyncAndThen(getStandardIncomeTable(effects))

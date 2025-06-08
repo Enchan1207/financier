@@ -1,7 +1,7 @@
 import type dayjs from '@/logic/dayjs'
 
 export const IncomeDefinitionKind = ['absolute', 'related_by_workday'] as const
-export type IncomeDefinitionKind = typeof IncomeDefinitionKind[number]
+export type IncomeDefinitionKind = (typeof IncomeDefinitionKind)[number]
 
 export type IncomeDefinition = {
   id: string

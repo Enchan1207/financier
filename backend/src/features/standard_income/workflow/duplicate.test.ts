@@ -1,6 +1,9 @@
 import { env } from 'cloudflare:test'
 
-import { createStandardIncomeGrade, createStandardIncomeTable } from '@/domains/standard_income/logic'
+import {
+  createStandardIncomeGrade,
+  createStandardIncomeTable,
+} from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 import { saveUser } from '@/features/authorize/dao'
@@ -34,7 +37,7 @@ describe('標準報酬月額表複製ワークフロー', () => {
         threshold: 110000,
         standardIncome: 120000,
       },
-    ].map(grade => createStandardIncomeGrade(grade)._unsafeUnwrap()),
+    ].map((grade) => createStandardIncomeGrade(grade)._unsafeUnwrap()),
   })._unsafeUnwrap()
 
   const workflow = createStandardIncomeTableDuplicateWorkflow({
@@ -49,7 +52,9 @@ describe('標準報酬月額表複製ワークフロー', () => {
   })
 
   describe('自分の項目を複製できること', () => {
-    let actual: ReturnType<Awaited<ReturnType<typeof workflow>>['_unsafeUnwrap']>['entity']
+    let actual: ReturnType<
+      Awaited<ReturnType<typeof workflow>>['_unsafeUnwrap']
+    >['entity']
 
     beforeAll(async () => {
       const command = {

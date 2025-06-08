@@ -14,4 +14,6 @@ interface ImportMetaEnv {
   readonly VITE_AUTH_AUDIENCE: string
 }
 
-interface ImportMeta { readonly env: ImportMetaEnv }
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}

@@ -38,8 +38,10 @@ export type Buildable<T, U> = T & { build(): U }
 export const createSelectionQueryBuilder = <
   M extends Model,
   S extends QueryState<M>,
-  P
->(statementBuilder: (state: S) => P): ((state: S) => Buildable<Query<M>, P>) => {
+  P,
+>(
+  statementBuilder: (state: S) => P,
+): ((state: S) => Buildable<Query<M>, P>) => {
   const _build = (state: S): Buildable<Query<M>, P> => ({
     limit(limit, offset) {
       const newState: S = {
@@ -55,10 +57,13 @@ export const createSelectionQueryBuilder = <
     orderBy(key, order) {
       const newState: S = {
         ...state,
-        orders: [...state.orders ?? [], {
-          key,
-          order: order ?? 'asc',
-        }],
+        orders: [
+          ...(state.orders ?? []),
+          {
+            key,
+            order: order ?? 'asc',
+          },
+        ],
       }
       return _build(newState)
     },

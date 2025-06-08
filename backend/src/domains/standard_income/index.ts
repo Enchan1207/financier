@@ -1,9 +1,11 @@
 import { z } from 'zod'
 
-export const StandardIncomeGradeSchema = z.object({
-  threshold: z.number().int().min(0),
-  standardIncome: z.number().int().min(0),
-}).brand()
+export const StandardIncomeGradeSchema = z
+  .object({
+    threshold: z.number().int().min(0),
+    standardIncome: z.number().int().min(0),
+  })
+  .brand()
 
 export const StandardIncomeTableSchema = z.object({
   id: z.string().ulid(),

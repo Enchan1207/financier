@@ -1,6 +1,9 @@
 import { env } from 'cloudflare:test'
 
-import { createStandardIncomeGrade, createStandardIncomeTable } from '@/domains/standard_income/logic'
+import {
+  createStandardIncomeGrade,
+  createStandardIncomeTable,
+} from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 import { saveUser } from '@/features/authorize/dao'
@@ -38,7 +41,7 @@ describe('標準報酬月額表取得ワークフロー', () => {
         threshold: 200000,
         standardIncome: 200000,
       },
-    ].map(grade => createStandardIncomeGrade(grade)._unsafeUnwrap()),
+    ].map((grade) => createStandardIncomeGrade(grade)._unsafeUnwrap()),
   })._unsafeUnwrap()
 
   const workflow = createStandardIncomeTableGetWorkflow({

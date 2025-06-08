@@ -39,62 +39,69 @@ const makeRecord = (entity: IncomeRecord): IncomeRecordRecord => ({
 })
 
 /** 月度idと定義idから実績を取得 */
-export const findIncomeRecord = (db: D1Database):
-(_: {
-  financialMonthId: string
-  definitionId: string
-}) => Promise<IncomeRecord | undefined> => async ({ financialMonthId, definitionId }) => {
-  const stmt = d1(db)
-    .select(IncomeRecordRecord, 'income_records')
-    .where(every(
-      condition('financial_month_id', '==', financialMonthId),
-      condition('definition_id', '==', definitionId),
-    ))
-    .build()
+export const findIncomeRecord =
+  (
+    db: D1Database,
+  ): ((_: {
+    financialMonthId: string
+    definitionId: string
+  }) => Promise<IncomeRecord | undefined>) =>
+  async ({ financialMonthId, definitionId }) => {
+    const stmt = d1(db)
+      .select(IncomeRecordRecord, 'income_records')
+      .where(
+        every(
+          condition('financial_month_id', '==', financialMonthId),
+          condition('definition_id', '==', definitionId),
+        ),
+      )
+      .build()
 
-  const record = await stmt.first<IncomeRecordRecord>()
-  return record ? makeEntity(record) : undefined
-}
+    const record = await stmt.first<IncomeRecordRecord>()
+    return record ? makeEntity(record) : undefined
+  }
 
 /**
  * 報酬実績を挿入する
  * @warning このメソッドは定義と実績の正しさ (期間が被っているかなど) を保証しません。
  * そういうのはワークフローでやってください。
  */
-export const insertIncomeRecord = (db: D1Database):
-(_: IncomeRecord) => Promise<IncomeRecord> => async (entity) => {
-  const record = makeRecord(entity)
+export const insertIncomeRecord =
+  (db: D1Database): ((_: IncomeRecord) => Promise<IncomeRecord>) =>
+  async (entity) => {
+    const record = makeRecord(entity)
 
-  const insertStmt = 'INSERT INTO income_records VALUES (?, ?, ?, ?, ?, ?)'
+    const insertStmt = 'INSERT INTO income_records VALUES (?, ?, ?, ?, ?, ?)'
 
-  await db
-    .prepare(insertStmt)
-    .bind(
-      record.user_id,
-      record.financial_month_id,
-      record.definition_id,
-      record.value,
-      record.updated_at,
-      record.updated_by,
-    )
-    .run()
+    await db
+      .prepare(insertStmt)
+      .bind(
+        record.user_id,
+        record.financial_month_id,
+        record.definition_id,
+        record.value,
+        record.updated_at,
+        record.updated_by,
+      )
+      .run()
 
-  return entity
-}
+    return entity
+  }
 
 /**
  * 報酬実績の値を更新する
  */
-export const updateIncomeRecordValue = (db: D1Database):
-(_: {
-  userId: string
-  financialMonthId: string
-  definitionId: string
-  value: number
-}) => Promise<IncomeRecord | undefined> => async ({
-  userId, financialMonthId, definitionId, value,
-}) => {
-  const upsertStmt = `
+export const updateIncomeRecordValue =
+  (
+    db: D1Database,
+  ): ((_: {
+    userId: string
+    financialMonthId: string
+    definitionId: string
+    value: number
+  }) => Promise<IncomeRecord | undefined>) =>
+  async ({ userId, financialMonthId, definitionId, value }) => {
+    const upsertStmt = `
   INSERT INTO income_records
   VALUES (?, ?, ?, ?, ?, "user")
   ON CONFLICT (financial_month_id, definition_id) DO UPDATE SET 
@@ -103,30 +110,28 @@ export const updateIncomeRecordValue = (db: D1Database):
     updated_by = excluded.updated_by
   `
 
-  const upsertQuery = db
-    .prepare(upsertStmt)
-    .bind(
-      userId,
-      financialMonthId,
-      definitionId,
-      value,
-      dayjs().valueOf(),
-    )
+    const upsertQuery = db
+      .prepare(upsertStmt)
+      .bind(userId, financialMonthId, definitionId, value, dayjs().valueOf())
 
-  const getQuery = d1(db)
-    .select(IncomeRecordRecord, 'income_records')
-    .where(every(
-      condition('financial_month_id', '==', financialMonthId),
-      condition('definition_id', '==', definitionId),
-      condition('user_id', '==', userId),
-    ))
-    .build()
+    const getQuery = d1(db)
+      .select(IncomeRecordRecord, 'income_records')
+      .where(
+        every(
+          condition('financial_month_id', '==', financialMonthId),
+          condition('definition_id', '==', definitionId),
+          condition('user_id', '==', userId),
+        ),
+      )
+      .build()
 
-  const queryResults = await db
-    .batch<IncomeRecordRecord>([upsertQuery, getQuery])
-  const updatedRaw = queryResults[1].results.at(0)
+    const queryResults = await db.batch<IncomeRecordRecord>([
+      upsertQuery,
+      getQuery,
+    ])
+    const updatedRaw = queryResults[1].results.at(0)
 
-  return updatedRaw ? makeEntity(updatedRaw) : undefined
-}
+    return updatedRaw ? makeEntity(updatedRaw) : undefined
+  }
 
 // TODO: 報酬実績のリセット (システム自動計算に戻す)

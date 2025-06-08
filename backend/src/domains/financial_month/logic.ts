@@ -15,7 +15,9 @@ export const createFinancialMonthData = (input: {
   month: number
   workday: number
 }): Result<FinancialMonthData, ValidationError> =>
-  parseSchema(FinancialMonthDataSchema, input).mapErr(() => new ValidationError())
+  parseSchema(FinancialMonthDataSchema, input).mapErr(
+    () => new ValidationError(),
+  )
 
 export const createFinancialMonth = (props: {
   userId: string
@@ -23,15 +25,13 @@ export const createFinancialMonth = (props: {
   month: number
   workday: number
 }): Result<FinancialMonth, ValidationError> => {
-  const {
-    month, financialYear, workday, userId,
-  } = props
+  const { month, financialYear, workday, userId } = props
 
   return createFinancialMonthData({
     financialYear,
     month,
     workday,
-  }).map(entity => ({
+  }).map((entity) => ({
     ...entity,
     id: ulid(),
     userId,
@@ -39,7 +39,9 @@ export const createFinancialMonth = (props: {
 }
 
 /** 会計月度オブジェクトが開始・終了する日時を取得する */
-export const getPeriodByFinancialMonth = (fm: FinancialMonthData): {
+export const getPeriodByFinancialMonth = (
+  fm: FinancialMonthData,
+): {
   start: dayjs.Dayjs
   end: dayjs.Dayjs
 } => {
@@ -56,7 +58,9 @@ export const getPeriodByFinancialMonth = (fm: FinancialMonthData): {
 }
 
 /** ある日時に相当する会計月度オブジェクトを得る */
-export const getFinancialMonthFromDate = (date: dayjs.Dayjs): FinancialMonthData | undefined => {
+export const getFinancialMonthFromDate = (
+  date: dayjs.Dayjs,
+): FinancialMonthData | undefined => {
   const dateWithTimezone = date.tz(financialTimezone)
 
   const year = dateWithTimezone.year()
@@ -68,5 +72,8 @@ export const getFinancialMonthFromDate = (date: dayjs.Dayjs): FinancialMonthData
     financialYear,
     month,
     workday: 20,
-  }).match(validated => validated, () => undefined)
+  }).match(
+    (validated) => validated,
+    () => undefined,
+  )
 }

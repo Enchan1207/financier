@@ -15,24 +15,38 @@ export interface GetIncomeDefinitionCommand {
   state: { user: User }
 }
 
-const getIncomeDefinition = (effects: Pick<WorkflowEffects, 'getIncomeDefinitionById'>) => fromSafePromise(async (command: GetIncomeDefinitionCommand) => {
-  const { input: { id }, state: { user: { id: userId } } } = command
+const getIncomeDefinition = (
+  effects: Pick<WorkflowEffects, 'getIncomeDefinitionById'>,
+) =>
+  fromSafePromise(async (command: GetIncomeDefinitionCommand) => {
+    const {
+      input: { id },
+      state: {
+        user: { id: userId },
+      },
+    } = command
 
-  const stored = await effects.getIncomeDefinitionById(userId, id)
-  if (stored === undefined) {
-    return err(new EntityNotFoundError({ id }))
-  }
+    const stored = await effects.getIncomeDefinitionById(userId, id)
+    if (stored === undefined) {
+      return err(new EntityNotFoundError({ id }))
+    }
 
-  return ok(stored)
-})
+    return ok(stored)
+  })
 
 type WorkflowEffects = {
   //
-  getIncomeDefinitionById: (userId: string, id: string) => Promise<IncomeDefinition | undefined>
+  getIncomeDefinitionById: (
+    userId: string,
+    id: string,
+  ) => Promise<IncomeDefinition | undefined>
 }
 
-type GetIncomeDefinitionWorkflow = (command: GetIncomeDefinitionCommand) => ResultAsync<IncomeDefinition, EntityNotFoundError>
+type GetIncomeDefinitionWorkflow = (
+  command: GetIncomeDefinitionCommand,
+) => ResultAsync<IncomeDefinition, EntityNotFoundError>
 
-export const createIncomeDefinitionGetWorkflow = (effects: WorkflowEffects): GetIncomeDefinitionWorkflow => command =>
-  ok(command)
-    .asyncAndThen(getIncomeDefinition(effects))
+export const createIncomeDefinitionGetWorkflow =
+  (effects: WorkflowEffects): GetIncomeDefinitionWorkflow =>
+  (command) =>
+    ok(command).asyncAndThen(getIncomeDefinition(effects))
