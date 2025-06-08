@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { breakpointsElement, useBreakpoints, useDark } from '@vueuse/core'
+import {
+  breakpointsElement, useBreakpoints, useDark,
+} from '@vueuse/core'
 import { BIconList } from 'bootstrap-icons-vue'
 import { ref, watch } from 'vue'
 

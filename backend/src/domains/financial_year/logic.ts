@@ -10,9 +10,7 @@ import type { FinancialYear } from '.'
 import { FinancialYearValueSchema } from '.'
 
 export const createFinancialYearValue = (value: number) =>
-  parseSchema(FinancialYearValueSchema, value).mapErr(
-    () => new ValidationError(),
-  )
+  parseSchema(FinancialYearValueSchema, value).mapErr(() => new ValidationError())
 
 export const createFinancialYear = (props: {
   userId: User['id']
@@ -25,17 +23,16 @@ export const createFinancialYear = (props: {
     return err(new ValidationError())
   }
 
-  const results = Months.map((month) =>
-    createFinancialMonth({
-      financialYear: yearParseResult.value,
-      userId,
-      month,
-      workday: 20, // TODO: 本来は各月の祝日を参照するべき
-    }),
-  )
-
-  return Result.combine(results).map((months) => ({
-    year: yearParseResult.value,
-    months,
+  const results = Months.map(month => createFinancialMonth({
+    financialYear: yearParseResult.value,
+    userId,
+    month,
+    workday: 20, // TODO: 本来は各月の祝日を参照するべき
   }))
+
+  return Result.combine(results)
+    .map(months => ({
+      year: yearParseResult.value,
+      months,
+    }))
 }

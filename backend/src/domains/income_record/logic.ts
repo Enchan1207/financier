@@ -11,7 +11,9 @@ export const createIncomeRecord = (props: {
   value: number
   updatedBy: IncomeRecordUpdator
 }): IncomeRecord => {
-  const { userId, financialMonthId, definitionId, value, updatedBy } = props
+  const {
+    userId, financialMonthId, definitionId, value, updatedBy,
+  } = props
 
   return {
     userId,

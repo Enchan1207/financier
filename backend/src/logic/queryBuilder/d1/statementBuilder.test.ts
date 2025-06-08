@@ -1,6 +1,8 @@
 import { z } from 'zod'
 
-import { condition, every, some } from '../conditionTree'
+import {
+  condition, every, some,
+} from '../conditionTree'
 import { buildD1Statement } from './statementBuilder'
 
 describe('buildD1Statement', () => {
@@ -48,12 +50,10 @@ describe('buildD1Statement', () => {
     const result = buildD1Statement({
       model: dummySchema,
       tableName: 'users',
-      orders: [
-        {
-          key: 'id',
-          order: 'desc',
-        },
-      ],
+      orders: [{
+        key: 'id',
+        order: 'desc',
+      }],
     })
 
     expect(result.query).toBe('SELECT id,name FROM users ORDER BY id DESC')
@@ -64,21 +64,17 @@ describe('buildD1Statement', () => {
     const result = buildD1Statement({
       model: dummySchema,
       tableName: 'users',
-      orders: [
-        {
-          key: 'id',
-          order: 'desc',
-        },
-        {
-          key: 'name',
-          order: 'asc',
-        },
-      ],
+      orders: [{
+        key: 'id',
+        order: 'desc',
+      },
+      {
+        key: 'name',
+        order: 'asc',
+      }],
     })
 
-    expect(result.query).toBe(
-      'SELECT id,name FROM users ORDER BY id DESC, name ASC',
-    )
+    expect(result.query).toBe('SELECT id,name FROM users ORDER BY id DESC, name ASC')
     expect(result.params).toStrictEqual([])
   })
 
@@ -110,13 +106,14 @@ describe('buildD1Statement', () => {
       tableName: 'users',
       condition: some(
         condition('id', '==', 2),
-        every(condition('id', '>', 3), condition('name', '!=', 'admin')),
+        every(
+          condition('id', '>', 3),
+          condition('name', '!=', 'admin'),
+        ),
       ),
     })
 
-    expect(result.query).toBe(
-      'SELECT id,name FROM users WHERE ( ( id == ?1 ) OR ( ( id > ?2 ) AND ( name != ?3 ) ) )',
-    )
+    expect(result.query).toBe('SELECT id,name FROM users WHERE ( ( id == ?1 ) OR ( ( id > ?2 ) AND ( name != ?3 ) ) )')
     expect(result.params).toStrictEqual([2, 3, 'admin'])
   })
 
@@ -128,21 +125,20 @@ describe('buildD1Statement', () => {
         limit: 10,
         offset: 2,
       },
-      orders: [
-        {
-          key: 'name',
-          order: 'desc',
-        },
-      ],
+      orders: [{
+        key: 'name',
+        order: 'desc',
+      }],
       condition: some(
         condition('id', '==', 2),
-        every(condition('id', '>', 3), condition('name', '!=', 'admin')),
+        every(
+          condition('id', '>', 3),
+          condition('name', '!=', 'admin'),
+        ),
       ),
     })
 
-    expect(result.query).toBe(
-      'SELECT id,name FROM users WHERE ( ( id == ?1 ) OR ( ( id > ?2 ) AND ( name != ?3 ) ) ) ORDER BY name DESC LIMIT ?4 OFFSET ?5',
-    )
+    expect(result.query).toBe('SELECT id,name FROM users WHERE ( ( id == ?1 ) OR ( ( id > ?2 ) AND ( name != ?3 ) ) ) ORDER BY name DESC LIMIT ?4 OFFSET ?5')
     expect(result.params).toStrictEqual([2, 3, 'admin', 10, 2])
   })
 })

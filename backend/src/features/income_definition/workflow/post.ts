@@ -31,23 +31,16 @@ export interface PostIncomeDefinitionCommand {
   state: { user: User }
 }
 
-export interface IncomeDefinitionRegistrationEvent {
-  entity: IncomeDefinition
-}
+export interface IncomeDefinitionRegistrationEvent { entity: IncomeDefinition }
 
-const createRegistrationEvent = (
-  command: PostIncomeDefinitionCommand,
-): Result<IncomeDefinitionRegistrationEvent, ValidationError> =>
+const createRegistrationEvent = (command: PostIncomeDefinitionCommand): Result<IncomeDefinitionRegistrationEvent, ValidationError> =>
   createIncomeDefinition({
     ...command.input,
     userId: command.state.user.id,
-  }).map((entity) => ({ entity }))
+  }).map(entity => ({ entity }))
 
-type PostIncomeDefinitionWorkflow = (
-  command: PostIncomeDefinitionCommand,
-) => Result<IncomeDefinitionRegistrationEvent, ValidationError>
+type PostIncomeDefinitionWorkflow = (command: PostIncomeDefinitionCommand) => Result<IncomeDefinitionRegistrationEvent, ValidationError>
 
 // もはやワークフローにするまでもないね……
-export const createIncomeDefinitionPostWorkflow =
-  (): PostIncomeDefinitionWorkflow => (command) =>
-    createRegistrationEvent(command)
+export const createIncomeDefinitionPostWorkflow = (): PostIncomeDefinitionWorkflow => command =>
+  createRegistrationEvent(command)

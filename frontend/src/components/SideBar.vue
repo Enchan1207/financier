@@ -1,15 +1,9 @@
 <script setup lang="ts">
 import {
-  breakpointsElement,
-  useBreakpoints,
-  useDark,
-  useToggle,
+  breakpointsElement, useBreakpoints, useDark, useToggle,
 } from '@vueuse/core'
 import {
-  BIconHouseFill,
-  BIconMoonFill,
-  BIconPencilSquare,
-  BIconSunFill,
+  BIconHouseFill, BIconMoonFill, BIconPencilSquare, BIconSunFill,
 } from 'bootstrap-icons-vue'
 import { useRouter } from 'vue-router'
 
@@ -46,7 +40,10 @@ const onClickNew = () => {
       </el-button>
     </div>
 
-    <el-menu :router="true" @select="emits('select')">
+    <el-menu
+      :router="true"
+      @select="emits('select')"
+    >
       <el-menu-item index="/">
         <el-icon><b-icon-house-fill /></el-icon>
         <span>ホーム</span>
@@ -54,7 +51,9 @@ const onClickNew = () => {
     </el-menu>
 
     <div class="appearance-switch-container sidebar-button-container">
-      <el-text> 外観: </el-text>
+      <el-text>
+        外観:
+      </el-text>
       <el-switch
         :model-value="isDark"
         :active-icon="BIconMoonFill"
@@ -90,7 +89,7 @@ const onClickNew = () => {
 }
 
 .sidebar-container .appearance-switch-container {
-  gap: 10px;
+  gap: 10px
 }
 
 .sidebar-container .add-button-container .el-button {

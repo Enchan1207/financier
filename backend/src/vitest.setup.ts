@@ -7,14 +7,10 @@ beforeAll(() => {
   fetchMock.activate()
   fetchMock.disableNetConnect()
 
-  fetchMock
-    .get(`https://${env.AUTH_DOMAIN}`)
-    .intercept({
-      method: 'GET',
-      path: '/.well-known/jwks.json',
-    })
-    .reply(200, { keys: keys.public_keys })
-    .persist()
+  fetchMock.get(`https://${env.AUTH_DOMAIN}`).intercept({
+    method: 'GET',
+    path: '/.well-known/jwks.json',
+  }).reply(200, { keys: keys.public_keys }).persist()
 
   env.TEST_PRIVATE_KEY = keys.private_key
 })

@@ -33,19 +33,13 @@ describe('報酬定義一覧取得ワークフロー', () => {
   const dummyApril = dummyFinancialYear.months.find(({ month }) => month === 4)!
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const dummyAugust = dummyFinancialYear.months.find(
-    ({ month }) => month === 8,
-  )!
+  const dummyAugust = dummyFinancialYear.months.find(({ month }) => month === 8)!
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const dummySeptember = dummyFinancialYear.months.find(
-    ({ month }) => month === 9,
-  )!
+  const dummySeptember = dummyFinancialYear.months.find(({ month }) => month === 9)!
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const dummyFebruary = dummyFinancialYear.months.find(
-    ({ month }) => month === 2,
-  )!
+  const dummyFebruary = dummyFinancialYear.months.find(({ month }) => month === 2)!
 
   const dummyDefinition1 = createIncomeDefinition({
     userId: dummyUser.id,
@@ -68,6 +62,7 @@ describe('報酬定義一覧取得ワークフロー', () => {
   })._unsafeUnwrap()
 
   const workflow = createIncomeDefinitionListWorkflow({
+    //
     findIncomeDefinitions: findIncomeDefinitions(env.D1),
   })
 
@@ -170,25 +165,24 @@ describe('報酬定義一覧取得ワークフロー', () => {
       at: '2025_09',
       expected: [dummyDefinition1.id, dummyDefinition2.id],
     },
-  ])(
-    'from: $from, to: $to, at: $at でフィルタした際 $expected.length件の定義が得られること',
-    async ({ from, to, at, expected }) => {
-      const command: UnvalidatedListIncomeDefinitionCommand = {
-        input: {
-          sortBy: 'enabledAt',
-          order: 'asc',
-          limit: 100,
-          from,
-          to,
-          at,
-        },
-        state: { user: dummyUser },
-      }
+  ])('from: $from, to: $to, at: $at でフィルタした際 $expected.length件の定義が得られること', async ({
+    from, to, at, expected,
+  }) => {
+    const command: UnvalidatedListIncomeDefinitionCommand = {
+      input: {
+        sortBy: 'enabledAt',
+        order: 'asc',
+        limit: 100,
+        from,
+        to,
+        at,
+      },
+      state: { user: dummyUser },
+    }
 
-      const actual = (await workflow(command))._unsafeUnwrap()
+    const actual = (await workflow(command))._unsafeUnwrap()
 
-      const ids = actual.map((def) => def.id)
-      expect(ids).toStrictEqual(expected)
-    },
-  )
+    const ids = actual.map(def => def.id)
+    expect(ids).toStrictEqual(expected)
+  })
 })

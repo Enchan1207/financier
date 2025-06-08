@@ -1,28 +1,32 @@
 {
   "folders": [
     {
-      "path": "frontend",
+      "path": "frontend"
     },
     {
-      "path": "backend",
+      "path": "backend"
     },
     {
+      
       "name": "actions",
-      "path": ".github/workflows",
+      "path": ".github/workflows"
     },
     {
-      "path": "spec",
+      "path": "spec"
     },
     {
       "name": "(root)",
-      "path": ".",
-    },
+      "path": "."
+    }
   ],
   "settings": {
     "eslint.useFlatConfig": true,
-    "eslint.workingDirectories": ["./frontend", "./backend"],
+    "eslint.workingDirectories": [
+      "./frontend",
+      "./backend"
+    ],
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "always",
+      "source.fixAll.eslint": "always"
     },
     "typescript.format.enable": false,
     "eslint.format.enable": true,
@@ -45,22 +49,25 @@
     },
     "npm.packageManager": "npm",
     "files.associations": {
-      "*.toml": "ini",
+      "*.toml": "ini"
     },
     "[scss]": {
-      "editor.defaultFormatter": "vscode.css-language-features",
+      "editor.defaultFormatter": "vscode.css-language-features"
     },
     "github.copilot.enable": {
       "*": false,
       "plaintext": false,
       "markdown": false,
-      "scminput": false,
+      "scminput": false
     },
     "[sql]": {
-      "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc",
-    },
+      "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc"
+    }
   },
   "extensions": {
-    "recommendations": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"],
-  },
+    "recommendations": [
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode"
+    ]
+  }
 }
