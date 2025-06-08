@@ -1,8 +1,7 @@
 // @ts-check
 // NOTE: プラグインの命名は eslint-plugin を削ったlowerCamelCase
 import eslint from '@eslint/js'
-import stylistic from '@stylistic/eslint-plugin'
-import stylisticTs from '@stylistic/eslint-plugin-ts'
+import prettierConfig from 'eslint-config-prettier'
 import * as importPlugin from 'eslint-plugin-import'
 import simpleImportSortPlugin from 'eslint-plugin-simple-import-sort'
 import unusedImportsPlugin from 'eslint-plugin-unused-imports'
@@ -16,16 +15,11 @@ export default tseslint.config(
 
   {
     name: 'global ignore',
-    ignores: [
-      '**/dist',
-      '**/node_modules',
-      '**/.wrangler/',
-    ],
+    ignores: ['**/dist', '**/node_modules', '**/.wrangler/'],
   },
 
   // MARK: - Shared configurations
   eslint.configs.recommended,
-  stylistic.configs.customize({ flat: true }),
 
   // configurations for TypeScript with type checking
   // based on: https://typescript-eslint.io/getting-started/typed-linting
@@ -39,9 +33,7 @@ export default tseslint.config(
       parser: tseslint.parser,
       parserOptions: { project: true },
     },
-    extends: [
-      tseslint.configs.strictTypeChecked,
-    ],
+    extends: [tseslint.configs.strictTypeChecked],
   },
 
   // configurations for Vue
@@ -62,10 +54,7 @@ export default tseslint.config(
         extraFileExtensions: ['.vue'],
       },
     },
-    extends: [
-      tseslint.configs.strict,
-      vuePlugin.configs['flat/recommended'],
-    ],
+    extends: [tseslint.configs.strict, vuePlugin.configs['flat/recommended']],
   },
 
   // configurations for config files
@@ -80,7 +69,7 @@ export default tseslint.config(
   {
     name: 'import rules',
     plugins: {
-      'import': importPlugin,
+      import: importPlugin,
       'simple-import-sort': simpleImportSortPlugin,
       'unused-import': unusedImportsPlugin,
     },
@@ -106,75 +95,35 @@ export default tseslint.config(
   },
 
   {
-    name: 'custom styling',
-    files: ['**/*.ts', '**/*.vue', '**/*.mjs'],
-    plugins: {
-      '@stylistic': stylistic,
-      '@stylistic/ts': stylisticTs,
-    },
-    rules: {
-      '@stylistic/max-len': [
-        'error',
-        {
-          code: 80,
-          ignoreUrls: true,
-          ignoreStrings: true,
-          ignoreTemplateLiterals: true,
-          ignorePattern: '=>',
-        },
-      ],
-      '@stylistic/comma-dangle': [
-        'error',
-        {
-          arrays: 'always-multiline',
-          objects: 'always-multiline',
-          imports: 'always-multiline',
-          exports: 'always-multiline',
-          functions: 'always-multiline',
-        },
-      ],
-      '@stylistic/object-property-newline': 'error',
-      '@stylistic/padding-line-between-statements': 'error',
-      '@stylistic/object-curly-newline': ['error',
-        {
-          multiline: true,
-          minProperties: 3,
-        },
-      ],
-      '@stylistic/ts/no-extra-parens': 'error',
-    },
-  },
-
-  {
     name: 'frontend rules',
     files: ['frontend/**/*.ts', 'frontend/**/*.vue'],
     plugins: { vue: vuePlugin },
     rules: {
       'no-console': 'warn',
       'no-restricted-imports': 'off',
-      '@typescript-eslint/no-restricted-imports': ['error', {
-        paths: [
-          {
-            name: 'dayjs',
-            message: 'Use @/logic/dayjs instead.',
-          },
-        ],
-        patterns: [
-          {
-            group: ['@routes/**'],
-            message: 'Do not use backend types.',
-            allowTypeImports: false,
-          },
-        ],
-      }],
-      'vue/no-undef-components': ['error', {
-        ignorePatterns: [
-          '^Router[A-Z]',
-          '^router-[a-z]',
-          '^el-[a-z]+',
-        ],
-      },
-
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'dayjs',
+              message: 'Use @/logic/dayjs instead.',
+            },
+          ],
+          patterns: [
+            {
+              group: ['@routes/**'],
+              message: 'Do not use backend types.',
+              allowTypeImports: false,
+            },
+          ],
+        },
+      ],
+      'vue/no-undef-components': [
+        'error',
+        {
+          ignorePatterns: ['^Router[A-Z]', '^router-[a-z]', '^el-[a-z]+'],
+        },
       ],
     },
   },
@@ -193,14 +142,17 @@ export default tseslint.config(
     name: 'backend rules',
     files: ['backend/**/*.ts', 'backend/**/*.vue'],
     rules: {
-      '@typescript-eslint/no-restricted-imports': ['error', {
-        paths: [
-          {
-            name: 'dayjs',
-            message: 'Use @/logic/dayjs instead.',
-          },
-        ],
-      }],
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'dayjs',
+              message: 'Use @/logic/dayjs instead.',
+            },
+          ],
+        },
+      ],
     }, // there is no rules for backend yet...
   },
 
@@ -208,7 +160,7 @@ export default tseslint.config(
     name: 'common rules',
     files: ['**/*.ts', '**/*.vue'],
     rules: {
-      'eqeqeq': ['error', 'always'],
+      eqeqeq: ['error', 'always'],
       'no-useless-rename': 'error',
       '@typescript-eslint/restrict-template-expressions': [
         'error',
@@ -220,4 +172,6 @@ export default tseslint.config(
       ],
     },
   },
+
+  prettierConfig,
 )
