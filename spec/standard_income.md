@@ -212,6 +212,104 @@ CREATE TABLE standard_income_grades (
 
 ## ルーティング
 
-各機能へのルーティングは以下の通りとする。
+各機能へのルーティングは以下の通りとする。基本的なI/Fは各ワークフローに対応させる。
+ワークフロー後の副作用は各ルートのハンドラ内で実施する。
 
-TBD
+### 標準報酬月額表の取得(単一)
+
+```
+GET /standard_income/:id
+```
+
+- request
+  - path_param
+    - `id` 標準報酬月額表のエンティティID
+- response
+  - 200
+    - 標準報酬月額表
+  - 404
+    - idに対応するエンティティが見つからない場合
+
+### 標準報酬月額表の取得(リスト)
+
+```
+GET /standard_income/:id
+```
+
+- request 
+  - query_param
+     - `order` 昇順・降順
+- response
+  - 200
+    - 標準報酬月額表の一覧
+
+### 標準報酬月額表の作成
+
+```
+POST /standard_income
+```
+
+- request 
+  - body
+     - `name` 標準報酬月額表の名前
+     - `grades` 標準報酬月額表の階級リスト
+- response
+  - 201
+    - 作成されたエンティティ
+  - 400
+    - リクエストボディが不正 (zValidatorで担保)
+
+### 標準報酬月額表名の更新
+
+```
+PATCH /standard_income/:id
+```
+
+- request 
+  - body
+     - `name` 標準報酬月額表の名前
+- response
+  - 200
+    - 更新されたエンティティ
+  - 404
+    - idに対応するエンティティが見つからない
+  - 400
+    - リクエストボディが不正 (zValidatorで担保)
+
+### 標準報酬月額表階級の更新
+
+```
+PATCH /standard_income/:id
+```
+
+- request 
+  - body
+     - `grades` 標準報酬月額表の階級リスト
+- response
+  - 200
+    - 更新されたエンティティ
+  - 404
+    - idに対応するエンティティが見つからない
+  - 400
+    - リクエストボディが不正 (zValidatorで担保)
+
+> [!NOTE]
+> 
+> 名前と階級の更新は同じエンドポイントで担う。
+> リクエストスキーマはそれぞれの和集合とし、どちらの値が入っているかで判断する。
+> 両方入ってきたときは400を返す。
+
+### 標準報酬月額表の複製
+
+```
+POST /standard_income/:id/duplicate
+```
+
+- request
+  - path_param
+    - `id` 標準報酬月額表のエンティティID
+- response
+  - 201
+    - 複製された標準報酬月額表
+  - 404
+    - idに対応するエンティティが見つからない場合
