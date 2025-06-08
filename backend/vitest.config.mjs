@@ -31,6 +31,7 @@ export default defineWorkersConfig({
     coverage: {
       provider: 'istanbul',
       include: ['src/domains/**', 'src/features/**'],
+      reporter: ['text-summary', 'json-summary'],
     },
   },
 })
