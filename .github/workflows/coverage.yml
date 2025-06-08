@@ -38,4 +38,4 @@ jobs:
     runs-on: ubuntu-latest
     needs: [emit-coverage]
     steps:
-      - run: echo '${{ toJSON(needs.emit-coverage.outputs) }}'
+      - run: npm -w '.github/scripts' run coverage-diff '${{ needs.emit-coverage.outputs.summary_source }}' '${{ needs.emit-coverage.outputs.summary_target }}'
