@@ -8,10 +8,7 @@ import type { IncomeDefinition } from '@/domains/income_definition'
 import { IncomeDefinitionKind } from '@/domains/income_definition'
 import type { User } from '@/domains/user'
 import type { ValidationError } from '@/logic/errors'
-import {
-  EntityAuthorizationError,
-  EntityNotFoundError,
-} from '@/logic/errors'
+import { EntityNotFoundError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
 
 export const PutIncomeDefinitionQuerySchema = z.object({
@@ -74,22 +71,12 @@ export interface IncomeDefinitionUpdateEvent {
   }
 }
 
-const queryCurrentDefinition = (effects: {
-  //
-  getIncomeDefinitionById: (id: string) => Promise<IncomeDefinition | undefined>
-}) => fromSafePromise(async (command: PutIncomeDefinitionCommand) => {
+const queryCurrentDefinition = (effects: Pick<WorkflowEffects, 'getIncomeDefinitionById'>) => fromSafePromise(async (command: PutIncomeDefinitionCommand) => {
   const { state: { id }, state: { user: { id: userId } } } = command
 
-  const stored = await effects.getIncomeDefinitionById(id)
+  const stored = await effects.getIncomeDefinitionById(userId, id)
   if (stored === undefined) {
     return err(new EntityNotFoundError({ id }))
-  }
-
-  if (stored.userId !== userId) {
-    return err(new EntityAuthorizationError({
-      id,
-      userId,
-    }))
   }
 
   return ok({
@@ -117,12 +104,14 @@ const createUpdateEvent = (command: CurrentDefinitionQueried): IncomeDefinitionU
   }
 }
 
-type IncomeDefinitionPutWorkflow = (command: PutIncomeDefinitionCommand) => ResultAsync<IncomeDefinitionUpdateEvent, EntityNotFoundError | EntityAuthorizationError | ValidationError>
+type IncomeDefinitionPutWorkflow = (command: PutIncomeDefinitionCommand) => ResultAsync<IncomeDefinitionUpdateEvent, EntityNotFoundError | ValidationError>
 
-export const createIncomeDefinitionPutWorkflow = (effects: {
+type WorkflowEffects = {
   //
-  getIncomeDefinitionById: (id: string) => Promise<IncomeDefinition | undefined>
-}): IncomeDefinitionPutWorkflow => command =>
+  getIncomeDefinitionById: (userId: string, id: string) => Promise<IncomeDefinition | undefined>
+}
+
+export const createIncomeDefinitionPutWorkflow = (effects: WorkflowEffects): IncomeDefinitionPutWorkflow => command =>
   ok(command)
     .asyncAndThen(queryCurrentDefinition(effects))
     .map(createUpdateEvent)
