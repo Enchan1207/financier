@@ -1,6 +1,9 @@
 import { env } from 'cloudflare:test'
 
-import { createFinancialMonthData, getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
+import {
+  createFinancialMonthData,
+  getPeriodByFinancialMonth,
+} from '@/domains/financial_month/logic'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
@@ -14,7 +17,9 @@ import { insertFinancialYear } from '../financial_year/dao'
 import { findIncomeRecord, insertIncomeRecord } from '../income_record/dao'
 import {
   findIncomeDefinitions,
-  getIncomeDefinitionById, insertIncomeDefinition, updateIncomeDefinition,
+  getIncomeDefinitionById,
+  insertIncomeDefinition,
+  updateIncomeDefinition,
 } from './dao'
 
 /** エンティティを相互変換可能な型に変換する */
@@ -79,8 +84,9 @@ describe('基本的なCRUD', () => {
     })
 
     test('同じ項目を取得できること', () => {
-      expect(makeComparable(actual))
-        .toStrictEqual(makeComparable(dummyDefinition))
+      expect(makeComparable(actual)).toStrictEqual(
+        makeComparable(dummyDefinition),
+      )
     })
   })
 
@@ -110,17 +116,21 @@ describe('基本的なCRUD', () => {
     })
 
     test('値が更新されていること', () => {
-      const { start } = getPeriodByFinancialMonth(createFinancialMonthData({
-        financialYear: 2025,
-        month: 6,
-        workday: 20,
-      })._unsafeUnwrap())
+      const { start } = getPeriodByFinancialMonth(
+        createFinancialMonthData({
+          financialYear: 2025,
+          month: 6,
+          workday: 20,
+        })._unsafeUnwrap(),
+      )
 
-      const { end } = getPeriodByFinancialMonth(createFinancialMonthData({
-        financialYear: 2025,
-        month: 1,
-        workday: 20,
-      })._unsafeUnwrap())
+      const { end } = getPeriodByFinancialMonth(
+        createFinancialMonthData({
+          financialYear: 2025,
+          month: 1,
+          workday: 20,
+        })._unsafeUnwrap(),
+      )
 
       expect(makeComparable(actual)).toStrictEqual({
         id: dummyDefinition.id,
@@ -219,8 +229,9 @@ describe('詳細な検索', () => {
       },
     })
 
-    expect(actual.map(makeComparable))
-      .toStrictEqual(expected.map(makeComparable))
+    expect(actual.map(makeComparable)).toStrictEqual(
+      expected.map(makeComparable),
+    )
   })
 
   test('年度全体での検索', async () => {
@@ -235,8 +246,9 @@ describe('詳細な検索', () => {
       },
     })
 
-    expect(actual.map(makeComparable))
-      .toStrictEqual([dummyDefinition1, dummyDefinition2].map(makeComparable))
+    expect(actual.map(makeComparable)).toStrictEqual(
+      [dummyDefinition1, dummyDefinition2].map(makeComparable),
+    )
   })
 })
 
@@ -274,10 +286,14 @@ describe('定義期間の更新', () => {
   const dummyApril = dummyFinancialYear.months.find(({ month }) => month === 4)!
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const dummySeptember = dummyFinancialYear.months.find(({ month }) => month === 9)!
+  const dummySeptember = dummyFinancialYear.months.find(
+    ({ month }) => month === 9,
+  )!
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const dummyFebruary = dummyFinancialYear.months.find(({ month }) => month === 2)!
+  const dummyFebruary = dummyFinancialYear.months.find(
+    ({ month }) => month === 2,
+  )!
 
   // 4月度の実績
   const dummyRecord1 = createIncomeRecord({

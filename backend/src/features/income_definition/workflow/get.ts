@@ -16,31 +16,45 @@ export interface GetIncomeDefinitionCommand {
 }
 
 const getIncomeDefinition = (effects: {
-  //
   getIncomeDefinitionById: (id: string) => Promise<IncomeDefinition | undefined>
-}) => fromSafePromise(async (command: GetIncomeDefinitionCommand) => {
-  const { input: { id }, state: { user: { id: userId } } } = command
+}) =>
+  fromSafePromise(async (command: GetIncomeDefinitionCommand) => {
+    const {
+      input: { id },
+      state: {
+        user: { id: userId },
+      },
+    } = command
 
-  const stored = await effects.getIncomeDefinitionById(id)
-  if (stored === undefined) {
-    return err(new EntityNotFoundError({ id }))
-  }
+    const stored = await effects.getIncomeDefinitionById(id)
+    if (stored === undefined) {
+      return err(new EntityNotFoundError({ id }))
+    }
 
-  if (stored.userId !== userId) {
-    return err(new EntityAuthorizationError({
-      id,
-      userId,
-    }))
-  }
+    if (stored.userId !== userId) {
+      return err(
+        new EntityAuthorizationError({
+          id,
+          userId,
+        }),
+      )
+    }
 
-  return ok(stored)
-})
+    return ok(stored)
+  })
 
-type GetIncomeDefinitionWorkflow = (command: GetIncomeDefinitionCommand) => ResultAsync<IncomeDefinition, EntityNotFoundError | EntityAuthorizationError>
+type GetIncomeDefinitionWorkflow = (
+  command: GetIncomeDefinitionCommand,
+) => ResultAsync<
+  IncomeDefinition,
+  EntityNotFoundError | EntityAuthorizationError
+>
 
-export const createIncomeDefinitionGetWorkflow = (effects: {
-  //
-  getIncomeDefinitionById: (id: string) => Promise<IncomeDefinition | undefined>
-}): GetIncomeDefinitionWorkflow => command =>
-  ok(command)
-    .asyncAndThen(getIncomeDefinition(effects))
+export const createIncomeDefinitionGetWorkflow =
+  (effects: {
+    getIncomeDefinitionById: (
+      id: string,
+    ) => Promise<IncomeDefinition | undefined>
+  }): GetIncomeDefinitionWorkflow =>
+  (command) =>
+    ok(command).asyncAndThen(getIncomeDefinition(effects))

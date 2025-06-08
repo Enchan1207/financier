@@ -16,11 +16,10 @@ export class EntityNotFoundError extends Error {
 }
 
 export class EntityAuthorizationError extends Error {
-  constructor(props: {
-    id: string
-    userId: User['id']
-  }) {
-    super(`ユーザ ${props.userId} はエンティティ ${props.id} に対するアクセス権を持たない`)
+  constructor(props: { id: string; userId: User['id'] }) {
+    super(
+      `ユーザ ${props.userId} はエンティティ ${props.id} に対するアクセス権を持たない`,
+    )
     this.name = 'EntityAuthorizationError'
     this.cause = {
       id: props.id,

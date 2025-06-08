@@ -1,9 +1,14 @@
 import { z } from 'zod'
 
 import type {
-  FinancialMonth, FinancialMonthData, WorkdayValue,
+  FinancialMonth,
+  FinancialMonthData,
+  WorkdayValue,
 } from '@/domains/financial_month'
-import { FinancialMonthValueSchema, WorkdayValueSchema } from '@/domains/financial_month'
+import {
+  FinancialMonthValueSchema,
+  WorkdayValueSchema,
+} from '@/domains/financial_month'
 import { FinancialYearValueSchema } from '@/domains/financial_year'
 import type { User } from '@/domains/user'
 import type dayjs from '@/logic/dayjs'
@@ -23,16 +28,23 @@ export const FinancialMonthRecord = z.object({
 })
 export type FinancialMonthRecord = z.infer<typeof FinancialMonthRecord>
 
-export const getFinancialMonthByFinancialMonth = (db: D1Database):
-(userId: string, financialMonth: FinancialMonthData) => Promise<FinancialMonth | undefined> =>
+export const getFinancialMonthByFinancialMonth =
+  (
+    db: D1Database,
+  ): ((
+    userId: string,
+    financialMonth: FinancialMonthData,
+  ) => Promise<FinancialMonth | undefined>) =>
   async (userId, { financialYear, month }) => {
     const stmt = d1(db)
       .select(FinancialMonthRecord, 'financial_months')
-      .where(every(
-        condition('user_id', '==', userId),
-        condition('financial_year', '==', financialYear),
-        condition('month', '==', month),
-      ))
+      .where(
+        every(
+          condition('user_id', '==', userId),
+          condition('financial_year', '==', financialYear),
+          condition('month', '==', month),
+        ),
+      )
       .build()
 
     const record = await stmt.first<FinancialMonthRecord>()
@@ -40,18 +52,25 @@ export const getFinancialMonthByFinancialMonth = (db: D1Database):
     return item
   }
 
-export const findFinancialMonthsByDate = (db: D1Database):
-(userId: string, date: dayjs.Dayjs) => Promise<FinancialMonth | undefined> =>
+export const findFinancialMonthsByDate =
+  (
+    db: D1Database,
+  ): ((
+    userId: string,
+    date: dayjs.Dayjs,
+  ) => Promise<FinancialMonth | undefined>) =>
   async (userId, date) => {
     const timestamp = date.valueOf()
 
     const stmt = d1(db)
       .select(FinancialMonthRecord, 'financial_months')
-      .where(every(
-        condition('user_id', '==', userId),
-        condition('started_at', '<=', timestamp),
-        condition('ended_at', '>=', timestamp),
-      ))
+      .where(
+        every(
+          condition('user_id', '==', userId),
+          condition('started_at', '<=', timestamp),
+          condition('ended_at', '>=', timestamp),
+        ),
+      )
       .build()
 
     const record = await stmt.first<FinancialMonthRecord>()
@@ -59,10 +78,17 @@ export const findFinancialMonthsByDate = (db: D1Database):
     return item
   }
 
-export const updateFinancialMonth = (db: D1Database):
-(userId: User['id'], financialMonthId: FinancialMonth['id'], props: { workday: WorkdayValue }) => Promise<FinancialMonth | undefined> =>
+export const updateFinancialMonth =
+  (
+    db: D1Database,
+  ): ((
+    userId: User['id'],
+    financialMonthId: FinancialMonth['id'],
+    props: { workday: WorkdayValue },
+  ) => Promise<FinancialMonth | undefined>) =>
   async (userId, financialMonthId, { workday }) => {
-    const updateQueryBase = 'UPDATE financial_months SET workday=? WHERE id=? AND user_id=?'
+    const updateQueryBase =
+      'UPDATE financial_months SET workday=? WHERE id=? AND user_id=?'
     const updateQuery = db
       .prepare(updateQueryBase)
       .bind(workday, financialMonthId, userId)

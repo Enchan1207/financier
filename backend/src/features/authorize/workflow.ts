@@ -24,10 +24,13 @@ export interface UserPrepared {
   }
 }
 
-export type AuthorizeWorkflow = (command: Command) => ResultAsync<UserPrepared, Error>
+export type AuthorizeWorkflow = (
+  command: Command,
+) => ResultAsync<UserPrepared, Error>
 
-const lookupUserByAuth0Id = (effects: { getUserByAuth0Id: (id: string) => Promise<User | undefined> }):
-((command: Command) => ResultAsync<UserPrepared, Error>) =>
+const lookupUserByAuth0Id = (effects: {
+  getUserByAuth0Id: (id: string) => Promise<User | undefined>
+}): ((command: Command) => ResultAsync<UserPrepared, Error>) =>
   fromSafePromise(async (command) => {
     const user = await effects.getUserByAuth0Id(command.input.auth0UserId)
     return user
@@ -38,15 +41,22 @@ const lookupUserByAuth0Id = (effects: { getUserByAuth0Id: (id: string) => Promis
             stored: true,
           },
         })
-      : err(new Error('与えられたidに合致するユーザは存在しない', { cause: command }))
+      : err(
+          new Error('与えられたidに合致するユーザは存在しない', {
+            cause: command,
+          }),
+        )
   })
 
-const createTentativeUser = (effects: { fetchUserInfo: (token: string) => Promise<Auth0UserInfo | undefined> }):
-((command: Command) => ResultAsync<UserPrepared, Error>) =>
+const createTentativeUser = (effects: {
+  fetchUserInfo: (token: string) => Promise<Auth0UserInfo | undefined>
+}): ((command: Command) => ResultAsync<UserPrepared, Error>) =>
   fromSafePromise(async (command) => {
     const userInfo = await effects.fetchUserInfo(command.input.token)
     if (userInfo === undefined) {
-      return err(new Error('Auth0からユーザ情報を取得できなかった', { cause: command }))
+      return err(
+        new Error('Auth0からユーザ情報を取得できなかった', { cause: command }),
+      )
     }
 
     const newUser: User = {
@@ -65,15 +75,19 @@ const createTentativeUser = (effects: { fetchUserInfo: (token: string) => Promis
     })
   })
 
-export const createAuthorizeWorkflow = (effects: {
-  //
-  getUserByAuth0Id: (id: string) => Promise<User | undefined>
-}): AuthorizeWorkflow => (command: Command) => ok(command)
-  .asyncAndThen(lookupUserByAuth0Id({
-    //
-    getUserByAuth0Id: effects.getUserByAuth0Id,
-  }))
-  .orElse(() => createTentativeUser({
-    //
-    fetchUserInfo: fetchUserInfo(command.state.authDomain),
-  })(command))
+export const createAuthorizeWorkflow =
+  (effects: {
+    getUserByAuth0Id: (id: string) => Promise<User | undefined>
+  }): AuthorizeWorkflow =>
+  (command: Command) =>
+    ok(command)
+      .asyncAndThen(
+        lookupUserByAuth0Id({
+          getUserByAuth0Id: effects.getUserByAuth0Id,
+        }),
+      )
+      .orElse(() =>
+        createTentativeUser({
+          fetchUserInfo: fetchUserInfo(command.state.authDomain),
+        })(command),
+      )

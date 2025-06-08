@@ -19,13 +19,12 @@ describe('会計年度生成ワークフロー', () => {
   })
 
   const workflow = createFinancialYearPostWorkflow({
-    //
     listFinancialYears: listFinancialYears(env.D1),
   })
 
-  const currentFinancialYear
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  = getFinancialMonthFromDate(dayjs())!.financialYear
+  const currentFinancialYear =
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    getFinancialMonthFromDate(dayjs())!.financialYear
 
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)

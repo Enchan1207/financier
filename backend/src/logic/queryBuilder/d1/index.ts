@@ -5,7 +5,9 @@ import type { Operation } from '..'
 import { buildD1Statement } from './statementBuilder'
 
 const buildStatementBuilderD1 = (database: D1Database) => {
-  const _builder = <M extends Model>(state: QueryState<M>): D1PreparedStatement => {
+  const _builder = <M extends Model>(
+    state: QueryState<M>,
+  ): D1PreparedStatement => {
     const { query, params } = buildD1Statement(state)
     return database.prepare(query).bind(...params)
   }
