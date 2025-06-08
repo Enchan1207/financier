@@ -30,7 +30,7 @@ jobs:
       - name: emit coverage
         id: emit
         run: |
-          summary=$( cat ./backend/coverage/coverage-summary.json | jq '.total' )
+          summary="$( cat ./backend/coverage/coverage-summary.json | jq -rc '.total' )"
           echo "summary_${{ matrix.ref }}=$summary" >> "$GITHUB_OUTPUT"
 
   list:
