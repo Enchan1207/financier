@@ -17,6 +17,13 @@ jobs:
         with:
           ref: ${{ matrix.ref }}
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: install
+        run: npm i
+
       - name: generate coverage
         run: npm run -w backend test:coverage
 
