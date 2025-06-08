@@ -7,15 +7,16 @@ on:
 jobs:
   emit-coverage:
     outputs:
-      summary: ${{ steps.emit.outputs.summary }}
+      summary_target: ${{ steps.emit.outputs.summary_target }}
+      summary_source: ${{ steps.emit.outputs.summary_source }}
     strategy:
       matrix:
-        ref: ['main', '${{ github.head_ref }}']
+        ref: ['target', 'source']
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ matrix.ref }}
+          ref: ${{matrix.ref == 'target' && github.base_ref || github.head_ref }}
 
       - uses: actions/setup-node@v4
         with:
@@ -32,6 +33,7 @@ jobs:
         run: |
           summary="$( cat ./backend/coverage/coverage-summary.json | jq -rc '.total' )"
           echo "summary_${{ matrix.ref }}=$summary" >> "$GITHUB_OUTPUT"
+          echo ${{matrix.ref == 'target' && github.base_ref || github.head_ref }}
 
   list:
     runs-on: ubuntu-latest
