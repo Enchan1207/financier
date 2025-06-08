@@ -57,6 +57,21 @@ export default tseslint.config(
     extends: [tseslint.configs.strict, vuePlugin.configs['flat/recommended']],
   },
 
+  // configurations for TypeScript with type checking
+  // based on: https://typescript-eslint.io/getting-started/typed-linting
+  {
+    name: 'workflow scripts',
+    files: ['.github/scripts/**/*.ts'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: globals.node,
+      parser: tseslint.parser,
+      parserOptions: { project: true },
+    },
+    extends: [tseslint.configs.strictTypeChecked],
+  },
+
   // configurations for config files
   {
     name: 'frontend config files',
