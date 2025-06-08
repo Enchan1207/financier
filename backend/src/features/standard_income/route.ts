@@ -45,7 +45,6 @@ const app = new Hono<{ Bindings: Env }>()
     }
 
     const workflow = createStandardIncomeTablesListWorkflow({
-      //
       listStandardIncomeTables: listStandardIncomeTables(c.env.D1),
     })
 
@@ -61,7 +60,6 @@ const app = new Hono<{ Bindings: Env }>()
     }
 
     const workflow = createStandardIncomeTableGetWorkflow({
-      //
       getStandardIncomeTable: getStandardIncomeTable(c.env.D1),
     })
 
@@ -131,7 +129,6 @@ const app = new Hono<{ Bindings: Env }>()
         }
 
         const workflow = createStandardIncomeTableNameUpdateWorkflow({
-          //
           getStandardIncomeTable: getStandardIncomeTable(c.env.D1),
         })
 
@@ -167,7 +164,6 @@ const app = new Hono<{ Bindings: Env }>()
         }
 
         const workflow = createStandardIncomeTableGradesUpdateWorkflow({
-          //
           getStandardIncomeTable: getStandardIncomeTable(c.env.D1),
         })
 
@@ -213,7 +209,6 @@ const app = new Hono<{ Bindings: Env }>()
       }
 
       const workflow = createStandardIncomeTableDuplicateWorkflow({
-        //
         getStandardIncomeTable: getStandardIncomeTable(c.env.D1),
       })
 

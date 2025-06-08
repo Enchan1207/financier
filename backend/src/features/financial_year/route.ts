@@ -104,7 +104,6 @@ const app = new Hono<{ Bindings: Env }>()
       }
 
       const workflow = createFinancialYearPostWorkflow({
-        //
         listFinancialYears: listFinancialYears(c.env.D1),
       })
 

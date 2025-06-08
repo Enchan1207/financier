@@ -43,7 +43,6 @@ const app = new Hono<{ Bindings: Env }>()
     }
 
     const workflow = createIncomeDefinitionListWorkflow({
-      //
       findIncomeDefinitions: findIncomeDefinitions(c.env.D1),
     })
 
@@ -64,7 +63,6 @@ const app = new Hono<{ Bindings: Env }>()
     }
 
     const workflow = createIncomeDefinitionGetWorkflow({
-      //
       getIncomeDefinitionById: getIncomeDefinitionById(c.env.D1),
     })
 
@@ -112,7 +110,6 @@ const app = new Hono<{ Bindings: Env }>()
       }
 
       const workflow = createIncomeDefinitionPutWorkflow({
-        //
         getIncomeDefinitionById: getIncomeDefinitionById(c.env.D1),
       })
 

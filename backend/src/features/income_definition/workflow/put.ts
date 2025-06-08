@@ -126,7 +126,6 @@ type IncomeDefinitionPutWorkflow = (
 >
 
 type WorkflowEffects = {
-  //
   getIncomeDefinitionById: (
     userId: string,
     id: string,

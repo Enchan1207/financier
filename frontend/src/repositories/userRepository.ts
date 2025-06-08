@@ -13,7 +13,6 @@ export const getCurrentUser = async (
     const response = await client.user.me.$get(
       {},
       {
-        //
         headers: { Authorization: `Bearer ${token}` },
       },
     )

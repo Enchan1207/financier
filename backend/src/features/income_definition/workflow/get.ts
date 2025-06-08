@@ -35,7 +35,6 @@ const getIncomeDefinition = (
   })
 
 type WorkflowEffects = {
-  //
   getIncomeDefinitionById: (
     userId: string,
     id: string,
