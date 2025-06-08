@@ -98,10 +98,10 @@ const compareSummaries = (
 })
 
 const compareCoverage = (source: Coverage, target: Coverage): Coverage => ({
-  total: target.total - source.total,
-  covered: target.covered - source.covered,
-  skipped: target.skipped - source.skipped,
-  pct: target.pct - source.pct,
+  total: source.total - target.total,
+  covered: source.covered - target.covered,
+  skipped: source.skipped - target.skipped,
+  pct: source.pct - target.pct,
 })
 
 main(process.argv)
