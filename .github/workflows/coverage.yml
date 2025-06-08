@@ -51,4 +51,4 @@ jobs:
 
       - run: |
           npm -w '.github/scripts' run coverage-diff '${{ needs.emit-coverage.outputs.summary_source }}' '${{ needs.emit-coverage.outputs.summary_target }}'
-          gh issue comment --edit-last --body-file .github/scripts/coverage-summary.txt
+          gh pr comment ${{ github.event.pull_request.number }} --edit-last --body-file .github/scripts/coverage-summary.txt
