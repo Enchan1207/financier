@@ -45,7 +45,6 @@ describe('標準報酬月額表取得ワークフロー', () => {
   })._unsafeUnwrap()
 
   const workflow = createStandardIncomeTableGetWorkflow({
-    //
     getStandardIncomeTable: getStandardIncomeTable(env.D1),
   })
 

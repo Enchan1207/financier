@@ -47,7 +47,6 @@ describe('報酬定義取得ワークフロー', () => {
   })._unsafeUnwrap()
 
   const workflow = createIncomeDefinitionGetWorkflow({
-    //
     getIncomeDefinitionById: getIncomeDefinitionById(env.D1),
   })
 

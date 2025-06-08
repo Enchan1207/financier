@@ -12,7 +12,6 @@ import { EntityNotFoundError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
 
 export const PutIncomeDefinitionQuerySchema = z.object({
-  //
   id: z.string().ulid(),
 })
 type PutIncomeDefinitionQuerySchema = z.infer<

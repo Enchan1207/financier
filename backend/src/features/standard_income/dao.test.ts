@@ -84,7 +84,6 @@ describe('基本的なCRUD', () => {
   describe('一覧の取得', () => {
     test('項目を取得できること', async () => {
       const actual = await listStandardIncomeTables(env.D1)({
-        //
         userId: dummyUser.id,
       })
 

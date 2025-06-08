@@ -68,7 +68,6 @@ describe('報酬定義一覧取得ワークフロー', () => {
   })._unsafeUnwrap()
 
   const workflow = createIncomeDefinitionListWorkflow({
-    //
     findIncomeDefinitions: findIncomeDefinitions(env.D1),
   })
 

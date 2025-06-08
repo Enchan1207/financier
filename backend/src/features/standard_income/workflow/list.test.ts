@@ -56,7 +56,6 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
   })._unsafeUnwrap()
 
   const workflow = createStandardIncomeTablesListWorkflow({
-    //
     listStandardIncomeTables: listStandardIncomeTables(env.D1),
   })
 

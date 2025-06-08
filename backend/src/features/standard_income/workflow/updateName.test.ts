@@ -41,7 +41,6 @@ describe('標準報酬月額表名更新ワークフロー', () => {
   })._unsafeUnwrap()
 
   const workflow = createStandardIncomeTableNameUpdateWorkflow({
-    //
     getStandardIncomeTable: getStandardIncomeTable(env.D1),
   })
 
