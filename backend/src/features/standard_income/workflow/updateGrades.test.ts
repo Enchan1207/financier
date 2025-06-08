@@ -1,15 +1,15 @@
 import { env } from 'cloudflare:test'
 
-import { createStandardIncomeGrade, createStandardIncomeTable } from '@/domains/standard_income/logic'
+import {
+  createStandardIncomeGrade,
+  createStandardIncomeTable,
+} from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 import { saveUser } from '@/features/authorize/dao'
 import { EntityNotFoundError, ValidationError } from '@/logic/errors'
 
-import {
-  getStandardIncomeTable,
-  insertStandardIncomeTable,
-} from '../dao'
+import { getStandardIncomeTable, insertStandardIncomeTable } from '../dao'
 import { createStandardIncomeTableGradesUpdateWorkflow } from './updateGrades'
 
 describe('標準報酬月額表階級更新ワークフロー', () => {
@@ -37,7 +37,7 @@ describe('標準報酬月額表階級更新ワークフロー', () => {
         threshold: 110000,
         standardIncome: 120000,
       },
-    ].map(grade => createStandardIncomeGrade(grade)._unsafeUnwrap()),
+    ].map((grade) => createStandardIncomeGrade(grade)._unsafeUnwrap()),
   })._unsafeUnwrap()
 
   const workflow = createStandardIncomeTableGradesUpdateWorkflow({
@@ -73,7 +73,9 @@ describe('標準報酬月額表階級更新ワークフロー', () => {
       state: { user: dummyUser },
     }
 
-    const { update: { grades } } = (await workflow(command))._unsafeUnwrap()
+    const {
+      update: { grades },
+    } = (await workflow(command))._unsafeUnwrap()
     expect(grades).toStrictEqual([
       {
         threshold: 0,

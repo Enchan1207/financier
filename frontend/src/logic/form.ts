@@ -12,8 +12,7 @@ export const validateForm = async <T>(
   try {
     await toValue(form).validate()
     return ok(data)
-  }
-  catch (e: unknown) {
+  } catch (e: unknown) {
     const error = e instanceof Error ? e : new Error('form validation error')
     return err(error)
   }

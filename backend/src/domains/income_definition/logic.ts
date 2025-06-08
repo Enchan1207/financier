@@ -18,9 +18,7 @@ export const createIncomeDefinition = (props: {
   from: FinancialMonthData
   to: FinancialMonthData
 }): Result<IncomeDefinition, ValidationError> => {
-  const {
-    userId, name, kind, value, isTaxable, from, to,
-  } = props
+  const { userId, name, kind, value, isTaxable, from, to } = props
 
   const { start: fromStart } = getPeriodByFinancialMonth(from)
   const { start: toStart, end } = getPeriodByFinancialMonth(to)
@@ -28,7 +26,11 @@ export const createIncomeDefinition = (props: {
   if (toStart.isBefore(fromStart)) {
     const startTime = fromStart.valueOf()
     const endTime = toStart.valueOf()
-    return err(new ValidationError(`from must be earlier than to (${startTime} -> ${endTime})`))
+    return err(
+      new ValidationError(
+        `from must be earlier than to (${startTime} -> ${endTime})`,
+      ),
+    )
   }
 
   return ok({

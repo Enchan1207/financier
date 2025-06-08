@@ -1,15 +1,15 @@
 import { env } from 'cloudflare:test'
 
-import { createStandardIncomeGrade, createStandardIncomeTable } from '@/domains/standard_income/logic'
+import {
+  createStandardIncomeGrade,
+  createStandardIncomeTable,
+} from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 import { saveUser } from '@/features/authorize/dao'
 import { EntityNotFoundError } from '@/logic/errors'
 
-import {
-  getStandardIncomeTable,
-  insertStandardIncomeTable,
-} from '../dao'
+import { getStandardIncomeTable, insertStandardIncomeTable } from '../dao'
 import { createStandardIncomeTableNameUpdateWorkflow } from './updateName'
 
 describe('標準報酬月額表名更新ワークフロー', () => {
@@ -37,7 +37,7 @@ describe('標準報酬月額表名更新ワークフロー', () => {
         threshold: 110000,
         standardIncome: 120000,
       },
-    ].map(grade => createStandardIncomeGrade(grade)._unsafeUnwrap()),
+    ].map((grade) => createStandardIncomeGrade(grade)._unsafeUnwrap()),
   })._unsafeUnwrap()
 
   const workflow = createStandardIncomeTableNameUpdateWorkflow({

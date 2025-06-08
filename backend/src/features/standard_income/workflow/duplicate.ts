@@ -13,40 +13,49 @@ export const DuplicateStandardIncomeTableSchema = z.object({
   id: z.string().ulid(),
   name: z.string(),
 })
-type DuplicateStandardIncomeTableSchema =
-z.infer<typeof DuplicateStandardIncomeTableSchema>
+type DuplicateStandardIncomeTableSchema = z.infer<
+  typeof DuplicateStandardIncomeTableSchema
+>
 
 export interface DuplicateStandardIncomeTableCommand {
   input: DuplicateStandardIncomeTableSchema
   state: { user: User }
 }
 
-interface TableDuplicateEvent { entity: StandardIncomeTable }
+interface TableDuplicateEvent {
+  entity: StandardIncomeTable
+}
 
 const querySourceTable = (effects: {
   getStandardIncomeTable: (props: {
     userId: User['id']
     id: StandardIncomeTable['id']
   }) => Promise<StandardIncomeTable | undefined>
-}) => fromSafePromise(async (command: DuplicateStandardIncomeTableCommand) => {
-  const { input: { id }, state: { user: { id: userId } } } = command
+}) =>
+  fromSafePromise(async (command: DuplicateStandardIncomeTableCommand) => {
+    const {
+      input: { id },
+      state: {
+        user: { id: userId },
+      },
+    } = command
 
-  const stored = await effects.getStandardIncomeTable({
-    userId,
-    id,
-  })
-  if (stored === undefined) {
-    return err(new EntityNotFoundError({ id }))
-  }
+    const stored = await effects.getStandardIncomeTable({
+      userId,
+      id,
+    })
+    if (stored === undefined) {
+      return err(new EntityNotFoundError({ id }))
+    }
 
-  return ok({
-    input: command.input,
-    state: {
-      current: stored,
-      user: command.state.user,
-    },
+    return ok({
+      input: command.input,
+      state: {
+        current: stored,
+        user: command.state.user,
+      },
+    })
   })
-})
 
 interface SourceTableQueried {
   input: DuplicateStandardIncomeTableSchema
@@ -56,23 +65,26 @@ interface SourceTableQueried {
   }
 }
 
-const duplicateTable = (queried: SourceTableQueried): Result<TableDuplicateEvent, ValidationError> =>
+const duplicateTable = (
+  queried: SourceTableQueried,
+): Result<TableDuplicateEvent, ValidationError> =>
   createStandardIncomeTable({
     userId: queried.state.user.id,
     name: queried.input.name,
     grades: queried.state.current.grades,
-  }).map(entity => ({ entity }))
+  }).map((entity) => ({ entity }))
 
 type WorkflowError = EntityNotFoundError | ValidationError
-type DuplicateStandardIncomeTableWorkflow =
-(command: DuplicateStandardIncomeTableCommand) => ResultAsync<TableDuplicateEvent, WorkflowError>
+type DuplicateStandardIncomeTableWorkflow = (
+  command: DuplicateStandardIncomeTableCommand,
+) => ResultAsync<TableDuplicateEvent, WorkflowError>
 
-export const createStandardIncomeTableDuplicateWorkflow = (effects: {
-  getStandardIncomeTable: (props: {
-    userId: User['id']
-    id: StandardIncomeTable['id']
-  }) => Promise<StandardIncomeTable | undefined>
-}): DuplicateStandardIncomeTableWorkflow => command =>
-  ok(command)
-    .asyncAndThen(querySourceTable(effects))
-    .andThen(duplicateTable)
+export const createStandardIncomeTableDuplicateWorkflow =
+  (effects: {
+    getStandardIncomeTable: (props: {
+      userId: User['id']
+      id: StandardIncomeTable['id']
+    }) => Promise<StandardIncomeTable | undefined>
+  }): DuplicateStandardIncomeTableWorkflow =>
+  (command) =>
+    ok(command).asyncAndThen(querySourceTable(effects)).andThen(duplicateTable)

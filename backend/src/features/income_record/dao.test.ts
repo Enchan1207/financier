@@ -11,7 +11,9 @@ import { saveUser } from '../authorize/dao'
 import { insertFinancialYear } from '../financial_year/dao'
 import { insertIncomeDefinition } from '../income_definition/dao'
 import {
-  findIncomeRecord, insertIncomeRecord, updateIncomeRecordValue,
+  findIncomeRecord,
+  insertIncomeRecord,
+  updateIncomeRecordValue,
 } from './dao'
 
 describe('報酬定義の操作', () => {
@@ -95,15 +97,14 @@ describe('報酬定義の操作', () => {
         value: 200,
       })
 
-      expect(actual).toStrictEqual(
-        {
-          userId: dummyUser.id,
-          financialMonthId: dummyFinancialMonth1.id,
-          definitionId: dummyIncomeDefinition.id,
-          updatedAt: actual?.updatedAt,
-          value: 200,
-          updatedBy: 'user',
-        })
+      expect(actual).toStrictEqual({
+        userId: dummyUser.id,
+        financialMonthId: dummyFinancialMonth1.id,
+        definitionId: dummyIncomeDefinition.id,
+        updatedAt: actual?.updatedAt,
+        value: 200,
+        updatedBy: 'user',
+      })
     })
   })
 
@@ -120,15 +121,14 @@ describe('報酬定義の操作', () => {
     })
 
     test('実績値が更新されていること', () => {
-      expect(actual).toStrictEqual(
-        {
-          userId: dummyUser.id,
-          financialMonthId: dummyFinancialMonth2.id,
-          definitionId: dummyIncomeDefinition.id,
-          updatedAt: actual?.updatedAt,
-          value: 400,
-          updatedBy: 'user',
-        })
+      expect(actual).toStrictEqual({
+        userId: dummyUser.id,
+        financialMonthId: dummyFinancialMonth2.id,
+        definitionId: dummyIncomeDefinition.id,
+        updatedAt: actual?.updatedAt,
+        value: 400,
+        updatedBy: 'user',
+      })
     })
 
     test('操作後、実績レコードは1件増えていること', async () => {

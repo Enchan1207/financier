@@ -2,7 +2,10 @@
 
 import { env } from 'cloudflare:test'
 
-import { createStandardIncomeGrade, createStandardIncomeTable } from '@/domains/standard_income/logic'
+import {
+  createStandardIncomeGrade,
+  createStandardIncomeTable,
+} from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 
@@ -85,15 +88,19 @@ describe('基本的なCRUD', () => {
         userId: dummyUser.id,
       })
 
-      expect(actual).toStrictEqual([{
-        id: dummyEntity.id,
-        userId: dummyEntity.userId,
-        name: dummyEntity.name,
-      }])
+      expect(actual).toStrictEqual([
+        {
+          id: dummyEntity.id,
+          userId: dummyEntity.userId,
+          name: dummyEntity.name,
+        },
+      ])
     })
 
     test('他人の項目は取得できないこと', async () => {
-      const actual = await listStandardIncomeTables(env.D1)({ userId: 'dummy_user_id' })
+      const actual = await listStandardIncomeTables(env.D1)({
+        userId: 'dummy_user_id',
+      })
 
       expect(actual).toStrictEqual([])
     })
@@ -131,7 +138,7 @@ describe('基本的なCRUD', () => {
             threshold: 200000,
             standardIncome: 200000,
           },
-        ].map(grade => createStandardIncomeGrade(grade)._unsafeUnwrap()),
+        ].map((grade) => createStandardIncomeGrade(grade)._unsafeUnwrap()),
       })
     })
 

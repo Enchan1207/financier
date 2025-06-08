@@ -1,6 +1,9 @@
 import { ok } from 'neverthrow'
 
-import type { ConditionLeaf, ConditionNode } from '@/logic/queryBuilder/conditionTree'
+import type {
+  ConditionLeaf,
+  ConditionNode,
+} from '@/logic/queryBuilder/conditionTree'
 import { isLeaf } from '@/logic/queryBuilder/conditionTree'
 import type { Model, QueryState } from '@/logic/queryBuilder/query'
 
@@ -19,7 +22,9 @@ type Command<M extends Model> = {
 }
 
 /** クエリの状態からD1用のSQLを生成する */
-export const buildD1Statement = <M extends Model>(state: QueryState<M>): {
+export const buildD1Statement = <M extends Model>(
+  state: QueryState<M>,
+): {
   query: string
   params: CommandParameters<M>[]
 } => {
@@ -34,7 +39,9 @@ export const buildD1Statement = <M extends Model>(state: QueryState<M>): {
 
   // ここでResultを持ち出すのは意味がないので、できればメソッドチェーン用の型を作りたかった
   // しかし難しすぎて断念
-  const { state: { query, params } } = ok(command)
+  const {
+    state: { query, params },
+  } = ok(command)
     .map(buildBaseStatement)
     .map(buildConditionStatement)
     .map(buildOrderStatement)
@@ -48,15 +55,13 @@ export const buildD1Statement = <M extends Model>(state: QueryState<M>): {
 }
 
 /** SQLのベースになるステートメントを生成する */
-const buildBaseStatement = <M extends Model>({ input, state }: Command<M>): Command<M> => {
+const buildBaseStatement = <M extends Model>({
+  input,
+  state,
+}: Command<M>): Command<M> => {
   const modelShape = input.model.shape as Record<string, unknown>
   const columns: (keyof M['shape'])[] = Object.keys(modelShape)
-  const query = [
-    'SELECT',
-    columns.join(','),
-    'FROM',
-    input.tableName,
-  ].join(' ')
+  const query = ['SELECT', columns.join(','), 'FROM', input.tableName].join(' ')
 
   return {
     input,
@@ -69,7 +74,10 @@ const buildBaseStatement = <M extends Model>({ input, state }: Command<M>): Comm
 }
 
 /** 条件ステートメントを生成する */
-const buildConditionStatement = <M extends Model>({ input, state }: Command<M>): Command<M> => {
+const buildConditionStatement = <M extends Model>({
+  input,
+  state,
+}: Command<M>): Command<M> => {
   const condition = input.condition
   if (condition === undefined) {
     return {
@@ -110,8 +118,7 @@ const buildExpression = <M extends Model>(
       query,
       index: index + 1,
     }
-  }
-  else {
+  } else {
     let currentIndex = index
     const queries: string[] = []
     for (const childNode of node.items) {
@@ -134,17 +141,21 @@ const buildExpression = <M extends Model>(
  * @param node 条件ノード
  * @returns パラメータの配列
  */
-const buildParams = <M extends Model>(node: ConditionNode<M>): Command<M>['state']['params'][] => {
+const buildParams = <M extends Model>(
+  node: ConditionNode<M>,
+): Command<M>['state']['params'][] => {
   if (isLeaf(node)) {
     return [node.value]
-  }
-  else {
+  } else {
     return node.items.map(buildParams).flat()
   }
 }
 
 /** 順序ステートメントを生成する */
-const buildOrderStatement = <M extends Model>({ input, state }: Command<M>): Command<M> => {
+const buildOrderStatement = <M extends Model>({
+  input,
+  state,
+}: Command<M>): Command<M> => {
   const orders = input.orders
   if (orders === undefined) {
     return {
@@ -153,7 +164,11 @@ const buildOrderStatement = <M extends Model>({ input, state }: Command<M>): Com
     }
   }
 
-  const statement = orders.map(({ key, order }) => `${key.toString()} ${(order ?? 'asc').toUpperCase()}`).join(', ')
+  const statement = orders
+    .map(
+      ({ key, order }) => `${key.toString()} ${(order ?? 'asc').toUpperCase()}`,
+    )
+    .join(', ')
 
   return {
     input,
@@ -166,7 +181,10 @@ const buildOrderStatement = <M extends Model>({ input, state }: Command<M>): Com
 }
 
 /** 範囲ステートメントを生成する */
-const buildRangeStatement = <M extends Model>({ input, state }: Command<M>): Command<M> => {
+const buildRangeStatement = <M extends Model>({
+  input,
+  state,
+}: Command<M>): Command<M> => {
   const range = input.range
   if (range === undefined) {
     return {

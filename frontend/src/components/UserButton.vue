@@ -10,9 +10,8 @@ import { getCurrentUser } from '@/repositories/userRepository'
 
 // MARK: - States
 
-const {
-  loginWithRedirect, isAuthenticated, logout, getAccessTokenSilently,
-} = useAuth0()
+const { loginWithRedirect, isAuthenticated, logout, getAccessTokenSilently } =
+  useAuth0()
 
 const user = ref<User>()
 
@@ -23,15 +22,14 @@ const isSmartphone = breakpoints.smaller('sm')
 
 onMounted(async () => {
   user.value = await getAccessTokenSilently()
-    .then(token => getCurrentUser(token))
-    .catch(e => err(e))
-    .then(result => result.unwrapOr(undefined))
+    .then((token) => getCurrentUser(token))
+    .catch((e) => err(e))
+    .then((result) => result.unwrapOr(undefined))
 })
 
 const onClickLogout = async () => {
   await logout({ logoutParams: { returnTo: window.location.origin } })
 }
-
 </script>
 
 <template>
@@ -43,30 +41,20 @@ const onClickLogout = async () => {
       placement="bottom-end"
     >
       <template #reference>
-        <el-button
-          v-if="isSmartphone"
-          :icon="BIconPersonFill"
-        />
+        <el-button v-if="isSmartphone" :icon="BIconPersonFill" />
 
-        <el-button
-          v-else
-          :icon="BIconPersonFill"
-        >
+        <el-button v-else :icon="BIconPersonFill">
           {{ user?.name }}
         </el-button>
       </template>
       <template #default>
-        <el-row style="margin-bottom: 10px;">
+        <el-row style="margin-bottom: 10px">
           <el-text type="info">
             {{ user?.email }}
           </el-text>
         </el-row>
         <el-row justify="end">
-          <el-button
-            link
-            type="primary"
-            @click="onClickLogout()"
-          >
+          <el-button link type="primary" @click="onClickLogout()">
             ログアウト
           </el-button>
         </el-row>
@@ -76,16 +64,10 @@ const onClickLogout = async () => {
 
   <template v-else>
     <template v-if="isSmartphone">
-      <el-button
-        :icon="BIconPersonFill"
-        @click="loginWithRedirect()"
-      />
+      <el-button :icon="BIconPersonFill" @click="loginWithRedirect()" />
     </template>
     <template v-else>
-      <el-button
-        :icon="BIconPersonFill"
-        @click="loginWithRedirect()"
-      >
+      <el-button :icon="BIconPersonFill" @click="loginWithRedirect()">
         ログイン
       </el-button>
     </template>

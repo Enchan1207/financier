@@ -8,4 +8,5 @@ export const corsMiddleware = createMiddleware<{ Bindings: Env }>(
       credentials: true,
     })
     return corsMiddleware(c, next)
-  })
+  },
+)

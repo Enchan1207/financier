@@ -15,8 +15,9 @@ export const PutIncomeDefinitionQuerySchema = z.object({
   //
   id: z.string().ulid(),
 })
-type PutIncomeDefinitionQuerySchema =
-z.infer<typeof PutIncomeDefinitionQuerySchema>
+type PutIncomeDefinitionQuerySchema = z.infer<
+  typeof PutIncomeDefinitionQuerySchema
+>
 
 export const PutIncomeDefinitionBodySchema = z.object({
   name: z.string().optional(),
@@ -26,8 +27,9 @@ export const PutIncomeDefinitionBodySchema = z.object({
   from: FinancialMonthDataSchema.optional(),
   to: FinancialMonthDataSchema.optional(),
 })
-type PutIncomeDefinitionBodySchema =
-z.infer<typeof PutIncomeDefinitionBodySchema>
+type PutIncomeDefinitionBodySchema = z.infer<
+  typeof PutIncomeDefinitionBodySchema
+>
 
 export interface PutIncomeDefinitionCommand {
   input: {
@@ -71,25 +73,38 @@ export interface IncomeDefinitionUpdateEvent {
   }
 }
 
-const queryCurrentDefinition = (effects: Pick<WorkflowEffects, 'getIncomeDefinitionById'>) => fromSafePromise(async (command: PutIncomeDefinitionCommand) => {
-  const { state: { id }, state: { user: { id: userId } } } = command
+const queryCurrentDefinition = (
+  effects: Pick<WorkflowEffects, 'getIncomeDefinitionById'>,
+) =>
+  fromSafePromise(async (command: PutIncomeDefinitionCommand) => {
+    const {
+      state: { id },
+      state: {
+        user: { id: userId },
+      },
+    } = command
 
-  const stored = await effects.getIncomeDefinitionById(userId, id)
-  if (stored === undefined) {
-    return err(new EntityNotFoundError({ id }))
-  }
+    const stored = await effects.getIncomeDefinitionById(userId, id)
+    if (stored === undefined) {
+      return err(new EntityNotFoundError({ id }))
+    }
 
-  return ok({
-    input: command.input,
-    state: {
-      current: stored,
-      user: command.state.user,
-    },
+    return ok({
+      input: command.input,
+      state: {
+        current: stored,
+        user: command.state.user,
+      },
+    })
   })
-})
 
-const createUpdateEvent = (command: CurrentDefinitionQueried): IncomeDefinitionUpdateEvent => {
-  const { input, state: { current } } = command
+const createUpdateEvent = (
+  command: CurrentDefinitionQueried,
+): IncomeDefinitionUpdateEvent => {
+  const {
+    input,
+    state: { current },
+  } = command
 
   return {
     current,
@@ -104,14 +119,24 @@ const createUpdateEvent = (command: CurrentDefinitionQueried): IncomeDefinitionU
   }
 }
 
-type IncomeDefinitionPutWorkflow = (command: PutIncomeDefinitionCommand) => ResultAsync<IncomeDefinitionUpdateEvent, EntityNotFoundError | ValidationError>
+type IncomeDefinitionPutWorkflow = (
+  command: PutIncomeDefinitionCommand,
+) => ResultAsync<
+  IncomeDefinitionUpdateEvent,
+  EntityNotFoundError | ValidationError
+>
 
 type WorkflowEffects = {
   //
-  getIncomeDefinitionById: (userId: string, id: string) => Promise<IncomeDefinition | undefined>
+  getIncomeDefinitionById: (
+    userId: string,
+    id: string,
+  ) => Promise<IncomeDefinition | undefined>
 }
 
-export const createIncomeDefinitionPutWorkflow = (effects: WorkflowEffects): IncomeDefinitionPutWorkflow => command =>
-  ok(command)
-    .asyncAndThen(queryCurrentDefinition(effects))
-    .map(createUpdateEvent)
+export const createIncomeDefinitionPutWorkflow =
+  (effects: WorkflowEffects): IncomeDefinitionPutWorkflow =>
+  (command) =>
+    ok(command)
+      .asyncAndThen(queryCurrentDefinition(effects))
+      .map(createUpdateEvent)

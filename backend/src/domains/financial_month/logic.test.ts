@@ -32,35 +32,38 @@ describe('会計月度と日時情報の相互変換', () => {
       expectedStart: dayjs.tz('2025-03-01T00:00:00', 'Asia/Tokyo'),
       expectedEnd: dayjs.tz('2025-03-31T23:59:59.999', 'Asia/Tokyo'),
     },
-  ])('$financialYear年度 $month月', ({
-    financialYear, month, expectedStart, expectedEnd,
-  }) => {
-    const financialMonthData = createFinancialMonthData({
-      financialYear,
-      month,
-      workday: 20,
-    })._unsafeUnwrap()
-    const period = getPeriodByFinancialMonth(financialMonthData)
-
-    const financialMonth = getFinancialMonthFromDate(expectedStart)
-
-    test(`月度に変換した場合は ${expectedStart.format()} に始まること`, () => {
-      expect(period.start.startOf('month').valueOf()).toBe(expectedStart.valueOf())
-    })
-
-    test(`月度に変換した場合は ${expectedEnd.format()} に終わること`, () => {
-      const actual = period.end.endOf('month').valueOf()
-      expect(actual).toBe(expectedEnd.valueOf())
-    })
-
-    test(`dayjsから変換した場合は ${financialYear}年度 ${month}月になること`, () => {
-      expect(financialMonth).toStrictEqual({
+  ])(
+    '$financialYear年度 $month月',
+    ({ financialYear, month, expectedStart, expectedEnd }) => {
+      const financialMonthData = createFinancialMonthData({
         financialYear,
         month,
         workday: 20,
+      })._unsafeUnwrap()
+      const period = getPeriodByFinancialMonth(financialMonthData)
+
+      const financialMonth = getFinancialMonthFromDate(expectedStart)
+
+      test(`月度に変換した場合は ${expectedStart.format()} に始まること`, () => {
+        expect(period.start.startOf('month').valueOf()).toBe(
+          expectedStart.valueOf(),
+        )
       })
-    })
-  })
+
+      test(`月度に変換した場合は ${expectedEnd.format()} に終わること`, () => {
+        const actual = period.end.endOf('month').valueOf()
+        expect(actual).toBe(expectedEnd.valueOf())
+      })
+
+      test(`dayjsから変換した場合は ${financialYear}年度 ${month}月になること`, () => {
+        expect(financialMonth).toStrictEqual({
+          financialYear,
+          month,
+          workday: 20,
+        })
+      })
+    },
+  )
 })
 
 describe('月度内からの会計月度の参照', () => {

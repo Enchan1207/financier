@@ -10,7 +10,9 @@ import { createUser } from '@/domains/user/logic'
 import { saveUser } from '../authorize/dao'
 import { insertIncomeDefinition } from '../income_definition/dao'
 import {
-  getFinancialYear, insertFinancialYear, listFinancialYears,
+  getFinancialYear,
+  insertFinancialYear,
+  listFinancialYears,
 } from './dao'
 
 describe('会計年度の生成', () => {
@@ -50,7 +52,7 @@ describe('会計年度の取得', () => {
     auth0UserId: 'auth0_test_user',
   })
 
-  const dummyFinancialYears = [2024, 2023, 2025].map(year =>
+  const dummyFinancialYears = [2024, 2023, 2025].map((year) =>
     createFinancialYear({
       userId: dummyUser.id,
       year,
@@ -155,10 +157,11 @@ describe('報酬定義が存在する場合', () => {
 
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)
-    await Promise.all([
-      dummyDefinition1,
-      dummyDefinition2,
-      dummyDefinition3].map(insertIncomeDefinition(env.D1)))
+    await Promise.all(
+      [dummyDefinition1, dummyDefinition2, dummyDefinition3].map(
+        insertIncomeDefinition(env.D1),
+      ),
+    )
   })
 
   describe('2024年度を挿入した場合', () => {

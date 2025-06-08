@@ -27,8 +27,12 @@ describe('日付に基づく項目の選択', () => {
     year: 2024,
   })._unsafeUnwrap()
 
-  const dummyEntityApril = dummyFinancialYear.months.find(month => month.month === 4)
-  const dummyEntityMay = dummyFinancialYear.months.find(month => month.month === 5)
+  const dummyEntityApril = dummyFinancialYear.months.find(
+    (month) => month.month === 4,
+  )
+  const dummyEntityMay = dummyFinancialYear.months.find(
+    (month) => month.month === 5,
+  )
 
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)
@@ -52,12 +56,15 @@ describe('日付に基づく項目の選択', () => {
       date: dayjs.tz('2024-05-10T00:00:00.000', 'Asia/Tokyo').endOf('month'),
       expected: dummyEntityMay,
     },
-  ])('$date の場合、 $expected が取得されること', async ({ date, expected }) => {
-    const actual = await findFinancialMonthsByDate(env.D1)(dummyUser.id, date)
+  ])(
+    '$date の場合、 $expected が取得されること',
+    async ({ date, expected }) => {
+      const actual = await findFinancialMonthsByDate(env.D1)(dummyUser.id, date)
 
-    // dayjsオブジェクトについては内部のプロパティが細かく変わっているので、タイムスタンプで比較
-    expect(actual).toStrictEqual(expected)
-  })
+      // dayjsオブジェクトについては内部のプロパティが細かく変わっているので、タイムスタンプで比較
+      expect(actual).toStrictEqual(expected)
+    },
+  )
 })
 
 describe('月度情報からエンティティを得る', () => {

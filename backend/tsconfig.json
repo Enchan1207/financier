@@ -27,10 +27,7 @@
       "vitest/globals"
     ]
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.json"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.json"],
   "exclude": ["dist", "node_modules"],
   "compileOnSave": false
 }

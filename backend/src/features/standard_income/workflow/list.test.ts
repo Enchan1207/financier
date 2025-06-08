@@ -1,6 +1,9 @@
 import { env } from 'cloudflare:test'
 
-import { createStandardIncomeGrade, createStandardIncomeTable } from '@/domains/standard_income/logic'
+import {
+  createStandardIncomeGrade,
+  createStandardIncomeTable,
+} from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 import { saveUser } from '@/features/authorize/dao'
@@ -34,7 +37,7 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
         threshold: 100000,
         standardIncome: 100000,
       },
-    ].map(grade => createStandardIncomeGrade(grade)._unsafeUnwrap()),
+    ].map((grade) => createStandardIncomeGrade(grade)._unsafeUnwrap()),
   })._unsafeUnwrap()
 
   const dummyTable2 = createStandardIncomeTable({
@@ -49,7 +52,7 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
         threshold: 200000,
         standardIncome: 200000,
       },
-    ].map(grade => createStandardIncomeGrade(grade)._unsafeUnwrap()),
+    ].map((grade) => createStandardIncomeGrade(grade)._unsafeUnwrap()),
   })._unsafeUnwrap()
 
   const workflow = createStandardIncomeTablesListWorkflow({
@@ -82,7 +85,7 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
 
       const actual = await workflow(command)
 
-      const actualNames = actual.map(entity => entity.name)
+      const actualNames = actual.map((entity) => entity.name)
       expect(actualNames).toStrictEqual([dummyTable1.name, dummyTable2.name])
     })
   })
@@ -105,7 +108,7 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
 
     const actual = await workflow(command)
 
-    const actualNames = actual.map(entity => entity.name)
+    const actualNames = actual.map((entity) => entity.name)
     expect(actualNames).toStrictEqual([dummyTable2.name, dummyTable1.name])
   })
 })

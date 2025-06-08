@@ -31,16 +31,15 @@ const userMiddleware = createMiddleware<{
     getUserByAuth0Id: getUserByAuth0Id(c.env.D1),
   })
 
-  const result = await workflow(command)
-    .andTee(async (command) => {
-      if (command.state.stored) {
-        return
-      }
+  const result = await workflow(command).andTee(async (command) => {
+    if (command.state.stored) {
+      return
+    }
 
-      const newUser = command.input.user
-      await saveUser(c.env.D1)(newUser)
-      console.log(`新規ユーザが登録されました。${JSON.stringify(newUser)}`)
-    })
+    const newUser = command.input.user
+    await saveUser(c.env.D1)(newUser)
+    console.log(`新規ユーザが登録されました。${JSON.stringify(newUser)}`)
+  })
   if (result.isErr()) {
     throw result.error
   }
@@ -53,8 +52,4 @@ const userMiddleware = createMiddleware<{
 export const userAuthMiddleware: MiddlewareHandler<{
   Bindings: Env
   Variables: { user: User }
-}> = every(
-  jwkMiddleware,
-  jwkValidationMiddleware,
-  userMiddleware,
-)
+}> = every(jwkMiddleware, jwkValidationMiddleware, userMiddleware)

@@ -10,8 +10,8 @@
 
 ## ドメインモデル
 
-financierでは、標準報酬月額を ***StandardIncome*** と呼称する。(IncomeRecord, IncomeDefinitionに寄せている)
-また、標準報酬月額の定義(等級とその値域)は変化しうるため、**標準報酬月額表 *StandardIncomeTable*** と **標準報酬月額等級 *StandardIncomeGrade*** というふたつのドメインモデルで管理する。
+financierでは、標準報酬月額を **_StandardIncome_** と呼称する。(IncomeRecord, IncomeDefinitionに寄せている)
+また、標準報酬月額の定義(等級とその値域)は変化しうるため、**標準報酬月額表 _StandardIncomeTable_** と **標準報酬月額等級 _StandardIncomeGrade_** というふたつのドメインモデルで管理する。
 
 ## 提供する機能
 
@@ -236,9 +236,9 @@ GET /standard_income/:id
 GET /standard_income/:id
 ```
 
-- request 
+- request
   - query_param
-     - `order` 昇順・降順
+    - `order` 昇順・降順
 - response
   - 200
     - 標準報酬月額表の一覧
@@ -249,10 +249,10 @@ GET /standard_income/:id
 POST /standard_income
 ```
 
-- request 
+- request
   - body
-     - `name` 標準報酬月額表の名前
-     - `grades` 標準報酬月額表の階級リスト
+    - `name` 標準報酬月額表の名前
+    - `grades` 標準報酬月額表の階級リスト
 - response
   - 201
     - 作成されたエンティティ
@@ -265,9 +265,9 @@ POST /standard_income
 PATCH /standard_income/:id
 ```
 
-- request 
+- request
   - body
-     - `name` 標準報酬月額表の名前
+    - `name` 標準報酬月額表の名前
 - response
   - 200
     - 更新されたエンティティ
@@ -282,9 +282,9 @@ PATCH /standard_income/:id
 PATCH /standard_income/:id
 ```
 
-- request 
+- request
   - body
-     - `grades` 標準報酬月額表の階級リスト
+    - `grades` 標準報酬月額表の階級リスト
 - response
   - 200
     - 更新されたエンティティ
@@ -294,7 +294,7 @@ PATCH /standard_income/:id
     - リクエストボディが不正 (zValidatorで担保)
 
 > [!NOTE]
-> 
+>
 > 名前と階級の更新は同じエンドポイントで担う。
 > リクエストスキーマはそれぞれの和集合とし、どちらの値が入っているかで判断する。
 > 両方入ってきたときは400を返す。

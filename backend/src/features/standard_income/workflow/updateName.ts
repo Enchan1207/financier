@@ -11,8 +11,9 @@ export const UpdateStandardIncomeTableNameSchema = z.object({
   id: z.string().ulid(),
   name: z.string(),
 })
-type UpdateStandardIncomeTableNameSchema =
-z.infer<typeof UpdateStandardIncomeTableNameSchema>
+type UpdateStandardIncomeTableNameSchema = z.infer<
+  typeof UpdateStandardIncomeTableNameSchema
+>
 
 export interface UpdateStandardIncomeTableNameCommand {
   input: UpdateStandardIncomeTableNameSchema
@@ -29,25 +30,31 @@ const queryCurrentTable = (effects: {
     userId: User['id']
     id: StandardIncomeTable['id']
   }) => Promise<StandardIncomeTable | undefined>
-}) => fromSafePromise(async (command: UpdateStandardIncomeTableNameCommand) => {
-  const { input: { id }, state: { user: { id: userId } } } = command
+}) =>
+  fromSafePromise(async (command: UpdateStandardIncomeTableNameCommand) => {
+    const {
+      input: { id },
+      state: {
+        user: { id: userId },
+      },
+    } = command
 
-  const stored = await effects.getStandardIncomeTable({
-    userId,
-    id,
-  })
-  if (stored === undefined) {
-    return err(new EntityNotFoundError({ id }))
-  }
+    const stored = await effects.getStandardIncomeTable({
+      userId,
+      id,
+    })
+    if (stored === undefined) {
+      return err(new EntityNotFoundError({ id }))
+    }
 
-  return ok({
-    input: command.input,
-    state: {
-      current: stored,
-      user: command.state.user,
-    },
+    return ok({
+      input: command.input,
+      state: {
+        current: stored,
+        user: command.state.user,
+      },
+    })
   })
-})
 
 interface CurrentTableQueried {
   input: UpdateStandardIncomeTableNameSchema
@@ -57,22 +64,24 @@ interface CurrentTableQueried {
   }
 }
 
-const updateTableName = ({ input: { name }, state: { current } }:
-CurrentTableQueried): TableNameUpdateEvent => ({
+const updateTableName = ({
+  input: { name },
+  state: { current },
+}: CurrentTableQueried): TableNameUpdateEvent => ({
   current,
   update: { name },
 })
 
-type UpdateStandardIncomeTableNameWorkflow =
-(command: UpdateStandardIncomeTableNameCommand) =>
-ResultAsync<TableNameUpdateEvent, EntityNotFoundError>
+type UpdateStandardIncomeTableNameWorkflow = (
+  command: UpdateStandardIncomeTableNameCommand,
+) => ResultAsync<TableNameUpdateEvent, EntityNotFoundError>
 
-export const createStandardIncomeTableNameUpdateWorkflow = (effects: {
-  getStandardIncomeTable: (props: {
-    userId: User['id']
-    id: StandardIncomeTable['id']
-  }) => Promise<StandardIncomeTable | undefined>
-}): UpdateStandardIncomeTableNameWorkflow => command =>
-  ok(command)
-    .asyncAndThen(queryCurrentTable(effects))
-    .map(updateTableName)
+export const createStandardIncomeTableNameUpdateWorkflow =
+  (effects: {
+    getStandardIncomeTable: (props: {
+      userId: User['id']
+      id: StandardIncomeTable['id']
+    }) => Promise<StandardIncomeTable | undefined>
+  }): UpdateStandardIncomeTableNameWorkflow =>
+  (command) =>
+    ok(command).asyncAndThen(queryCurrentTable(effects)).map(updateTableName)
