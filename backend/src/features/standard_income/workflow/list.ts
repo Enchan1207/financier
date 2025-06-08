@@ -1,10 +1,7 @@
-import type { ResultAsync } from 'neverthrow'
-import { ok } from 'neverthrow'
 import { z } from 'zod'
 
 import type { StandardIncomeTableSummary } from '@/domains/standard_income'
 import type { User } from '@/domains/user'
-import type { ValidationError } from '@/logic/errors'
 
 export const ListStandardIncomeTablesSchema = z.object({
   // 未指定なら昇順
@@ -39,13 +36,11 @@ Promise<StandardIncomeTableSummary[]> => {
 }
 
 type ListStandardIncomeTablesWorkflow = (command: UnvalidatedListStandardIncomeTablesCommand) =>
-ResultAsync<StandardIncomeTableSummary[], ValidationError>
+Promise<StandardIncomeTableSummary[]>
 
 export const createStandardIncomeTablesListWorkflow = (effects: {
   listStandardIncomeTables: (props: {
     userId: User['id']
     order?: 'asc' | 'desc'
   }) => Promise<StandardIncomeTableSummary[]>
-}): ListStandardIncomeTablesWorkflow => command =>
-  ok(command)
-    .asyncMap(listStandardIncomeTables(effects))
+}): ListStandardIncomeTablesWorkflow => listStandardIncomeTables(effects)

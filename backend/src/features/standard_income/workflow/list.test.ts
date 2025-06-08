@@ -70,11 +70,8 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
         state: { user: dummyUser },
       }
 
-      const result = await workflow(command)
-      expect(result.isOk()).toBeTruthy()
-
-      const tables = result._unsafeUnwrap()
-      expect(tables).toHaveLength(2)
+      const actual = await workflow(command)
+      expect(actual).toHaveLength(2)
     })
 
     test('昇順で取得した場合、正しい順序で項目が取得できること', async () => {
@@ -83,11 +80,10 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
         state: { user: dummyUser },
       }
 
-      const result = await workflow(command)
-      const tables = result._unsafeUnwrap()
+      const actual = await workflow(command)
 
-      expect(tables[0].name).toBe(dummyTable1.name)
-      expect(tables[1].name).toBe(dummyTable2.name)
+      const actualNames = actual.map(entity => entity.name)
+      expect(actualNames).toStrictEqual([dummyTable1.name, dummyTable2.name])
     })
   })
 
@@ -97,11 +93,8 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
       state: { user: anotherUser },
     }
 
-    const result = await workflow(command)
-    expect(result.isOk()).toBeTruthy()
-
-    const tables = result._unsafeUnwrap()
-    expect(tables).toHaveLength(0)
+    const actual = await workflow(command)
+    expect(actual).toHaveLength(0)
   })
 
   test('降順で取得した場合、正しい順序で項目が取得できること', async () => {
@@ -110,11 +103,9 @@ describe('標準報酬月額表一覧取得ワークフロー', () => {
       state: { user: dummyUser },
     }
 
-    const result = await workflow(command)
-    expect(result.isOk()).toBeTruthy()
+    const actual = await workflow(command)
 
-    const tables = result._unsafeUnwrap()
-    expect(tables[0].name).toBe(dummyTable2.name)
-    expect(tables[1].name).toBe(dummyTable1.name)
+    const actualNames = actual.map(entity => entity.name)
+    expect(actualNames).toStrictEqual([dummyTable2.name, dummyTable1.name])
   })
 })

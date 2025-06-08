@@ -2,8 +2,6 @@ import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
-import { EntityNotFoundError } from '@/logic/errors'
-
 import { userAuthMiddleware } from '../authorize/middleware'
 import {
   getStandardIncomeTable,
@@ -43,7 +41,6 @@ const app = new Hono<{ Bindings: Env }>()
       })
 
       const response = await workflow(command)
-
       return c.json(response)
     })
 
@@ -67,10 +64,7 @@ const app = new Hono<{ Bindings: Env }>()
           entity => c.json(entity),
           (error) => {
             console.error(error)
-            if (error instanceof EntityNotFoundError) {
-              return c.json({ error: 'not found' }, 404)
-            }
-            return c.json({ error: 'server error' }, 500)
+            return c.json({ error: 'not found' }, 404)
           },
         )
     })
