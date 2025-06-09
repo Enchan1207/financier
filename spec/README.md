@@ -11,3 +11,4 @@
   - [報酬実績の自動計算](/spec/automated_income_calculation.md)
   - [会計年度の初期化](/spec/financial_year_initialization.md)
   - [標準報酬月額](/spec/standard_income.md)
+  - [報酬](/spec/income.md)
