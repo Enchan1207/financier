@@ -19,11 +19,11 @@
     "zod-openapi": "^4.2.4"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "0.8.32",
+    "@cloudflare/vitest-pool-workers": "0.8.37",
     "@hono/node-server": "^1.13.7",
     "@hono/zod-validator": "^0.4.2",
     "@vitest/coverage-istanbul": "^3.1.4",
-    "miniflare": "^3.20250124.1",
+    "miniflare": "4.20250604.0",
     "tsx": "^4.19.2"
   }
 }
