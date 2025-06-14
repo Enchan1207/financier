@@ -1,6 +1,5 @@
 import type { Result, ResultAsync } from 'neverthrow'
 import { err, ok } from 'neverthrow'
-import { z } from 'zod'
 
 import { getFinancialMonthFromDate } from '@/domains/financial_month_context/logic'
 import type {
@@ -13,18 +12,26 @@ import type { User } from '@/domains/user'
 import dayjs from '@/logic/dayjs'
 import { ValidationError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
-
-export const PostFinancialYearSchema = z.object({
-  year: FinancialYearValueSchema,
-})
-type PostFinancialYearSchema = z.infer<typeof PostFinancialYearSchema>
+import { parseSchema } from '@/logic/zod'
 
 export interface PostFinancialYearCommand {
+  input: {
+    year: number
+    standardIncomeTableId: string
+  }
+  state: {
+    user: User
+  }
+}
+
+interface ValidatedCommand {
   input: {
     year: FinancialYearValue
     standardIncomeTableId: string
   }
-  state: { user: User }
+  state: {
+    user: User
+  }
 }
 
 interface LatestFinancialYearQueried {
@@ -43,12 +50,26 @@ interface ContinuityChecked {
     year: FinancialYearValue
     standardIncomeTableId: string
   }
-  state: { user: User }
+  state: {
+    user: User
+  }
 }
 
 export interface FinancialYearPostEvent {
   entity: FinancialYear
 }
+
+const validateCommand = ({
+  input,
+  state,
+}: PostFinancialYearCommand): Result<ValidatedCommand, ValidationError> =>
+  parseSchema(FinancialYearValueSchema, input.year).map((year) => ({
+    input: {
+      year,
+      standardIncomeTableId: input.standardIncomeTableId,
+    },
+    state,
+  }))
 
 const queryLatestFinancialYear = (effects: {
   listFinancialYears: (props: {
@@ -56,7 +77,7 @@ const queryLatestFinancialYear = (effects: {
     order?: 'asc' | 'desc'
   }) => Promise<FinancialYearValue[]>
 }) =>
-  fromSafePromise(async ({ input, state }: PostFinancialYearCommand) => {
+  fromSafePromise(async ({ input, state }: ValidatedCommand) => {
     const financialYears = await effects.listFinancialYears({
       userId: state.user.id,
       order: 'desc',
@@ -134,6 +155,7 @@ export const createFinancialYearPostWorkflow =
   }): FinancialYearPostWorkflow =>
   (command) =>
     ok(command)
+      .andThen(validateCommand)
       .asyncAndThen(queryLatestFinancialYear(effects))
       .andThen(checkContinuity)
       .andThen(createPostEvent)

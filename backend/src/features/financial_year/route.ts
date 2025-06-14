@@ -90,24 +90,13 @@ const app = new Hono<{ Bindings: Env }>()
   )
   .post(
     '/:year',
-    zValidator(
-      'param',
-      z.object({
-        year: z.coerce.number(),
-        standardIncomeTableId: z.string().ulid(),
-      }),
-    ),
+    zValidator('param', z.object({ year: z.coerce.number() })),
+    zValidator('json', z.object({ standardIncomeTableId: z.string() })),
     async (c) => {
-      const params = c.req.valid('param')
-      const parseResult = FinancialYearValueSchema.safeParse(params.year)
-      if (!parseResult.success) {
-        return c.json({ error: 'bad request' }, 400)
-      }
-
       const command: PostFinancialYearCommand = {
         input: {
-          year: parseResult.data,
-          standardIncomeTableId: params.standardIncomeTableId,
+          ...c.req.valid('param'),
+          ...c.req.valid('json'),
         },
         state: { user: c.get('user') },
       }
