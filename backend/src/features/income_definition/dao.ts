@@ -24,25 +24,12 @@ const IncomeDefinitionRecord = z.object({
 
 type IncomeDefinitionRecord = z.infer<typeof IncomeDefinitionRecord>
 
-export const IncomeDefinitionSortKey = [
+const IncomeDefinitionSortKey = [
   'enabledAt',
   'disabledAt',
   'updatedAt',
 ] as const
-export type IncomeDefinitionSortKey = (typeof IncomeDefinitionSortKey)[number]
-
-export type IncomeDefinitionFindCondition = {
-  userId: User['id']
-  sortBy: IncomeDefinitionSortKey
-  kind?: IncomeDefinitionKind
-  order: 'asc' | 'desc'
-  limit: number
-  offset?: number
-  period?: {
-    start: dayjs.Dayjs
-    end: dayjs.Dayjs
-  }
-}
+type IncomeDefinitionSortKey = (typeof IncomeDefinitionSortKey)[number]
 
 const sortKeyMap: Record<
   IncomeDefinitionSortKey,
@@ -285,7 +272,18 @@ export const getIncomeDefinitionById =
 export const findIncomeDefinitions =
   (
     db: D1Database,
-  ): ((props: IncomeDefinitionFindCondition) => Promise<IncomeDefinition[]>) =>
+  ): ((props: {
+    userId: User['id']
+    sortBy: IncomeDefinitionSortKey
+    kind?: IncomeDefinitionKind
+    order: 'asc' | 'desc'
+    limit: number
+    offset?: number
+    period?: {
+      start: dayjs.Dayjs
+      end: dayjs.Dayjs
+    }
+  }) => Promise<IncomeDefinition[]>) =>
   async ({ userId, sortBy, kind, order, limit, offset, period }) => {
     const conditionNodes: ConditionNode<typeof IncomeDefinitionRecord>[] = [
       condition('user_id', '==', userId),

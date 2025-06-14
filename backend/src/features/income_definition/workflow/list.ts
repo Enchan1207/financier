@@ -12,8 +12,12 @@ import type { User } from '@/domains/user'
 import type dayjs from '@/logic/dayjs'
 import { ValidationError } from '@/logic/errors'
 
-import type { IncomeDefinitionFindCondition } from '../dao'
-import { IncomeDefinitionSortKey } from '../dao'
+const IncomeDefinitionSortKey = [
+  'enabledAt',
+  'disabledAt',
+  'updatedAt',
+] as const
+type IncomeDefinitionSortKey = (typeof IncomeDefinitionSortKey)[number]
 
 export const ListIncomeDefinitionSchema = z.object({
   sortBy: z.enum(IncomeDefinitionSortKey).optional().default('updatedAt'),
@@ -45,6 +49,21 @@ interface ValidatedListIncomeDefinitionCommand {
     }
   }
   state: { user: User }
+}
+
+type WorkflowEffects = {
+  findIncomeDefinitions: (props: {
+    userId: User['id']
+    sortBy: IncomeDefinitionSortKey
+    kind?: IncomeDefinitionKind
+    order: 'asc' | 'desc'
+    limit: number
+    offset?: number
+    period?: {
+      start: dayjs.Dayjs
+      end: dayjs.Dayjs
+    }
+  }) => Promise<IncomeDefinition[]>
 }
 
 const parsePeriodString = (
@@ -151,11 +170,7 @@ const validateCommand = (
 }
 
 const listIncomeDefinitions =
-  (effects: {
-    findIncomeDefinitions: (
-      _: IncomeDefinitionFindCondition,
-    ) => Promise<IncomeDefinition[]>
-  }) =>
+  (effects: Pick<WorkflowEffects, 'findIncomeDefinitions'>) =>
   async (
     command: ValidatedListIncomeDefinitionCommand,
   ): Promise<IncomeDefinition[]> => {
@@ -172,11 +187,9 @@ type ListIncomeDefinitionWorkflow = (
 ) => ResultAsync<IncomeDefinition[], ValidationError>
 
 export const createIncomeDefinitionListWorkflow =
-  (effects: {
-    findIncomeDefinitions: (
-      _: IncomeDefinitionFindCondition,
-    ) => Promise<IncomeDefinition[]>
-  }): ListIncomeDefinitionWorkflow =>
+  (
+    effects: Pick<WorkflowEffects, 'findIncomeDefinitions'>,
+  ): ListIncomeDefinitionWorkflow =>
   (command) =>
     ok(command)
       .andThen(validateCommand)

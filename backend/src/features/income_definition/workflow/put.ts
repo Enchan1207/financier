@@ -2,8 +2,8 @@ import type { ResultAsync } from 'neverthrow'
 import { err, ok } from 'neverthrow'
 import { z } from 'zod'
 
-import type { FinancialMonthData } from '@/domains/financial_month_context'
-import { FinancialMonthDataSchema } from '@/domains/financial_month_context'
+import type { FinancialMonthInfo } from '@/domains/financial_month_context'
+import { FinancialMonthInfoSchema } from '@/domains/financial_month_context'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { IncomeDefinitionKind } from '@/domains/income_definition'
 import type { User } from '@/domains/user'
@@ -23,8 +23,8 @@ export const PutIncomeDefinitionBodySchema = z.object({
   kind: z.enum(IncomeDefinitionKind).optional(),
   value: z.number().int().min(0).optional(),
   isTaxable: z.boolean().optional(),
-  from: FinancialMonthDataSchema.optional(),
-  to: FinancialMonthDataSchema.optional(),
+  from: FinancialMonthInfoSchema.optional(),
+  to: FinancialMonthInfoSchema.optional(),
 })
 type PutIncomeDefinitionBodySchema = z.infer<
   typeof PutIncomeDefinitionBodySchema
@@ -36,8 +36,8 @@ export interface PutIncomeDefinitionCommand {
     kind?: IncomeDefinitionKind
     value?: number
     isTaxable?: boolean
-    from?: FinancialMonthData
-    to?: FinancialMonthData
+    from?: FinancialMonthInfo
+    to?: FinancialMonthInfo
   }
   state: {
     id: IncomeDefinition['id']
@@ -51,8 +51,8 @@ interface CurrentDefinitionQueried {
     kind?: IncomeDefinitionKind
     value?: number
     isTaxable?: boolean
-    from?: FinancialMonthData
-    to?: FinancialMonthData
+    from?: FinancialMonthInfo
+    to?: FinancialMonthInfo
   }
   state: {
     current: IncomeDefinition
@@ -67,8 +67,8 @@ export interface IncomeDefinitionUpdateEvent {
     kind: IncomeDefinitionKind | undefined
     value: number | undefined
     isTaxable: boolean | undefined
-    from: FinancialMonthData | undefined
-    to: FinancialMonthData | undefined
+    from: FinancialMonthInfo | undefined
+    to: FinancialMonthInfo | undefined
   }
 }
 

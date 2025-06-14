@@ -1,6 +1,7 @@
 import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { err, ok } from 'neverthrow'
+import { z } from 'zod'
 
 import { EntityNotFoundError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
@@ -12,11 +13,6 @@ import {
   insertIncomeDefinition,
   updateIncomeDefinition,
 } from './dao'
-import type { GetIncomeDefinitionCommand } from './workflow/get'
-import {
-  createIncomeDefinitionGetWorkflow,
-  GetIncomeDefinitionSchema,
-} from './workflow/get'
 import type { UnvalidatedListIncomeDefinitionCommand } from './workflow/list'
 import {
   createIncomeDefinitionListWorkflow,
@@ -56,30 +52,27 @@ const app = new Hono<{ Bindings: Env }>()
 
     return response
   })
-  .get('/:id', zValidator('param', GetIncomeDefinitionSchema), async (c) => {
-    const command: GetIncomeDefinitionCommand = {
-      input: c.req.valid('param'),
-      state: { user: c.get('user') },
-    }
+  .get(
+    '/:id',
+    zValidator('param', z.object({ id: z.string().ulid() })),
+    async (c) => {
+      const userId = c.get('user').id
+      const id = c.req.valid('param').id
+      const stored = await getIncomeDefinitionById(c.env.D1)(userId, id)
 
-    const workflow = createIncomeDefinitionGetWorkflow({
-      getIncomeDefinitionById: getIncomeDefinitionById(c.env.D1),
-    })
+      if (stored === undefined) {
+        c.json({ error: 'not found' }, 404)
+      }
 
-    const response = workflow(command).match(
-      (entity) => c.json(entity),
-      (error) => {
-        console.error(error)
-        return c.json({ error: 'not found' }, 404)
-      },
-    )
-
-    return response
-  })
+      return c.json(stored)
+    },
+  )
   .post('/', zValidator('json', PostIncomeDefinitionSchema), async (c) => {
     const command: PostIncomeDefinitionCommand = {
       input: c.req.valid('json'),
-      state: { user: c.get('user') },
+      state: {
+        user: c.get('user'),
+      },
     }
 
     const workflow = createIncomeDefinitionPostWorkflow()

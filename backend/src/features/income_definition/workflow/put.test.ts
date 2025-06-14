@@ -1,5 +1,6 @@
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
+import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 import { EntityNotFoundError } from '@/logic/errors'
@@ -13,17 +14,31 @@ describe('収入定義更新ワークフロー', () => {
     auth0UserId: 'auth0_test_user',
   })
 
+  const dummyStandardIncomeTable = createStandardIncomeTable({
+    userId: dummyUser.id,
+    name: '',
+    grades: [
+      {
+        threshold: 0,
+        standardIncome: 10000,
+      },
+    ],
+  })._unsafeUnwrap()
+
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
     financialYear: 2025,
+    standardIncomeTableId: dummyStandardIncomeTable.id,
   })._unsafeUnwrap()
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const dummyApril = dummyFinancialYear.months.find(({ month }) => month === 4)!
+  const dummyApril = dummyFinancialYear.months.find(
+    ({ info: { month } }) => month === 4,
+  )!
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const dummySeptember = dummyFinancialYear.months.find(
-    ({ month }) => month === 9,
+    ({ info: { month } }) => month === 9,
   )!
 
   const dummyDefinition = createIncomeDefinition({
@@ -32,8 +47,8 @@ describe('収入定義更新ワークフロー', () => {
     kind: 'related_by_workday',
     value: 350,
     isTaxable: true,
-    from: dummyApril,
-    to: dummySeptember,
+    from: dummyApril.info,
+    to: dummySeptember.info,
   })._unsafeUnwrap()
 
   const workflow = createIncomeDefinitionPutWorkflow({
