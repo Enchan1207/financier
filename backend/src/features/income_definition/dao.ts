@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import type { FinancialMonthData } from '@/domains/financial_month_context'
+import type { FinancialMonthInfo } from '@/domains/financial_month_context'
 import { getPeriodByFinancialMonth } from '@/domains/financial_month_context/logic'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { IncomeDefinitionKind } from '@/domains/income_definition'
@@ -111,8 +111,8 @@ interface IncomeDefinitionUpdateCondition {
     kind: IncomeDefinitionKind | undefined
     value: number | undefined
     isTaxable: boolean | undefined
-    from: FinancialMonthData | undefined
-    to: FinancialMonthData | undefined
+    from: FinancialMonthInfo | undefined
+    to: FinancialMonthInfo | undefined
   }
 }
 
