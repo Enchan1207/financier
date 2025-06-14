@@ -51,12 +51,12 @@ describe('正常系', () => {
     })
 
     test('25/04/01に始まること', () => {
-      const expectedStart = dayjs.tz('2025-04-01T00:00:00.000')
+      const expectedStart = dayjs('2025-04-01T00:00:00.000+09:00')
       expect(actual.period?.start.valueOf()).toBe(expectedStart.valueOf())
     })
 
     test('25/09/30に終わること', () => {
-      const expectedEnd = dayjs.tz('2025-09-30T23:59:59.999')
+      const expectedEnd = dayjs('2025-09-30T23:59:59.999+09:00')
       expect(actual.period?.end.valueOf()).toBe(expectedEnd.valueOf())
     })
   })
@@ -85,12 +85,12 @@ describe('正常系', () => {
     })
 
     test('25/07/01に始まること', () => {
-      const expectedStart = dayjs.tz('2025-07-01T00:00:00.000')
+      const expectedStart = dayjs('2025-07-01T00:00:00.000+09:00')
       expect(actual.period?.start.valueOf()).toBe(expectedStart.valueOf())
     })
 
     test('25/07/31に終わること', () => {
-      const expectedEnd = dayjs.tz('2025-07-31T23:59:59.999')
+      const expectedEnd = dayjs('2025-07-31T23:59:59.999+09:00')
       expect(actual.period?.end.valueOf()).toBe(expectedEnd.valueOf())
     })
   })
