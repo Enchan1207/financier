@@ -2,6 +2,11 @@ name: deploy
 on:
   workflow_dispatch:
   push:
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - './package.json'
+      - './eslint.config.mjs'
     branches:
       - main
       - release

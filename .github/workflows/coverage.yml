@@ -1,6 +1,11 @@
 name: build coverage report
 on:
   pull_request:
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - './package.json'
+      - './eslint.config.mjs'
     branches:
       - main
 
