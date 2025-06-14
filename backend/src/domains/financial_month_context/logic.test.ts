@@ -1,7 +1,7 @@
 import dayjs from '@/logic/dayjs'
 
 import {
-  createFinancialMonthData,
+  createFinancialMonthInfo,
   getFinancialMonthFromDate,
   getPeriodByFinancialMonth,
 } from './logic'
@@ -33,12 +33,11 @@ describe('会計月度と日時情報の相互変換', () => {
       expectedEnd: dayjs.tz('2025-03-31T23:59:59.999', 'Asia/Tokyo'),
     },
   ])(
-    '$financialYear年度 $month月',
+    '$year年度 $month月',
     ({ financialYear, month, expectedStart, expectedEnd }) => {
-      const financialMonthData = createFinancialMonthData({
+      const financialMonthData = createFinancialMonthInfo({
         financialYear,
         month,
-        workday: 20,
       })._unsafeUnwrap()
       const period = getPeriodByFinancialMonth(financialMonthData)
 
@@ -59,7 +58,6 @@ describe('会計月度と日時情報の相互変換', () => {
         expect(financialMonth).toStrictEqual({
           financialYear,
           month,
-          workday: 20,
         })
       })
     },
@@ -83,14 +81,13 @@ describe('月度内からの会計月度の参照', () => {
       financialYear: 2024,
       month: 4,
     },
-  ])('月中で取得した場合 $financialYear年度 $month月 になること', (props) => {
+  ])('月中で取得した場合 $year年度 $month月 になること', (props) => {
     const { financialYear, month } = props
     const actual = getFinancialMonthFromDate(props.now)
 
     expect(actual).toStrictEqual({
       financialYear,
       month,
-      workday: 20,
     })
   })
 })
