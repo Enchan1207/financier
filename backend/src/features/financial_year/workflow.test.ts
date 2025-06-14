@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:test'
 
-import { getFinancialMonthFromDate } from '@/domains/financial_month/logic'
+import { getFinancialMonthFromDate } from '@/domains/financial_month_context/logic'
 import type { FinancialYearValue } from '@/domains/financial_year'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import type { User } from '@/domains/user'
@@ -33,7 +33,10 @@ describe('会計年度生成ワークフロー', () => {
   describe('会計年度が一件も存在しない場合', () => {
     test('現在の会計年度に等しければ作成できること', async () => {
       const result = await workflow({
-        input: { year: currentFinancialYear },
+        input: {
+          year: currentFinancialYear,
+          standardIncomeTableId: '',
+        },
         state: { user: dummyUser },
       })
 
@@ -42,7 +45,10 @@ describe('会計年度生成ワークフロー', () => {
 
     test('現在の会計年度に等しくなければ作成できないこと', async () => {
       const result = await workflow({
-        input: { year: (currentFinancialYear + 1) as FinancialYearValue },
+        input: {
+          year: (currentFinancialYear + 1) as FinancialYearValue,
+          standardIncomeTableId: '',
+        },
         state: { user: dummyUser },
       })
 

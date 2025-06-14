@@ -5,17 +5,19 @@ import { testClient } from 'hono/testing'
 
 import type { FinancialYearValue } from '@/domains/financial_year'
 import { createFinancialYear } from '@/domains/financial_year/logic'
+import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 
 import { saveUser } from '../authorize/dao'
+import { insertStandardIncomeTable } from '../standard_income/dao'
 import { getFinancialYear, insertFinancialYear } from './dao'
 import financial_years from './route'
 
-describe('財務年度API', () => {
+describe('会計年度API', () => {
   const client = testClient(financial_years, env)
 
-  const testUser: User = createUser({
+  const dummyUser: User = createUser({
     name: 'test user',
     email: 'test@example.com',
     auth0UserId: 'test_user',
@@ -23,9 +25,21 @@ describe('財務年度API', () => {
 
   let token: string
 
-  const testYear = createFinancialYear({
-    userId: testUser.id,
+  const dummyStandardIncomeTable = createStandardIncomeTable({
+    userId: dummyUser.id,
+    name: '',
+    grades: [
+      {
+        threshold: 0,
+        standardIncome: 10000,
+      },
+    ],
+  })._unsafeUnwrap()
+
+  const dummyFinancialYear = createFinancialYear({
+    userId: dummyUser.id,
     financialYear: 2025,
+    standardIncomeTableId: dummyStandardIncomeTable.id,
   })._unsafeUnwrap()
 
   beforeAll(async () => {
@@ -33,7 +47,7 @@ describe('財務年度API', () => {
       {
         exp: Math.floor(Date.now() / 1000) + 60 * 60,
         iss: `https://${env.AUTH_DOMAIN}/`,
-        sub: testUser.auth0UserId,
+        sub: dummyUser.auth0UserId,
         aud: [env.AUTH_AUDIENCE],
       },
       env.TEST_PRIVATE_KEY,
@@ -41,8 +55,9 @@ describe('財務年度API', () => {
     )
 
     // テストユーザとテスト用財務年度を登録
-    await saveUser(env.D1)(testUser)
-    await insertFinancialYear(env.D1)(testYear)
+    await saveUser(env.D1)(dummyUser)
+    await insertStandardIncomeTable(env.D1)(dummyStandardIncomeTable)
+    await insertFinancialYear(env.D1)(dummyFinancialYear)
   })
 
   afterEach(() => {
@@ -52,19 +67,20 @@ describe('財務年度API', () => {
   test('単一の財務年度を取得できること', async () => {
     const result = await client[':year'].$get(
       {
-        param: { year: testYear.year.toString() },
+        param: { year: dummyFinancialYear.year.toString() },
       },
       { headers: { Authorization: `Bearer ${token}` } },
     )
 
     const stored = await result.json()
-    expect(stored).toStrictEqual(testYear)
+    expect(stored).toStrictEqual(dummyFinancialYear)
   })
 
   test('複数の財務年度を取得できること', async () => {
     const anotherYear = createFinancialYear({
-      userId: testUser.id,
+      userId: dummyUser.id,
       financialYear: 2026,
+      standardIncomeTableId: dummyStandardIncomeTable.id,
     })._unsafeUnwrap()
     await insertFinancialYear(env.D1)(anotherYear)
 
@@ -82,7 +98,10 @@ describe('財務年度API', () => {
 
     const result = await client[':year'].$post(
       {
-        param: { year: input.year.toString() },
+        param: {
+          year: input.year.toString(),
+          standardIncomeTableId: dummyStandardIncomeTable.id,
+        },
       },
       { headers: { Authorization: `Bearer ${token}` } },
     )
@@ -95,7 +114,7 @@ describe('財務年度API', () => {
     expect(created.year).toBe(input.year)
 
     const stored = await getFinancialYear(env.D1)({
-      userId: testUser.id,
+      userId: dummyUser.id,
       financialYear: input.year as FinancialYearValue,
     })
     expect(stored).toStrictEqual(created)
@@ -105,14 +124,16 @@ describe('財務年度API', () => {
     const result = await client[':financialYear'][':month'].$get(
       {
         param: {
-          financialYear: testYear.year.toString(),
+          financialYear: dummyFinancialYear.year.toString(),
           month: '6',
         },
       },
       { headers: { Authorization: `Bearer ${token}` } },
     )
 
-    const expected = testYear.months.find(({ month }) => month === 6)
+    const expected = dummyFinancialYear.months.find(
+      ({ info: { month } }) => month === 6,
+    )
 
     const stored = await result.json()
     expect(stored).toStrictEqual(expected)
@@ -130,7 +151,7 @@ describe('財務年度API', () => {
         {
           exp: Math.floor(Date.now() / 1000) + 60 * 60,
           iss: `https://${env.AUTH_DOMAIN}/`,
-          sub: testUser.auth0UserId,
+          sub: dummyUser.auth0UserId,
           aud: [env.AUTH_AUDIENCE],
         },
         env.TEST_PRIVATE_KEY,
@@ -156,7 +177,9 @@ describe('財務年度API', () => {
         200
       >
 
-      const expected = testYear.months.find(({ month }) => month === 6)
+      const expected = dummyFinancialYear.months.find(
+        ({ info: { month } }) => month === 6,
+      )
       expect(stored).toStrictEqual(expected)
     })
   })
@@ -173,7 +196,7 @@ describe('財務年度API', () => {
         {
           exp: Math.floor(Date.now() / 1000) + 60 * 60,
           iss: `https://${env.AUTH_DOMAIN}/`,
-          sub: testUser.auth0UserId,
+          sub: dummyUser.auth0UserId,
           aud: [env.AUTH_AUDIENCE],
         },
         env.TEST_PRIVATE_KEY,

@@ -3,9 +3,9 @@ import { err, ok, Result } from 'neverthrow'
 import { z } from 'zod'
 
 import {
-  createFinancialMonthData,
+  createFinancialMonthInfo,
   getPeriodByFinancialMonth,
-} from '@/domains/financial_month/logic'
+} from '@/domains/financial_month_context/logic'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { IncomeDefinitionKind } from '@/domains/income_definition'
 import type { User } from '@/domains/user'
@@ -112,7 +112,7 @@ const buildPeriod = (props: {
               month: to.month ?? 3,
               workday: 0,
             },
-          ].map(createFinancialMonthData),
+          ].map(createFinancialMonthInfo),
         ),
       ),
     )

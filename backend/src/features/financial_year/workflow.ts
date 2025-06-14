@@ -2,7 +2,7 @@ import type { Result, ResultAsync } from 'neverthrow'
 import { err, ok } from 'neverthrow'
 import { z } from 'zod'
 
-import { getFinancialMonthFromDate } from '@/domains/financial_month/logic'
+import { getFinancialMonthFromDate } from '@/domains/financial_month_context/logic'
 import type {
   FinancialYear,
   FinancialYearValue,
@@ -20,12 +20,18 @@ export const PostFinancialYearSchema = z.object({
 type PostFinancialYearSchema = z.infer<typeof PostFinancialYearSchema>
 
 export interface PostFinancialYearCommand {
-  input: { year: FinancialYearValue }
+  input: {
+    year: FinancialYearValue
+    standardIncomeTableId: string
+  }
   state: { user: User }
 }
 
 interface LatestFinancialYearQueried {
-  input: { year: FinancialYearValue }
+  input: {
+    year: FinancialYearValue
+    standardIncomeTableId: string
+  }
   state: {
     user: User
     latestFinancialYear: FinancialYearValue | undefined
@@ -33,7 +39,10 @@ interface LatestFinancialYearQueried {
 }
 
 interface ContinuityChecked {
-  input: { year: FinancialYearValue }
+  input: {
+    year: FinancialYearValue
+    standardIncomeTableId: string
+  }
   state: { user: User }
 }
 
@@ -47,33 +56,34 @@ const queryLatestFinancialYear = (effects: {
     order?: 'asc' | 'desc'
   }) => Promise<FinancialYearValue[]>
 }) =>
-  fromSafePromise(async (command: PostFinancialYearCommand) => {
+  fromSafePromise(async ({ input, state }: PostFinancialYearCommand) => {
     const financialYears = await effects.listFinancialYears({
-      userId: command.state.user.id,
+      userId: state.user.id,
       order: 'desc',
     })
     const latestFinancialYear = financialYears.at(0)
 
     return ok({
-      input: { year: command.input.year },
+      input,
       state: {
-        user: command.state.user,
+        user: state.user,
         latestFinancialYear,
       },
     })
   })
 
-const checkContinuity = (
-  command: LatestFinancialYearQueried,
-): Result<ContinuityChecked, ValidationError> => {
-  if (command.state.latestFinancialYear === undefined) {
+const checkContinuity = ({
+  input,
+  state,
+}: LatestFinancialYearQueried): Result<ContinuityChecked, ValidationError> => {
+  if (state.latestFinancialYear === undefined) {
     const currentFinancialMonth = getFinancialMonthFromDate(dayjs())
     if (currentFinancialMonth === undefined) {
       return err(new ValidationError('failed to get current financial month'))
     }
 
     const expected = currentFinancialMonth.financialYear
-    if (command.input.year !== expected) {
+    if (input.year !== expected) {
       return err(
         new ValidationError(
           'only current financial year can be created when no any entities exist.',
@@ -82,23 +92,23 @@ const checkContinuity = (
     }
 
     return ok({
-      input: { year: command.input.year },
-      state: { user: command.state.user },
+      input,
+      state: { user: state.user },
     })
   }
 
-  const latestYear = command.state.latestFinancialYear
-  if (command.input.year - 1 !== latestYear) {
+  const latestYear = state.latestFinancialYear
+  if (input.year - 1 !== latestYear) {
     return err(
       new ValidationError(
-        `financial year must keep continuity (latest: ${latestYear} specified: ${command.input.year})`,
+        `financial year must keep continuity (latest: ${latestYear} specified: ${input.year})`,
       ),
     )
   }
 
   return ok({
-    input: { year: command.input.year },
-    state: { user: command.state.user },
+    input,
+    state: { user: state.user },
   })
 }
 
@@ -108,6 +118,7 @@ const createPostEvent = (
   createFinancialYear({
     userId: command.state.user.id,
     financialYear: command.input.year,
+    standardIncomeTableId: command.input.standardIncomeTableId,
   }).map((entity) => ({ entity }))
 
 type FinancialYearPostWorkflow = (

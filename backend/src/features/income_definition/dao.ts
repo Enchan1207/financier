@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 import type { FinancialMonthData } from '@/domains/financial_month_context'
-import { getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
+import { getPeriodByFinancialMonth } from '@/domains/financial_month_context/logic'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { IncomeDefinitionKind } from '@/domains/income_definition'
 import type { User } from '@/domains/user'

@@ -1,9 +1,9 @@
 import { env } from 'cloudflare:test'
 
 import {
-  createFinancialMonthData,
+  createFinancialMonthInfo,
   getPeriodByFinancialMonth,
-} from '@/domains/financial_month/logic'
+} from '@/domains/financial_month_context/logic'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
@@ -50,12 +50,12 @@ describe('基本的なCRUD', () => {
     kind: 'absolute',
     value: 230000,
     isTaxable: true,
-    from: createFinancialMonthData({
+    from: createFinancialMonthInfo({
       financialYear: 2025,
       month: 4,
       workday: 20,
     })._unsafeUnwrap(),
-    to: createFinancialMonthData({
+    to: createFinancialMonthInfo({
       financialYear: 2025,
       month: 3,
       workday: 20,
@@ -107,12 +107,12 @@ describe('基本的なCRUD', () => {
             name: '通勤手当',
             isTaxable: undefined,
             value: 300,
-            from: createFinancialMonthData({
+            from: createFinancialMonthInfo({
               financialYear: 2025,
               month: 6,
               workday: 20,
             })._unsafeUnwrap(),
-            to: createFinancialMonthData({
+            to: createFinancialMonthInfo({
               financialYear: 2025,
               month: 1,
               workday: 20,
@@ -124,7 +124,7 @@ describe('基本的なCRUD', () => {
 
     test('値が更新されていること', () => {
       const { start } = getPeriodByFinancialMonth(
-        createFinancialMonthData({
+        createFinancialMonthInfo({
           financialYear: 2025,
           month: 6,
           workday: 20,
@@ -132,7 +132,7 @@ describe('基本的なCRUD', () => {
       )
 
       const { end } = getPeriodByFinancialMonth(
-        createFinancialMonthData({
+        createFinancialMonthInfo({
           financialYear: 2025,
           month: 1,
           workday: 20,
@@ -167,12 +167,12 @@ describe('詳細な検索', () => {
     kind: 'related_by_workday',
     value: 380,
     isTaxable: false,
-    from: createFinancialMonthData({
+    from: createFinancialMonthInfo({
       financialYear: 2025,
       month: 4,
       workday: 20,
     })._unsafeUnwrap(),
-    to: createFinancialMonthData({
+    to: createFinancialMonthInfo({
       financialYear: 2025,
       month: 12,
       workday: 20,
@@ -185,12 +185,12 @@ describe('詳細な検索', () => {
     kind: 'related_by_workday',
     value: 380,
     isTaxable: true,
-    from: createFinancialMonthData({
+    from: createFinancialMonthInfo({
       financialYear: 2025,
       month: 8,
       workday: 20,
     })._unsafeUnwrap(),
-    to: createFinancialMonthData({
+    to: createFinancialMonthInfo({
       financialYear: 2025,
       month: 2,
       workday: 20,
@@ -218,7 +218,7 @@ describe('詳細な検索', () => {
       expected: [dummyDefinition2],
     },
   ])('単月検索 $month月度', async ({ month, expected }) => {
-    const financialMonth = createFinancialMonthData({
+    const financialMonth = createFinancialMonthInfo({
       financialYear: 2025,
       month,
       workday: 20,
@@ -277,12 +277,12 @@ describe('定義期間の更新', () => {
     kind: 'absolute',
     value: 230000,
     isTaxable: true,
-    from: createFinancialMonthData({
+    from: createFinancialMonthInfo({
       financialYear: 2025,
       month: 4,
       workday: 20,
     })._unsafeUnwrap(),
-    to: createFinancialMonthData({
+    to: createFinancialMonthInfo({
       financialYear: 2025,
       month: 3,
       workday: 20,
@@ -351,7 +351,7 @@ describe('定義期間の更新', () => {
           name: undefined,
           isTaxable: undefined,
           value: undefined,
-          from: createFinancialMonthData({
+          from: createFinancialMonthInfo({
             financialYear: dummyFinancialYear.year,
             month: 5,
             workday: 20,
@@ -397,7 +397,7 @@ describe('定義期間の更新', () => {
           isTaxable: undefined,
           value: undefined,
           from: undefined,
-          to: createFinancialMonthData({
+          to: createFinancialMonthInfo({
             financialYear: dummyFinancialYear.year,
             month: 1,
             workday: 20,

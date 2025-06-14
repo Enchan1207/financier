@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:test'
 
 import type { FinancialMonthData } from '@/domains/financial_month_context'
-import { createFinancialMonthData } from '@/domains/financial_month/logic'
+import { createFinancialMonthInfo } from '@/domains/financial_month_context/logic'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
@@ -24,13 +24,13 @@ describe('報酬定義取得ワークフロー', () => {
     auth0UserId: 'auth0_another_user',
   })
 
-  const fromMonth: FinancialMonthData = createFinancialMonthData({
+  const fromMonth: FinancialMonthData = createFinancialMonthInfo({
     financialYear: 2025,
     month: 4,
     workday: 20,
   })._unsafeUnwrap()
 
-  const toMonth: FinancialMonthData = createFinancialMonthData({
+  const toMonth: FinancialMonthData = createFinancialMonthInfo({
     financialYear: 2025,
     month: 12,
     workday: 20,
