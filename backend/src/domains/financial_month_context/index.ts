@@ -9,6 +9,8 @@ export type WorkdayValue = z.infer<typeof WorkdayValueSchema>
 export const FinancialMonthValueSchema = z.number().int().min(1).max(12).brand()
 export type Months = z.infer<typeof FinancialMonthValueSchema>
 
+export const Months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const
+
 export const FinancialMonthInfoSchema = z.object({
   financialYear: FinancialYearValueSchema,
   month: FinancialMonthValueSchema,

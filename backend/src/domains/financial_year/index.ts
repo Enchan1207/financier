@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import type { FinancialMonth } from '../financial_month'
+import type { FinancialMonthContext } from '../financial_month_context'
 
 export const FinancialYearValueSchema = z
   .number()
@@ -13,5 +13,5 @@ export type FinancialYearValue = z.infer<typeof FinancialYearValueSchema>
 /** 会計年度 */
 export interface FinancialYear {
   year: FinancialYearValue
-  months: FinancialMonth[]
+  months: FinancialMonthContext[]
 }

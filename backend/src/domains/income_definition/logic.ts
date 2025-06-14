@@ -5,8 +5,8 @@ import { ulid } from 'ulid'
 import dayjs from '@/logic/dayjs'
 import { ValidationError } from '@/logic/errors'
 
-import type { FinancialMonthData } from '../financial_month'
-import { getPeriodByFinancialMonth } from '../financial_month/logic'
+import type { FinancialMonthInfo } from '../financial_month_context'
+import { getPeriodByFinancialMonth } from '../financial_month_context/logic'
 import type { IncomeDefinition, IncomeDefinitionKind } from '.'
 
 export const createIncomeDefinition = (props: {
@@ -15,8 +15,8 @@ export const createIncomeDefinition = (props: {
   kind: IncomeDefinitionKind
   isTaxable: boolean
   value: number
-  from: FinancialMonthData
-  to: FinancialMonthData
+  from: FinancialMonthInfo
+  to: FinancialMonthInfo
 }): Result<IncomeDefinition, ValidationError> => {
   const { userId, name, kind, value, isTaxable, from, to } = props
 
