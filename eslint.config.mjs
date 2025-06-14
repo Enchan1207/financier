@@ -168,7 +168,52 @@ export default tseslint.config(
           ],
         },
       ],
-    }, // there is no rules for backend yet...
+    },
+  },
+
+  {
+    name: 'backend architecture rules - domains',
+    files: ['backend/src/domains/**/*.ts', 'backend/src/domains/**/*.test.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/features'],
+              message:
+                'Do not import features at domains. ドメインレイヤは機能に依存してはいけません。',
+              allowTypeImports: false,
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    name: 'backend architecture rules - workflow',
+    files: [
+      'backend/**/workflow.ts',
+      'backend/**/workflow.test.ts',
+      'backend/**/workflow/**/*.ts',
+      'backend/**/workflow/**/*.test.ts',
+    ],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/dao'],
+              message:
+                'Do not import dao at workflow. ワークフローにdaoは必要ないはずです。',
+              allowTypeImports: false,
+            },
+          ],
+        },
+      ],
+    },
   },
 
   {
