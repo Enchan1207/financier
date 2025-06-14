@@ -1,19 +1,17 @@
 import dayjs from '@/logic/dayjs'
 
-import { createFinancialMonthData } from '../financial_month/logic'
+import { createFinancialMonthInfo } from '../financial_month_context/logic'
 import { createIncomeDefinition } from './logic'
 
 describe('正常系', () => {
-  const from = createFinancialMonthData({
+  const from = createFinancialMonthInfo({
     financialYear: 2024,
     month: 12,
-    workday: 20,
   })._unsafeUnwrap()
 
-  const to = createFinancialMonthData({
+  const to = createFinancialMonthInfo({
     financialYear: 2024,
     month: 1,
-    workday: 20,
   })._unsafeUnwrap()
 
   const result = createIncomeDefinition({
@@ -57,16 +55,14 @@ describe('正常系', () => {
 })
 
 describe('異常系 - 終了が開始より前', () => {
-  const from = createFinancialMonthData({
+  const from = createFinancialMonthInfo({
     financialYear: 2024,
     month: 12,
-    workday: 20,
   })._unsafeUnwrap()
 
-  const to = createFinancialMonthData({
+  const to = createFinancialMonthInfo({
     financialYear: 2024,
     month: 11,
-    workday: 20,
   })._unsafeUnwrap()
 
   const result = createIncomeDefinition({

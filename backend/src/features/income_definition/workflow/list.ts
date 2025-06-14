@@ -3,17 +3,21 @@ import { err, ok, Result } from 'neverthrow'
 import { z } from 'zod'
 
 import {
-  createFinancialMonthData,
+  createFinancialMonthInfo,
   getPeriodByFinancialMonth,
-} from '@/domains/financial_month/logic'
+} from '@/domains/financial_month_context/logic'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { IncomeDefinitionKind } from '@/domains/income_definition'
 import type { User } from '@/domains/user'
 import type dayjs from '@/logic/dayjs'
 import { ValidationError } from '@/logic/errors'
 
-import type { IncomeDefinitionFindCondition } from '../dao'
-import { IncomeDefinitionSortKey } from '../dao'
+const IncomeDefinitionSortKey = [
+  'enabledAt',
+  'disabledAt',
+  'updatedAt',
+] as const
+type IncomeDefinitionSortKey = (typeof IncomeDefinitionSortKey)[number]
 
 export const ListIncomeDefinitionSchema = z.object({
   sortBy: z.enum(IncomeDefinitionSortKey).optional().default('updatedAt'),
@@ -45,6 +49,21 @@ interface ValidatedListIncomeDefinitionCommand {
     }
   }
   state: { user: User }
+}
+
+type WorkflowEffects = {
+  findIncomeDefinitions: (props: {
+    userId: User['id']
+    sortBy: IncomeDefinitionSortKey
+    kind?: IncomeDefinitionKind
+    order: 'asc' | 'desc'
+    limit: number
+    offset?: number
+    period?: {
+      start: dayjs.Dayjs
+      end: dayjs.Dayjs
+    }
+  }) => Promise<IncomeDefinition[]>
 }
 
 const parsePeriodString = (
@@ -112,7 +131,7 @@ const buildPeriod = (props: {
               month: to.month ?? 3,
               workday: 0,
             },
-          ].map(createFinancialMonthData),
+          ].map(createFinancialMonthInfo),
         ),
       ),
     )
@@ -137,25 +156,29 @@ const validateCommand = (
     from,
     to,
     at,
-  }).map((period) => ({
-    input: {
-      sortBy,
-      limit,
-      offset,
-      order,
-      kind,
-      period,
-    },
-    state,
-  }))
+  })
+    .andThen(({ start, end }) => {
+      if (end.isBefore(start)) {
+        return err(new ValidationError('invalid period'))
+      }
+
+      return ok({ start, end })
+    })
+    .map((period) => ({
+      input: {
+        sortBy,
+        limit,
+        offset,
+        order,
+        kind,
+        period,
+      },
+      state,
+    }))
 }
 
 const listIncomeDefinitions =
-  (effects: {
-    findIncomeDefinitions: (
-      _: IncomeDefinitionFindCondition,
-    ) => Promise<IncomeDefinition[]>
-  }) =>
+  (effects: Pick<WorkflowEffects, 'findIncomeDefinitions'>) =>
   async (
     command: ValidatedListIncomeDefinitionCommand,
   ): Promise<IncomeDefinition[]> => {
@@ -172,11 +195,7 @@ type ListIncomeDefinitionWorkflow = (
 ) => ResultAsync<IncomeDefinition[], ValidationError>
 
 export const createIncomeDefinitionListWorkflow =
-  (effects: {
-    findIncomeDefinitions: (
-      _: IncomeDefinitionFindCondition,
-    ) => Promise<IncomeDefinition[]>
-  }): ListIncomeDefinitionWorkflow =>
+  (effects: WorkflowEffects): ListIncomeDefinitionWorkflow =>
   (command) =>
     ok(command)
       .andThen(validateCommand)

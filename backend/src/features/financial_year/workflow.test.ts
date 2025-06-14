@@ -1,90 +1,171 @@
-import { env } from 'cloudflare:test'
+import type { ResultAsync } from 'neverthrow'
+import { Err, Ok } from 'neverthrow'
 
-import { getFinancialMonthFromDate } from '@/domains/financial_month/logic'
 import type { FinancialYearValue } from '@/domains/financial_year'
-import { createFinancialYear } from '@/domains/financial_year/logic'
-import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
-import dayjs from '@/logic/dayjs'
+import type { ValidationError } from '@/logic/errors'
 
-import { saveUser } from '../authorize/dao'
-import { insertFinancialYear, listFinancialYears } from './dao'
+import type { FinancialYearPostEvent } from './workflow'
 import { createFinancialYearPostWorkflow } from './workflow'
 
-describe('会計年度生成ワークフロー', () => {
-  const dummyUser: User = createUser({
-    name: 't_est_user',
-    email: 'test@example.com',
-    auth0UserId: 'auth0_test_user',
+describe('正常系', () => {
+  beforeAll(() => {
+    vi.setSystemTime('2024-08-08T09:00:00Z')
   })
 
-  const workflow = createFinancialYearPostWorkflow({
-    listFinancialYears: listFinancialYears(env.D1),
+  afterAll(() => {
+    vi.useRealTimers()
   })
 
-  const currentFinancialYear =
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    getFinancialMonthFromDate(dayjs())!.financialYear
-
-  beforeAll(async () => {
-    await saveUser(env.D1)(dummyUser)
-  })
-
-  describe('会計年度が一件も存在しない場合', () => {
-    test('現在の会計年度に等しければ作成できること', async () => {
-      const result = await workflow({
-        input: { year: currentFinancialYear },
-        state: { user: dummyUser },
-      })
-
-      expect(result.isOk()).toBeTruthy()
+  describe('現在時刻に基づく最初の会計年度を生成する場合', () => {
+    const workflow = createFinancialYearPostWorkflow({
+      listFinancialYears: async () => Promise.resolve([]),
     })
 
-    test('現在の会計年度に等しくなければ作成できないこと', async () => {
-      const result = await workflow({
-        input: { year: (currentFinancialYear + 1) as FinancialYearValue },
-        state: { user: dummyUser },
-      })
+    let actual: Awaited<ResultAsync<FinancialYearPostEvent, ValidationError>>
 
-      expect(result.isOk()).toBeFalsy()
-    })
-  })
-
-  describe('既存の会計年度が存在する場合', () => {
     beforeAll(async () => {
-      const financialYear = createFinancialYear({
-        userId: dummyUser.id,
-        year: currentFinancialYear,
-      })._unsafeUnwrap()
-
-      await insertFinancialYear(env.D1)(financialYear)
+      actual = await workflow({
+        input: {
+          year: 2024,
+          standardIncomeTableId: '',
+        },
+        state: {
+          user: createUser({
+            name: '',
+            email: '',
+            auth0UserId: '',
+          }),
+        },
+      })
     })
 
-    test('同じ年度のものは作成できないこと', async () => {
-      const result = await workflow({
-        input: { year: currentFinancialYear },
-        state: { user: dummyUser },
-      })
+    test('正常に作成できること', () => {
+      expect(actual).toBeInstanceOf(Ok)
+    })
+  })
 
-      expect(result.isOk()).toBeFalsy()
+  describe('連続した二つ目の会計年度を生成する場合', () => {
+    const workflow = createFinancialYearPostWorkflow({
+      listFinancialYears: async () =>
+        Promise.resolve([2024] as FinancialYearValue[]),
     })
 
-    test('連続していれば作成できること', async () => {
-      const result = await workflow({
-        input: { year: (currentFinancialYear + 1) as FinancialYearValue },
-        state: { user: dummyUser },
-      })
+    let actual: Awaited<ResultAsync<FinancialYearPostEvent, ValidationError>>
 
-      expect(result.isOk()).toBeTruthy()
+    beforeAll(async () => {
+      actual = await workflow({
+        input: {
+          year: 2025,
+          standardIncomeTableId: '',
+        },
+        state: {
+          user: createUser({
+            name: '',
+            email: '',
+            auth0UserId: '',
+          }),
+        },
+      })
     })
 
-    test('連続していなければ作成できないこと', async () => {
-      const result = await workflow({
-        input: { year: (currentFinancialYear + 2) as FinancialYearValue },
-        state: { user: dummyUser },
-      })
+    test('正常に作成できること', () => {
+      expect(actual).toBeInstanceOf(Ok)
+    })
+  })
+})
 
-      expect(result.isOk()).toBeFalsy()
+describe('異常系', () => {
+  beforeAll(() => {
+    vi.setSystemTime('2024-08-08T09:00:00Z')
+  })
+
+  afterAll(() => {
+    vi.useRealTimers()
+  })
+
+  describe('コマンドバリデーションエラー', () => {
+    const workflow = createFinancialYearPostWorkflow({
+      listFinancialYears: async () => Promise.resolve([]),
+    })
+
+    let actual: Awaited<ResultAsync<FinancialYearPostEvent, ValidationError>>
+
+    beforeAll(async () => {
+      actual = await workflow({
+        input: {
+          year: -1,
+          standardIncomeTableId: '',
+        },
+        state: {
+          user: createUser({
+            name: '',
+            email: '',
+            auth0UserId: '',
+          }),
+        },
+      })
+    })
+
+    test('正常に作成できないこと', () => {
+      expect(actual).toBeInstanceOf(Err)
+    })
+  })
+
+  describe('現在時刻から離れた最初の会計年度を生成する場合', () => {
+    const workflow = createFinancialYearPostWorkflow({
+      listFinancialYears: async () => Promise.resolve([]),
+    })
+
+    let actual: Awaited<ResultAsync<FinancialYearPostEvent, ValidationError>>
+
+    beforeAll(async () => {
+      actual = await workflow({
+        input: {
+          year: 2023,
+          standardIncomeTableId: '',
+        },
+        state: {
+          user: createUser({
+            name: '',
+            email: '',
+            auth0UserId: '',
+          }),
+        },
+      })
+    })
+
+    test('正常に作成できないこと', () => {
+      expect(actual).toBeInstanceOf(Err)
+    })
+  })
+
+  describe('連続しない二つ目の会計年度を生成する場合', () => {
+    const workflow = createFinancialYearPostWorkflow({
+      listFinancialYears: async () =>
+        Promise.resolve([2024] as FinancialYearValue[]),
+    })
+
+    let actual: Awaited<ResultAsync<FinancialYearPostEvent, ValidationError>>
+
+    beforeAll(async () => {
+      actual = await workflow({
+        input: {
+          year: 2026,
+          standardIncomeTableId: '',
+        },
+        state: {
+          user: createUser({
+            name: '',
+            email: '',
+            auth0UserId: '',
+          }),
+        },
+      })
+    })
+
+    test('正常に作成できないこと', () => {
+      expect(actual).toBeInstanceOf(Err)
     })
   })
 })

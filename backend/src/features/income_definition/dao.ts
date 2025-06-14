@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-import type { FinancialMonthData } from '@/domains/financial_month'
-import { getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
+import type { FinancialMonthInfo } from '@/domains/financial_month_context'
+import { getPeriodByFinancialMonth } from '@/domains/financial_month_context/logic'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { IncomeDefinitionKind } from '@/domains/income_definition'
 import type { User } from '@/domains/user'
@@ -24,25 +24,12 @@ const IncomeDefinitionRecord = z.object({
 
 type IncomeDefinitionRecord = z.infer<typeof IncomeDefinitionRecord>
 
-export const IncomeDefinitionSortKey = [
+const IncomeDefinitionSortKey = [
   'enabledAt',
   'disabledAt',
   'updatedAt',
 ] as const
-export type IncomeDefinitionSortKey = (typeof IncomeDefinitionSortKey)[number]
-
-export type IncomeDefinitionFindCondition = {
-  userId: User['id']
-  sortBy: IncomeDefinitionSortKey
-  kind?: IncomeDefinitionKind
-  order: 'asc' | 'desc'
-  limit: number
-  offset?: number
-  period?: {
-    start: dayjs.Dayjs
-    end: dayjs.Dayjs
-  }
-}
+type IncomeDefinitionSortKey = (typeof IncomeDefinitionSortKey)[number]
 
 const sortKeyMap: Record<
   IncomeDefinitionSortKey,
@@ -111,8 +98,8 @@ interface IncomeDefinitionUpdateCondition {
     kind: IncomeDefinitionKind | undefined
     value: number | undefined
     isTaxable: boolean | undefined
-    from: FinancialMonthData | undefined
-    to: FinancialMonthData | undefined
+    from: FinancialMonthInfo | undefined
+    to: FinancialMonthInfo | undefined
   }
 }
 
@@ -182,7 +169,7 @@ const buildIncomeRecordCleanupQuery =
         r.financial_month_id
       FROM
         income_records r
-        LEFT JOIN financial_months m ON m.id = r.financial_month_id
+        LEFT JOIN financial_month_contexts m ON m.id = r.financial_month_id
         LEFT JOIN income_definitions d ON d.id = r.definition_id
       WHERE
         r.definition_id = ?1
@@ -285,7 +272,18 @@ export const getIncomeDefinitionById =
 export const findIncomeDefinitions =
   (
     db: D1Database,
-  ): ((props: IncomeDefinitionFindCondition) => Promise<IncomeDefinition[]>) =>
+  ): ((props: {
+    userId: User['id']
+    sortBy: IncomeDefinitionSortKey
+    kind?: IncomeDefinitionKind
+    order: 'asc' | 'desc'
+    limit: number
+    offset?: number
+    period?: {
+      start: dayjs.Dayjs
+      end: dayjs.Dayjs
+    }
+  }) => Promise<IncomeDefinition[]>) =>
   async ({ userId, sortBy, kind, order, limit, offset, period }) => {
     const conditionNodes: ConditionNode<typeof IncomeDefinitionRecord>[] = [
       condition('user_id', '==', userId),

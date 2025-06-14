@@ -76,7 +76,7 @@ financierバックエンドは以下のエンティティを持ちます。
 ### FinancialMonth
 
 会計年度における各月を扱います。
-最新の定義は [`FinancialMonth`](/backend/src/features/financial_months/domain/entity.ts) を参照ください。
+最新の定義は [`FinancialMonth`](/backend/src/features/financial_month_contexts/domain/entity.ts) を参照ください。
 
 ```mermaid
 erDiagram

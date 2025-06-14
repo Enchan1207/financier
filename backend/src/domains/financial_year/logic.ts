@@ -1,10 +1,11 @@
-import { err, Result } from 'neverthrow'
+import { Result } from 'neverthrow'
 
 import { ValidationError } from '@/logic/errors'
 import { parseSchema } from '@/logic/zod'
 
-import { Months } from '../financial_month'
-import { createFinancialMonth } from '../financial_month/logic'
+import { Months } from '../financial_month_context'
+import { createFinancialMonthContext } from '../financial_month_context/logic'
+import type { StandardIncomeTable } from '../standard_income'
 import type { User } from '../user'
 import type { FinancialYear } from '.'
 import { FinancialYearValueSchema } from '.'
@@ -16,26 +17,23 @@ export const createFinancialYearValue = (value: number) =>
 
 export const createFinancialYear = (props: {
   userId: User['id']
-  year: number
+  financialYear: number
+  standardIncomeTableId: StandardIncomeTable['id']
 }): Result<FinancialYear, ValidationError> => {
-  const { userId, year } = props
-
-  const yearParseResult = parseSchema(FinancialYearValueSchema, year)
-  if (yearParseResult.isErr()) {
-    return err(new ValidationError())
-  }
+  const { userId, financialYear, standardIncomeTableId } = props
 
   const results = Months.map((month) =>
-    createFinancialMonth({
-      financialYear: yearParseResult.value,
+    createFinancialMonthContext({
       userId,
+      financialYear,
       month,
       workday: 20, // TODO: 本来は各月の祝日を参照するべき
+      standardIncomeTableId,
     }),
   )
 
   return Result.combine(results).map((months) => ({
-    year: yearParseResult.value,
+    year: months[0].info.financialYear,
     months,
   }))
 }

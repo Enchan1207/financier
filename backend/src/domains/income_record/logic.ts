@@ -1,12 +1,12 @@
 import dayjs from '@/logic/dayjs'
 
-import type { FinancialMonth } from '../financial_month'
+import type { FinancialMonthContext } from '../financial_month_context'
 import type { IncomeDefinition } from '../income_definition'
 import type { IncomeRecord, IncomeRecordUpdator } from '.'
 
 export const createIncomeRecord = (props: {
   userId: string
-  financialMonthId: FinancialMonth['id']
+  financialMonthId: FinancialMonthContext['id']
   definitionId: IncomeDefinition['id']
   value: number
   updatedBy: IncomeRecordUpdator

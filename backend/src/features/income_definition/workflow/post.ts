@@ -1,8 +1,8 @@
 import type { Result } from 'neverthrow'
 import { z } from 'zod'
 
-import type { FinancialMonthData } from '@/domains/financial_month'
-import { FinancialMonthDataSchema } from '@/domains/financial_month'
+import type { FinancialMonthInfo } from '@/domains/financial_month_context'
+import { FinancialMonthInfoSchema } from '@/domains/financial_month_context'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { IncomeDefinitionKind } from '@/domains/income_definition'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
@@ -14,8 +14,8 @@ export const PostIncomeDefinitionSchema = z.object({
   kind: z.enum(IncomeDefinitionKind),
   value: z.number().int().min(0),
   isTaxable: z.boolean().default(true),
-  from: FinancialMonthDataSchema,
-  to: FinancialMonthDataSchema,
+  from: FinancialMonthInfoSchema,
+  to: FinancialMonthInfoSchema,
 })
 type PostIncomeDefinitionSchema = z.infer<typeof PostIncomeDefinitionSchema>
 
@@ -25,8 +25,8 @@ export interface PostIncomeDefinitionCommand {
     kind: IncomeDefinitionKind
     value: number
     isTaxable: boolean
-    from: FinancialMonthData
-    to: FinancialMonthData
+    from: FinancialMonthInfo
+    to: FinancialMonthInfo
   }
   state: { user: User }
 }

@@ -6,11 +6,13 @@ import { ulid } from 'ulid'
 
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
+import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 import { saveUser } from '@/features/authorize/dao'
 import { insertFinancialYear } from '@/features/financial_year/dao'
 
+import { insertStandardIncomeTable } from '../standard_income/dao'
 import { insertIncomeDefinition } from './dao'
 import incomeDefinitions from './route'
 import type { PutIncomeDefinitionCommand } from './workflow/put'
@@ -24,17 +26,31 @@ describe('報酬定義API', () => {
     auth0UserId: 'test_user',
   })
 
+  const dummyStandardIncomeTable = createStandardIncomeTable({
+    userId: dummyUser.id,
+    name: '',
+    grades: [
+      {
+        threshold: 0,
+        standardIncome: 10000,
+      },
+    ],
+  })._unsafeUnwrap()
+
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
-    year: 2025,
+    financialYear: 2025,
+    standardIncomeTableId: dummyStandardIncomeTable.id,
   })._unsafeUnwrap()
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const dummyMay = dummyFinancialYear.months.find(({ month }) => month === 5)!
+  const dummyMay = dummyFinancialYear.months.find(
+    ({ info: { month } }) => month === 5,
+  )!
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const dummyNovember = dummyFinancialYear.months.find(
-    ({ month }) => month === 11,
+    ({ info: { month } }) => month === 11,
   )!
 
   const dummyDefinition = createIncomeDefinition({
@@ -43,8 +59,8 @@ describe('報酬定義API', () => {
     kind: 'absolute',
     value: 100000,
     isTaxable: true,
-    from: dummyMay,
-    to: dummyNovember,
+    from: dummyMay.info,
+    to: dummyNovember.info,
   })._unsafeUnwrap()
 
   let token: string
@@ -62,6 +78,7 @@ describe('報酬定義API', () => {
     )
 
     await saveUser(env.D1)(dummyUser)
+    await insertStandardIncomeTable(env.D1)(dummyStandardIncomeTable)
     await insertFinancialYear(env.D1)(dummyFinancialYear)
     await insertIncomeDefinition(env.D1)(dummyDefinition)
   })
@@ -122,10 +139,7 @@ describe('報酬定義API', () => {
       })
 
       test('定義が返ること', async () => {
-        const result = (await actual.json()) as InferResponseType<
-          (typeof client)[':id']['$get'],
-          200
-        >
+        const result = await actual.json()
         const expected = {
           ...dummyDefinition,
           enabledAt: dummyDefinition.enabledAt.toISOString(),
@@ -164,8 +178,8 @@ describe('報酬定義API', () => {
         kind: 'absolute',
         value: 50000,
         isTaxable: true,
-        from: dummyMay,
-        to: dummyNovember,
+        from: dummyMay.info,
+        to: dummyNovember.info,
       } as const
 
       beforeAll(async () => {
@@ -203,8 +217,8 @@ describe('報酬定義API', () => {
               kind: 'absolute',
               value: 0,
               isTaxable: true,
-              from: dummyNovember,
-              to: dummyMay,
+              from: dummyNovember.info,
+              to: dummyMay.info,
             },
           },
           { headers: { Authorization: `Bearer ${token}` } },

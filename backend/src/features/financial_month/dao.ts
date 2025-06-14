@@ -1,14 +1,14 @@
 import { z } from 'zod'
 
 import type {
-  FinancialMonth,
-  FinancialMonthData,
+  FinancialMonthContext,
+  FinancialMonthInfo,
   WorkdayValue,
-} from '@/domains/financial_month'
+} from '@/domains/financial_month_context'
 import {
   FinancialMonthValueSchema,
   WorkdayValueSchema,
-} from '@/domains/financial_month'
+} from '@/domains/financial_month_context'
 import { FinancialYearValueSchema } from '@/domains/financial_year'
 import type { User } from '@/domains/user'
 import type dayjs from '@/logic/dayjs'
@@ -25,19 +25,20 @@ export const FinancialMonthRecord = z.object({
   started_at: z.number(),
   ended_at: z.number(),
   workday: WorkdayValueSchema,
+  standard_income_table_id: z.string(),
 })
 export type FinancialMonthRecord = z.infer<typeof FinancialMonthRecord>
 
-export const getFinancialMonthByFinancialMonth =
+export const getFinancialMonthContext =
   (
     db: D1Database,
-  ): ((
-    userId: string,
-    financialMonth: FinancialMonthData,
-  ) => Promise<FinancialMonth | undefined>) =>
-  async (userId, { financialYear, month }) => {
+  ): ((props: {
+    userId: string
+    info: FinancialMonthInfo
+  }) => Promise<FinancialMonthContext | undefined>) =>
+  async ({ userId, info: { financialYear, month } }) => {
     const stmt = d1(db)
-      .select(FinancialMonthRecord, 'financial_months')
+      .select(FinancialMonthRecord, 'financial_month_contexts')
       .where(
         every(
           condition('user_id', '==', userId),
@@ -52,18 +53,18 @@ export const getFinancialMonthByFinancialMonth =
     return item
   }
 
-export const findFinancialMonthsByDate =
+export const findFinancialMonthCotextsByDate =
   (
     db: D1Database,
-  ): ((
-    userId: string,
-    date: dayjs.Dayjs,
-  ) => Promise<FinancialMonth | undefined>) =>
-  async (userId, date) => {
+  ): ((props: {
+    userId: string
+    date: dayjs.Dayjs
+  }) => Promise<FinancialMonthContext | undefined>) =>
+  async ({ userId, date }) => {
     const timestamp = date.valueOf()
 
     const stmt = d1(db)
-      .select(FinancialMonthRecord, 'financial_months')
+      .select(FinancialMonthRecord, 'financial_month_contexts')
       .where(
         every(
           condition('user_id', '==', userId),
@@ -78,24 +79,22 @@ export const findFinancialMonthsByDate =
     return item
   }
 
-export const updateFinancialMonth =
+export const updateFinancialMonthContext =
   (
     db: D1Database,
-  ): ((
-    userId: User['id'],
-    financialMonthId: FinancialMonth['id'],
-    props: { workday: WorkdayValue },
-  ) => Promise<FinancialMonth | undefined>) =>
-  async (userId, financialMonthId, { workday }) => {
+  ): ((props: {
+    id: FinancialMonthContext['id']
+    userId: User['id']
+    workday: WorkdayValue
+  }) => Promise<FinancialMonthContext | undefined>) =>
+  async ({ id, userId, workday }) => {
     const updateQueryBase =
-      'UPDATE financial_months SET workday=? WHERE id=? AND user_id=?'
-    const updateQuery = db
-      .prepare(updateQueryBase)
-      .bind(workday, financialMonthId, userId)
+      'UPDATE financial_month_contexts SET workday=?3 WHERE id=?1 AND user_id=?2'
+    const updateQuery = db.prepare(updateQueryBase).bind(id, userId, workday)
 
     const getQuery = d1(db)
-      .select(FinancialMonthRecord, 'financial_months')
-      .where(condition('id', '==', financialMonthId))
+      .select(FinancialMonthRecord, 'financial_month_contexts')
+      .where(condition('id', '==', id))
       .build()
 
     const queries: D1PreparedStatement[] = [updateQuery, getQuery]

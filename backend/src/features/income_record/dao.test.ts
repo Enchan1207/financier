@@ -1,15 +1,17 @@
 import { env } from 'cloudflare:test'
 
-import { createFinancialMonthData } from '@/domains/financial_month/logic'
+import { createFinancialMonthInfo } from '@/domains/financial_month_context/logic'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
 import type { IncomeRecord } from '@/domains/income_record'
 import { createIncomeRecord } from '@/domains/income_record/logic'
+import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import { createUser } from '@/domains/user/logic'
 
 import { saveUser } from '../authorize/dao'
 import { insertFinancialYear } from '../financial_year/dao'
 import { insertIncomeDefinition } from '../income_definition/dao'
+import { insertStandardIncomeTable } from '../standard_income/dao'
 import {
   findIncomeRecord,
   insertIncomeRecord,
@@ -23,9 +25,21 @@ describe('報酬定義の操作', () => {
     auth0UserId: 'auth0_user_id',
   })
 
+  const dummyStandardIncomeTable = createStandardIncomeTable({
+    userId: dummyUser.id,
+    name: '',
+    grades: [
+      {
+        threshold: 0,
+        standardIncome: 10000,
+      },
+    ],
+  })._unsafeUnwrap()
+
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
-    year: 2024,
+    financialYear: 2024,
+    standardIncomeTableId: dummyStandardIncomeTable.id,
   })._unsafeUnwrap()
 
   const dummyFinancialMonth1 = dummyFinancialYear.months[0]
@@ -37,15 +51,13 @@ describe('報酬定義の操作', () => {
     name: 'テスト定義',
     value: 100000,
     isTaxable: true,
-    from: createFinancialMonthData({
+    from: createFinancialMonthInfo({
       financialYear: 2024,
       month: 4,
-      workday: 20,
     })._unsafeUnwrap(),
-    to: createFinancialMonthData({
+    to: createFinancialMonthInfo({
       financialYear: 2024,
       month: 3,
-      workday: 20,
     })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
@@ -59,6 +71,7 @@ describe('報酬定義の操作', () => {
 
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)
+    await insertStandardIncomeTable(env.D1)(dummyStandardIncomeTable)
     await insertFinancialYear(env.D1)(dummyFinancialYear)
     await insertIncomeDefinition(env.D1)(dummyIncomeDefinition)
 

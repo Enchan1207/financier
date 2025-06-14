@@ -1,5 +1,5 @@
-import type { FinancialMonth } from '@/domains/financial_month'
-import { getPeriodByFinancialMonth } from '@/domains/financial_month/logic'
+import type { FinancialMonthContext } from '@/domains/financial_month_context'
+import { getPeriodByFinancialMonth } from '@/domains/financial_month_context/logic'
 import type {
   FinancialYear,
   FinancialYearValue,
@@ -13,24 +13,21 @@ import { FinancialMonthRecord } from '../financial_month/dao'
 const makeFinancialMonthRecord = ({
   id,
   userId,
-  financialYear,
-  month,
+  info,
   workday,
-}: FinancialMonth): FinancialMonthRecord => {
-  const { start, end } = getPeriodByFinancialMonth({
-    financialYear,
-    month,
-    workday,
-  })
+  standardIncomeTableId,
+}: FinancialMonthContext): FinancialMonthRecord => {
+  const { start, end } = getPeriodByFinancialMonth(info)
 
   return {
     id,
     user_id: userId,
-    financial_year: financialYear,
-    month,
+    financial_year: info.financialYear,
+    month: info.month,
     started_at: start.valueOf(),
     ended_at: end.valueOf(),
     workday,
+    standard_income_table_id: standardIncomeTableId,
   }
 }
 
@@ -40,12 +37,16 @@ export const makeFinancialMonthEntity = ({
   financial_year,
   month,
   workday,
-}: FinancialMonthRecord): FinancialMonth => ({
+  standard_income_table_id,
+}: FinancialMonthRecord): FinancialMonthContext => ({
   id,
   userId: user_id,
-  financialYear: financial_year,
-  month: month,
+  info: {
+    financialYear: financial_year,
+    month: month,
+  },
   workday,
+  standardIncomeTableId: standard_income_table_id,
 })
 
 export const insertFinancialYear =
@@ -53,7 +54,8 @@ export const insertFinancialYear =
   async (entity) => {
     const monthRecords = entity.months.map(makeFinancialMonthRecord)
 
-    const stmt = 'INSERT INTO financial_months VALUES (?1,?2,?3,?4,?5,?6, ?7)'
+    const stmt =
+      'INSERT INTO financial_month_contexts VALUES (?1,?2,?3,?4,?5,?6,?7,?8)'
     const base = db.prepare(stmt)
 
     const queries: D1PreparedStatement[] = monthRecords.map((record) =>
@@ -65,6 +67,7 @@ export const insertFinancialYear =
         record.started_at,
         record.ended_at,
         record.workday,
+        record.standard_income_table_id,
       ),
     )
 
@@ -86,7 +89,7 @@ export const listFinancialYears =
     SELECT DISTINCT
         financial_year
     FROM
-        financial_months
+        financial_month_contexts
     WHERE
         user_id = ?
     ORDER BY
@@ -113,7 +116,7 @@ export const getFinancialYear =
   }) => Promise<FinancialYear | undefined>) =>
   async ({ userId, financialYear }) => {
     const stmt = d1(db)
-      .select(FinancialMonthRecord, 'financial_months')
+      .select(FinancialMonthRecord, 'financial_month_contexts')
       .where(
         every(
           condition('user_id', '==', userId),

@@ -1,13 +1,14 @@
 import { env } from 'cloudflare:test'
 
 import {
-  createFinancialMonthData,
+  createFinancialMonthInfo,
   getPeriodByFinancialMonth,
-} from '@/domains/financial_month/logic'
+} from '@/domains/financial_month_context/logic'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
 import { createIncomeRecord } from '@/domains/income_record/logic'
+import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 import dayjs from '@/logic/dayjs'
@@ -15,6 +16,7 @@ import dayjs from '@/logic/dayjs'
 import { saveUser } from '../authorize/dao'
 import { insertFinancialYear } from '../financial_year/dao'
 import { findIncomeRecord, insertIncomeRecord } from '../income_record/dao'
+import { insertStandardIncomeTable } from '../standard_income/dao'
 import {
   findIncomeDefinitions,
   getIncomeDefinitionById,
@@ -32,16 +34,28 @@ const makeComparable = (entity?: IncomeDefinition) => {
   }
 }
 
-describe('基本的なCRUD', () => {
-  const dummyUser: User = createUser({
-    name: 'testuser',
-    email: 'test@example.com',
-    auth0UserId: 'auth0_test_user',
-  })
+const dummyUser: User = createUser({
+  name: 'testuser',
+  email: 'test@example.com',
+  auth0UserId: 'auth0_test_user',
+})
 
+const dummyStandardIncomeTable = createStandardIncomeTable({
+  userId: dummyUser.id,
+  name: '',
+  grades: [
+    {
+      threshold: 0,
+      standardIncome: 10000,
+    },
+  ],
+})._unsafeUnwrap()
+
+describe('基本的なCRUD', () => {
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
-    year: 2025,
+    financialYear: 2025,
+    standardIncomeTableId: dummyStandardIncomeTable.id,
   })._unsafeUnwrap()
 
   const dummyDefinition = createIncomeDefinition({
@@ -50,23 +64,20 @@ describe('基本的なCRUD', () => {
     kind: 'absolute',
     value: 230000,
     isTaxable: true,
-    from: createFinancialMonthData({
+    from: createFinancialMonthInfo({
       financialYear: 2025,
       month: 4,
-      workday: 20,
     })._unsafeUnwrap(),
-    to: createFinancialMonthData({
+    to: createFinancialMonthInfo({
       financialYear: 2025,
       month: 3,
-      workday: 20,
     })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
   beforeAll(async () => {
     await saveUser(env.D1)(dummyUser)
-
+    await insertStandardIncomeTable(env.D1)(dummyStandardIncomeTable)
     await insertFinancialYear(env.D1)(dummyFinancialYear)
-
     await insertIncomeDefinition(env.D1)(dummyDefinition)
   })
 
@@ -107,15 +118,13 @@ describe('基本的なCRUD', () => {
             name: '通勤手当',
             isTaxable: undefined,
             value: 300,
-            from: createFinancialMonthData({
+            from: createFinancialMonthInfo({
               financialYear: 2025,
               month: 6,
-              workday: 20,
             })._unsafeUnwrap(),
-            to: createFinancialMonthData({
+            to: createFinancialMonthInfo({
               financialYear: 2025,
               month: 1,
-              workday: 20,
             })._unsafeUnwrap(),
           },
         },
@@ -124,18 +133,16 @@ describe('基本的なCRUD', () => {
 
     test('値が更新されていること', () => {
       const { start } = getPeriodByFinancialMonth(
-        createFinancialMonthData({
+        createFinancialMonthInfo({
           financialYear: 2025,
           month: 6,
-          workday: 20,
         })._unsafeUnwrap(),
       )
 
       const { end } = getPeriodByFinancialMonth(
-        createFinancialMonthData({
+        createFinancialMonthInfo({
           financialYear: 2025,
           month: 1,
-          workday: 20,
         })._unsafeUnwrap(),
       )
 
@@ -167,15 +174,13 @@ describe('詳細な検索', () => {
     kind: 'related_by_workday',
     value: 380,
     isTaxable: false,
-    from: createFinancialMonthData({
+    from: createFinancialMonthInfo({
       financialYear: 2025,
       month: 4,
-      workday: 20,
     })._unsafeUnwrap(),
-    to: createFinancialMonthData({
+    to: createFinancialMonthInfo({
       financialYear: 2025,
       month: 12,
-      workday: 20,
     })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
@@ -185,15 +190,13 @@ describe('詳細な検索', () => {
     kind: 'related_by_workday',
     value: 380,
     isTaxable: true,
-    from: createFinancialMonthData({
+    from: createFinancialMonthInfo({
       financialYear: 2025,
       month: 8,
-      workday: 20,
     })._unsafeUnwrap(),
-    to: createFinancialMonthData({
+    to: createFinancialMonthInfo({
       financialYear: 2025,
       month: 2,
-      workday: 20,
     })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
@@ -218,10 +221,9 @@ describe('詳細な検索', () => {
       expected: [dummyDefinition2],
     },
   ])('単月検索 $month月度', async ({ month, expected }) => {
-    const financialMonth = createFinancialMonthData({
+    const financialMonth = createFinancialMonthInfo({
       financialYear: 2025,
       month,
-      workday: 20,
     })._unsafeUnwrap()
     const { start, end } = getPeriodByFinancialMonth(financialMonth)
 
@@ -260,15 +262,10 @@ describe('詳細な検索', () => {
 })
 
 describe('定義期間の更新', () => {
-  const dummyUser: User = createUser({
-    name: 'testuser',
-    email: 'test@example.com',
-    auth0UserId: 'auth0_test_user',
-  })
-
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
-    year: 2025,
+    financialYear: 2025,
+    standardIncomeTableId: dummyStandardIncomeTable.id,
   })._unsafeUnwrap()
 
   const dummyDefinition = createIncomeDefinition({
@@ -277,29 +274,29 @@ describe('定義期間の更新', () => {
     kind: 'absolute',
     value: 230000,
     isTaxable: true,
-    from: createFinancialMonthData({
+    from: createFinancialMonthInfo({
       financialYear: 2025,
       month: 4,
-      workday: 20,
     })._unsafeUnwrap(),
-    to: createFinancialMonthData({
+    to: createFinancialMonthInfo({
       financialYear: 2025,
       month: 3,
-      workday: 20,
     })._unsafeUnwrap(),
   })._unsafeUnwrap()
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const dummyApril = dummyFinancialYear.months.find(({ month }) => month === 4)!
+  const dummyApril = dummyFinancialYear.months.find(
+    ({ info: { month } }) => month === 4,
+  )!
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const dummySeptember = dummyFinancialYear.months.find(
-    ({ month }) => month === 9,
+    ({ info: { month } }) => month === 9,
   )!
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const dummyFebruary = dummyFinancialYear.months.find(
-    ({ month }) => month === 2,
+    ({ info: { month } }) => month === 2,
   )!
 
   // 4月度の実績
@@ -333,6 +330,7 @@ describe('定義期間の更新', () => {
     await Promise.all([
       saveUser(env.D1)(dummyUser),
 
+      insertStandardIncomeTable(env.D1)(dummyStandardIncomeTable),
       insertFinancialYear(env.D1)(dummyFinancialYear),
       insertIncomeDefinition(env.D1)(dummyDefinition),
 
@@ -351,10 +349,9 @@ describe('定義期間の更新', () => {
           name: undefined,
           isTaxable: undefined,
           value: undefined,
-          from: createFinancialMonthData({
+          from: createFinancialMonthInfo({
             financialYear: dummyFinancialYear.year,
             month: 5,
-            workday: 20,
           })._unsafeUnwrap(),
           to: undefined,
         },
@@ -397,10 +394,9 @@ describe('定義期間の更新', () => {
           isTaxable: undefined,
           value: undefined,
           from: undefined,
-          to: createFinancialMonthData({
+          to: createFinancialMonthInfo({
             financialYear: dummyFinancialYear.year,
             month: 1,
-            workday: 20,
           })._unsafeUnwrap(),
         },
       })
