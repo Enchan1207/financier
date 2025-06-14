@@ -100,6 +100,8 @@ describe('会計年度API', () => {
       {
         param: {
           year: input.year.toString(),
+        },
+        json: {
           standardIncomeTableId: dummyStandardIncomeTable.id,
         },
       },
