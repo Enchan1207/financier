@@ -107,7 +107,7 @@ const createPostEvent = (
 ): Result<FinancialYearPostEvent, ValidationError> =>
   createFinancialYear({
     userId: command.state.user.id,
-    year: command.input.year,
+    financialYear: command.input.year,
   }).map((entity) => ({ entity }))
 
 type FinancialYearPostWorkflow = (

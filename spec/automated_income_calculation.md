@@ -25,7 +25,7 @@ SELECT
     ELSE d.value
   END value
 FROM
-  financial_months m
+  financial_month_contexts m
   LEFT JOIN workdays w ON m.id = w.financial_month_id
   LEFT JOIN income_definitions d ON d.disabled_at > m.started_at
   AND d.enabled_at < m.ended_at

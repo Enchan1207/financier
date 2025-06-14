@@ -6,7 +6,7 @@ CREATE TABLE users (
     email TEXT NOT NULL DEFAULT ''
 );
 
-CREATE TABLE financial_months (
+CREATE TABLE financial_month_contexts (
     id TEXT PRIMARY KEY NOT NULL,
     user_id TEXT NOT NULL,
     financial_year INT NOT NULL,
@@ -14,8 +14,10 @@ CREATE TABLE financial_months (
     started_at INT NOT NULL,
     ended_at INT NOT NULL,
     workday INT NOT NULL DEFAULT 20,
+    standard_income_table_id TEXT NOT NULL,
     UNIQUE (user_id, financial_year, month),
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT,
+    FOREIGN KEY (standard_income_table_id) REFERENCES standard_income_tables (id) ON DELETE RESTRICT
 );
 
 CREATE TABLE income_definitions (
@@ -39,7 +41,7 @@ CREATE TABLE income_records (
     updated_at INT NOT NULL,
     updated_by TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT,
-    FOREIGN KEY (financial_month_id) REFERENCES financial_months (id) ON DELETE RESTRICT,
+    FOREIGN KEY (financial_month_id) REFERENCES financial_month_contexts (id) ON DELETE RESTRICT,
     FOREIGN KEY (definition_id) REFERENCES income_definitions (id) ON DELETE RESTRICT,
     PRIMARY KEY (financial_month_id, definition_id)
 );

@@ -5,6 +5,7 @@ import { parseSchema } from '@/logic/zod'
 
 import { Months } from '../financial_month_context'
 import { createFinancialMonthContext } from '../financial_month_context/logic'
+import type { StandardIncomeTable } from '../standard_income'
 import type { User } from '../user'
 import type { FinancialYear } from '.'
 import { FinancialYearValueSchema } from '.'
@@ -16,17 +17,18 @@ export const createFinancialYearValue = (value: number) =>
 
 export const createFinancialYear = (props: {
   userId: User['id']
-  year: number
+  financialYear: number
+  standardIncomeTableId: StandardIncomeTable['id']
 }): Result<FinancialYear, ValidationError> => {
-  const { userId, year } = props
+  const { userId, financialYear, standardIncomeTableId } = props
 
   const results = Months.map((month) =>
     createFinancialMonthContext({
       userId,
-      financialYear: year,
+      financialYear,
       month,
       workday: 20, // TODO: 本来は各月の祝日を参照するべき
-      standardIncomeTableId: '', // TODO: 年度初期化時にDIできるようにする?
+      standardIncomeTableId,
     }),
   )
 

@@ -25,7 +25,7 @@ describe('報酬定義の操作', () => {
 
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
-    year: 2024,
+    financialYear: 2024,
   })._unsafeUnwrap()
 
   const dummyFinancialMonth1 = dummyFinancialYear.months[0]

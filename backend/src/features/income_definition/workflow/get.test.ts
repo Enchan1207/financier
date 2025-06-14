@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:test'
 
-import type { FinancialMonthData } from '@/domains/financial_month'
+import type { FinancialMonthData } from '@/domains/financial_month_context'
 import { createFinancialMonthData } from '@/domains/financial_month/logic'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'
 import type { User } from '@/domains/user'

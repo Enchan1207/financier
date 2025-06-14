@@ -41,7 +41,7 @@ describe('基本的なCRUD', () => {
 
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
-    year: 2025,
+    financialYear: 2025,
   })._unsafeUnwrap()
 
   const dummyDefinition = createIncomeDefinition({
@@ -268,7 +268,7 @@ describe('定義期間の更新', () => {
 
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
-    year: 2025,
+    financialYear: 2025,
   })._unsafeUnwrap()
 
   const dummyDefinition = createIncomeDefinition({

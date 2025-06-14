@@ -24,7 +24,7 @@ describe('会計年度の生成', () => {
 
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
-    year: 2024,
+    financialYear: 2024,
   })._unsafeUnwrap()
 
   beforeAll(async () => {
@@ -33,7 +33,7 @@ describe('会計年度の生成', () => {
   })
 
   test('12個の会計月度エンティティが登録されていること', async () => {
-    const stmt = 'SELECT COUNT(*) count FROM financial_months'
+    const stmt = 'SELECT COUNT(*) count FROM financial_month_contexts'
     const result = await env.D1.prepare(stmt).first<{ count: number }>()
     expect(result?.count).toBe(12)
   })
@@ -55,7 +55,7 @@ describe('会計年度の取得', () => {
   const dummyFinancialYears = [2024, 2023, 2025].map((year) =>
     createFinancialYear({
       userId: dummyUser.id,
-      year,
+      financialYear: year,
     })._unsafeUnwrap(),
   )
 
@@ -167,7 +167,7 @@ describe('報酬定義が存在する場合', () => {
   describe('2024年度を挿入した場合', () => {
     const dummyFinancialYear = createFinancialYear({
       userId: dummyUser.id,
-      year: 2024,
+      financialYear: 2024,
     })._unsafeUnwrap()
 
     beforeAll(async () => {
@@ -184,7 +184,7 @@ describe('報酬定義が存在する場合', () => {
   describe('2025年度を挿入した場合', () => {
     const dummyFinancialYear = createFinancialYear({
       userId: dummyUser.id,
-      year: 2025,
+      financialYear: 2025,
     })._unsafeUnwrap()
 
     beforeAll(async () => {
@@ -201,12 +201,12 @@ describe('報酬定義が存在する場合', () => {
   describe('2024年度と2025年度を挿入した場合', () => {
     const dummyFinancialYear24 = createFinancialYear({
       userId: dummyUser.id,
-      year: 2024,
+      financialYear: 2024,
     })._unsafeUnwrap()
 
     const dummyFinancialYear25 = createFinancialYear({
       userId: dummyUser.id,
-      year: 2025,
+      financialYear: 2025,
     })._unsafeUnwrap()
 
     beforeAll(async () => {

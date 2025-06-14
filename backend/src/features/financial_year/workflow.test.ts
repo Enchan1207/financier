@@ -54,7 +54,7 @@ describe('会計年度生成ワークフロー', () => {
     beforeAll(async () => {
       const financialYear = createFinancialYear({
         userId: dummyUser.id,
-        year: currentFinancialYear,
+        financialYear: currentFinancialYear,
       })._unsafeUnwrap()
 
       await insertFinancialYear(env.D1)(financialYear)

@@ -19,7 +19,7 @@ describe('収入定義作成ワークフロー', () => {
 
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
-    year: 2025,
+    financialYear: 2025,
   })._unsafeUnwrap()
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

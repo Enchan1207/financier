@@ -2,15 +2,15 @@ import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
-import type { WorkdayValue } from '@/domains/financial_month'
-import { FinancialMonthValueSchema } from '@/domains/financial_month'
+import type { WorkdayValue } from '@/domains/financial_month_context'
+import { FinancialMonthValueSchema } from '@/domains/financial_month_context'
 import { FinancialYearValueSchema } from '@/domains/financial_year'
 import dayjs from '@/logic/dayjs'
 
 import { userAuthMiddleware } from '../authorize/middleware'
 import {
-  findFinancialMonthsByDate,
-  getFinancialMonthByFinancialMonth,
+  findFinancialMonthCotextsByDate,
+  getFinancialMonthContext,
 } from '../financial_month/dao'
 import {
   getFinancialYear,
@@ -38,7 +38,10 @@ const app = new Hono<{ Bindings: Env }>()
   )
   .get('/current', async (c) => {
     const userId = c.get('user').id
-    const entity = await findFinancialMonthsByDate(c.env.D1)(userId, dayjs())
+    const entity = await findFinancialMonthCotextsByDate(c.env.D1)(
+      userId,
+      dayjs(),
+    )
 
     return entity ? c.json(entity) : c.json({ error: 'not found' }, 404)
   })
@@ -78,7 +81,7 @@ const app = new Hono<{ Bindings: Env }>()
         return c.json({ error: 'bad request' }, 400)
       }
 
-      const entity = await getFinancialMonthByFinancialMonth(c.env.D1)(
+      const entity = await getFinancialMonthContext(c.env.D1)(
         c.get('user').id,
         // FIXME: FinancialMonthDataの構造おかしい workdayいらない
         { ...parseResult.data, workday: 20 as WorkdayValue },

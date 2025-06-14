@@ -1,8 +1,8 @@
 import type { Result } from 'neverthrow'
 import { z } from 'zod'
 
-import type { FinancialMonthData } from '@/domains/financial_month'
-import { FinancialMonthDataSchema } from '@/domains/financial_month'
+import type { FinancialMonthData } from '@/domains/financial_month_context'
+import { FinancialMonthDataSchema } from '@/domains/financial_month_context'
 import type { IncomeDefinition } from '@/domains/income_definition'
 import { IncomeDefinitionKind } from '@/domains/income_definition'
 import { createIncomeDefinition } from '@/domains/income_definition/logic'

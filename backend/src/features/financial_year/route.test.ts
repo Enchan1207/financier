@@ -25,7 +25,7 @@ describe('財務年度API', () => {
 
   const testYear = createFinancialYear({
     userId: testUser.id,
-    year: 2025,
+    financialYear: 2025,
   })._unsafeUnwrap()
 
   beforeAll(async () => {
@@ -64,7 +64,7 @@ describe('財務年度API', () => {
   test('複数の財務年度を取得できること', async () => {
     const anotherYear = createFinancialYear({
       userId: testUser.id,
-      year: 2026,
+      financialYear: 2026,
     })._unsafeUnwrap()
     await insertFinancialYear(env.D1)(anotherYear)
 

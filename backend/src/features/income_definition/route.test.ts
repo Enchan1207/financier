@@ -26,7 +26,7 @@ describe('報酬定義API', () => {
 
   const dummyFinancialYear = createFinancialYear({
     userId: dummyUser.id,
-    year: 2025,
+    financialYear: 2025,
   })._unsafeUnwrap()
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
