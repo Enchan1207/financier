@@ -7,7 +7,7 @@ import { ValidationError } from '@/logic/errors'
 import type { PostIncomeDefinitionCommand } from './post'
 import { createIncomeDefinitionPostWorkflow } from './post'
 
-describe('収入定義作成ワークフロー', () => {
+describe('収入定義の作成', () => {
   const dummyUser: User = createUser({
     name: 'testuser',
     email: 'test@example.com',
@@ -43,7 +43,7 @@ describe('収入定義作成ワークフロー', () => {
 
   const workflow = createIncomeDefinitionPostWorkflow()
 
-  test('有効な収入定義を作成できること', () => {
+  test('正常系', () => {
     const command: PostIncomeDefinitionCommand = {
       input: {
         name: 'test income',
@@ -60,7 +60,7 @@ describe('収入定義作成ワークフロー', () => {
     expect(result.isOk()).toBeTruthy()
   })
 
-  test('無効な収入定義を作成できないこと', () => {
+  test('異常系', () => {
     const command: PostIncomeDefinitionCommand = {
       input: {
         name: 'test income',

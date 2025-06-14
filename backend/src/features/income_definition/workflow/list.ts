@@ -156,17 +156,25 @@ const validateCommand = (
     from,
     to,
     at,
-  }).map((period) => ({
-    input: {
-      sortBy,
-      limit,
-      offset,
-      order,
-      kind,
-      period,
-    },
-    state,
-  }))
+  })
+    .andThen(({ start, end }) => {
+      if (end.isBefore(start)) {
+        return err(new ValidationError('invalid period'))
+      }
+
+      return ok({ start, end })
+    })
+    .map((period) => ({
+      input: {
+        sortBy,
+        limit,
+        offset,
+        order,
+        kind,
+        period,
+      },
+      state,
+    }))
 }
 
 const listIncomeDefinitions =
@@ -187,9 +195,7 @@ type ListIncomeDefinitionWorkflow = (
 ) => ResultAsync<IncomeDefinition[], ValidationError>
 
 export const createIncomeDefinitionListWorkflow =
-  (
-    effects: Pick<WorkflowEffects, 'findIncomeDefinitions'>,
-  ): ListIncomeDefinitionWorkflow =>
+  (effects: WorkflowEffects): ListIncomeDefinitionWorkflow =>
   (command) =>
     ok(command)
       .andThen(validateCommand)
