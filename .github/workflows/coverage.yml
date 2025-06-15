@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{matrix.ref == 'target' && github.base_ref || github.head_ref }}
+          ref: ${{ matrix.ref == 'target' && github.base_ref || github.head_ref }}
 
       - uses: actions/setup-node@v4
         with:
