@@ -15,11 +15,6 @@ import {
 } from './dao'
 import type { DuplicateStandardIncomeTableCommand } from './workflow/duplicate'
 import { createStandardIncomeTableDuplicateWorkflow } from './workflow/duplicate'
-import type { UnvalidatedListStandardIncomeTablesCommand } from './workflow/list'
-import {
-  createStandardIncomeTablesListWorkflow,
-  ListStandardIncomeTablesSchema,
-} from './workflow/list'
 import type { PostStandardIncomeTableCommand } from './workflow/post'
 import {
   createStandardIncomeTablePostWorkflow,
@@ -33,19 +28,24 @@ import { createStandardIncomeTableNameUpdateWorkflow } from './workflow/updateNa
 const app = new Hono<{ Bindings: Env }>()
   .use(userAuthMiddleware)
   // 標準報酬月額表の一覧を取得
-  .get('/', zValidator('query', ListStandardIncomeTablesSchema), async (c) => {
-    const command: UnvalidatedListStandardIncomeTablesCommand = {
-      input: c.req.valid('query'),
-      state: { user: c.get('user') },
-    }
+  .get(
+    '/',
+    zValidator(
+      'query',
+      z.object({
+        // 未指定なら昇順
+        order: z.enum(['asc', 'desc']).optional().default('asc'),
+      }),
+    ),
+    async (c) => {
+      const entities = await listStandardIncomeTables(c.env.D1)({
+        userId: c.get('user').id,
+        order: c.req.valid('query').order,
+      })
 
-    const workflow = createStandardIncomeTablesListWorkflow({
-      listStandardIncomeTables: listStandardIncomeTables(c.env.D1),
-    })
-
-    const response = await workflow(command)
-    return c.json(response)
-  })
+      return c.json(entities)
+    },
+  )
 
   // 単一の標準報酬月額表を取得
   .get('/:id', zValidator('param', z.object({ id: z.string() })), async (c) => {
