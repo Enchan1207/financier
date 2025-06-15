@@ -1,10 +1,10 @@
 import { Ok } from 'neverthrow'
 
+import type { User } from '@/domains/user'
+import { createUser } from '@/domains/user/logic'
 import { ValidationError } from '@/logic/errors'
 
-import type { User } from '../user'
-import { createUser } from '../user/logic'
-import { createStandardIncomeTable } from './logic'
+import { createStandardIncomeTable } from '.'
 
 const dummyUser: User = createUser({
   name: 'testuser',

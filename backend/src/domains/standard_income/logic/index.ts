@@ -5,8 +5,8 @@ import { ulid } from 'ulid'
 import { ValidationError } from '@/logic/errors'
 import { parseSchema } from '@/logic/zod'
 
-import type { StandardIncomeGrade, StandardIncomeTable } from '.'
-import { StandardIncomeGradeSchema, StandardIncomeTableSchema } from '.'
+import type { StandardIncomeGrade, StandardIncomeTable } from '..'
+import { StandardIncomeGradeSchema, StandardIncomeTableSchema } from '..'
 
 export const createStandardIncomeGrade = (props: {
   threshold: number
