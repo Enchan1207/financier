@@ -28,7 +28,7 @@ describe('報酬定義API', () => {
 
   const dummyStandardIncomeTable = createStandardIncomeTable({
     userId: dummyUser.id,
-    name: '',
+    name: 'テスト',
     grades: [
       {
         threshold: 0,

@@ -27,7 +27,7 @@ describe('報酬定義の操作', () => {
 
   const dummyStandardIncomeTable = createStandardIncomeTable({
     userId: dummyUser.id,
-    name: '',
+    name: 'テスト',
     grades: [
       {
         threshold: 0,

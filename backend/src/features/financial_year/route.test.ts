@@ -27,7 +27,7 @@ describe('会計年度API', () => {
 
   const dummyStandardIncomeTable = createStandardIncomeTable({
     userId: dummyUser.id,
-    name: '',
+    name: 'テスト',
     grades: [
       {
         threshold: 0,

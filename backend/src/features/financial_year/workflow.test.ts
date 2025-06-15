@@ -32,7 +32,7 @@ describe('正常系', () => {
         },
         state: {
           user: createUser({
-            name: '',
+            name: 'テスト',
             email: '',
             auth0UserId: '',
           }),
@@ -61,7 +61,7 @@ describe('正常系', () => {
         },
         state: {
           user: createUser({
-            name: '',
+            name: 'テスト',
             email: '',
             auth0UserId: '',
           }),
@@ -99,7 +99,7 @@ describe('異常系', () => {
         },
         state: {
           user: createUser({
-            name: '',
+            name: 'テスト',
             email: '',
             auth0UserId: '',
           }),
@@ -127,7 +127,7 @@ describe('異常系', () => {
         },
         state: {
           user: createUser({
-            name: '',
+            name: 'テスト',
             email: '',
             auth0UserId: '',
           }),
@@ -156,7 +156,7 @@ describe('異常系', () => {
         },
         state: {
           user: createUser({
-            name: '',
+            name: 'テスト',
             email: '',
             auth0UserId: '',
           }),

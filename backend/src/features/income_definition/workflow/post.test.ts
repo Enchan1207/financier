@@ -18,7 +18,7 @@ describe('収入定義の作成', () => {
 
   const dummyStandardIncomeTable = createStandardIncomeTable({
     userId: dummyUser.id,
-    name: '',
+    name: 'テスト',
     grades: [
       {
         threshold: 0,

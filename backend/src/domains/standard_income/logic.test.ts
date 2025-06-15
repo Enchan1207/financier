@@ -16,7 +16,7 @@ describe('異常系', () => {
   test('階級がない', () => {
     const actual = createStandardIncomeTable({
       userId: dummyUser.id,
-      name: '',
+      name: 'テスト',
       grades: [],
     })
 
@@ -26,7 +26,7 @@ describe('異常系', () => {
   test('負の値を含む', () => {
     const actual = createStandardIncomeTable({
       userId: dummyUser.id,
-      name: '',
+      name: 'テスト',
       grades: [
         {
           threshold: -1,
@@ -41,7 +41,7 @@ describe('異常系', () => {
   test('非整数', () => {
     const actual = createStandardIncomeTable({
       userId: dummyUser.id,
-      name: '',
+      name: 'テスト',
       grades: [
         {
           threshold: 0,
@@ -56,7 +56,7 @@ describe('異常系', () => {
   test('階級の最小値が非ゼロ', () => {
     const actual = createStandardIncomeTable({
       userId: dummyUser.id,
-      name: '',
+      name: 'テスト',
       grades: [
         {
           threshold: 1,
@@ -71,7 +71,7 @@ describe('異常系', () => {
   test('階級における報酬額が閾値を下回る', () => {
     const actual = createStandardIncomeTable({
       userId: dummyUser.id,
-      name: '',
+      name: 'テスト',
       grades: [
         // 正常
         {
@@ -92,7 +92,7 @@ describe('異常系', () => {
   test('階級における閾値が前の報酬を下回る', () => {
     const actual = createStandardIncomeTable({
       userId: dummyUser.id,
-      name: '',
+      name: 'テスト',
       grades: [
         // 正常
         {
@@ -114,7 +114,7 @@ describe('異常系', () => {
   test('閾値 = 報酬額 = ゼロ', () => {
     const actual = createStandardIncomeTable({
       userId: dummyUser.id,
-      name: '',
+      name: 'テスト',
       grades: [
         {
           threshold: 0,
@@ -135,7 +135,7 @@ describe('正常系', () => {
   test('単一の階級', () => {
     const actual = createStandardIncomeTable({
       userId: dummyUser.id,
-      name: '',
+      name: 'テスト',
       grades: [
         {
           threshold: 0,
@@ -150,7 +150,7 @@ describe('正常系', () => {
   test('複数の階級', () => {
     const actual = createStandardIncomeTable({
       userId: dummyUser.id,
-      name: '',
+      name: 'テスト',
       grades: [
         {
           threshold: 0,
@@ -169,7 +169,7 @@ describe('正常系', () => {
   test('閾値 = 標準報酬月額', () => {
     const actual = createStandardIncomeTable({
       userId: dummyUser.id,
-      name: '',
+      name: 'テスト',
       grades: [
         {
           threshold: 0,

@@ -26,7 +26,7 @@ const dummyUser: User = createUser({
 describe('会計年度の生成', () => {
   const dummyStandardIncomeTable = createStandardIncomeTable({
     userId: dummyUser.id,
-    name: '',
+    name: 'テスト',
     grades: [
       {
         threshold: 0,
@@ -63,7 +63,7 @@ describe('会計年度の生成', () => {
 describe('会計年度の取得', () => {
   const dummyStandardIncomeTable = createStandardIncomeTable({
     userId: dummyUser.id,
-    name: '',
+    name: 'テスト',
     grades: [
       {
         threshold: 0,
@@ -119,7 +119,7 @@ describe('会計年度の取得', () => {
 describe('報酬定義が存在する場合', () => {
   const dummyDefinition1 = createIncomeDefinition({
     userId: dummyUser.id,
-    name: '',
+    name: 'テスト',
     kind: 'absolute',
     value: 123456,
     isTaxable: true,
@@ -135,7 +135,7 @@ describe('報酬定義が存在する場合', () => {
 
   const dummyDefinition2 = createIncomeDefinition({
     userId: dummyUser.id,
-    name: '',
+    name: 'テスト',
     kind: 'related_by_workday',
     value: 123,
     isTaxable: true,
@@ -151,7 +151,7 @@ describe('報酬定義が存在する場合', () => {
 
   const dummyDefinition3 = createIncomeDefinition({
     userId: dummyUser.id,
-    name: '',
+    name: 'テスト',
     kind: 'related_by_workday',
     value: 123,
     isTaxable: true,
@@ -177,7 +177,7 @@ describe('報酬定義が存在する場合', () => {
   describe('2024年度を挿入した場合', () => {
     const dummyStandardIncomeTable = createStandardIncomeTable({
       userId: dummyUser.id,
-      name: '',
+      name: 'テスト',
       grades: [
         {
           threshold: 0,
@@ -207,7 +207,7 @@ describe('報酬定義が存在する場合', () => {
   describe('2025年度を挿入した場合', () => {
     const dummyStandardIncomeTable = createStandardIncomeTable({
       userId: dummyUser.id,
-      name: '',
+      name: 'テスト',
       grades: [
         {
           threshold: 0,
@@ -237,7 +237,7 @@ describe('報酬定義が存在する場合', () => {
   describe('2024年度と2025年度を挿入した場合', () => {
     const dummyStandardIncomeTable = createStandardIncomeTable({
       userId: dummyUser.id,
-      name: '',
+      name: 'テスト',
       grades: [
         {
           threshold: 0,
