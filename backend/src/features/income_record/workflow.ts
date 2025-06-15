@@ -85,8 +85,7 @@ const queryFinancialMonthContext = (
 
     if (financialMonth === undefined) {
       const { financialYear, month } = input.financialMonth
-      const id = `${financialYear}_${month}`
-      return err(new EntityNotFoundError({ id }))
+      return err(new EntityNotFoundError({ id: `${financialYear}_${month}` }))
     }
 
     return ok({
