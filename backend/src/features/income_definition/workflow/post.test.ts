@@ -1,3 +1,5 @@
+import { Ok } from 'neverthrow'
+
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
@@ -57,7 +59,7 @@ describe('収入定義の作成', () => {
     }
 
     const result = workflow(command)
-    expect(result.isOk()).toBeTruthy()
+    expect(result).toBeInstanceOf(Ok)
   })
 
   test('異常系', () => {

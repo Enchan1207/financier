@@ -13,7 +13,7 @@ export const createStandardIncomeGrade = (props: {
   standardIncome: number
 }): Result<StandardIncomeGrade, ValidationError> =>
   parseSchema(StandardIncomeGradeSchema, props).mapErr(
-    () => new ValidationError(),
+    (error) => new ValidationError(error.message),
   )
 
 export const createStandardIncomeTable = (props: {
@@ -28,7 +28,7 @@ export const createStandardIncomeTable = (props: {
     ...props,
     id: ulid(),
   })
-    .mapErr(() => new ValidationError())
+    .mapErr((error) => new ValidationError(error.message))
     .andThen(validateGradeContinuity)
 
 const validateGradeContinuity = (

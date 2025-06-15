@@ -12,7 +12,7 @@ import { FinancialYearValueSchema } from '.'
 
 export const createFinancialYearValue = (value: number) =>
   parseSchema(FinancialYearValueSchema, value).mapErr(
-    () => new ValidationError(),
+    (error) => new ValidationError(error.message),
   )
 
 export const createFinancialYear = (props: {

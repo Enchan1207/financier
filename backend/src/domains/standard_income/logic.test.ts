@@ -1,3 +1,5 @@
+import { Ok } from 'neverthrow'
+
 import { ValidationError } from '@/logic/errors'
 
 import type { User } from '../user'
@@ -142,7 +144,7 @@ describe('正常系', () => {
       ],
     })
 
-    expect(actual.isOk()).toBeTruthy()
+    expect(actual).toBeInstanceOf(Ok)
   })
 
   test('複数の階級', () => {
@@ -161,7 +163,7 @@ describe('正常系', () => {
       ],
     })
 
-    expect(actual.isOk()).toBeTruthy()
+    expect(actual).toBeInstanceOf(Ok)
   })
 
   test('閾値 = 標準報酬月額', () => {
@@ -180,6 +182,6 @@ describe('正常系', () => {
       ],
     })
 
-    expect(actual.isOk()).toBeTruthy()
+    expect(actual).toBeInstanceOf(Ok)
   })
 })
