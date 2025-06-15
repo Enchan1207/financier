@@ -2,11 +2,8 @@ import type { ResultAsync } from 'neverthrow'
 import { err, ok } from 'neverthrow'
 import { ulid } from 'ulid'
 
-import type { User } from '@/domains/user'
+import type { Auth0UserInfo, User } from '@/domains/user'
 import { fromSafePromise } from '@/logic/neverthrow'
-
-import type { Auth0UserInfo } from './dao'
-import { fetchUserInfo } from './dao'
 
 export interface Command {
   input: {
@@ -22,6 +19,13 @@ export interface UserPrepared {
     authDomain: string
     stored: boolean
   }
+}
+
+type WorkflowEffects = {
+  getUserByAuth0Id: (id: string) => Promise<User | undefined>
+  fetchUserInfo(
+    authDomain: string,
+  ): (token: string) => Promise<Auth0UserInfo | undefined>
 }
 
 export type AuthorizeWorkflow = (
@@ -76,9 +80,7 @@ const createTentativeUser = (effects: {
   })
 
 export const createAuthorizeWorkflow =
-  (effects: {
-    getUserByAuth0Id: (id: string) => Promise<User | undefined>
-  }): AuthorizeWorkflow =>
+  (effects: WorkflowEffects): AuthorizeWorkflow =>
   (command: Command) =>
     ok(command)
       .asyncAndThen(
@@ -88,6 +90,6 @@ export const createAuthorizeWorkflow =
       )
       .orElse(() =>
         createTentativeUser({
-          fetchUserInfo: fetchUserInfo(command.state.authDomain),
+          fetchUserInfo: effects.fetchUserInfo(command.state.authDomain),
         })(command),
       )

@@ -6,7 +6,7 @@ import type { User } from '@/domains/user'
 import type { Auth0JWTPayload } from '@/logic/middlewares/jwk'
 import { jwkMiddleware, jwkValidationMiddleware } from '@/logic/middlewares/jwk'
 
-import { getUserByAuth0Id, saveUser } from './dao'
+import { fetchUserInfo, getUserByAuth0Id, saveUser } from './dao'
 import type { Command } from './workflow'
 import { createAuthorizeWorkflow } from './workflow'
 
@@ -28,6 +28,7 @@ const userMiddleware = createMiddleware<{
 
   const workflow = createAuthorizeWorkflow({
     getUserByAuth0Id: getUserByAuth0Id(c.env.D1),
+    fetchUserInfo: fetchUserInfo,
   })
 
   const result = await workflow(command).andTee(async (command) => {
