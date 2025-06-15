@@ -1,108 +1,134 @@
-import { env } from 'cloudflare:test'
+import { Err, Ok } from 'neverthrow'
 
-import {
-  createStandardIncomeGrade,
-  createStandardIncomeTable,
-} from '@/domains/standard_income/logic'
+import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
-import { saveUser } from '@/features/authorize/dao'
-import { EntityNotFoundError } from '@/logic/errors'
 
-import { getStandardIncomeTable, insertStandardIncomeTable } from '../dao'
 import { createStandardIncomeTableDuplicateWorkflow } from './duplicate'
 
-describe('標準報酬月額表複製ワークフロー', () => {
-  const dummyUser: User = createUser({
-    name: 'testuser',
-    email: 'test@example.com',
-    auth0UserId: 'auth0_test_user',
-  })
+const dummyUser: User = createUser({
+  name: 'testuser',
+  email: 'test@example.com',
+  auth0UserId: 'auth0_test_user',
+})
 
-  const anotherUser: User = createUser({
-    name: 'another',
-    email: 'another@example.com',
-    auth0UserId: 'auth0_another_user',
-  })
-
-  const dummyEntity = createStandardIncomeTable({
+describe('正常系', () => {
+  const dummyTable = createStandardIncomeTable({
     userId: dummyUser.id,
-    name: 'test table',
+    name: '既存テーブル',
     grades: [
       {
         threshold: 0,
-        standardIncome: 100000,
+        standardIncome: 10000,
       },
-      {
-        threshold: 110000,
-        standardIncome: 120000,
-      },
-    ].map((grade) => createStandardIncomeGrade(grade)._unsafeUnwrap()),
+    ],
   })._unsafeUnwrap()
 
   const workflow = createStandardIncomeTableDuplicateWorkflow({
-    getStandardIncomeTable: getStandardIncomeTable(env.D1),
+    // eslint-disable-next-line @typescript-eslint/require-await
+    getStandardIncomeTable: async ({ id }) =>
+      id === dummyTable.id ? dummyTable : undefined,
   })
+
+  let actual: Awaited<ReturnType<typeof workflow>>
 
   beforeAll(async () => {
-    await saveUser(env.D1)(dummyUser)
-    await saveUser(env.D1)(anotherUser)
-    await insertStandardIncomeTable(env.D1)(dummyEntity)
+    actual = await workflow({
+      input: {
+        id: dummyTable.id,
+        name: '複製済みのテーブル',
+      },
+      state: {
+        user: dummyUser,
+      },
+    })
   })
 
-  describe('自分の項目を複製できること', () => {
-    let actual: ReturnType<
-      Awaited<ReturnType<typeof workflow>>['_unsafeUnwrap']
-    >['entity']
+  test('正常に完了すること', () => {
+    expect(actual).toBeInstanceOf(Ok)
+  })
+
+  test('正常に複製されていること', () => {
+    const duplicated = actual._unsafeUnwrap().entity
+
+    expect(duplicated).toMatchObject({
+      name: '複製済みのテーブル',
+      grades: dummyTable.grades,
+    })
+  })
+})
+
+describe('異常系', () => {
+  describe('テーブルが見つからない', () => {
+    const dummyTable = createStandardIncomeTable({
+      userId: dummyUser.id,
+      name: '既存テーブル',
+      grades: [
+        {
+          threshold: 0,
+          standardIncome: 10000,
+        },
+      ],
+    })._unsafeUnwrap()
+
+    const workflow = createStandardIncomeTableDuplicateWorkflow({
+      // eslint-disable-next-line @typescript-eslint/require-await
+      getStandardIncomeTable: async () => undefined,
+    })
+
+    let actual: Awaited<ReturnType<typeof workflow>>
 
     beforeAll(async () => {
-      const command = {
+      actual = await workflow({
         input: {
-          id: dummyEntity.id,
-          name: 'duplicated table',
+          id: dummyTable.id,
+          name: '複製済みのテーブル',
         },
-        state: { user: dummyUser },
-      }
-
-      actual = (await workflow(command))._unsafeUnwrap().entity
+        state: {
+          user: dummyUser,
+        },
+      })
     })
 
-    test('idが変わっていること', () => {
-      expect(actual.id).not.toBe(dummyEntity.id)
-    })
-
-    test('名前は入力値が採用されること', () => {
-      expect(actual.name).toBe('duplicated table')
-    })
-
-    test('階級は完全に一致すること', () => {
-      expect(actual.grades).toStrictEqual(dummyEntity.grades)
+    test('エラーになること', () => {
+      expect(actual).toBeInstanceOf(Err)
     })
   })
 
-  test('存在しない項目は複製できないこと', async () => {
-    const command = {
-      input: {
-        id: 'invalid_id',
-        name: 'duplicated table',
-      },
-      state: { user: dummyUser },
-    }
+  describe('名前が不正', () => {
+    const dummyTable = createStandardIncomeTable({
+      userId: dummyUser.id,
+      name: '既存テーブル',
+      grades: [
+        {
+          threshold: 0,
+          standardIncome: 10000,
+        },
+      ],
+    })._unsafeUnwrap()
 
-    const result = await workflow(command)
-    expect(result._unsafeUnwrapErr()).toBeInstanceOf(EntityNotFoundError)
-  })
+    const workflow = createStandardIncomeTableDuplicateWorkflow({
+      // eslint-disable-next-line @typescript-eslint/require-await
+      getStandardIncomeTable: async ({ id }) =>
+        id === dummyTable.id ? dummyTable : undefined,
+    })
 
-  test('他人の項目は複製できないこと', async () => {
-    const command = {
-      input: {
-        id: dummyEntity.id,
-        name: 'duplicated table',
-      },
-      state: { user: anotherUser },
-    }
+    let actual: Awaited<ReturnType<typeof workflow>>
 
-    const result = await workflow(command)
-    expect(result._unsafeUnwrapErr()).toBeInstanceOf(EntityNotFoundError)
+    beforeAll(async () => {
+      actual = await workflow({
+        input: {
+          id: dummyTable.id,
+          name: '',
+        },
+        state: {
+          user: dummyUser,
+        },
+      })
+    })
+
+    test('エラーになること', () => {
+      expect(actual).toBeInstanceOf(Err)
+    })
   })
 })

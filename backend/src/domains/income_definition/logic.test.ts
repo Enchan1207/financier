@@ -1,3 +1,5 @@
+import { Err, Ok } from 'neverthrow'
+
 import dayjs from '@/logic/dayjs'
 
 import { createFinancialMonthInfo } from '../financial_month_context/logic'
@@ -25,7 +27,7 @@ describe('正常系', () => {
   })
 
   test('作成できること', () => {
-    expect(result.isOk()).toBeTruthy()
+    expect(result).toBeInstanceOf(Ok)
   })
 
   test('定義の開始は2024年12月はじめであること', () => {
@@ -50,7 +52,7 @@ describe('正常系', () => {
       isTaxable: true,
       userId: 'test_user',
     })
-    expect(result.isOk()).toBeTruthy()
+    expect(result).toBeInstanceOf(Ok)
   })
 })
 
@@ -76,6 +78,6 @@ describe('異常系 - 終了が開始より前', () => {
   })
 
   test('作成できないこと', () => {
-    expect(result.isErr()).toBeTruthy()
+    expect(result).toBeInstanceOf(Err)
   })
 })

@@ -1,19 +1,9 @@
 import { z } from 'zod'
 
-import type { User } from '@/domains/user'
+import type { Auth0UserInfo, User } from '@/domains/user'
+import { Auth0UserInfoSchema } from '@/domains/user'
 import { condition } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
-
-const Auth0UserInfoSchema = z.object({
-  sub: z.string(),
-  nickname: z.string(),
-  name: z.string(),
-  email: z.string(),
-  picture: z.string(),
-  updated_at: z.string(),
-  email_verified: z.boolean(),
-})
-export type Auth0UserInfo = z.infer<typeof Auth0UserInfoSchema>
 
 const UserRecord = z.object({
   name: z.string(),

@@ -78,7 +78,7 @@ const parsePeriodString = (
   const pattern = /(?<yearRaw>\d{4})(_(?<monthRaw>\d{2}))?/
   const groups = periodRaw.match(pattern)?.groups
   if (groups === undefined) {
-    return err(new ValidationError())
+    return err(new ValidationError(`不正な期間文字列: ${periodRaw}`))
   }
 
   const { yearRaw, monthRaw } = groups
@@ -115,7 +115,11 @@ const buildPeriod = (props: {
         })
       }
 
-      return err(new ValidationError())
+      return err(
+        new ValidationError(
+          `不正な期間: ${from?.valueOf()}, ${to?.valueOf()}, ${at?.valueOf()}`,
+        ),
+      )
     })
     .andThen(({ from, to }) =>
       Result.combine([from, to].map(parsePeriodString)).andThen(([from, to]) =>

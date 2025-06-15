@@ -87,4 +87,6 @@ export const createStandardIncomeTableDuplicateWorkflow =
     }) => Promise<StandardIncomeTable | undefined>
   }): DuplicateStandardIncomeTableWorkflow =>
   (command) =>
-    ok(command).asyncAndThen(querySourceTable(effects)).andThen(duplicateTable)
+    ok(command) //
+      .asyncAndThen(querySourceTable(effects))
+      .andThen(duplicateTable)

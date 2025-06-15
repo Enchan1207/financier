@@ -25,7 +25,7 @@ const dummyUser: User = createUser({
 
 const dummyStandardIncomeTable = createStandardIncomeTable({
   userId: dummyUser.id,
-  name: '',
+  name: 'テスト',
   grades: [
     {
       threshold: 0,

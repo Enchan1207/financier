@@ -17,13 +17,15 @@ export const createFinancialMonthInfo = (input: {
   month: number
 }): Result<FinancialMonthInfo, ValidationError> =>
   parseSchema(FinancialMonthInfoSchema, input).mapErr(
-    () => new ValidationError(),
+    (error) => new ValidationError(error.message),
   )
 
 export const createWorkday = (
   input: number,
 ): Result<WorkdayValue, ValidationError> =>
-  parseSchema(WorkdayValueSchema, input).mapErr(() => new ValidationError())
+  parseSchema(WorkdayValueSchema, input).mapErr(
+    (error) => new ValidationError(error.message),
+  )
 
 export const createFinancialMonthContext = (props: {
   userId: string

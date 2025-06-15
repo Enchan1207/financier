@@ -7,7 +7,7 @@ import { createIncomeDefinitionListWorkflow } from './list'
 
 const dummyUser = createUser({
   auth0UserId: '',
-  name: '',
+  name: 'テスト',
   email: '',
 })
 
