@@ -10,7 +10,7 @@ export const getCurrentUser = async (
   token: string,
 ): Promise<Result<User, NetworkError>> => {
   try {
-    const response = await client.user.me.$get(
+    const response = await client.users.me.$get(
       {},
       {
         headers: { Authorization: `Bearer ${token}` },
