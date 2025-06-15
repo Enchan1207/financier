@@ -1,5 +1,3 @@
-// FIXME: これdao読んでるだけじゃん、いらなくね?
-
 import type { Result, ResultAsync } from 'neverthrow'
 import { err, ok } from 'neverthrow'
 
