@@ -1,4 +1,5 @@
 import type { Result } from 'neverthrow'
+import { ok } from 'neverthrow'
 import { z } from 'zod'
 
 import type { StandardIncomeTable } from '@/domains/standard_income'
@@ -43,4 +44,4 @@ type PostStandardIncomeTableWorkflow = (
 
 export const createStandardIncomeTablePostWorkflow =
   (): PostStandardIncomeTableWorkflow => (command) =>
-    createRegistrationEvent(command)
+    ok(command).andThen(createRegistrationEvent)
