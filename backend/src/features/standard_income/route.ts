@@ -4,6 +4,7 @@ import { err, ok } from 'neverthrow'
 import { z } from 'zod'
 
 import { EntityNotFoundError } from '@/logic/errors'
+import { fromSafePromise } from '@/logic/neverthrow'
 
 import { userAuthMiddleware } from '../authorize/middleware'
 import {
@@ -20,10 +21,8 @@ import {
   createStandardIncomeTablePostWorkflow,
   PostStandardIncomeTableSchema,
 } from './workflow/post'
-import type { UpdateStandardIncomeTableGradesCommand } from './workflow/updateGrades'
-import { createStandardIncomeTableGradesUpdateWorkflow } from './workflow/updateGrades'
-import type { UpdateStandardIncomeTableNameCommand } from './workflow/updateName'
-import { createStandardIncomeTableNameUpdateWorkflow } from './workflow/updateName'
+import type { UpdateStandardIncomeTableCommand } from './workflow/update'
+import { createStandardIncomeTableUpdateWorkflow } from './workflow/update'
 
 const app = new Hono<{ Bindings: Env }>()
   .use(userAuthMiddleware)
@@ -92,94 +91,57 @@ const app = new Hono<{ Bindings: Env }>()
         grades: z
           .array(
             z.object({
-              threshold: z.number().int().min(0),
-              standardIncome: z.number().int().min(0),
+              threshold: z.number(),
+              standardIncome: z.number(),
             }),
           )
           .optional(),
       }),
     ),
     async (c) => {
-      const id = c.req.valid('param').id
-      const { name, grades } = c.req.valid('json')
-
-      // いずれか一方しか更新できない
-      if (name !== undefined && grades !== undefined) {
-        return c.json({ error: 'bad request' }, 400)
+      const command: UpdateStandardIncomeTableCommand = {
+        input: {
+          ...c.req.valid('json'),
+          ...c.req.valid('param'),
+        },
+        state: {
+          user: c.get('user'),
+        },
       }
 
-      if (name !== undefined) {
-        const command: UpdateStandardIncomeTableNameCommand = {
-          input: {
-            id,
-            name,
-          },
-          state: { user: c.get('user') },
-        }
+      const workflow = createStandardIncomeTableUpdateWorkflow()
 
-        const workflow = createStandardIncomeTableNameUpdateWorkflow({
-          getStandardIncomeTable: getStandardIncomeTable(c.env.D1),
-        })
+      const response = workflow(command)
+        .asyncAndThen(
+          fromSafePromise(async (event) => {
+            if (event.kind === 'grades') {
+              const result = await updateStandardIncomeTableGrades(c.env.D1)(
+                event,
+              )
+              return result !== undefined
+                ? ok(result)
+                : err(new EntityNotFoundError({ id: event.id }))
+            }
 
-        const response = workflow(command)
-          .map(({ current: { userId, id }, update: { name } }) =>
-            updateStandardIncomeTableName(c.env.D1)({
-              userId,
-              id,
-              name,
-            }),
-          )
-          .andThen((updated) =>
-            updated ? ok(updated) : err(new EntityNotFoundError({ id })),
-          )
-          .match(
-            (entity) => c.json(entity),
-            (error) => {
-              console.error(error)
+            const result = await updateStandardIncomeTableName(c.env.D1)(event)
+            return result !== undefined
+              ? ok(result)
+              : err(new EntityNotFoundError({ id: event.id }))
+          }),
+        )
+        .match(
+          (entity) => c.json(entity),
+          (error) => {
+            if (error instanceof EntityNotFoundError) {
               return c.json({ error: 'not found' }, 404)
-            },
-          )
+            }
 
-        return response
-      }
-
-      if (grades !== undefined) {
-        const command: UpdateStandardIncomeTableGradesCommand = {
-          input: {
-            id,
-            grades,
+            console.error(error)
+            return c.json({ error: 'bad request' }, 400)
           },
-          state: { user: c.get('user') },
-        }
+        )
 
-        const workflow = createStandardIncomeTableGradesUpdateWorkflow({
-          getStandardIncomeTable: getStandardIncomeTable(c.env.D1),
-        })
-
-        const response = workflow(command)
-          .map(({ current: { userId, id }, update: { grades } }) =>
-            updateStandardIncomeTableGrades(c.env.D1)({
-              userId,
-              id,
-              grades,
-            }),
-          )
-          .andThen((updated) =>
-            updated ? ok(updated) : err(new EntityNotFoundError({ id })),
-          )
-          .match(
-            (entity) => c.json(entity),
-            (error) => {
-              console.error(error)
-              return c.json({ error: 'not found' }, 404)
-            },
-          )
-
-        return response
-      }
-
-      // 何がしたいねんお前
-      return c.json({ error: 'bad request' }, 400)
+      return response
     },
   )
 
