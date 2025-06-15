@@ -14,12 +14,12 @@ const app = new Hono<{ Bindings: Env }>()
   .use(userAuthMiddleware)
   // ある会計月度における報酬の詳細を取得
   .get(
-    '/:financialYear/:id',
+    '/:financialYear/:month',
     zValidator(
       'param',
       z.object({
-        financialYear: z.number(),
-        month: z.number(),
+        financialYear: z.coerce.number(),
+        month: z.coerce.number(),
       }),
     ),
     async (c) => {
