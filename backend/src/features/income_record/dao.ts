@@ -134,4 +134,28 @@ export const updateIncomeRecordValue =
     return updatedRaw ? makeEntity(updatedRaw) : undefined
   }
 
-// TODO: 報酬実績のリセット (システム自動計算に戻す)
+/**
+ * 報酬実績をリセット
+ */
+export const resetIncomeRecordValue =
+  (
+    db: D1Database,
+  ): ((_: {
+    userId: string
+    financialMonthId: string
+    definitionId: string
+  }) => Promise<void>) =>
+  async (props) => {
+    const query = `
+  DELETE from income_records
+  WHERE 
+    user_id = ?1
+    AND financial_month_id = ?2
+    AND definition_id = ?3
+  `
+
+    await db
+      .prepare(query)
+      .bind(props.userId, props.financialMonthId, props.definitionId)
+      .run()
+  }

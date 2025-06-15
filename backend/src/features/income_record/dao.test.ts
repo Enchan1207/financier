@@ -15,6 +15,7 @@ import { insertStandardIncomeTable } from '../standard_income/dao'
 import {
   findIncomeRecord,
   insertIncomeRecord,
+  resetIncomeRecordValue,
   updateIncomeRecordValue,
 } from './dao'
 
@@ -148,6 +149,25 @@ describe('報酬定義の操作', () => {
       const stmt = 'SELECT COUNT(*) count FROM income_records'
       const result = await env.D1.prepare(stmt).first<{ count: number }>()
       expect(result?.count).toBe(2)
+    })
+  })
+
+  describe('既存レコードの削除', () => {
+    beforeAll(async () => {
+      await resetIncomeRecordValue(env.D1)({
+        userId: dummyIncomeRecord.userId,
+        financialMonthId: dummyIncomeRecord.financialMonthId,
+        definitionId: dummyIncomeRecord.definitionId,
+      })
+    })
+
+    test('既存のレコードはもう存在しないこと', async () => {
+      const removed = await findIncomeRecord(env.D1)({
+        financialMonthId: dummyIncomeRecord.financialMonthId,
+        definitionId: dummyIncomeRecord.definitionId,
+      })
+
+      expect(removed).toBeUndefined()
     })
   })
 })
