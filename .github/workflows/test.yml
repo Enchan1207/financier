@@ -5,14 +5,6 @@ on:
       - 'backend/**'
       - './package.json'
       - './eslint.config.mjs'
-  pull_request:
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
-      - './package.json'
-      - './eslint.config.mjs'
-    branches:
-      - main
 
 jobs:
   test:
