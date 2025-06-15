@@ -4,6 +4,8 @@ import { err, ok } from 'neverthrow'
 import { z } from 'zod'
 
 import { createStandardIncomeTable } from '@/domains/standard_income/logic'
+import { getDefaultStandardIncomeGrades } from '@/domains/standard_income/logic/defaults'
+import dayjs from '@/logic/dayjs'
 import { EntityNotFoundError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
 
@@ -41,6 +43,16 @@ const app = new Hono<{ Bindings: Env }>()
       return c.json(entities)
     },
   )
+
+  // 現在時刻に基づく標準報酬月額表を取得
+  .get('/default', (c) => {
+    const result = getDefaultStandardIncomeGrades(dayjs())
+    if (result.isErr()) {
+      return c.json({ error: 'internal server error' }, 500)
+    }
+
+    return c.json(result.value)
+  })
 
   // 単一の標準報酬月額表を取得
   .get('/:id', zValidator('param', z.object({ id: z.string() })), async (c) => {

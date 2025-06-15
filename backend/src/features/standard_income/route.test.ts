@@ -237,4 +237,13 @@ describe('標準報酬月額表API', () => {
       })
     })
   })
+
+  test('デフォルトの月額表を取得できること', async () => {
+    const result = await client.default.$get(
+      { param: { id: testTable.id } },
+      { headers: { Authorization: `Bearer ${token}` } },
+    )
+
+    expect(result.ok).toBeTruthy()
+  })
 })
