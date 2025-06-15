@@ -1,13 +1,31 @@
 import { z } from 'zod'
 
-import type { IncomeRecord } from '@/domains/income_record'
+import type { FinancialMonthContext } from '@/domains/financial_month_context'
+import type { IncomeRecord, IncomeRecordItem } from '@/domains/income_record'
 import { IncomeRecordUpdator } from '@/domains/income_record'
+import type { User } from '@/domains/user'
 import dayjs from '@/logic/dayjs'
 import { condition, every } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
 
-// 草
-export const IncomeRecordRecord = z.object({
+type IncomeRecordItemRecord = {
+  user_id: User['id']
+  name: string
+  value: number
+}
+
+const makeIncomeRecordItemEntity = ({
+  user_id,
+  name,
+  value,
+}: IncomeRecordItemRecord): IncomeRecordItem => ({
+  userId: user_id,
+  name,
+  value,
+})
+
+/** 報酬定義エンティティのRDBレコードスキーマ */
+const IncomeRecordRecordSchema = z.object({
   user_id: z.string(),
 
   financial_month_id: z.string(),
@@ -18,9 +36,9 @@ export const IncomeRecordRecord = z.object({
   updated_at: z.number(),
   updated_by: z.enum(IncomeRecordUpdator),
 })
-type IncomeRecordRecord = z.infer<typeof IncomeRecordRecord>
+type IncomeRecordRecord = z.infer<typeof IncomeRecordRecordSchema>
 
-const makeEntity = (record: IncomeRecordRecord): IncomeRecord => ({
+const makeIncomeRecordEntity = (record: IncomeRecordRecord): IncomeRecord => ({
   userId: record.user_id,
   financialMonthId: record.financial_month_id,
   definitionId: record.definition_id,
@@ -48,7 +66,7 @@ export const findIncomeRecord =
   }) => Promise<IncomeRecord | undefined>) =>
   async ({ financialMonthId, definitionId }) => {
     const stmt = d1(db)
-      .select(IncomeRecordRecord, 'income_records')
+      .select(IncomeRecordRecordSchema, 'income_records')
       .where(
         every(
           condition('financial_month_id', '==', financialMonthId),
@@ -58,7 +76,7 @@ export const findIncomeRecord =
       .build()
 
     const record = await stmt.first<IncomeRecordRecord>()
-    return record ? makeEntity(record) : undefined
+    return record ? makeIncomeRecordEntity(record) : undefined
   }
 
 /**
@@ -115,7 +133,7 @@ export const updateIncomeRecordValue =
       .bind(userId, financialMonthId, definitionId, value, dayjs().valueOf())
 
     const getQuery = d1(db)
-      .select(IncomeRecordRecord, 'income_records')
+      .select(IncomeRecordRecordSchema, 'income_records')
       .where(
         every(
           condition('financial_month_id', '==', financialMonthId),
@@ -131,7 +149,73 @@ export const updateIncomeRecordValue =
     ])
     const updatedRaw = queryResults[1].results.at(0)
 
-    return updatedRaw ? makeEntity(updatedRaw) : undefined
+    return updatedRaw ? makeIncomeRecordEntity(updatedRaw) : undefined
   }
 
-// TODO: 報酬実績のリセット (システム自動計算に戻す)
+/**
+ * 報酬実績をリセット
+ */
+export const resetIncomeRecordValue =
+  (
+    db: D1Database,
+  ): ((_: {
+    userId: string
+    financialMonthId: string
+    definitionId: string
+  }) => Promise<void>) =>
+  async (props) => {
+    const query = `
+  DELETE from income_records
+  WHERE 
+    user_id = ?1
+    AND financial_month_id = ?2
+    AND definition_id = ?3
+  `
+
+    await db
+      .prepare(query)
+      .bind(props.userId, props.financialMonthId, props.definitionId)
+      .run()
+  }
+
+export const listIncomeRecordItems =
+  (
+    db: D1Database,
+  ): ((_: {
+    userId: User['id']
+    financialMonth: FinancialMonthContext
+  }) => Promise<IncomeRecordItem[]>) =>
+  async ({ userId, financialMonth }) => {
+    const query = `
+      SELECT
+        m.user_id,
+        d.name,
+        d.kind,
+        CASE
+          WHEN r.value IS NOT NULL THEN r.value
+          ELSE CASE
+            WHEN d.kind = 'absolute' THEN d.value
+            WHEN d.kind = 'related_by_workday' THEN m.workday * d.value
+            ELSE -1
+          END
+        END value
+      FROM
+        financial_month_contexts m
+        LEFT JOIN income_definitions d ON d.user_id = ?2
+        AND d.enabled_at <= m.ended_at
+        AND d.disabled_at >= m.started_at
+        LEFT JOIN income_records r ON r.financial_month_id = m.id
+        AND r.definition_id = d.id
+        AND r.user_id = m.user_id
+      WHERE
+        m.id = ?1 
+        AND m.user_id = ?2
+    `
+
+    const { results } = await db
+      .prepare(query)
+      .bind(financialMonth.id, userId)
+      .all<IncomeRecordItemRecord>()
+
+    return results.map(makeIncomeRecordItemEntity)
+  }

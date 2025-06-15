@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 import type dayjs from '@/logic/dayjs'
 
 import type { FinancialMonthContext } from '../financial_month_context'
@@ -18,3 +20,12 @@ export type IncomeRecord = {
   updatedAt: dayjs.Dayjs
   updatedBy: IncomeRecordUpdator
 }
+
+export const IncomeRecordItemSchema = z.object({
+  userId: z.string(),
+  name: z.string(),
+  value: z.number(),
+})
+
+/** 報酬実績アイテム */
+export type IncomeRecordItem = z.infer<typeof IncomeRecordItemSchema>
