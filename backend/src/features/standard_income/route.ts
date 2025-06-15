@@ -3,6 +3,7 @@ import { Hono } from 'hono'
 import { err, ok } from 'neverthrow'
 import { z } from 'zod'
 
+import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import { EntityNotFoundError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
 
@@ -16,11 +17,6 @@ import {
 } from './dao'
 import type { DuplicateStandardIncomeTableCommand } from './workflow/duplicate'
 import { createStandardIncomeTableDuplicateWorkflow } from './workflow/duplicate'
-import type { PostStandardIncomeTableCommand } from './workflow/post'
-import {
-  createStandardIncomeTablePostWorkflow,
-  PostStandardIncomeTableSchema,
-} from './workflow/post'
 import type { UpdateStandardIncomeTableCommand } from './workflow/update'
 import { createStandardIncomeTableUpdateWorkflow } from './workflow/update'
 
@@ -61,24 +57,35 @@ const app = new Hono<{ Bindings: Env }>()
   })
 
   // 新規標準報酬月額表を作成
-  .post('/', zValidator('json', PostStandardIncomeTableSchema), async (c) => {
-    const command: PostStandardIncomeTableCommand = {
-      input: c.req.valid('json'),
-      state: { user: c.get('user') },
-    }
-
-    const workflow = createStandardIncomeTablePostWorkflow()
-
-    return workflow(command)
-      .asyncMap(({ entity }) => insertStandardIncomeTable(c.env.D1)(entity))
-      .match(
-        (entity) => c.json(entity, 201),
-        (error) => {
-          console.error(error)
-          return c.json({ error: 'bad request' }, 400)
-        },
-      )
-  })
+  .post(
+    '/',
+    zValidator(
+      'json',
+      z.object({
+        name: z.string(),
+        grades: z.array(
+          z.object({
+            threshold: z.number().int().min(0),
+            standardIncome: z.number().int().min(0),
+          }),
+        ),
+      }),
+    ),
+    async (c) => {
+      return createStandardIncomeTable({
+        userId: c.get('user').id,
+        ...c.req.valid('json'),
+      })
+        .asyncMap((entity) => insertStandardIncomeTable(c.env.D1)(entity))
+        .match(
+          (entity) => c.json(entity, 201),
+          (error) => {
+            console.error(error)
+            return c.json({ error: 'bad request' }, 400)
+          },
+        )
+    },
+  )
 
   // 標準報酬月額表を更新（名前または階級）
   .patch(
