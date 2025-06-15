@@ -15,11 +15,6 @@ import {
 } from './dao'
 import type { DuplicateStandardIncomeTableCommand } from './workflow/duplicate'
 import { createStandardIncomeTableDuplicateWorkflow } from './workflow/duplicate'
-import type { GetStandardIncomeTableCommand } from './workflow/get'
-import {
-  createStandardIncomeTableGetWorkflow,
-  GetStandardIncomeTableSchema,
-} from './workflow/get'
 import type { UnvalidatedListStandardIncomeTablesCommand } from './workflow/list'
 import {
   createStandardIncomeTablesListWorkflow,
@@ -53,23 +48,17 @@ const app = new Hono<{ Bindings: Env }>()
   })
 
   // 単一の標準報酬月額表を取得
-  .get('/:id', zValidator('param', GetStandardIncomeTableSchema), async (c) => {
-    const command: GetStandardIncomeTableCommand = {
-      input: c.req.valid('param'),
-      state: { user: c.get('user') },
-    }
-
-    const workflow = createStandardIncomeTableGetWorkflow({
-      getStandardIncomeTable: getStandardIncomeTable(c.env.D1),
+  .get('/:id', zValidator('param', z.object({ id: z.string() })), async (c) => {
+    const stored = await getStandardIncomeTable(c.env.D1)({
+      userId: c.get('user').id,
+      id: c.req.valid('param').id,
     })
 
-    return workflow(command).match(
-      (entity) => c.json(entity),
-      (error) => {
-        console.error(error)
-        return c.json({ error: 'not found' }, 404)
-      },
-    )
+    if (stored === undefined) {
+      return c.json({ error: 'not found' }, 404)
+    }
+
+    return c.json(stored)
   })
 
   // 新規標準報酬月額表を作成

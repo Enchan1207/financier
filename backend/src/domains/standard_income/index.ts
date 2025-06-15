@@ -10,7 +10,7 @@ export const StandardIncomeGradeSchema = z
 export const StandardIncomeTableSchema = z.object({
   id: z.string().ulid(),
   userId: z.string().ulid(),
-  name: z.string(),
+  name: z.string().min(1),
   grades: z.array(StandardIncomeGradeSchema).min(1),
 })
 
