@@ -16,17 +16,21 @@ export const buildUpdateStatement = <M extends Model>(
     throw new Error('Unexpected state: modifications not defined')
   }
 
+  const modificationKeys = Object.keys(state.modifications).filter(
+    (key) => state.modifications[key] !== undefined,
+  )
+
   // ノーエントリ
-  if (Object.keys(state.modifications).length === 0) {
+  if (modificationKeys.length === 0) {
     throw new Error('Unexpected state: no modifications found')
   }
 
-  const modificationClause = Object.keys(state.modifications)
+  const modificationClause = modificationKeys
     .map((key, index) => `${key} = ?${index + 1}`)
     .join(', ')
 
-  const modificationParams = Object.values(
-    state.modifications,
+  const modificationParams = Object.values(state.modifications).filter(
+    (value) => value !== undefined,
   ) as CommandParameters<M>[]
 
   if (state.state === 'modification_specified') {

@@ -75,4 +75,21 @@ describe('buildUpdateStatement', () => {
       params: [3, 'update', 2],
     })
   })
+
+  test('キーのみがあり値がundefinedの場合', () => {
+    const actual = buildUpdateStatement({
+      state: 'modification_specified',
+      model: dummySchema,
+      tableName: 'users',
+      modifications: {
+        id: undefined,
+        name: 'update',
+      },
+    })
+
+    expect(actual).toStrictEqual({
+      query: 'UPDATE users SET name = ?1',
+      params: ['update'],
+    })
+  })
 })
