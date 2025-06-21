@@ -1,15 +1,22 @@
 import type { z } from 'zod'
 
-import type { Buildable, Model } from '.'
+import type { Model, QueryStateBase, QueryStateInit } from '.'
 
-export type InsertionQueryState<M extends Model> = {
-  model: M
-  tableName: string
-  values?: z.infer<M>
+type PreparedQueryState<M extends Model> = QueryStateBase<M> & {
+  state: 'prepared'
+  values: z.infer<M>
 }
 
-export interface InsertionQuery<M extends Model> {
-  values(values: z.infer<M>): this
+export type InsertionQueryState<M extends Model> =
+  | PreparedQueryState<M>
+  | QueryStateInit<M>
+
+export interface InsertionQuery<M extends Model, P> {
+  values(values: z.infer<M>): ValueSpecifiedInsertionQuery<P>
+}
+
+interface ValueSpecifiedInsertionQuery<T> {
+  build(): T
 }
 
 /**
@@ -17,25 +24,23 @@ export interface InsertionQuery<M extends Model> {
  * @param statementBuilder ステートメントビルダ
  * @returns 構成されたクエリビルダ
  */
-export const createInsertionQueryBuilder = <
-  M extends Model,
-  S extends InsertionQueryState<M>,
-  P,
->(
-  statementBuilder: (state: S) => P,
-): ((state: S) => Buildable<InsertionQuery<M>, P>) => {
-  const _build = (state: S): Buildable<InsertionQuery<M>, P> => ({
-    values(values) {
-      const newState: S = {
+export const createInsertionQueryBuilder = <N extends Model, P>(
+  statementBuilder: (state: PreparedQueryState<N>) => P,
+) => {
+  const uninitialized = <M extends N>(
+    state: QueryStateInit<M>,
+  ): InsertionQuery<M, P> => ({
+    values: (values) =>
+      valueSpecified({
         ...state,
+        state: 'prepared',
         values,
-      }
+      }),
+  })
 
-      return _build(newState)
-    },
-
+  const valueSpecified = <M extends N>(state: PreparedQueryState<M>) => ({
     build: () => statementBuilder(state),
   })
 
-  return _build
+  return uninitialized
 }

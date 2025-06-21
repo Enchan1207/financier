@@ -14,8 +14,5 @@ export interface Operation<P> {
   ): Buildable<SelectionQuery<M>, P>
 
   /** 値を渡してアイテムを挿入する */
-  insert<M extends Model>(
-    model: M,
-    tableName: string,
-  ): Buildable<InsertionQuery<M>, P>
+  insert<M extends Model>(model: M, tableName: string): InsertionQuery<M, P>
 }
