@@ -3,7 +3,7 @@ import { ulid } from 'ulid'
 
 import type { User } from '@/domains/user'
 
-import { getUserByAuth0Id, getUserById, saveUser } from './dao'
+import { getUserByAuth0Id, getUserById, saveUser } from '.'
 
 describe('単一項目のCRUD', () => {
   test('項目を作成できること', async () => {
