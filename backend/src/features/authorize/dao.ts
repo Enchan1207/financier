@@ -59,9 +59,9 @@ export const saveUser =
     const stmt = `INSERT INTO users 
     VALUES (?1,?2,?3,?4)
     ON CONFLICT (id) DO UPDATE SET
-        name = ?2,
-        auth0_user_id = ?3,
-        email = ?4
+        name = excluded.name,
+        auth0_user_id = excluded.auth0_user_id,
+        email = excluded.email
   `
 
     const newUserRecord = makeRecord(newUser)
