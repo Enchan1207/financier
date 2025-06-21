@@ -9,7 +9,7 @@ import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 
-import { saveUser } from '../authorize/dao'
+import { saveUser } from '@/dao/authorize'
 import { insertFinancialYear } from '../financial_year/dao'
 import { insertIncomeDefinition } from '../income_definition/dao'
 import { insertStandardIncomeTable } from '../standard_income/dao'

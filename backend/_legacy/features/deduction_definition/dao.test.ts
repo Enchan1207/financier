@@ -15,7 +15,7 @@ import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 import dayjs from '@/logic/dayjs'
 
-import { saveUser } from '../authorize/dao'
+import { saveUser } from '@/dao/authorize'
 import {
   findDeductionRecord,
   insertDeductionRecord,

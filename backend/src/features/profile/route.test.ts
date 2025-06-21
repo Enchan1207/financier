@@ -2,9 +2,9 @@ import { env, fetchMock } from 'cloudflare:test'
 import { sign } from 'hono/jwt'
 import { testClient } from 'hono/testing'
 
+import { getUserById, saveUser } from '@/dao/authorize'
 import type { User } from '@/domains/user'
 
-import { getUserById, saveUser } from '../authorize/dao'
 import users from './route'
 
 describe('ユーザが存在する場合 (登録済みアカウントへのログイン)', () => {

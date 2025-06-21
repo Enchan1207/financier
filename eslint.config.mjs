@@ -15,7 +15,7 @@ export default tseslint.config(
 
   {
     name: 'global ignore',
-    ignores: ['**/dist', '**/node_modules', '**/.wrangler/'],
+    ignores: ['**/dist', '**/node_modules', '**/.wrangler/', '**/_legacy'],
   },
 
   // MARK: - Shared configurations

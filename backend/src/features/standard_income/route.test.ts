@@ -3,6 +3,7 @@ import type { InferResponseType } from 'hono'
 import { sign } from 'hono/jwt'
 import { testClient } from 'hono/testing'
 
+import { saveUser } from '@/dao/authorize'
 import {
   createStandardIncomeGrade,
   createStandardIncomeTable,
@@ -10,7 +11,6 @@ import {
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 
-import { saveUser } from '../authorize/dao'
 import { getStandardIncomeTable, insertStandardIncomeTable } from './dao'
 import standard_incomes from './route'
 

@@ -1,56 +1,35 @@
-import { z } from 'zod'
-
 import type { Auth0UserInfo, User } from '@/domains/user'
 import { Auth0UserInfoSchema } from '@/domains/user'
 import { condition } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
 
-const UserRecord = z.object({
-  name: z.string(),
-  auth0_user_id: z.string(),
-  id: z.string(),
-  email: z.string(),
-})
-
-type UserRecord = z.infer<typeof UserRecord>
-
-const makeEntity = ({ id, name, auth0_user_id, email }: UserRecord): User => ({
-  id,
-  name,
-  auth0UserId: auth0_user_id,
-  email,
-})
-
-const makeRecord = ({ id, name, auth0UserId, email }: User): UserRecord => ({
-  id,
-  name,
-  auth0_user_id: auth0UserId,
-  email,
-})
+import type { UserRecord } from './schema'
+import { makeUserEntity, makeUserRecord, UserRecordSchema } from './schema'
 
 export const getUserById =
   (db: D1Database) =>
   async (id: string): Promise<User | undefined> => {
     const stmt = d1(db)
-      .select(UserRecord, 'users')
+      .select(UserRecordSchema, 'users')
       .where(condition('id', '==', id))
       .build()
 
     return stmt
       .first<UserRecord>()
-      .then((item) => (item === null ? undefined : makeEntity(item)))
+      .then((item) => (item === null ? undefined : makeUserEntity(item)))
   }
 
 export const getUserByAuth0Id =
   (db: D1Database) =>
   async (id: string): Promise<User | undefined> => {
     const stmt = d1(db)
-      .select(UserRecord, 'users')
+      .select(UserRecordSchema, 'users')
       .where(condition('auth0_user_id', '==', id))
       .build()
+
     return stmt
       .first<UserRecord>()
-      .then((item) => (item === null ? undefined : makeEntity(item)))
+      .then((item) => (item === null ? undefined : makeUserEntity(item)))
   }
 
 export const saveUser =
@@ -64,7 +43,7 @@ export const saveUser =
         email = excluded.email
   `
 
-    const newUserRecord = makeRecord(newUser)
+    const newUserRecord = makeUserRecord(newUser)
 
     await db
       .prepare(stmt)

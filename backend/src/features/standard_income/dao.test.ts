@@ -2,6 +2,7 @@
 
 import { env } from 'cloudflare:test'
 
+import { saveUser } from '@/dao/authorize'
 import {
   createStandardIncomeGrade,
   createStandardIncomeTable,
@@ -9,7 +10,6 @@ import {
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 
-import { saveUser } from '../authorize/dao'
 import {
   getStandardIncomeTable,
   insertStandardIncomeTable,
