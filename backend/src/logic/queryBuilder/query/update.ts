@@ -1,7 +1,7 @@
 import type { z } from 'zod'
 
 import type { ConditionNode } from '../conditionTree'
-import type { Model, QueryStateBase, QueryStateInit } from '.'
+import type { Model, PreparedQuery, QueryStateBase, QueryStateInit } from '.'
 
 type ConditionSpecifiedQueryState<M extends Model> = QueryStateBase<M> & {
   state: 'condition_specified'
@@ -21,22 +21,24 @@ type ConditionAndModificationSpecifiedQueryState<M extends Model> =
   }
 
 export type UpdateQueryState<M extends Model> =
-  | ConditionSpecifiedQueryState<M>
   | ModificationSpecifiedQueryState<M>
   | ConditionAndModificationSpecifiedQueryState<M>
-  | QueryStateInit<M>
 
-interface PreparedQuery<P> {
-  build(): P
+// エントリポイント
+export interface UpdateQuery<M extends Model, P> {
+  where(condition: ConditionNode<M>): ConditionSpecifiedUpdateQuery<M, P>
+  set(values: Partial<z.infer<M>>): ModificationSpecifiedQuery<M, P>
 }
 
+// 条件のみ指定
 interface ConditionSpecifiedUpdateQuery<M extends Model, P> {
   set(values: Partial<z.infer<M>>): PreparedQuery<P>
 }
 
-export interface UpdateQuery<M extends Model, P> {
-  where(condition: ConditionNode<M>): ConditionSpecifiedUpdateQuery<M, P>
-  set(values: Partial<z.infer<M>>): PreparedQuery<P>
+// 変更のみ指定
+interface ModificationSpecifiedQuery<M extends Model, P> {
+  where(condition: ConditionNode<M>): PreparedQuery<P>
+  build(): P
 }
 
 export const createUpdateQueryBuilder = <M extends Model, P>(
@@ -62,19 +64,29 @@ export const createUpdateQueryBuilder = <M extends Model, P>(
 
   const conditionSpecified = <M2 extends M>(
     state: ConditionSpecifiedQueryState<M2>,
-  ): ConditionSpecifiedUpdateQuery<M, P> => ({
+  ): ConditionSpecifiedUpdateQuery<M2, P> => ({
     set: (modifications) =>
-      modificationSpecified({
+      modificationAndConditionSpecified({
         ...state,
-        state: 'modification_specified',
+        state: 'condition_modification_specified',
         modifications,
       }),
   })
 
   const modificationSpecified = <M2 extends M>(
-    state:
-      | ModificationSpecifiedQueryState<M2>
-      | ConditionAndModificationSpecifiedQueryState<M2>,
+    state: ModificationSpecifiedQueryState<M2>,
+  ): ModificationSpecifiedQuery<M2, P> => ({
+    where: (condition) =>
+      modificationAndConditionSpecified({
+        ...state,
+        state: 'condition_modification_specified',
+        condition,
+      }),
+    build: () => statementBuilder(state),
+  })
+
+  const modificationAndConditionSpecified = <M2 extends M>(
+    state: ConditionAndModificationSpecifiedQueryState<M2>,
   ): PreparedQuery<P> => ({
     build: () => statementBuilder(state),
   })

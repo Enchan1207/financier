@@ -9,13 +9,6 @@ export const buildUpdateStatement = <M extends Model>(
   query: string
   params: CommandParameters<M>[]
 } => {
-  const isValid =
-    state.state === 'modification_specified' ||
-    state.state === 'condition_modification_specified'
-  if (!isValid) {
-    throw new Error('Unexpected state: modifications not defined')
-  }
-
   const modificationKeys = Object.keys(state.modifications).filter(
     (key) => state.modifications[key] !== undefined,
   )

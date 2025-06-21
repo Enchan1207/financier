@@ -9,27 +9,6 @@ describe('buildUpdateStatement', () => {
     name: z.string(),
   })
 
-  test('ステートがない場合、エラーになること', () => {
-    expect(() =>
-      buildUpdateStatement({
-        state: 'ready',
-        model: dummySchema,
-        tableName: 'users',
-      }),
-    ).toThrowError()
-  })
-
-  test('変更がない場合、エラーになること', () => {
-    expect(() =>
-      buildUpdateStatement({
-        state: 'condition_specified',
-        model: dummySchema,
-        tableName: 'users',
-        condition: condition('id', '==', 2),
-      }),
-    ).toThrowError()
-  })
-
   test('変更項目がない場合、エラーになること', () => {
     expect(() =>
       buildUpdateStatement({

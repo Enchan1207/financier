@@ -14,3 +14,7 @@ export type QueryStateBase<M extends Model> = {
 export type QueryStateInit<M extends Model> = QueryStateBase<M> & {
   state: 'ready'
 }
+
+export interface PreparedQuery<P> {
+  build(): P
+}
