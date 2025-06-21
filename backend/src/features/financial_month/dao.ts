@@ -88,9 +88,15 @@ export const updateFinancialMonthContext =
     workday: WorkdayValue
   }) => Promise<FinancialMonthContext | undefined>) =>
   async ({ id, userId, workday }) => {
-    const updateQueryBase =
-      'UPDATE financial_month_contexts SET workday=?3 WHERE id=?1 AND user_id=?2'
-    const updateQuery = db.prepare(updateQueryBase).bind(id, userId, workday)
+    const updateQuery = d1(db)
+      .update(FinancialMonthRecord, 'financial_month_contexts')
+      .where(
+        every(condition('id', '==', id), condition('user_id', '==', userId)),
+      )
+      .set({
+        workday,
+      })
+      .build()
 
     const getQuery = d1(db)
       .select(FinancialMonthRecord, 'financial_month_contexts')

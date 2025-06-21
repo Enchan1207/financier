@@ -93,11 +93,18 @@ export const updateStandardIncomeTableName =
     name: StandardIncomeTable['name']
   }) => Promise<StandardIncomeTableSummary | undefined>) =>
   async (props) => {
-    const updateQueryBase =
-      'UPDATE standard_income_tables SET name=? WHERE id=? AND user_id=?'
-    const updateQuery = db
-      .prepare(updateQueryBase)
-      .bind(props.name, props.id, props.userId)
+    const updateQuery = d1(db)
+      .update(StandardIncomeTableRecord, 'standard_income_tables')
+      .where(
+        every(
+          condition('id', '==', props.id),
+          condition('user_id', '==', props.userId),
+        ),
+      )
+      .set({
+        name: props.name,
+      })
+      .build()
 
     const getQuery = d1(db)
       .select(StandardIncomeTableRecord, 'standard_income_tables')
