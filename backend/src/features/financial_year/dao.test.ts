@@ -1,6 +1,7 @@
 import { env } from 'cloudflare:test'
 
 import { saveUser } from '@/dao/authorize'
+import { insertStandardIncomeTable } from '@/dao/standard_income'
 import { createFinancialMonthInfo } from '@/domains/financial_month_context/logic'
 import type { FinancialYearValue } from '@/domains/financial_year'
 import { createFinancialYear } from '@/domains/financial_year/logic'
@@ -10,7 +11,6 @@ import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 
 import { insertIncomeDefinition } from '../income_definition/dao'
-import { insertStandardIncomeTable } from '../standard_income/dao'
 import {
   getFinancialYear,
   insertFinancialYear,

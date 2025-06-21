@@ -9,60 +9,20 @@ import type { User } from '@/domains/user'
 import { condition, every } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
 
-const StandardIncomeTableRecord = z.object({
-  id: z.string().ulid(),
-  user_id: z.string().ulid(),
-  name: z.string(),
-})
-
-type StandardIncomeTableRecord = z.infer<typeof StandardIncomeTableRecord>
-
-const StandardIncomeGradeRecord = z.object({
-  income_table_id: z.string().ulid(),
-  threshold: z.number().int().min(0),
-  standard_income: z.number().int().min(0),
-})
-
-type StandardIncomeGradeRecord = z.infer<typeof StandardIncomeGradeRecord>
-
-const makeRecord = (
-  entity: StandardIncomeTable,
-): [StandardIncomeTableRecord, StandardIncomeGradeRecord[]] => [
-  {
-    id: entity.id,
-    user_id: entity.userId,
-    name: entity.name,
-  },
-  entity.grades.map((grade) => ({
-    income_table_id: entity.id,
-    threshold: grade.threshold,
-    standard_income: grade.standardIncome,
-  })),
-]
-
-const makeGradeEntity = (record: StandardIncomeGradeRecord) =>
-  ({
-    threshold: record.threshold,
-    standardIncome: record.standard_income,
-  }) as StandardIncomeGrade // recordを作成する前段階でドメインモデルになっているはずなので、asで問題ない
-
-const makeTableEntity = (props: {
-  tableRecord: StandardIncomeTableRecord
-  gradeRecords: StandardIncomeGradeRecord[]
-}): StandardIncomeTable => ({
-  id: props.tableRecord.id,
-  userId: props.tableRecord.user_id,
-  name: props.tableRecord.name,
-  grades: props.gradeRecords.map(makeGradeEntity),
-})
+import {
+  makeStandardIncomeRecord,
+  makeStandardIncomeTableEntity,
+  StandardIncomeGradeRecord,
+  StandardIncomeTableRecord,
+} from './schema'
 
 /** 新しい標準報酬月額表を追加 */
-export const insertStandardIncomeTable =
+const insertStandardIncomeTable =
   (
     db: D1Database,
   ): ((item: StandardIncomeTable) => Promise<StandardIncomeTable>) =>
   async (entity) => {
-    const [tableRecord, gradeRecords] = makeRecord(entity)
+    const [tableRecord, gradeRecords] = makeStandardIncomeRecord(entity)
 
     const tableInsertQuery = d1(db)
       .insert(StandardIncomeTableRecord, 'standard_income_tables')
@@ -84,7 +44,7 @@ export const insertStandardIncomeTable =
   }
 
 /** 標準報酬月額表の名前を変更する */
-export const updateStandardIncomeTableName =
+const updateStandardIncomeTableName =
   (
     db: D1Database,
   ): ((props: {
@@ -133,7 +93,7 @@ export const updateStandardIncomeTableName =
   }
 
 /** 標準報酬月額表の階級を変更する */
-export const updateStandardIncomeTableGrades =
+const updateStandardIncomeTableGrades =
   (
     db: D1Database,
   ): ((props: {
@@ -190,7 +150,7 @@ export const updateStandardIncomeTableGrades =
   }
 
 /** 登録されている標準報酬月額表の一覧を得る */
-export const listStandardIncomeTables =
+const listStandardIncomeTables =
   (
     db: D1Database,
   ): ((props: {
@@ -213,7 +173,7 @@ export const listStandardIncomeTables =
   }
 
 /** IDを指定して標準報酬月額表を取得する */
-export const getStandardIncomeTable =
+const getStandardIncomeTable =
   (
     db: D1Database,
   ): ((props: {
@@ -254,8 +214,16 @@ export const getStandardIncomeTable =
       return undefined
     }
 
-    return makeTableEntity({
+    return makeStandardIncomeTableEntity({
       tableRecord: tableRecord.data,
       gradeRecords: gradeRecords.data,
     })
   }
+
+export {
+  getStandardIncomeTable,
+  insertStandardIncomeTable,
+  listStandardIncomeTables,
+  updateStandardIncomeTableGrades,
+  updateStandardIncomeTableName,
+}

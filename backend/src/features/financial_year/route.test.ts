@@ -4,13 +4,13 @@ import { sign } from 'hono/jwt'
 import { testClient } from 'hono/testing'
 
 import { saveUser } from '@/dao/authorize'
+import { insertStandardIncomeTable } from '@/dao/standard_income'
 import type { FinancialYearValue } from '@/domains/financial_year'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 
-import { insertStandardIncomeTable } from '../standard_income/dao'
 import { getFinancialYear, insertFinancialYear } from './dao'
 import financial_years from './route'
 

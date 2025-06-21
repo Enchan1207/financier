@@ -16,7 +16,7 @@ import {
   listStandardIncomeTables,
   updateStandardIncomeTableGrades,
   updateStandardIncomeTableName,
-} from './dao'
+} from '.'
 
 describe('基本的なCRUD', () => {
   const dummyUser: User = createUser({

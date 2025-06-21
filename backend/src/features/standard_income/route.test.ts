@@ -5,13 +5,16 @@ import { testClient } from 'hono/testing'
 
 import { saveUser } from '@/dao/authorize'
 import {
+  getStandardIncomeTable,
+  insertStandardIncomeTable,
+} from '@/dao/standard_income'
+import {
   createStandardIncomeGrade,
   createStandardIncomeTable,
 } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 
-import { getStandardIncomeTable, insertStandardIncomeTable } from './dao'
 import standard_incomes from './route'
 
 describe('標準報酬月額表API', () => {

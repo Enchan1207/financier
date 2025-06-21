@@ -21,7 +21,7 @@ import {
   insertDeductionRecord,
 } from '../deduction_record/dao'
 import { insertFinancialYear } from '../financial_year/dao'
-import { insertStandardIncomeTable } from '../standard_income/dao'
+import { insertStandardIncomeTable } from '@/dao/standard_income'
 import {
   findDeductionDefinitions,
   getDeductionDefinitionById,

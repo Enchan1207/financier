@@ -12,7 +12,7 @@ import { createUser } from '@/domains/user/logic'
 import { saveUser } from '@/features/authorize/dao'
 import { insertFinancialYear } from '@/features/financial_year/dao'
 
-import { insertStandardIncomeTable } from '../standard_income/dao'
+import { insertStandardIncomeTable } from '@/dao/standard_income'
 import { insertIncomeDefinition } from './dao'
 import incomeDefinitions from './route'
 import type { PutIncomeDefinitionCommand } from './workflow/put'

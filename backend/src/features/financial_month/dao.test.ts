@@ -1,6 +1,7 @@
 import { env } from 'cloudflare:test'
 
 import { saveUser } from '@/dao/authorize'
+import { insertStandardIncomeTable } from '@/dao/standard_income'
 import type { WorkdayValue } from '@/domains/financial_month_context'
 import { createFinancialMonthInfo } from '@/domains/financial_month_context/logic'
 import { createFinancialYear } from '@/domains/financial_year/logic'
@@ -10,7 +11,6 @@ import { createUser } from '@/domains/user/logic'
 import dayjs from '@/logic/dayjs'
 
 import { insertFinancialYear } from '../financial_year/dao'
-import { insertStandardIncomeTable } from '../standard_income/dao'
 import {
   findFinancialMonthCotextsByDate,
   getFinancialMonthContext,

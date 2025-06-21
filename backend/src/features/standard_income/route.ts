@@ -3,6 +3,13 @@ import { Hono } from 'hono'
 import { err, ok } from 'neverthrow'
 import { z } from 'zod'
 
+import {
+  getStandardIncomeTable,
+  insertStandardIncomeTable,
+  listStandardIncomeTables,
+  updateStandardIncomeTableGrades,
+  updateStandardIncomeTableName,
+} from '@/dao/standard_income'
 import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import { getDefaultStandardIncomeGrades } from '@/domains/standard_income/logic/defaults'
 import dayjs from '@/logic/dayjs'
@@ -10,13 +17,6 @@ import { EntityNotFoundError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
 
 import { userAuthMiddleware } from '../authorize/middleware'
-import {
-  getStandardIncomeTable,
-  insertStandardIncomeTable,
-  listStandardIncomeTables,
-  updateStandardIncomeTableGrades,
-  updateStandardIncomeTableName,
-} from './dao'
 import type { DuplicateStandardIncomeTableCommand } from './workflow/duplicate'
 import { createStandardIncomeTableDuplicateWorkflow } from './workflow/duplicate'
 import type { UpdateStandardIncomeTableCommand } from './workflow/update'
