@@ -9,7 +9,7 @@ export type InsertionQueryState<M extends Model> = {
 }
 
 export interface InsertionQuery<M extends Model> {
-  values(values: M): this
+  values(values: z.infer<M>): this
 }
 
 /**
