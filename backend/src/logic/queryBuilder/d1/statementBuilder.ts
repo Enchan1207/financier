@@ -5,7 +5,7 @@ import type {
   ConditionNode,
 } from '@/logic/queryBuilder/conditionTree'
 import { isLeaf } from '@/logic/queryBuilder/conditionTree'
-import type { Model, QueryState } from '@/logic/queryBuilder/query'
+import type { Model, SelectionQueryState } from '@/logic/queryBuilder/query'
 
 type CommandParameters<M extends Model> =
   | ConditionLeaf<M, keyof M['shape']>['value'][]
@@ -13,7 +13,7 @@ type CommandParameters<M extends Model> =
   | string
 
 type Command<M extends Model> = {
-  input: QueryState<M>
+  input: SelectionQueryState<M>
   state: {
     query: string
     index: number
@@ -23,7 +23,7 @@ type Command<M extends Model> = {
 
 /** クエリの状態からD1用のSQLを生成する */
 export const buildD1Statement = <M extends Model>(
-  state: QueryState<M>,
+  state: SelectionQueryState<M>,
 ): {
   query: string
   params: CommandParameters<M>[]

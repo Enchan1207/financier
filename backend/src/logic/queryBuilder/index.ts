@@ -1,4 +1,4 @@
-import type { Buildable, Model, Query } from './query'
+import type { Buildable, Model, SelectionQuery } from './query'
 
 /**
  * データベースに対して行う操作
@@ -6,5 +6,8 @@ import type { Buildable, Model, Query } from './query'
  */
 export interface Operation<P> {
   /** モデルとテーブル名を渡してアイテムを選択する */
-  select<M extends Model>(model: M, tableName: string): Buildable<Query<M>, P>
+  select<M extends Model>(
+    model: M,
+    tableName: string,
+  ): Buildable<SelectionQuery<M>, P>
 }
