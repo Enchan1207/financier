@@ -89,18 +89,10 @@ export const insertIncomeRecord =
   async (entity) => {
     const record = makeRecord(entity)
 
-    const insertStmt = 'INSERT INTO income_records VALUES (?, ?, ?, ?, ?, ?)'
-
-    await db
-      .prepare(insertStmt)
-      .bind(
-        record.user_id,
-        record.financial_month_id,
-        record.definition_id,
-        record.value,
-        record.updated_at,
-        record.updated_by,
-      )
+    await d1(db)
+      .insert(IncomeRecordRecordSchema, 'income_records')
+      .values(record)
+      .build()
       .run()
 
     return entity

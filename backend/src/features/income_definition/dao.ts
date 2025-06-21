@@ -70,22 +70,10 @@ export const insertIncomeDefinition =
   async (entity) => {
     const record = makeRecord(entity)
 
-    const base =
-      'INSERT INTO income_definitions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-
-    await db
-      .prepare(base)
-      .bind(
-        record.id,
-        record.user_id,
-        record.name,
-        record.kind,
-        record.value,
-        record.enabled_at,
-        record.disabled_at,
-        record.updated_at,
-        record.is_taxable,
-      )
+    await d1(db)
+      .insert(IncomeDefinitionRecord, 'income_definitions')
+      .values(record)
+      .build()
       .run()
 
     return entity

@@ -54,22 +54,8 @@ export const insertFinancialYear =
   async (entity) => {
     const monthRecords = entity.months.map(makeFinancialMonthRecord)
 
-    const stmt =
-      'INSERT INTO financial_month_contexts VALUES (?1,?2,?3,?4,?5,?6,?7,?8)'
-    const base = db.prepare(stmt)
-
-    const queries: D1PreparedStatement[] = monthRecords.map((record) =>
-      base.bind(
-        record.id,
-        record.user_id,
-        record.financial_year,
-        record.month,
-        record.started_at,
-        record.ended_at,
-        record.workday,
-        record.standard_income_table_id,
-      ),
-    )
+    const base = d1(db).insert(FinancialMonthRecord, 'financial_month_contexts')
+    const queries = monthRecords.map((record) => base.values(record).build())
 
     await db.batch(queries)
 

@@ -64,18 +64,17 @@ export const insertStandardIncomeTable =
   async (entity) => {
     const [tableRecord, gradeRecords] = makeRecord(entity)
 
-    const tableInsertStmt =
-      'INSERT INTO standard_income_tables VALUES (?1,?2,?3)'
-    const tableInsertQuery = db
-      .prepare(tableInsertStmt)
-      .bind(tableRecord.id, tableRecord.user_id, tableRecord.name)
+    const tableInsertQuery = d1(db)
+      .insert(StandardIncomeTableRecord, 'standard_income_tables')
+      .values(tableRecord)
+      .build()
 
-    const gradeInsertStmt =
-      'INSERT INTO standard_income_grades VALUES (?1,?2,?3)'
+    const gradeBase = d1(db).insert(
+      StandardIncomeGradeRecord,
+      'standard_income_grades',
+    )
     const gradeInsertQueries = gradeRecords.map((grade) =>
-      db
-        .prepare(gradeInsertStmt)
-        .bind(tableRecord.id, grade.threshold, grade.standard_income),
+      gradeBase.values(grade).build(),
     )
 
     const queries = [tableInsertQuery, ...gradeInsertQueries]
