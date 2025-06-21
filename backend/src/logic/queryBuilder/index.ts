@@ -1,4 +1,5 @@
-import type { Buildable, Model, SelectionQuery } from './query'
+import type { Buildable, Model } from './query'
+import type { SelectionQuery } from './query/select'
 
 /**
  * データベースに対して行う操作

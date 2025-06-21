@@ -5,7 +5,9 @@ import type {
   ConditionNode,
 } from '@/logic/queryBuilder/conditionTree'
 import { isLeaf } from '@/logic/queryBuilder/conditionTree'
-import type { Model, SelectionQueryState } from '@/logic/queryBuilder/query'
+import type { SelectionQueryState } from '@/logic/queryBuilder/query/select'
+
+import type { Model } from '../query'
 
 type CommandParameters<M extends Model> =
   | ConditionLeaf<M, keyof M['shape']>['value'][]
