@@ -7,12 +7,12 @@ import type { SelectionQuery } from './query/select'
  * @template P 操作結果として得られるステートメントオブジェクトの型
  */
 export interface Operation<P> {
-  /** モデルとテーブル名を渡してアイテムを選択する */
+  /** アイテムを選択する */
   select<M extends Model>(
     model: M,
     tableName: string,
   ): Buildable<SelectionQuery<M>, P>
 
-  /** 値を渡してアイテムを挿入する */
+  /** アイテムを挿入する */
   insert<M extends Model>(model: M, tableName: string): InsertionQuery<M, P>
 }
