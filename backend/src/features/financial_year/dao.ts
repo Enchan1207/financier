@@ -1,9 +1,9 @@
-import type { FinancialMonthContext } from '@/domains/financial_month_context'
-import { getPeriodByFinancialMonth } from '@/domains/financial_month_context/logic'
 import type {
   FinancialYear,
   FinancialYearValue,
 } from '@/domains/financial_year'
+import type { MonthlyContext } from '@/domains/monthly_context'
+import { getPeriodByFinancialMonth } from '@/domains/monthly_context/logic'
 import type { User } from '@/domains/user'
 import { condition, every } from '@/logic/queryBuilder/conditionTree'
 import { d1 } from '@/logic/queryBuilder/d1'
@@ -13,17 +13,18 @@ import { FinancialMonthRecord } from '../financial_month/dao'
 const makeFinancialMonthRecord = ({
   id,
   userId,
-  info,
+  financialYear,
+  month,
   workday,
   standardIncomeTableId,
-}: FinancialMonthContext): FinancialMonthRecord => {
-  const { start, end } = getPeriodByFinancialMonth(info)
+}: MonthlyContext): FinancialMonthRecord => {
+  const { start, end } = getPeriodByFinancialMonth({ financialYear, month })
 
   return {
     id,
     user_id: userId,
-    financial_year: info.financialYear,
-    month: info.month,
+    financial_year: financialYear,
+    month,
     started_at: start.valueOf(),
     ended_at: end.valueOf(),
     workday,
@@ -38,13 +39,11 @@ export const makeFinancialMonthEntity = ({
   month,
   workday,
   standard_income_table_id,
-}: FinancialMonthRecord): FinancialMonthContext => ({
+}: FinancialMonthRecord): MonthlyContext => ({
   id,
   userId: user_id,
-  info: {
-    financialYear: financial_year,
-    month: month,
-  },
+  financialYear: financial_year,
+  month: month,
   workday,
   standardIncomeTableId: standard_income_table_id,
 })

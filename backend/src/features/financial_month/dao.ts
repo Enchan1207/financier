@@ -1,15 +1,12 @@
 import { z } from 'zod'
 
-import type {
-  FinancialMonthContext,
-  FinancialMonthInfo,
-  WorkdayValue,
-} from '@/domains/financial_month_context'
-import {
-  FinancialMonthValueSchema,
-  WorkdayValueSchema,
-} from '@/domains/financial_month_context'
 import { FinancialYearValueSchema } from '@/domains/financial_year'
+import type {
+  FinancialMonthInfo,
+  MonthlyContext,
+  WorkdayValue,
+} from '@/domains/monthly_context'
+import { MonthsSchema, WorkdayValueSchema } from '@/domains/monthly_context'
 import type { User } from '@/domains/user'
 import type dayjs from '@/logic/dayjs'
 import { condition, every } from '@/logic/queryBuilder/conditionTree'
@@ -21,7 +18,7 @@ export const FinancialMonthRecord = z.object({
   id: z.string(),
   user_id: z.string(),
   financial_year: FinancialYearValueSchema,
-  month: FinancialMonthValueSchema,
+  month: MonthsSchema,
   started_at: z.number(),
   ended_at: z.number(),
   workday: WorkdayValueSchema,
@@ -29,13 +26,13 @@ export const FinancialMonthRecord = z.object({
 })
 export type FinancialMonthRecord = z.infer<typeof FinancialMonthRecord>
 
-export const getFinancialMonthContext =
+export const getMonthlyContext =
   (
     db: D1Database,
   ): ((props: {
     userId: string
     info: FinancialMonthInfo
-  }) => Promise<FinancialMonthContext | undefined>) =>
+  }) => Promise<MonthlyContext | undefined>) =>
   async ({ userId, info: { financialYear, month } }) => {
     const stmt = d1(db)
       .select(FinancialMonthRecord, 'financial_month_contexts')
@@ -59,7 +56,7 @@ export const findFinancialMonthCotextsByDate =
   ): ((props: {
     userId: string
     date: dayjs.Dayjs
-  }) => Promise<FinancialMonthContext | undefined>) =>
+  }) => Promise<MonthlyContext | undefined>) =>
   async ({ userId, date }) => {
     const timestamp = date.valueOf()
 
@@ -79,14 +76,14 @@ export const findFinancialMonthCotextsByDate =
     return item
   }
 
-export const updateFinancialMonthContext =
+export const updateMonthlyContext =
   (
     db: D1Database,
   ): ((props: {
-    id: FinancialMonthContext['id']
+    id: MonthlyContext['id']
     userId: User['id']
     workday: WorkdayValue
-  }) => Promise<FinancialMonthContext | undefined>) =>
+  }) => Promise<MonthlyContext | undefined>) =>
   async ({ id, userId, workday }) => {
     const updateQuery = d1(db)
       .update(FinancialMonthRecord, 'financial_month_contexts')

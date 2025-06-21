@@ -2,8 +2,8 @@ import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
-import { FinancialMonthValueSchema } from '@/domains/financial_month_context'
 import { FinancialYearValueSchema } from '@/domains/financial_year'
+import { MonthsSchema } from '@/domains/monthly_context'
 import dayjs from '@/logic/dayjs'
 
 import { userAuthMiddleware } from '../authorize/middleware'
@@ -73,7 +73,7 @@ const app = new Hono<{ Bindings: Env }>()
       const parseResult = z
         .object({
           financialYear: FinancialYearValueSchema,
-          month: FinancialMonthValueSchema,
+          month: MonthsSchema,
         })
         .safeParse(c.req.valid('param'))
       if (!parseResult.success) {

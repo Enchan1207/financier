@@ -1,24 +1,18 @@
-import { Result } from 'neverthrow'
+import type { Result } from 'neverthrow'
 import { ulid } from 'ulid'
 
 import dayjs from '@/logic/dayjs'
 import { ValidationError } from '@/logic/errors'
 import { parseSchema } from '@/logic/zod'
 
-import type { WorkdayValue } from '../financial_month_context'
-import { WorkdayValueSchema } from '../financial_month_context'
-import type { FinancialMonthContext, FinancialMonthInfo } from '.'
-import { FinancialMonthInfoSchema } from '.'
+import type { FinancialMonthInfo, MonthlyContext, WorkdayValue } from '.'
+import {
+  FinancialMonthInfoSchema,
+  MonthlyContextSchema,
+  WorkdayValueSchema,
+} from '.'
 
 const financialTimezone = 'Asia/Tokyo'
-
-export const createFinancialMonthInfo = (input: {
-  financialYear: number
-  month: number
-}): Result<FinancialMonthInfo, ValidationError> =>
-  parseSchema(FinancialMonthInfoSchema, input).mapErr(
-    (error) => new ValidationError(error.message),
-  )
 
 export const createWorkday = (
   input: number,
@@ -27,26 +21,25 @@ export const createWorkday = (
     (error) => new ValidationError(error.message),
   )
 
-export const createFinancialMonthContext = (props: {
+export const createFinancialMonthInfo = (props: {
+  financialYear: number
+  month: number
+}): Result<FinancialMonthInfo, ValidationError> =>
+  parseSchema(FinancialMonthInfoSchema, props).mapErr(
+    (error) => new ValidationError(error.message),
+  )
+
+export const createMonthlyContext = (props: {
   userId: string
   financialYear: number
   month: number
   workday: number
   standardIncomeTableId: string
-}): Result<FinancialMonthContext, ValidationError> => {
-  const { userId, month, financialYear, workday, standardIncomeTableId } = props
-
-  return Result.combine([
-    createFinancialMonthInfo({ financialYear, month }),
-    createWorkday(workday),
-  ]).map(([info, workday]) => ({
+}): Result<MonthlyContext, ValidationError> =>
+  parseSchema(MonthlyContextSchema, {
+    ...props,
     id: ulid(),
-    userId,
-    info,
-    standardIncomeTableId,
-    workday,
-  }))
-}
+  }).mapErr((error) => new ValidationError(error.message))
 
 /** 会計月度コンテキストが開始・終了する日時を取得する */
 export const getPeriodByFinancialMonth = (

@@ -1,13 +1,13 @@
 import type { Result, ResultAsync } from 'neverthrow'
 import { err, ok } from 'neverthrow'
 
-import { getFinancialMonthFromDate } from '@/domains/financial_month_context/logic'
 import type {
   FinancialYear,
   FinancialYearValue,
 } from '@/domains/financial_year'
 import { FinancialYearValueSchema } from '@/domains/financial_year'
 import { createFinancialYear } from '@/domains/financial_year/logic'
+import { getFinancialMonthFromDate } from '@/domains/monthly_context/logic'
 import type { User } from '@/domains/user'
 import dayjs from '@/logic/dayjs'
 import { ValidationError } from '@/logic/errors'
