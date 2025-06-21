@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { condition, every, some } from '../../conditionTree'
 import { buildSelectionStatement } from './select'
 
-describe('buildD1Statement', () => {
+describe('buildSelectionStatement', () => {
   const dummySchema = z.object({
     id: z.number(),
     name: z.string(),

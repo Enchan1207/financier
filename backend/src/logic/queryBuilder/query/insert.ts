@@ -1,9 +1,11 @@
+import type { z } from 'zod'
+
 import type { Buildable, Model } from '.'
 
 export type InsertionQueryState<M extends Model> = {
   model: M
   tableName: string
-  values?: M
+  values?: z.infer<M>
 }
 
 export interface InsertionQuery<M extends Model> {
