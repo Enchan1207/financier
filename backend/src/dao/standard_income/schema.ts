@@ -5,7 +5,7 @@ import type {
   StandardIncomeTable,
 } from '@/domains/standard_income'
 
-import { UlidSchema } from '../schema'
+import { MoneySchema, UlidSchema } from '../schema'
 
 export const StandardIncomeTableRecord = z.object({
   id: UlidSchema,
@@ -19,8 +19,8 @@ export type StandardIncomeTableRecord = z.infer<
 
 export const StandardIncomeGradeRecord = z.object({
   income_table_id: UlidSchema,
-  threshold: z.number().int().min(0),
-  standard_income: z.number().int().min(0),
+  threshold: MoneySchema,
+  standard_income: MoneySchema,
 })
 
 export type StandardIncomeGradeRecord = z.infer<

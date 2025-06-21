@@ -2,14 +2,14 @@ import { z } from 'zod'
 
 import type { Actual } from '@/domains/actual'
 
-import { UlidSchema } from '../schema'
+import { MoneySchema, UlidSchema } from '../schema'
 
 export const ActualRecordSchema = z.object({
   id: UlidSchema,
   user_id: UlidSchema,
   definition_id: UlidSchema,
   financial_month_id: UlidSchema,
-  value: z.number().int().min(0),
+  value: MoneySchema,
 })
 export type ActualRecord = z.infer<typeof ActualRecordSchema>
 

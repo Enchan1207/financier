@@ -6,13 +6,13 @@ import {
   IncomeDefinitionKind,
 } from '@/domains/definition'
 
-import { UlidSchema } from '../schema'
+import { MoneySchema, UlidSchema } from '../schema'
 
 const BaseSchema = z.object({
   id: UlidSchema,
   user_id: UlidSchema,
   name: z.string().min(1),
-  value: z.number().int().min(0),
+  value: MoneySchema,
   enabled_at: z.number(),
   disabled_at: z.number(),
   updated_at: z.number(),
