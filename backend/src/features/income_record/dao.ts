@@ -155,20 +155,19 @@ export const resetIncomeRecordValue =
     financialMonthId: string
     definitionId: string
   }) => Promise<void>) =>
-  async (props) => {
-    const query = `
-  DELETE from income_records
-  WHERE 
-    user_id = ?1
-    AND financial_month_id = ?2
-    AND definition_id = ?3
-  `
-
-    await db
-      .prepare(query)
-      .bind(props.userId, props.financialMonthId, props.definitionId)
+  (props) =>
+    d1(db)
+      .delete(IncomeRecordRecordSchema, 'income_records')
+      .where(
+        every(
+          condition('user_id', '==', props.userId),
+          condition('financial_month_id', '==', props.financialMonthId),
+          condition('definition_id', '==', props.definitionId),
+        ),
+      )
+      .build()
       .run()
-  }
+      .then()
 
 export const listIncomeRecordItems =
   (

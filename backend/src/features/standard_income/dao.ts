@@ -151,9 +151,10 @@ export const updateStandardIncomeTableGrades =
       gradeBase.values(record).build(),
     )
 
-    const gradeCleanupStmt =
-      'DELETE from standard_income_grades WHERE income_table_id=?'
-    const gradeCleanupQuery = db.prepare(gradeCleanupStmt).bind(props.id)
+    const gradeCleanupQuery = d1(db)
+      .delete(StandardIncomeGradeRecord, 'standard_income_grades')
+      .where(condition('income_table_id', '==', props.id))
+      .build()
 
     const tableFetchQuery = d1(db)
       .select(StandardIncomeTableRecord, 'standard_income_tables')
