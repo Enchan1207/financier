@@ -143,12 +143,12 @@ export const updateStandardIncomeTableGrades =
       }),
     )
 
-    const gradeInsertStmt =
-      'INSERT INTO standard_income_grades VALUES (?1,?2,?3)'
+    const gradeBase = d1(db).insert(
+      StandardIncomeGradeRecord,
+      'standard_income_grades',
+    )
     const gradeInsertQueries = gradeRecords.map((record) =>
-      db
-        .prepare(gradeInsertStmt)
-        .bind(record.income_table_id, record.threshold, record.standard_income),
+      gradeBase.values(record).build(),
     )
 
     const gradeCleanupStmt =
