@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
-import { condition, every, some } from '../conditionTree'
-import { buildD1Statement } from './statementBuilder'
+import { condition, every, some } from '../../conditionTree'
+import { buildSelectionStatement } from './select'
 
 describe('buildD1Statement', () => {
   const dummySchema = z.object({
@@ -10,7 +10,7 @@ describe('buildD1Statement', () => {
   })
 
   test('ステートがない場合、ベースクエリのみが生成されること', () => {
-    const result = buildD1Statement({
+    const result = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
     })
@@ -20,7 +20,7 @@ describe('buildD1Statement', () => {
   })
 
   test('範囲ステートのうちlimitがある場合、必要なクエリとパラメータが生成されること', () => {
-    const result = buildD1Statement({
+    const result = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       range: { limit: 10 },
@@ -31,7 +31,7 @@ describe('buildD1Statement', () => {
   })
 
   test('範囲ステートのうちlimit, offsetがある場合、必要なクエリとパラメータが生成されること', () => {
-    const result = buildD1Statement({
+    const result = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       range: {
@@ -45,7 +45,7 @@ describe('buildD1Statement', () => {
   })
 
   test('順序ステートがある場合、必要なクエリとパラメータが生成されること', () => {
-    const result = buildD1Statement({
+    const result = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       orders: [
@@ -61,7 +61,7 @@ describe('buildD1Statement', () => {
   })
 
   test('複数の順序ステート', () => {
-    const result = buildD1Statement({
+    const result = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       orders: [
@@ -83,7 +83,7 @@ describe('buildD1Statement', () => {
   })
 
   test('順序ステートで方向を指定しなかった場合、ASCになること', () => {
-    const result = buildD1Statement({
+    const result = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       orders: [{ key: 'name' }],
@@ -94,7 +94,7 @@ describe('buildD1Statement', () => {
   })
 
   test('単一条件ステートがある場合', () => {
-    const result = buildD1Statement({
+    const result = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       condition: condition('id', '==', 2),
@@ -105,7 +105,7 @@ describe('buildD1Statement', () => {
   })
 
   test('複合条件ステートがある場合', () => {
-    const result = buildD1Statement({
+    const result = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       condition: some(
@@ -121,7 +121,7 @@ describe('buildD1Statement', () => {
   })
 
   test('全部盛り', () => {
-    const result = buildD1Statement({
+    const result = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       range: {

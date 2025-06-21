@@ -2,23 +2,27 @@ import type { SelectionQueryState } from '@/logic/queryBuilder/query/select'
 import { createSelectionQueryBuilder } from '@/logic/queryBuilder/query/select'
 
 import type { Operation } from '..'
+import type { ConditionLeaf } from '../conditionTree'
 import type { Model } from '../query'
-import { buildD1Statement } from './statementBuilder'
+import type { InsertionQueryState } from '../query/insert'
+import { createInsertionQueryBuilder } from '../query/insert'
+import { buildInsertionStatement } from './statementBuilder/insert'
+import { buildSelectionStatement } from './statementBuilder/select'
 
-const buildStatementBuilderD1 = (database: D1Database) => {
-  const _builder = <M extends Model>(
-    state: SelectionQueryState<M>,
-  ): D1PreparedStatement => {
-    const { query, params } = buildD1Statement(state)
-    return database.prepare(query).bind(...params)
-  }
-
-  return _builder
-}
+export type CommandParameters<M extends Model> =
+  | ConditionLeaf<M, keyof M['shape']>['value'][]
+  | number
+  | string
 
 export const d1 = (database: D1Database): Operation<D1PreparedStatement> => ({
   select(model, tableName) {
-    const builder = buildStatementBuilderD1(database)
+    const builder = <M extends Model>(
+      state: SelectionQueryState<M>,
+    ): D1PreparedStatement => {
+      const { query, params } = buildSelectionStatement(state)
+      return database.prepare(query).bind(...params)
+    }
+
     return createSelectionQueryBuilder(builder)({
       model,
       tableName,
@@ -26,6 +30,16 @@ export const d1 = (database: D1Database): Operation<D1PreparedStatement> => ({
   },
 
   insert(model, tableName) {
-    throw new Error('not implemented')
+    const builder = <M extends Model>(
+      state: InsertionQueryState<M>,
+    ): D1PreparedStatement => {
+      const { query, params } = buildInsertionStatement(state)
+      return database.prepare(query).bind(...params)
+    }
+
+    return createInsertionQueryBuilder(builder)({
+      model,
+      tableName,
+    })
   },
 })

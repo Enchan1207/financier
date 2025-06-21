@@ -1,18 +1,11 @@
 import { ok } from 'neverthrow'
 
-import type {
-  ConditionLeaf,
-  ConditionNode,
-} from '@/logic/queryBuilder/conditionTree'
+import type { ConditionNode } from '@/logic/queryBuilder/conditionTree'
 import { isLeaf } from '@/logic/queryBuilder/conditionTree'
 import type { SelectionQueryState } from '@/logic/queryBuilder/query/select'
 
-import type { Model } from '../query'
-
-type CommandParameters<M extends Model> =
-  | ConditionLeaf<M, keyof M['shape']>['value'][]
-  | number
-  | string
+import type { Model } from '../../query'
+import type { CommandParameters } from '..'
 
 type Command<M extends Model> = {
   input: SelectionQueryState<M>
@@ -24,7 +17,7 @@ type Command<M extends Model> = {
 }
 
 /** クエリの状態からD1用のSQLを生成する */
-export const buildD1Statement = <M extends Model>(
+export const buildSelectionStatement = <M extends Model>(
   state: SelectionQueryState<M>,
 ): {
   query: string
