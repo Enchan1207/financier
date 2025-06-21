@@ -6,7 +6,8 @@ import { d1 } from '@/logic/queryBuilder/d1'
 import type { UserRecord } from './schema'
 import { makeUserEntity, makeUserRecord, UserRecordSchema } from './schema'
 
-export const getUserById =
+/** idでユーザを取得する */
+const getUserById =
   (db: D1Database) =>
   async (id: string): Promise<User | undefined> => {
     const stmt = d1(db)
@@ -19,7 +20,8 @@ export const getUserById =
       .then((item) => (item === null ? undefined : makeUserEntity(item)))
   }
 
-export const getUserByAuth0Id =
+/** Auth0のidでユーザを検索する */
+const findUserByAuth0Id =
   (db: D1Database) =>
   async (id: string): Promise<User | undefined> => {
     const stmt = d1(db)
@@ -32,7 +34,8 @@ export const getUserByAuth0Id =
       .then((item) => (item === null ? undefined : makeUserEntity(item)))
   }
 
-export const saveUser =
+/** ユーザ情報を挿入または上書きする */
+const saveUser =
   (db: D1Database) =>
   async (newUser: User): Promise<User> => {
     const stmt = `INSERT INTO users 
@@ -58,7 +61,8 @@ export const saveUser =
     return newUser
   }
 
-export const fetchUserInfo =
+/** ユーザ情報取得関数を構成する */
+const fetchUserInfo =
   (authDomain: string) =>
   async (token: string): Promise<Auth0UserInfo | undefined> => {
     const response = await fetch(`https://${authDomain}/userinfo`, {
@@ -68,3 +72,5 @@ export const fetchUserInfo =
     const { success, data } = Auth0UserInfoSchema.safeParse(response)
     return success ? data : undefined
   }
+
+export { fetchUserInfo, findUserByAuth0Id, getUserById, saveUser }

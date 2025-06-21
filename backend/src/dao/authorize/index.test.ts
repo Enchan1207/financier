@@ -3,7 +3,7 @@ import { ulid } from 'ulid'
 
 import type { User } from '@/domains/user'
 
-import { getUserByAuth0Id, getUserById, saveUser } from '.'
+import { findUserByAuth0Id, getUserById, saveUser } from '.'
 
 describe('単一項目のCRUD', () => {
   test('項目を作成できること', async () => {
@@ -39,7 +39,7 @@ describe('単一項目のCRUD', () => {
     }
     const { auth0UserId } = await saveUser(env.D1)(user)
 
-    const stored = await getUserByAuth0Id(env.D1)(auth0UserId)
+    const stored = await findUserByAuth0Id(env.D1)(auth0UserId)
     expect(stored).toBeDefined()
   })
 
