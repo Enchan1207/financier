@@ -1,4 +1,5 @@
 import type { Buildable, Model } from './query'
+import type { DeletionQuery } from './query/delete'
 import type { InsertionQuery } from './query/insert'
 import type { SelectionQuery } from './query/select'
 
@@ -15,4 +16,7 @@ export interface Operation<P> {
 
   /** アイテムを挿入する */
   insert<M extends Model>(model: M, tableName: string): InsertionQuery<M, P>
+
+  /** アイテムを削除する */
+  delete<M extends Model>(model: M, tableName: string): DeletionQuery<M, P>
 }

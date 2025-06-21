@@ -10,28 +10,32 @@ describe('buildSelectionStatement', () => {
   })
 
   test('ステートがない場合、ベースクエリのみが生成されること', () => {
-    const result = buildSelectionStatement({
+    const actual = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
     })
 
-    expect(result.query).toBe('SELECT id,name FROM users')
-    expect(result.params).toStrictEqual([])
+    expect(actual).toStrictEqual({
+      query: 'SELECT id,name FROM users',
+      params: [],
+    })
   })
 
   test('範囲ステートのうちlimitがある場合、必要なクエリとパラメータが生成されること', () => {
-    const result = buildSelectionStatement({
+    const actual = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       range: { limit: 10 },
     })
 
-    expect(result.query).toBe('SELECT id,name FROM users LIMIT ?1')
-    expect(result.params).toStrictEqual([10])
+    expect(actual).toStrictEqual({
+      query: 'SELECT id,name FROM users LIMIT ?1',
+      params: [10],
+    })
   })
 
   test('範囲ステートのうちlimit, offsetがある場合、必要なクエリとパラメータが生成されること', () => {
-    const result = buildSelectionStatement({
+    const actual = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       range: {
@@ -40,12 +44,14 @@ describe('buildSelectionStatement', () => {
       },
     })
 
-    expect(result.query).toBe('SELECT id,name FROM users LIMIT ?1 OFFSET ?2')
-    expect(result.params).toStrictEqual([10, 2])
+    expect(actual).toStrictEqual({
+      query: 'SELECT id,name FROM users LIMIT ?1 OFFSET ?2',
+      params: [10, 2],
+    })
   })
 
   test('順序ステートがある場合、必要なクエリとパラメータが生成されること', () => {
-    const result = buildSelectionStatement({
+    const actual = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       orders: [
@@ -56,12 +62,14 @@ describe('buildSelectionStatement', () => {
       ],
     })
 
-    expect(result.query).toBe('SELECT id,name FROM users ORDER BY id DESC')
-    expect(result.params).toStrictEqual([])
+    expect(actual).toStrictEqual({
+      query: 'SELECT id,name FROM users ORDER BY id DESC',
+      params: [],
+    })
   })
 
   test('複数の順序ステート', () => {
-    const result = buildSelectionStatement({
+    const actual = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       orders: [
@@ -76,36 +84,40 @@ describe('buildSelectionStatement', () => {
       ],
     })
 
-    expect(result.query).toBe(
-      'SELECT id,name FROM users ORDER BY id DESC, name ASC',
-    )
-    expect(result.params).toStrictEqual([])
+    expect(actual).toStrictEqual({
+      query: 'SELECT id,name FROM users ORDER BY id DESC, name ASC',
+      params: [],
+    })
   })
 
   test('順序ステートで方向を指定しなかった場合、ASCになること', () => {
-    const result = buildSelectionStatement({
+    const actual = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       orders: [{ key: 'name' }],
     })
 
-    expect(result.query).toBe('SELECT id,name FROM users ORDER BY name ASC')
-    expect(result.params).toStrictEqual([])
+    expect(actual).toStrictEqual({
+      query: 'SELECT id,name FROM users ORDER BY name ASC',
+      params: [],
+    })
   })
 
   test('単一条件ステートがある場合', () => {
-    const result = buildSelectionStatement({
+    const actual = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       condition: condition('id', '==', 2),
     })
 
-    expect(result.query).toBe('SELECT id,name FROM users WHERE ( id == ?1 )')
-    expect(result.params).toStrictEqual([2])
+    expect(actual).toStrictEqual({
+      query: 'SELECT id,name FROM users WHERE ( id == ?1 )',
+      params: [2],
+    })
   })
 
   test('複合条件ステートがある場合', () => {
-    const result = buildSelectionStatement({
+    const actual = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       condition: some(
@@ -114,14 +126,15 @@ describe('buildSelectionStatement', () => {
       ),
     })
 
-    expect(result.query).toBe(
-      'SELECT id,name FROM users WHERE ( ( id == ?1 ) OR ( ( id > ?2 ) AND ( name != ?3 ) ) )',
-    )
-    expect(result.params).toStrictEqual([2, 3, 'admin'])
+    expect(actual).toStrictEqual({
+      query:
+        'SELECT id,name FROM users WHERE ( ( id == ?1 ) OR ( ( id > ?2 ) AND ( name != ?3 ) ) )',
+      params: [2, 3, 'admin'],
+    })
   })
 
   test('全部盛り', () => {
-    const result = buildSelectionStatement({
+    const actual = buildSelectionStatement({
       model: dummySchema,
       tableName: 'users',
       range: {
@@ -140,9 +153,10 @@ describe('buildSelectionStatement', () => {
       ),
     })
 
-    expect(result.query).toBe(
-      'SELECT id,name FROM users WHERE ( ( id == ?1 ) OR ( ( id > ?2 ) AND ( name != ?3 ) ) ) ORDER BY name DESC LIMIT ?4 OFFSET ?5',
-    )
-    expect(result.params).toStrictEqual([2, 3, 'admin', 10, 2])
+    expect(actual).toStrictEqual({
+      query:
+        'SELECT id,name FROM users WHERE ( ( id == ?1 ) OR ( ( id > ?2 ) AND ( name != ?3 ) ) ) ORDER BY name DESC LIMIT ?4 OFFSET ?5',
+      params: [2, 3, 'admin', 10, 2],
+    })
   })
 })

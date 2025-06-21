@@ -4,8 +4,11 @@ import { createSelectionQueryBuilder } from '@/logic/queryBuilder/query/select'
 import type { Operation } from '..'
 import type { ConditionLeaf } from '../conditionTree'
 import type { Model } from '../query'
+import type { DeletionQueryState } from '../query/delete'
+import { createDeletionQueryBuilder } from '../query/delete'
 import type { InsertionQueryState } from '../query/insert'
 import { createInsertionQueryBuilder } from '../query/insert'
+import { buildDeletionStatement } from './statementBuilder/delete'
 import { buildInsertionStatement } from './statementBuilder/insert'
 import { buildSelectionStatement } from './statementBuilder/select'
 
@@ -38,6 +41,21 @@ export const d1 = (database: D1Database): Operation<D1PreparedStatement> => ({
     }
 
     return createInsertionQueryBuilder(builder)({
+      state: 'ready',
+      model,
+      tableName,
+    })
+  },
+
+  delete(model, tableName) {
+    const builder = <M extends Model>(
+      state: DeletionQueryState<M>,
+    ): D1PreparedStatement => {
+      const { query, params } = buildDeletionStatement(state)
+      return database.prepare(query).bind(...params)
+    }
+
+    return createDeletionQueryBuilder(builder)({
       state: 'ready',
       model,
       tableName,

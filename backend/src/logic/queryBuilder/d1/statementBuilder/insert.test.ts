@@ -19,7 +19,7 @@ describe('buildInsertionStatement', () => {
   })
 
   test('値が設定されている場合、必要なクエリとパラメータが生成されること', () => {
-    const result = buildInsertionStatement({
+    const actual = buildInsertionStatement({
       state: 'prepared',
       model: dummySchema,
       tableName: 'users',
@@ -29,7 +29,7 @@ describe('buildInsertionStatement', () => {
       },
     })
 
-    expect(result).toStrictEqual({
+    expect(actual).toStrictEqual({
       query: 'INSERT INTO users (id,name) VALUES (?, ?)',
       params: [123, 'test-name'],
     })

@@ -24,12 +24,12 @@ interface ValueSpecifiedInsertionQuery<T> {
  * @param statementBuilder ステートメントビルダ
  * @returns 構成されたクエリビルダ
  */
-export const createInsertionQueryBuilder = <N extends Model, P>(
-  statementBuilder: (state: PreparedQueryState<N>) => P,
+export const createInsertionQueryBuilder = <M extends Model, P>(
+  statementBuilder: (state: PreparedQueryState<M>) => P,
 ) => {
-  const uninitialized = <M extends N>(
-    state: QueryStateInit<M>,
-  ): InsertionQuery<M, P> => ({
+  const uninitialized = <M2 extends M>(
+    state: QueryStateInit<M2>,
+  ): InsertionQuery<M2, P> => ({
     values: (values) =>
       valueSpecified({
         ...state,
@@ -38,7 +38,7 @@ export const createInsertionQueryBuilder = <N extends Model, P>(
       }),
   })
 
-  const valueSpecified = <M extends N>(state: PreparedQueryState<M>) => ({
+  const valueSpecified = <M2 extends M>(state: PreparedQueryState<M2>) => ({
     build: () => statementBuilder(state),
   })
 
