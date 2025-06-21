@@ -1,6 +1,6 @@
 import type { z } from 'zod'
 
-import type { ConditionNode } from './conditionTree'
+import type { ConditionNode } from '../conditionTree'
 
 type Order = 'asc' | 'desc'
 
