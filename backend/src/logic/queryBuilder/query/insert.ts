@@ -7,9 +7,7 @@ type PreparedQueryState<M extends Model> = QueryStateBase<M> & {
   values: z.infer<M>
 }
 
-export type InsertionQueryState<M extends Model> =
-  | PreparedQueryState<M>
-  | QueryStateInit<M>
+export type InsertionQueryState<M extends Model> = PreparedQueryState<M>
 
 export interface InsertionQuery<M extends Model, P> {
   values(values: z.infer<M>): ValueSpecifiedInsertionQuery<P>

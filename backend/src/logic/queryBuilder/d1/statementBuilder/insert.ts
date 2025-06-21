@@ -8,10 +8,6 @@ export const buildInsertionStatement = <M extends Model>(
   query: string
   params: CommandParameters<M>[]
 } => {
-  if (state.state !== 'prepared') {
-    throw new Error('Unexpected state: values not defined')
-  }
-
   const keys = Object.keys(state.values)
   const placeholders = Array.from({ length: keys.length })
     .map(() => '?')
