@@ -64,18 +64,17 @@ export const insertStandardIncomeTable =
   async (entity) => {
     const [tableRecord, gradeRecords] = makeRecord(entity)
 
-    const tableInsertStmt =
-      'INSERT INTO standard_income_tables VALUES (?1,?2,?3)'
-    const tableInsertQuery = db
-      .prepare(tableInsertStmt)
-      .bind(tableRecord.id, tableRecord.user_id, tableRecord.name)
+    const tableInsertQuery = d1(db)
+      .insert(StandardIncomeTableRecord, 'standard_income_tables')
+      .values(tableRecord)
+      .build()
 
-    const gradeInsertStmt =
-      'INSERT INTO standard_income_grades VALUES (?1,?2,?3)'
+    const gradeBase = d1(db).insert(
+      StandardIncomeGradeRecord,
+      'standard_income_grades',
+    )
     const gradeInsertQueries = gradeRecords.map((grade) =>
-      db
-        .prepare(gradeInsertStmt)
-        .bind(tableRecord.id, grade.threshold, grade.standard_income),
+      gradeBase.values(grade).build(),
     )
 
     const queries = [tableInsertQuery, ...gradeInsertQueries]
@@ -94,11 +93,18 @@ export const updateStandardIncomeTableName =
     name: StandardIncomeTable['name']
   }) => Promise<StandardIncomeTableSummary | undefined>) =>
   async (props) => {
-    const updateQueryBase =
-      'UPDATE standard_income_tables SET name=? WHERE id=? AND user_id=?'
-    const updateQuery = db
-      .prepare(updateQueryBase)
-      .bind(props.name, props.id, props.userId)
+    const updateQuery = d1(db)
+      .update(StandardIncomeTableRecord, 'standard_income_tables')
+      .where(
+        every(
+          condition('id', '==', props.id),
+          condition('user_id', '==', props.userId),
+        ),
+      )
+      .set({
+        name: props.name,
+      })
+      .build()
 
     const getQuery = d1(db)
       .select(StandardIncomeTableRecord, 'standard_income_tables')
@@ -144,17 +150,18 @@ export const updateStandardIncomeTableGrades =
       }),
     )
 
-    const gradeInsertStmt =
-      'INSERT INTO standard_income_grades VALUES (?1,?2,?3)'
+    const gradeBase = d1(db).insert(
+      StandardIncomeGradeRecord,
+      'standard_income_grades',
+    )
     const gradeInsertQueries = gradeRecords.map((record) =>
-      db
-        .prepare(gradeInsertStmt)
-        .bind(record.income_table_id, record.threshold, record.standard_income),
+      gradeBase.values(record).build(),
     )
 
-    const gradeCleanupStmt =
-      'DELETE from standard_income_grades WHERE income_table_id=?'
-    const gradeCleanupQuery = db.prepare(gradeCleanupStmt).bind(props.id)
+    const gradeCleanupQuery = d1(db)
+      .delete(StandardIncomeGradeRecord, 'standard_income_grades')
+      .where(condition('income_table_id', '==', props.id))
+      .build()
 
     const tableFetchQuery = d1(db)
       .select(StandardIncomeTableRecord, 'standard_income_tables')

@@ -70,22 +70,10 @@ export const insertIncomeDefinition =
   async (entity) => {
     const record = makeRecord(entity)
 
-    const base =
-      'INSERT INTO income_definitions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-
-    await db
-      .prepare(base)
-      .bind(
-        record.id,
-        record.user_id,
-        record.name,
-        record.kind,
-        record.value,
-        record.enabled_at,
-        record.disabled_at,
-        record.updated_at,
-        record.is_taxable,
-      )
+    await d1(db)
+      .insert(IncomeDefinitionRecord, 'income_definitions')
+      .values(record)
+      .build()
       .run()
 
     return entity
@@ -115,35 +103,25 @@ const buildIncomeDefinitionUpdateQuery =
     const fromDate = from ? getPeriodByFinancialMonth(from) : undefined
     const toDate = to ? getPeriodByFinancialMonth(to) : undefined
 
-    const updatePart = [
-      name ? 'name=?' : undefined,
-      kind ? 'kind=?' : undefined,
-      value ? 'value=?' : undefined,
-      isTaxable !== undefined ? 'is_taxable=?' : undefined,
-      fromDate ? 'enabled_at=?' : undefined,
-      toDate ? 'disabled_at=?' : undefined,
-      'updated_at=?',
-    ]
-      .filter((fragment) => fragment !== undefined)
-      .join(', ')
+    const query = d1(db)
+      .update(IncomeDefinitionRecord, 'income_definitions')
+      .where(
+        every(
+          every(condition('id', '==', id), condition('user_id', '==', userId)),
+        ),
+      )
+      .set({
+        name,
+        kind,
+        value,
+        is_taxable: isTaxable !== undefined ? (isTaxable ? 1 : 0) : undefined,
+        enabled_at: fromDate?.start.valueOf(),
+        disabled_at: toDate?.end.valueOf(),
+        updated_at: dayjs().valueOf(),
+      })
+      .build()
 
-    const stmt = `UPDATE income_definitions SET ${updatePart} WHERE id=? AND user_id=?`
-
-    const params = [
-      name,
-      kind,
-      value,
-      isTaxable,
-      fromDate?.start.valueOf(),
-      toDate?.end.valueOf(),
-      dayjs().valueOf(),
-      id,
-      userId,
-    ].filter((fragment) => fragment !== undefined)
-
-    const prepared = db.prepare(stmt).bind(...params)
-
-    return prepared
+    return query
   }
 
 /** 更新後の範囲から外れる実績をクリーンアップする */

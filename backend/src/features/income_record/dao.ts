@@ -89,18 +89,10 @@ export const insertIncomeRecord =
   async (entity) => {
     const record = makeRecord(entity)
 
-    const insertStmt = 'INSERT INTO income_records VALUES (?, ?, ?, ?, ?, ?)'
-
-    await db
-      .prepare(insertStmt)
-      .bind(
-        record.user_id,
-        record.financial_month_id,
-        record.definition_id,
-        record.value,
-        record.updated_at,
-        record.updated_by,
-      )
+    await d1(db)
+      .insert(IncomeRecordRecordSchema, 'income_records')
+      .values(record)
+      .build()
       .run()
 
     return entity
@@ -163,20 +155,19 @@ export const resetIncomeRecordValue =
     financialMonthId: string
     definitionId: string
   }) => Promise<void>) =>
-  async (props) => {
-    const query = `
-  DELETE from income_records
-  WHERE 
-    user_id = ?1
-    AND financial_month_id = ?2
-    AND definition_id = ?3
-  `
-
-    await db
-      .prepare(query)
-      .bind(props.userId, props.financialMonthId, props.definitionId)
+  (props) =>
+    d1(db)
+      .delete(IncomeRecordRecordSchema, 'income_records')
+      .where(
+        every(
+          condition('user_id', '==', props.userId),
+          condition('financial_month_id', '==', props.financialMonthId),
+          condition('definition_id', '==', props.definitionId),
+        ),
+      )
+      .build()
       .run()
-  }
+      .then()
 
 export const listIncomeRecordItems =
   (
