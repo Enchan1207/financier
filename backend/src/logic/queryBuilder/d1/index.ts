@@ -24,4 +24,8 @@ export const d1 = (database: D1Database): Operation<D1PreparedStatement> => ({
       tableName,
     })
   },
+
+  insert(model, tableName) {
+    throw new Error('not implemented')
+  },
 })

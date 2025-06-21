@@ -24,7 +24,7 @@ export interface SelectionQuery<M extends Model> {
 }
 
 /**
- * ビルダーを渡して選択クエリビルダを構成する
+ * ステートメントビルダを渡して選択クエリビルダを構成する
  * @param statementBuilder ステートメントビルダ
  * @returns 構成されたクエリビルダ
  */

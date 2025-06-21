@@ -1,4 +1,5 @@
 import type { Buildable, Model } from './query'
+import type { InsertionQuery } from './query/insert'
 import type { SelectionQuery } from './query/select'
 
 /**
@@ -11,4 +12,10 @@ export interface Operation<P> {
     model: M,
     tableName: string,
   ): Buildable<SelectionQuery<M>, P>
+
+  /** 値を渡してアイテムを挿入する */
+  insert<M extends Model>(
+    model: M,
+    tableName: string,
+  ): Buildable<InsertionQuery<M>, P>
 }
