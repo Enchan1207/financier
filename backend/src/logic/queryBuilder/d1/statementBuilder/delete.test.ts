@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { condition } from '../../conditionTree'
 import { buildDeletionStatement } from './delete'
 
-describe('buildInsertionStatement', () => {
+describe('buildDeletionStatement', () => {
   const dummySchema = z.object({
     id: z.number(),
     name: z.string(),

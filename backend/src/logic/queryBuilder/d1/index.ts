@@ -8,9 +8,12 @@ import type { DeletionQueryState } from '../query/delete'
 import { createDeletionQueryBuilder } from '../query/delete'
 import type { InsertionQueryState } from '../query/insert'
 import { createInsertionQueryBuilder } from '../query/insert'
+import type { UpdateQueryState } from '../query/update'
+import { createUpdateQueryBuilder } from '../query/update'
 import { buildDeletionStatement } from './statementBuilder/delete'
 import { buildInsertionStatement } from './statementBuilder/insert'
 import { buildSelectionStatement } from './statementBuilder/select'
+import { buildUpdateStatement } from './statementBuilder/update'
 
 export type CommandParameters<M extends Model> =
   | ConditionLeaf<M, keyof M['shape']>['value'][]
@@ -56,6 +59,21 @@ export const d1 = (database: D1Database): Operation<D1PreparedStatement> => ({
     }
 
     return createDeletionQueryBuilder(builder)({
+      state: 'ready',
+      model,
+      tableName,
+    })
+  },
+
+  update(model, tableName) {
+    const builder = <M extends Model>(
+      state: UpdateQueryState<M>,
+    ): D1PreparedStatement => {
+      const { query, params } = buildUpdateStatement(state)
+      return database.prepare(query).bind(...params)
+    }
+
+    return createUpdateQueryBuilder(builder)({
       state: 'ready',
       model,
       tableName,
