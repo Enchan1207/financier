@@ -9,7 +9,7 @@ import { makeUserEntity, makeUserRecord, UserRecordSchema } from './schema'
 /** idでユーザを取得する */
 const getUserById =
   (db: D1Database) =>
-  async (id: string): Promise<User | undefined> => {
+  async (id: User['id']): Promise<User | undefined> => {
     const stmt = d1(db)
       .select(UserRecordSchema, 'users')
       .where(condition('id', '==', id))

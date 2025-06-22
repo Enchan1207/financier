@@ -1,11 +1,12 @@
 import { z } from 'zod'
 
+import { EntityIdSchema } from '@/domains/schema'
 import type { User } from '@/domains/user'
 
 export const UserRecordSchema = z.object({
+  id: EntityIdSchema('user'),
   name: z.string(),
   auth0_user_id: z.string(),
-  id: z.string(),
   email: z.string(),
 })
 

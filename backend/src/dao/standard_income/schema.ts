@@ -1,15 +1,14 @@
 import { z } from 'zod'
 
+import { EntityIdSchema, MoneySchema } from '@/domains/schema'
 import type {
   StandardIncomeGrade,
   StandardIncomeTable,
 } from '@/domains/standard_income'
 
-import { MoneySchema, UlidSchema } from '../schema'
-
 export const StandardIncomeTableRecord = z.object({
-  id: UlidSchema,
-  user_id: UlidSchema,
+  id: EntityIdSchema('standard_income_table'),
+  user_id: EntityIdSchema('user'),
   name: z.string(),
 })
 
@@ -18,7 +17,7 @@ export type StandardIncomeTableRecord = z.infer<
 >
 
 export const StandardIncomeGradeRecord = z.object({
-  income_table_id: UlidSchema,
+  income_table_id: EntityIdSchema('standard_income_table'),
   threshold: MoneySchema,
   standard_income: MoneySchema,
 })

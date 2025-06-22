@@ -1,29 +1,27 @@
 import { env } from 'cloudflare:test'
-import { ulid } from 'ulid'
 
 import type { User } from '@/domains/user'
+import { createUser } from '@/domains/user/logic'
 
 import { findUserByAuth0Id, getUserById, saveUser } from '.'
 
 describe('単一項目のCRUD', () => {
   test('項目を作成できること', async () => {
-    const user: User = {
-      id: ulid(),
+    const user: User = createUser({
       name: 'test-user',
       auth0UserId: 'auth0|0123456789',
       email: 'test@example.com',
-    }
+    })._unsafeUnwrap()
     const inserted = await saveUser(env.D1)(user)
     expect(user).toStrictEqual(inserted)
   })
 
   test('IDを指定して項目を取得できること', async () => {
-    const user: User = {
-      id: ulid(),
+    const user: User = createUser({
       name: 'test-user',
       auth0UserId: 'auth0|0123456789',
       email: 'test@example.com',
-    }
+    })._unsafeUnwrap()
     const { id } = await saveUser(env.D1)(user)
 
     const stored = await getUserById(env.D1)(id)
@@ -31,12 +29,11 @@ describe('単一項目のCRUD', () => {
   })
 
   test('Auth0 IDを指定して項目を取得できること', async () => {
-    const user: User = {
-      id: ulid(),
+    const user: User = createUser({
       name: 'test-user',
       auth0UserId: 'auth0|0123456789',
       email: 'test@example.com',
-    }
+    })._unsafeUnwrap()
     const { auth0UserId } = await saveUser(env.D1)(user)
 
     const stored = await findUserByAuth0Id(env.D1)(auth0UserId)
@@ -44,12 +41,11 @@ describe('単一項目のCRUD', () => {
   })
 
   test('挿入した項目を更新できること', async () => {
-    const user: User = {
-      id: ulid(),
+    const user: User = createUser({
       name: 'test-user',
       auth0UserId: 'auth0|0123456789',
       email: 'test@example.com',
-    }
+    })._unsafeUnwrap()
     const stored = await saveUser(env.D1)(user)
 
     const input: User = {

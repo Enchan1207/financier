@@ -3,6 +3,7 @@
 import { env } from 'cloudflare:test'
 
 import { saveUser } from '@/dao/authorize'
+import type { EntityId } from '@/domains/schema'
 import {
   createStandardIncomeGrade,
   createStandardIncomeTable,
@@ -23,7 +24,7 @@ describe('基本的なCRUD', () => {
     name: 'testuser',
     email: 'test@example.com',
     auth0UserId: 'auth0_test_user',
-  })
+  })._unsafeUnwrap()
 
   const dummyEntity = createStandardIncomeTable({
     userId: dummyUser.id,
@@ -73,7 +74,7 @@ describe('基本的なCRUD', () => {
 
     test('他人の項目は取得できないこと', async () => {
       const actual = await getStandardIncomeTable(env.D1)({
-        userId: 'dummy_user_id',
+        userId: 'invalid_user_id' as EntityId<'user'>,
         id: dummyEntity.id,
       })
 
@@ -98,7 +99,7 @@ describe('基本的なCRUD', () => {
 
     test('他人の項目は取得できないこと', async () => {
       const actual = await listStandardIncomeTables(env.D1)({
-        userId: 'dummy_user_id',
+        userId: 'invalid_user_id' as EntityId<'user'>,
       })
 
       expect(actual).toStrictEqual([])

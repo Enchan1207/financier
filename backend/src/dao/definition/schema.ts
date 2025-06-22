@@ -5,17 +5,16 @@ import {
   DeductionDefinitionKind,
   IncomeDefinitionKind,
 } from '@/domains/definition'
-
-import { MoneySchema, UlidSchema } from '../schema'
+import { EntityIdSchema, MoneySchema, TimestampSchema } from '@/domains/schema'
 
 const BaseSchema = z.object({
-  id: UlidSchema,
-  user_id: UlidSchema,
+  id: EntityIdSchema('definition'),
+  user_id: EntityIdSchema('user'),
   name: z.string().min(1),
   value: MoneySchema,
-  enabled_at: z.number(),
-  disabled_at: z.number(),
-  updated_at: z.number(),
+  enabled_at: TimestampSchema,
+  disabled_at: TimestampSchema,
+  updated_at: TimestampSchema,
 })
 
 const IncomeSchema = BaseSchema.extend({

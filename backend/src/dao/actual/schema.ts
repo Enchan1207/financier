@@ -1,30 +1,39 @@
 import { z } from 'zod'
 
 import type { Actual } from '@/domains/actual'
+import type { MonthlyContext } from '@/domains/monthly_context'
+import { EntityIdSchema, MoneySchema } from '@/domains/schema'
 
-import { MoneySchema, UlidSchema } from '../schema'
+import type { MonthlyContextRecord } from '../monthly_context/schema'
 
 export const ActualRecordSchema = z.object({
-  id: UlidSchema,
-  user_id: UlidSchema,
-  definition_id: UlidSchema,
-  financial_month_id: UlidSchema,
+  id: EntityIdSchema('actual'),
+  user_id: EntityIdSchema('user'),
+  definition_id: EntityIdSchema('definition'),
+  monthly_context_id: EntityIdSchema('monthly_context'),
   value: MoneySchema,
 })
 export type ActualRecord = z.infer<typeof ActualRecordSchema>
 
-export const makeActualEntity = (record: ActualRecord): Actual => ({
-  id: record.id,
-  userId: record.user_id,
-  definitionId: record.definition_id,
-  financialMonthId: record.financial_month_id,
-  value: record.value,
+export const makeActualEntity = (
+  actual: ActualRecord,
+  context: MonthlyContextRecord,
+): Actual => ({
+  id: actual.id,
+  userId: actual.user_id,
+  definitionId: actual.definition_id,
+  financialYear: context.financial_year,
+  month: context.month,
+  value: actual.value,
 })
 
-export const makeActualRecord = (entity: Actual): ActualRecord => ({
-  id: entity.id,
-  user_id: entity.userId,
-  definition_id: entity.definitionId,
-  financial_month_id: entity.financialMonthId,
-  value: entity.value,
+export const makeActualRecord = (
+  actual: Actual,
+  context: MonthlyContext,
+): ActualRecord => ({
+  id: actual.id,
+  user_id: actual.userId,
+  definition_id: actual.definitionId,
+  monthly_context_id: context.id,
+  value: actual.value,
 })
