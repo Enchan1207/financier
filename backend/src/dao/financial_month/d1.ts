@@ -1,41 +1,15 @@
-import { z } from 'zod'
-
-import { FinancialYearValueSchema } from '@/domains/financial_year'
-import type {
-  FinancialMonthInfo,
-  MonthlyContext,
-  WorkdayValue,
-} from '@/domains/monthly_context'
-import { MonthsSchema, WorkdayValueSchema } from '@/domains/monthly_context'
-import type { User } from '@/domains/user'
-import type dayjs from '@/logic/dayjs'
 import { condition, every } from '@/logic/query_builder/condition_tree'
 import { d1 } from '@/logic/query_builder/d1'
 
-import { makeFinancialMonthEntity } from '../financial_year/dao'
-
-export const FinancialMonthRecord = z.object({
-  id: z.string(),
-  user_id: z.string(),
-  financial_year: FinancialYearValueSchema,
-  month: MonthsSchema,
-  started_at: z.number(),
-  ended_at: z.number(),
-  workday: WorkdayValueSchema,
-  standard_income_table_id: z.string(),
-})
-export type FinancialMonthRecord = z.infer<typeof FinancialMonthRecord>
+import type { FinancialMonthDao } from '.'
+import type { FinancialMonthRecord } from './schema'
+import { FinancialMonthRecordSchema } from './schema'
 
 export const getMonthlyContext =
-  (
-    db: D1Database,
-  ): ((props: {
-    userId: string
-    info: FinancialMonthInfo
-  }) => Promise<MonthlyContext | undefined>) =>
+  (db: D1Database): FinancialMonthDao['getMonthlyContext'] =>
   async ({ userId, info: { financialYear, month } }) => {
     const stmt = d1(db)
-      .select(FinancialMonthRecord, 'financial_month_contexts')
+      .select(FinancialMonthRecordSchema, 'financial_month_contexts')
       .where(
         every(
           condition('user_id', '==', userId),
@@ -51,17 +25,12 @@ export const getMonthlyContext =
   }
 
 export const findFinancialMonthCotextsByDate =
-  (
-    db: D1Database,
-  ): ((props: {
-    userId: string
-    date: dayjs.Dayjs
-  }) => Promise<MonthlyContext | undefined>) =>
+  (db: D1Database): FinancialMonthDao['findFinancialMonthCotextsByDate'] =>
   async ({ userId, date }) => {
-    const timestamp = date.valueOf()
+    const timestamp = date.toTimestamp()
 
     const stmt = d1(db)
-      .select(FinancialMonthRecord, 'financial_month_contexts')
+      .select(FinancialMonthRecordSchema, 'financial_month_contexts')
       .where(
         every(
           condition('user_id', '==', userId),
@@ -77,16 +46,10 @@ export const findFinancialMonthCotextsByDate =
   }
 
 export const updateMonthlyContext =
-  (
-    db: D1Database,
-  ): ((props: {
-    id: MonthlyContext['id']
-    userId: User['id']
-    workday: WorkdayValue
-  }) => Promise<MonthlyContext | undefined>) =>
+  (db: D1Database): FinancialMonthDao['updateMonthlyContext'] =>
   async ({ id, userId, workday }) => {
     const updateQuery = d1(db)
-      .update(FinancialMonthRecord, 'financial_month_contexts')
+      .update(FinancialMonthRecordSchema, 'financial_month_contexts')
       .where(
         every(condition('id', '==', id), condition('user_id', '==', userId)),
       )
@@ -96,7 +59,7 @@ export const updateMonthlyContext =
       .build()
 
     const getQuery = d1(db)
-      .select(FinancialMonthRecord, 'financial_month_contexts')
+      .select(FinancialMonthRecordSchema, 'financial_month_contexts')
       .where(condition('id', '==', id))
       .build()
 

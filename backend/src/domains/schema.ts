@@ -15,3 +15,5 @@ export const TimestampSchema = z
   .min(0)
   .max(253402268399999) // 9999-12-31T23:59:59.999Z
   .brand('timestamp')
+
+export type Timestamp = z.infer<typeof TimestampSchema>

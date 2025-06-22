@@ -8,6 +8,7 @@ import type {
 import { FinancialYearValueSchema } from '@/domains/financial_year'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import { getFinancialMonthFromDate } from '@/domains/monthly_context/logic'
+import type { EntityId } from '@/domains/schema'
 import type { User } from '@/domains/user'
 import dayjs from '@/logic/dayjs'
 import { ValidationError } from '@/logic/errors'
@@ -17,7 +18,7 @@ import { parseSchema } from '@/logic/zod'
 export interface PostFinancialYearCommand {
   input: {
     year: number
-    standardIncomeTableId: string
+    standardIncomeTableId: EntityId<'standard_income_table'>
   }
   state: {
     user: User
@@ -27,7 +28,7 @@ export interface PostFinancialYearCommand {
 interface ValidatedCommand {
   input: {
     year: FinancialYearValue
-    standardIncomeTableId: string
+    standardIncomeTableId: EntityId<'standard_income_table'>
   }
   state: {
     user: User
@@ -37,7 +38,7 @@ interface ValidatedCommand {
 interface LatestFinancialYearQueried {
   input: {
     year: FinancialYearValue
-    standardIncomeTableId: string
+    standardIncomeTableId: EntityId<'standard_income_table'>
   }
   state: {
     user: User
@@ -48,7 +49,7 @@ interface LatestFinancialYearQueried {
 interface ContinuityChecked {
   input: {
     year: FinancialYearValue
-    standardIncomeTableId: string
+    standardIncomeTableId: EntityId<'standard_income_table'>
   }
   state: {
     user: User

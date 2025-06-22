@@ -2,11 +2,18 @@ import type { ResultAsync } from 'neverthrow'
 import { Err, Ok } from 'neverthrow'
 
 import type { FinancialYearValue } from '@/domains/financial_year'
+import type { EntityId } from '@/domains/schema'
 import { createUser } from '@/domains/user/logic'
 import type { ValidationError } from '@/logic/errors'
 
 import type { FinancialYearPostEvent } from './workflow'
 import { createFinancialYearPostWorkflow } from './workflow'
+
+const dummyUser = createUser({
+  name: 'テスト',
+  email: '',
+  auth0UserId: '',
+})._unsafeUnwrap()
 
 describe('正常系', () => {
   beforeAll(() => {
@@ -28,14 +35,10 @@ describe('正常系', () => {
       actual = await workflow({
         input: {
           year: 2024,
-          standardIncomeTableId: '',
+          standardIncomeTableId: '' as EntityId<'standard_income_table'>,
         },
         state: {
-          user: createUser({
-            name: 'テスト',
-            email: '',
-            auth0UserId: '',
-          }),
+          user: dummyUser,
         },
       })
     })
@@ -57,14 +60,10 @@ describe('正常系', () => {
       actual = await workflow({
         input: {
           year: 2025,
-          standardIncomeTableId: '',
+          standardIncomeTableId: '' as EntityId<'standard_income_table'>,
         },
         state: {
-          user: createUser({
-            name: 'テスト',
-            email: '',
-            auth0UserId: '',
-          }),
+          user: dummyUser,
         },
       })
     })
@@ -95,14 +94,10 @@ describe('異常系', () => {
       actual = await workflow({
         input: {
           year: -1,
-          standardIncomeTableId: '',
+          standardIncomeTableId: '' as EntityId<'standard_income_table'>,
         },
         state: {
-          user: createUser({
-            name: 'テスト',
-            email: '',
-            auth0UserId: '',
-          }),
+          user: dummyUser,
         },
       })
     })
@@ -123,14 +118,10 @@ describe('異常系', () => {
       actual = await workflow({
         input: {
           year: 2023,
-          standardIncomeTableId: '',
+          standardIncomeTableId: '' as EntityId<'standard_income_table'>,
         },
         state: {
-          user: createUser({
-            name: 'テスト',
-            email: '',
-            auth0UserId: '',
-          }),
+          user: dummyUser,
         },
       })
     })
@@ -152,14 +143,10 @@ describe('異常系', () => {
       actual = await workflow({
         input: {
           year: 2026,
-          standardIncomeTableId: '',
+          standardIncomeTableId: '' as EntityId<'standard_income_table'>,
         },
         state: {
-          user: createUser({
-            name: 'テスト',
-            email: '',
-            auth0UserId: '',
-          }),
+          user: dummyUser,
         },
       })
     })

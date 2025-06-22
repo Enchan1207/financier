@@ -3,15 +3,15 @@ import type { InferResponseType } from 'hono'
 import { sign } from 'hono/jwt'
 import { testClient } from 'hono/testing'
 
-import { saveUser } from '@/dao/authorize'
-import { insertStandardIncomeTable } from '@/dao/standard_income'
+import { saveUser } from '@/dao/authorize/d1'
+import { getFinancialYear, insertFinancialYear } from '@/dao/financial_year/d1'
+import { insertStandardIncomeTable } from '@/dao/standard_income/d1'
 import type { FinancialYearValue } from '@/domains/financial_year'
 import { createFinancialYear } from '@/domains/financial_year/logic'
 import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 
-import { getFinancialYear, insertFinancialYear } from './dao'
 import financial_years from './route'
 
 describe('会計年度API', () => {
@@ -21,7 +21,7 @@ describe('会計年度API', () => {
     name: 'test user',
     email: 'test@example.com',
     auth0UserId: 'test_user',
-  })
+  })._unsafeUnwrap()
 
   let token: string
 
@@ -133,9 +133,7 @@ describe('会計年度API', () => {
       { headers: { Authorization: `Bearer ${token}` } },
     )
 
-    const expected = dummyFinancialYear.months.find(
-      ({ info: { month } }) => month === 6,
-    )
+    const expected = dummyFinancialYear.months.find(({ month }) => month === 6)
 
     const stored = await result.json()
     expect(stored).toStrictEqual(expected)
@@ -180,7 +178,7 @@ describe('会計年度API', () => {
       >
 
       const expected = dummyFinancialYear.months.find(
-        ({ info: { month } }) => month === 6,
+        ({ month }) => month === 6,
       )
       expect(stored).toStrictEqual(expected)
     })

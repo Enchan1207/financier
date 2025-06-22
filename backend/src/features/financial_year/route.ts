@@ -2,20 +2,21 @@ import { zValidator } from '@hono/zod-validator'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
-import { FinancialYearValueSchema } from '@/domains/financial_year'
-import { MonthsSchema } from '@/domains/monthly_context'
-import dayjs from '@/logic/dayjs'
-
-import { userAuthMiddleware } from '../authorize/middleware'
 import {
   findFinancialMonthCotextsByDate,
-  getFinancialMonthContext,
-} from '../financial_month/dao'
+  getMonthlyContext,
+} from '@/dao/financial_month/d1'
 import {
   getFinancialYear,
   insertFinancialYear,
   listFinancialYears,
-} from './dao'
+} from '@/dao/financial_year/d1'
+import { FinancialYearValueSchema } from '@/domains/financial_year'
+import { MonthsSchema } from '@/domains/monthly_context'
+import { EntityIdSchema } from '@/domains/schema'
+import dayjs from '@/logic/dayjs'
+
+import { userAuthMiddleware } from '../authorize/middleware'
 import type { PostFinancialYearCommand } from './workflow'
 import { createFinancialYearPostWorkflow } from './workflow'
 
@@ -80,7 +81,7 @@ const app = new Hono<{ Bindings: Env }>()
         return c.json({ error: 'bad request' }, 400)
       }
 
-      const entity = await getFinancialMonthContext(c.env.D1)({
+      const entity = await getMonthlyContext(c.env.D1)({
         userId: c.get('user').id,
         info: parseResult.data,
       })
@@ -91,7 +92,12 @@ const app = new Hono<{ Bindings: Env }>()
   .post(
     '/:year',
     zValidator('param', z.object({ year: z.coerce.number() })),
-    zValidator('json', z.object({ standardIncomeTableId: z.string() })),
+    zValidator(
+      'json',
+      z.object({
+        standardIncomeTableId: EntityIdSchema('standard_income_table'),
+      }),
+    ),
     async (c) => {
       const command: PostFinancialYearCommand = {
         input: {
