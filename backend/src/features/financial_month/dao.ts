@@ -9,8 +9,8 @@ import type {
 import { MonthsSchema, WorkdayValueSchema } from '@/domains/monthly_context'
 import type { User } from '@/domains/user'
 import type dayjs from '@/logic/dayjs'
-import { condition, every } from '@/logic/queryBuilder/conditionTree'
-import { d1 } from '@/logic/queryBuilder/d1'
+import { condition, every } from '@/logic/query_builder/condition_tree'
+import { d1 } from '@/logic/query_builder/d1'
 
 import { makeFinancialMonthEntity } from '../financial_year/dao'
 

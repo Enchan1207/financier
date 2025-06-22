@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { condition, every, some } from '../../conditionTree'
+import { condition, every, some } from '../../condition_tree'
 import { buildSelectionStatement } from './select'
 
 describe('buildSelectionStatement', () => {

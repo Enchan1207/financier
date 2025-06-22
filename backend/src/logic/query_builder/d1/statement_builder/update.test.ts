@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { condition } from '../../conditionTree'
+import { condition } from '../../condition_tree'
 import { buildUpdateStatement } from './update'
 
 describe('buildUpdateStatement', () => {

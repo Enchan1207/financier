@@ -1,5 +1,5 @@
-import type { ConditionNode } from '../../conditionTree'
-import { isLeaf } from '../../conditionTree'
+import type { ConditionNode } from '../../condition_tree'
+import { isLeaf } from '../../condition_tree'
 import type { Model } from '../../query'
 import type { CommandParameters } from '..'
 

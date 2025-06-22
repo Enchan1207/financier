@@ -6,9 +6,9 @@ import type { IncomeDefinition } from '@/domains/income_definition'
 import { IncomeDefinitionKind } from '@/domains/income_definition'
 import type { User } from '@/domains/user'
 import dayjs from '@/logic/dayjs'
-import type { ConditionNode } from '@/logic/queryBuilder/conditionTree'
-import { condition, every } from '@/logic/queryBuilder/conditionTree'
-import { d1 } from '@/logic/queryBuilder/d1'
+import type { ConditionNode } from '@/logic/query_builder/condition_tree'
+import { condition, every } from '@/logic/query_builder/condition_tree'
+import { d1 } from '@/logic/query_builder/d1'
 
 const IncomeDefinitionRecord = z.object({
   id: z.string(),

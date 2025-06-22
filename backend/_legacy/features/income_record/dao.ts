@@ -5,8 +5,8 @@ import type { IncomeRecord, IncomeRecordItem } from '@/domains/income_record'
 import { IncomeRecordUpdator } from '@/domains/income_record'
 import type { User } from '@/domains/user'
 import dayjs from '@/logic/dayjs'
-import { condition, every } from '@/logic/queryBuilder/conditionTree'
-import { d1 } from '@/logic/queryBuilder/d1'
+import { condition, every } from '@/logic/query_builder/condition_tree'
+import { d1 } from '@/logic/query_builder/d1'
 
 type IncomeRecordItemRecord = {
   user_id: User['id']

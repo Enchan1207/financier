@@ -1,7 +1,7 @@
 import type { Auth0UserInfo, User } from '@/domains/user'
 import { Auth0UserInfoSchema } from '@/domains/user'
-import { condition } from '@/logic/queryBuilder/conditionTree'
-import { d1 } from '@/logic/queryBuilder/d1'
+import { condition } from '@/logic/query_builder/condition_tree'
+import { d1 } from '@/logic/query_builder/d1'
 
 import type { UserRecord } from './schema'
 import { makeUserEntity, makeUserRecord, UserRecordSchema } from './schema'

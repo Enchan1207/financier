@@ -1,8 +1,8 @@
-import type { SelectionQueryState } from '@/logic/queryBuilder/query/select'
-import { createSelectionQueryBuilder } from '@/logic/queryBuilder/query/select'
+import type { SelectionQueryState } from '@/logic/query_builder/query/select'
+import { createSelectionQueryBuilder } from '@/logic/query_builder/query/select'
 
 import type { Operation } from '..'
-import type { ConditionLeaf } from '../conditionTree'
+import type { ConditionLeaf } from '../condition_tree'
 import type { Model } from '../query'
 import type { DeletionQueryState } from '../query/delete'
 import { createDeletionQueryBuilder } from '../query/delete'
@@ -10,10 +10,10 @@ import type { InsertionQueryState } from '../query/insert'
 import { createInsertionQueryBuilder } from '../query/insert'
 import type { UpdateQueryState } from '../query/update'
 import { createUpdateQueryBuilder } from '../query/update'
-import { buildDeletionStatement } from './statementBuilder/delete'
-import { buildInsertionStatement } from './statementBuilder/insert'
-import { buildSelectionStatement } from './statementBuilder/select'
-import { buildUpdateStatement } from './statementBuilder/update'
+import { buildDeletionStatement } from './statement_builder/delete'
+import { buildInsertionStatement } from './statement_builder/insert'
+import { buildSelectionStatement } from './statement_builder/select'
+import { buildUpdateStatement } from './statement_builder/update'
 
 export type CommandParameters<M extends Model> =
   | ConditionLeaf<M, keyof M['shape']>['value'][]

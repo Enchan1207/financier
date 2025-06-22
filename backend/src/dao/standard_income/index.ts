@@ -6,8 +6,8 @@ import type {
   StandardIncomeTableSummary,
 } from '@/domains/standard_income'
 import type { User } from '@/domains/user'
-import { condition, every } from '@/logic/queryBuilder/conditionTree'
-import { d1 } from '@/logic/queryBuilder/d1'
+import { condition, every } from '@/logic/query_builder/condition_tree'
+import { d1 } from '@/logic/query_builder/d1'
 
 import {
   makeStandardIncomeRecord,

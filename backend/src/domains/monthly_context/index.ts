@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { ActualSchema } from '../actual'
 import { DefinitionSchema } from '../definition'
 import { FinancialYearValueSchema } from '../financial_year'
 import { EntityIdSchema } from '../schema'
@@ -26,6 +27,7 @@ export const MonthlyContextSchema = z
     userId: EntityIdSchema('user'),
     workday: WorkdayValueSchema,
     definitions: z.array(DefinitionSchema),
+    actuals: z.array(ActualSchema),
     standardIncomeTableId: EntityIdSchema('standard_income_table'),
   })
   .merge(FinancialMonthInfoSchema)

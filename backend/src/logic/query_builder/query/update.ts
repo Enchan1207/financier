@@ -1,6 +1,6 @@
 import type { z } from 'zod'
 
-import type { ConditionNode } from '../conditionTree'
+import type { ConditionNode } from '../condition_tree'
 import type { Model, PreparedQuery, QueryStateBase, QueryStateInit } from '.'
 
 type ConditionSpecifiedQueryState<M extends Model> = QueryStateBase<M> & {

@@ -1,6 +1,6 @@
 import { ok } from 'neverthrow'
 
-import type { SelectionQueryState } from '@/logic/queryBuilder/query/select'
+import type { SelectionQueryState } from '@/logic/query_builder/query/select'
 
 import type { Model } from '../../query'
 import type { CommandParameters } from '..'

@@ -1,4 +1,4 @@
-import type { ConditionNode } from '../conditionTree'
+import type { ConditionNode } from '../condition_tree'
 import type { Buildable, Columns, Model } from '.'
 
 type Order = 'asc' | 'desc'

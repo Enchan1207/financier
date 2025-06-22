@@ -1,4 +1,4 @@
-import type { ConditionNode } from '../conditionTree'
+import type { ConditionNode } from '../condition_tree'
 import type { Model, QueryStateBase, QueryStateInit } from '.'
 
 type ConditionSpecifiedQueryState<M extends Model> = QueryStateBase<M> & {
