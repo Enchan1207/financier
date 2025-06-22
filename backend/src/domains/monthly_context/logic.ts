@@ -5,6 +5,9 @@ import dayjs from '@/logic/dayjs'
 import { ValidationError } from '@/logic/errors'
 import { parseSchema } from '@/logic/zod'
 
+import type { Actual } from '../actual'
+import type { Definition } from '../definition'
+import type { StandardIncomeTable } from '../standard_income'
 import type { FinancialMonthInfo, MonthlyContext } from '.'
 import { FinancialMonthInfoSchema, MonthlyContextSchema } from '.'
 
@@ -23,7 +26,9 @@ export const createMonthlyContext = (props: {
   financialYear: number
   month: number
   workday: number
-  standardIncomeTableId: string
+  definitions: Definition[]
+  actuals: Actual[]
+  standardIncomeTable: StandardIncomeTable
 }): Result<MonthlyContext, ValidationError> =>
   parseSchema(MonthlyContextSchema, {
     ...props,
