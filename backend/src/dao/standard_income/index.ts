@@ -7,17 +7,17 @@ import type { User } from '@/domains/user'
 
 export interface StandardIncomeDao {
   /** IDを指定して標準報酬月額表を取得する */
-  getStandardIncomeTable(props: {
+  getStandardIncomeTableById(props: {
     userId: User['id']
     id: StandardIncomeTable['id']
   }): Promise<StandardIncomeTable | undefined>
 
-  /** 新しい標準報酬月額表を追加 */
+  /** 新しい標準報酬月額表を挿入する */
   insertStandardIncomeTable(
     item: StandardIncomeTable,
   ): Promise<StandardIncomeTable>
 
-  /** 登録されている標準報酬月額表の一覧を得る */
+  /** 標準報酬月額表の一覧を取得する */
   listStandardIncomeTables(props: {
     userId: User['id']
     order?: 'asc' | 'desc'

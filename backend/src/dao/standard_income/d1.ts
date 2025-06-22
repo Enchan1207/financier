@@ -150,7 +150,7 @@ export const listStandardIncomeTables =
 
 /** IDを指定して標準報酬月額表を取得する */
 export const getStandardIncomeTable =
-  (db: D1Database): StandardIncomeDao['getStandardIncomeTable'] =>
+  (db: D1Database): StandardIncomeDao['getStandardIncomeTableById'] =>
   async (props) => {
     const tableFetchQuery = d1(db)
       .select(StandardIncomeTableRecord, 'standard_income_tables')
