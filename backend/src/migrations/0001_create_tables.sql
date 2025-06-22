@@ -6,21 +6,29 @@ CREATE TABLE users (
     email TEXT NOT NULL DEFAULT ''
 );
 
-CREATE TABLE financial_month_contexts (
+CREATE TABLE financial_years (
     id TEXT PRIMARY KEY NOT NULL,
     user_id TEXT NOT NULL,
-    financial_year INT NOT NULL,
-    month INT NOT NULL,
-    started_at INT NOT NULL,
-    ended_at INT NOT NULL,
-    workday INT NOT NULL DEFAULT 20,
+    year INT NOT NULL,
     standard_income_table_id TEXT NOT NULL,
-    UNIQUE (user_id, financial_year, month),
+    UNIQUE (user_id, financial_year),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT,
     FOREIGN KEY (standard_income_table_id) REFERENCES standard_income_tables (id) ON DELETE RESTRICT
 );
 
-CREATE TABLE income_definitions (
+CREATE TABLE monthly_contexts (
+    id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL,
+    financial_year_id TEXT NOT NULL,
+    month INT NOT NULL,
+    started_at INT NOT NULL,
+    ended_at INT NOT NULL,
+    workday INT NOT NULL DEFAULT 20,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT,
+    FOREIGN KEY (financial_year_id) REFERENCES financial_years (id) ON DELETE RESTRICT,
+);
+
+CREATE TABLE definitions (
     id TEXT PRIMARY KEY NOT NULL,
     user_id TEXT NOT NULL,
     name TEXT NOT NULL,
@@ -29,21 +37,19 @@ CREATE TABLE income_definitions (
     enabled_at INT NOT NULL,
     disabled_at INT NOT NULL,
     updated_at INT NOT NULL,
-    is_taxable BOOLEAN NOT NULL DEFAULT true,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT
 );
 
-CREATE TABLE income_records (
+CREATE TABLE actuals (
     user_id TEXT NOT NULL,
-    financial_month_id TEXT NOT NULL,
+    monthly_context_id TEXT NOT NULL,
     definition_id TEXT NOT NULL,
     value INT NOT NULL,
     updated_at INT NOT NULL,
-    updated_by TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT,
-    FOREIGN KEY (financial_month_id) REFERENCES financial_month_contexts (id) ON DELETE RESTRICT,
+    FOREIGN KEY (monthly_context_id) REFERENCES monthly_contexts (id) ON DELETE RESTRICT,
     FOREIGN KEY (definition_id) REFERENCES income_definitions (id) ON DELETE RESTRICT,
-    PRIMARY KEY (financial_month_id, definition_id)
+    PRIMARY KEY (monthly_context_id, definition_id)
 );
 
 CREATE TABLE standard_income_tables (
@@ -59,29 +65,4 @@ CREATE TABLE standard_income_grades (
     standard_income INTEGER NOT NULL,
     FOREIGN KEY (income_table_id) REFERENCES standard_income_tables (id) ON DELETE RESTRICT,
     PRIMARY KEY (income_table_id, standard_income)
-);
-
-CREATE TABLE deduction_definitions (
-    id TEXT PRIMARY KEY NOT NULL,
-    user_id TEXT NOT NULL,
-    name TEXT NOT NULL,
-    kind TEXT NOT NULL,
-    value INT NOT NULL,
-    enabled_at INT NOT NULL,
-    disabled_at INT NOT NULL,
-    updated_at INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT
-);
-
-CREATE TABLE deduction_records (
-    user_id TEXT NOT NULL,
-    financial_month_id TEXT NOT NULL,
-    definition_id TEXT NOT NULL,
-    value INT NOT NULL,
-    updated_at INT NOT NULL,
-    updated_by TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT,
-    FOREIGN KEY (financial_month_id) REFERENCES financial_month_contexts (id) ON DELETE RESTRICT,
-    FOREIGN KEY (definition_id) REFERENCES deduction_definitions (id) ON DELETE RESTRICT,
-    PRIMARY KEY (financial_month_id, definition_id)
 );
