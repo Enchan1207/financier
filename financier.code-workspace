@@ -54,12 +54,6 @@
     "[scss]": {
       "editor.defaultFormatter": "vscode.css-language-features",
     },
-    "github.copilot.enable": {
-      "*": true,
-      "plaintext": false,
-      "markdown": false,
-      "scminput": false,
-    },
     "[sql]": {
       "editor.defaultFormatter": "ReneSaarsoo.sql-formatter-vsc",
     },
