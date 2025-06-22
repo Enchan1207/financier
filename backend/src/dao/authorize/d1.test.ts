@@ -3,7 +3,7 @@ import { env } from 'cloudflare:test'
 import type { User } from '@/domains/user'
 import { createUser } from '@/domains/user/logic'
 
-import { findUserByAuth0Id, getUserById, saveUser } from '.'
+import { findUserByAuth0Id, getUserById, saveUser } from './d1'
 
 describe('単一項目のCRUD', () => {
   test('項目を作成できること', async () => {
