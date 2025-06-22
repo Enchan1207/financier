@@ -13,7 +13,7 @@ import type { Timestamp } from '@/domains/schema'
 
 declare module 'dayjs' {
   interface Dayjs {
-    toTimestamp(): Timestamp
+    timestamp(): Timestamp
   }
 }
 
@@ -23,7 +23,7 @@ dayjs.extend(isLeapYear)
 dayjs.extend(relativeTime)
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-dayjs.prototype.toTimestamp = function () {
+dayjs.prototype.timestamp = function () {
   return (this as dayjs.Dayjs).valueOf() as Timestamp
 }
 

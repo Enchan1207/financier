@@ -7,7 +7,6 @@ import { parseSchema } from '@/logic/zod'
 
 import type { Actual } from '../actual'
 import type { Definition } from '../definition'
-import type { StandardIncomeTable } from '../standard_income'
 import type { FinancialMonthInfo, MonthlyContext } from '.'
 import { FinancialMonthInfoSchema, MonthlyContextSchema } from '.'
 
@@ -28,7 +27,6 @@ export const createMonthlyContext = (props: {
   workday: number
   definitions: Definition[]
   actuals: Actual[]
-  standardIncomeTable: StandardIncomeTable
 }): Result<MonthlyContext, ValidationError> =>
   parseSchema(MonthlyContextSchema, {
     ...props,

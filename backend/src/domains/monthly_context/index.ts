@@ -4,7 +4,6 @@ import { ActualSchema } from '../actual'
 import { DefinitionSchema } from '../definition'
 import { FinancialYearValueSchema } from '../financial_year'
 import { EntityIdSchema } from '../schema'
-import { StandardIncomeTableSchema } from '../standard_income'
 
 export const WorkdayValueSchema = z.number().int().min(0).max(31).brand()
 export type WorkdayValue = z.infer<typeof WorkdayValueSchema>
@@ -29,7 +28,6 @@ export const MonthlyContextSchema = z
     workday: WorkdayValueSchema,
     definitions: z.array(DefinitionSchema),
     actuals: z.array(ActualSchema),
-    standardIncomeTable: StandardIncomeTableSchema,
   })
   .merge(FinancialMonthInfoSchema)
 

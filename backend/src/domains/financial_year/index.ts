@@ -1,6 +1,8 @@
 import { z } from 'zod'
 
-import type { MonthlyContext } from '../monthly_context'
+import { MonthsSchema } from '../monthly_context'
+import { EntityIdSchema } from '../schema'
+import { StandardIncomeTableSchema } from '../standard_income'
 
 export const FinancialYearValueSchema = z
   .number()
@@ -11,8 +13,20 @@ export const FinancialYearValueSchema = z
 
 export type FinancialYearValue = z.infer<typeof FinancialYearValueSchema>
 
+export const FinancialYearSchema = z.object({
+  id: EntityIdSchema('financial_year'),
+  userId: EntityIdSchema('user'),
+  year: FinancialYearValueSchema,
+  months: z
+    .array(
+      z.object({
+        id: EntityIdSchema('monthly_context'),
+        month: MonthsSchema,
+      }),
+    )
+    .length(12),
+  standardIncomeTable: StandardIncomeTableSchema,
+})
+
 /** 会計年度 */
-export interface FinancialYear {
-  year: FinancialYearValue
-  months: MonthlyContext[]
-}
+export type FinancialYear = z.infer<typeof FinancialYearSchema>
