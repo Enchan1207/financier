@@ -3,17 +3,19 @@ import { ulid } from 'ulid'
 
 import dayjs from '@/logic/dayjs'
 import { ValidationError } from '@/logic/errors'
+import { parseSchema } from '@/logic/zod'
 
 import {
   createFinancialMonthInfo,
   getPeriodByFinancialMonth,
-} from '../financial_month_context/logic'
+} from '../monthly_context/logic'
 import type { User } from '../user'
 import type {
   DeductionDefinitionKind,
   Definition,
   IncomeDefinitionKind,
 } from '.'
+import { DefinitionSchema } from '.'
 
 export const createDefinition = (
   props: {
@@ -56,7 +58,7 @@ export const createDefinition = (
 
       return ok({ start: fromStart, end })
     })
-    .map(({ start, end }) => {
+    .andThen(({ start, end }) => {
       const base = {
         id: ulid(),
         userId: props.userId,
@@ -68,16 +70,16 @@ export const createDefinition = (
       }
 
       if (props.type === 'income') {
-        return {
+        return parseSchema(DefinitionSchema, {
           ...base,
           type: 'income',
           kind: props.kind,
-        }
+        })
       }
 
-      return {
+      return parseSchema(DefinitionSchema, {
         ...base,
         type: 'deduction',
         kind: props.kind,
-      }
+      })
     })

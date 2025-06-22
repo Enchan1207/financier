@@ -5,21 +5,10 @@ import dayjs from '@/logic/dayjs'
 import { ValidationError } from '@/logic/errors'
 import { parseSchema } from '@/logic/zod'
 
-import type { FinancialMonthInfo, MonthlyContext, WorkdayValue } from '.'
-import {
-  FinancialMonthInfoSchema,
-  MonthlyContextSchema,
-  WorkdayValueSchema,
-} from '.'
+import type { FinancialMonthInfo, MonthlyContext } from '.'
+import { FinancialMonthInfoSchema, MonthlyContextSchema } from '.'
 
 const financialTimezone = 'Asia/Tokyo'
-
-export const createWorkday = (
-  input: number,
-): Result<WorkdayValue, ValidationError> =>
-  parseSchema(WorkdayValueSchema, input).mapErr(
-    (error) => new ValidationError(error.message),
-  )
 
 export const createFinancialMonthInfo = (props: {
   financialYear: number

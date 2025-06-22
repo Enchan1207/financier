@@ -1,22 +1,18 @@
-import type { User } from '../user'
+import { z } from 'zod'
+
+import { EntityIdSchema, MoneySchema, TimestampSchema } from '@/domains/schema'
 
 // MARK: base
 
-type Base = {
-  id: string
-
-  userId: User['id']
-
-  /** 定義名 */
-  name: string
-
-  /** 定義値 */
-  value: number
-
-  enabledAt: number
-  disabledAt: number
-  updatedAt: number
-}
+const BaseSchema = z.object({
+  id: EntityIdSchema('definition'),
+  userId: EntityIdSchema('user'),
+  name: z.string(),
+  value: MoneySchema,
+  enabledAt: TimestampSchema,
+  disabledAt: TimestampSchema,
+  updatedAt: TimestampSchema,
+})
 
 export const DefinitionType = ['income', 'deduction'] as const
 export type DefinitionType = (typeof DefinitionType)[number]
@@ -29,12 +25,14 @@ export const IncomeDefinitionKind = [
   'absolute_taxable',
   'related_by_workday_taxable',
 ] as const
-export type IncomeDefinitionKind = (typeof IncomeDefinitionKind)[number]
 
-type Income = {
-  type: 'income'
-  kind: IncomeDefinitionKind
-}
+const IncomeDefinitionKindSchema = z.enum(IncomeDefinitionKind)
+export type IncomeDefinitionKind = z.infer<typeof IncomeDefinitionKindSchema>
+
+const IncomeDefinitionSchema = BaseSchema.extend({
+  type: z.literal('income'),
+  kind: IncomeDefinitionKindSchema,
+})
 
 // MARK: deduction
 
@@ -44,12 +42,20 @@ export const DeductionDefinitionKind = [
   'related_by_standard_income',
   'related_by_total_income',
 ] as const
-export type DeductionDefinitionKind = (typeof DeductionDefinitionKind)[number]
 
-type Deduction = {
-  type: 'deduction'
-  kind: DeductionDefinitionKind
-}
+const DeductionDefinitionKindSchema = z.enum(DeductionDefinitionKind)
+export type DeductionDefinitionKind = z.infer<
+  typeof DeductionDefinitionKindSchema
+>
+
+const DeductionDefinitionSchema = BaseSchema.extend({
+  type: z.literal('deduction'),
+  kind: DeductionDefinitionKindSchema,
+})
 
 /** 定義 */
-export type Definition = Base & (Income | Deduction)
+export const DefinitionSchema = z.union([
+  IncomeDefinitionSchema,
+  DeductionDefinitionSchema,
+])
+export type Definition = z.infer<typeof DefinitionSchema>

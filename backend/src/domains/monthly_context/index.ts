@@ -1,8 +1,8 @@
 import { z } from 'zod'
 
-import { UlidSchema } from '@/dao/schema'
-
+import { DefinitionSchema } from '../definition'
 import { FinancialYearValueSchema } from '../financial_year'
+import { EntityIdSchema } from '../schema'
 
 export const WorkdayValueSchema = z.number().int().min(0).max(31).brand()
 export type WorkdayValue = z.infer<typeof WorkdayValueSchema>
@@ -22,10 +22,11 @@ export type FinancialMonthInfo = z.infer<typeof FinancialMonthInfoSchema>
 
 export const MonthlyContextSchema = z
   .object({
-    id: UlidSchema,
-    userId: UlidSchema,
+    id: EntityIdSchema('monthly_context'),
+    userId: EntityIdSchema('user'),
     workday: WorkdayValueSchema,
-    standardIncomeTableId: UlidSchema,
+    definitions: z.array(DefinitionSchema),
+    standardIncomeTableId: EntityIdSchema('standard_income_table'),
   })
   .merge(FinancialMonthInfoSchema)
 
