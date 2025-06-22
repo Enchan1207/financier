@@ -2,7 +2,7 @@
 
 import { env } from 'cloudflare:test'
 
-import { saveUser } from '@/dao/authorize'
+import { saveUser } from '@/dao/authorize/d1'
 import type { EntityId } from '@/domains/schema'
 import {
   createStandardIncomeGrade,
