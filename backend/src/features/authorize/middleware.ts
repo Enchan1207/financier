@@ -2,11 +2,11 @@ import type { MiddlewareHandler } from 'hono'
 import { every } from 'hono/combine'
 import { createMiddleware } from 'hono/factory'
 
+import { fetchUserInfo, findUserByAuth0Id, saveUser } from '@/dao/authorize/d1'
 import type { User } from '@/domains/user'
 import type { Auth0JWTPayload } from '@/logic/middlewares/jwk'
 import { jwkMiddleware, jwkValidationMiddleware } from '@/logic/middlewares/jwk'
 
-import { fetchUserInfo, getUserByAuth0Id, saveUser } from './dao'
 import type { Command } from './workflow'
 import { createAuthorizeWorkflow } from './workflow'
 
@@ -27,7 +27,7 @@ const userMiddleware = createMiddleware<{
   }
 
   const workflow = createAuthorizeWorkflow({
-    getUserByAuth0Id: getUserByAuth0Id(c.env.D1),
+    getUserByAuth0Id: findUserByAuth0Id(c.env.D1),
     fetchUserInfo: fetchUserInfo,
   })
 

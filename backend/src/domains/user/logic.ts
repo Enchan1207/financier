@@ -1,8 +1,14 @@
+import type { Result } from 'neverthrow'
 import { ulid } from 'ulid'
 
-import type { User, UserData } from '.'
+import type { ValidationError } from '@/logic/errors'
+import { parseSchema } from '@/logic/zod'
 
-export const createUser = (userData: UserData): User => ({
-  id: ulid(),
-  ...userData,
-})
+import type { User, UserData } from '.'
+import { UserSchema } from '.'
+
+export const createUser = (userData: UserData): Result<User, ValidationError> =>
+  parseSchema(UserSchema, {
+    ...userData,
+    id: ulid(),
+  })

@@ -10,12 +10,37 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 import vueParser from 'vue-eslint-parser'
 
+const dayjsRestriction = {
+  name: 'dayjs',
+  message: 'Use @/logic/dayjs instead.',
+}
+
+const backendTypeRestriction = {
+  group: ['@routes/**'],
+  message: 'Do not use backend types.',
+  allowTypeImports: false,
+}
+
+const featureLayerRestriction = {
+  group: ['**/features'],
+  message:
+    'Do not import features at domains. ドメインレイヤは機能に依存してはいけません。',
+  allowTypeImports: false,
+}
+
+const daoLayerRestriction = {
+  group: ['**/dao'],
+  message:
+    'Do not import dao at workflow. ワークフローにdaoは必要ないはずです。',
+  allowTypeImports: false,
+}
+
 export default tseslint.config(
   // MARK: - Base configurations
 
   {
     name: 'global ignore',
-    ignores: ['**/dist', '**/node_modules', '**/.wrangler/'],
+    ignores: ['**/dist', '**/node_modules', '**/.wrangler/', '**/_legacy'],
   },
 
   // MARK: - Shared configurations
@@ -119,19 +144,8 @@ export default tseslint.config(
       '@typescript-eslint/no-restricted-imports': [
         'error',
         {
-          paths: [
-            {
-              name: 'dayjs',
-              message: 'Use @/logic/dayjs instead.',
-            },
-          ],
-          patterns: [
-            {
-              group: ['@routes/**'],
-              message: 'Do not use backend types.',
-              allowTypeImports: false,
-            },
-          ],
+          paths: [dayjsRestriction],
+          patterns: [backendTypeRestriction],
         },
       ],
       'vue/no-undef-components': [
@@ -155,17 +169,12 @@ export default tseslint.config(
 
   {
     name: 'backend rules',
-    files: ['backend/**/*.ts', 'backend/**/*.vue'],
+    files: ['backend/**/*.ts'],
     rules: {
       '@typescript-eslint/no-restricted-imports': [
         'error',
         {
-          paths: [
-            {
-              name: 'dayjs',
-              message: 'Use @/logic/dayjs instead.',
-            },
-          ],
+          paths: [dayjsRestriction],
         },
       ],
     },
@@ -178,14 +187,8 @@ export default tseslint.config(
       '@typescript-eslint/no-restricted-imports': [
         'error',
         {
-          patterns: [
-            {
-              group: ['**/features'],
-              message:
-                'Do not import features at domains. ドメインレイヤは機能に依存してはいけません。',
-              allowTypeImports: false,
-            },
-          ],
+          paths: [dayjsRestriction],
+          patterns: [featureLayerRestriction],
         },
       ],
     },
@@ -203,14 +206,8 @@ export default tseslint.config(
       '@typescript-eslint/no-restricted-imports': [
         'error',
         {
-          patterns: [
-            {
-              group: ['**/dao'],
-              message:
-                'Do not import dao at workflow. ワークフローにdaoは必要ないはずです。',
-              allowTypeImports: false,
-            },
-          ],
+          paths: [dayjsRestriction],
+          patterns: [daoLayerRestriction],
         },
       ],
     },

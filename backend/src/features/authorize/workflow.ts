@@ -1,8 +1,8 @@
 import type { ResultAsync } from 'neverthrow'
 import { err, ok } from 'neverthrow'
-import { ulid } from 'ulid'
 
 import type { Auth0UserInfo, User } from '@/domains/user'
+import { createUser } from '@/domains/user/logic'
 import { fromSafePromise } from '@/logic/neverthrow'
 
 export interface Command {
@@ -63,20 +63,17 @@ const createTentativeUser = (effects: {
       )
     }
 
-    const newUser: User = {
-      id: ulid(),
+    return createUser({
       name: userInfo.nickname,
       auth0UserId: userInfo.sub,
       email: userInfo.email,
-    }
-
-    return ok({
-      input: { user: newUser },
+    }).map((user) => ({
+      input: { user },
       state: {
         authDomain: command.state.authDomain,
         stored: false,
       },
-    })
+    }))
   })
 
 export const createAuthorizeWorkflow =

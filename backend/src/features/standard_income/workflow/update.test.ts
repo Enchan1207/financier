@@ -10,7 +10,7 @@ const dummyUser: User = createUser({
   name: 'testuser',
   email: 'test@example.com',
   auth0UserId: 'auth0_test_user',
-})
+})._unsafeUnwrap()
 
 const dummyTable = createStandardIncomeTable({
   userId: dummyUser.id,

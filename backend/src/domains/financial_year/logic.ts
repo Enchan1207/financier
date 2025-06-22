@@ -3,8 +3,8 @@ import { Result } from 'neverthrow'
 import { ValidationError } from '@/logic/errors'
 import { parseSchema } from '@/logic/zod'
 
-import { Months } from '../financial_month_context'
-import { createFinancialMonthContext } from '../financial_month_context/logic'
+import { Months } from '../monthly_context'
+import { createMonthlyContext } from '../monthly_context/logic'
 import type { StandardIncomeTable } from '../standard_income'
 import type { User } from '../user'
 import type { FinancialYear } from '.'
@@ -23,7 +23,7 @@ export const createFinancialYear = (props: {
   const { userId, financialYear, standardIncomeTableId } = props
 
   const results = Months.map((month) =>
-    createFinancialMonthContext({
+    createMonthlyContext({
       userId,
       financialYear,
       month,
@@ -33,7 +33,7 @@ export const createFinancialYear = (props: {
   )
 
   return Result.combine(results).map((months) => ({
-    year: months[0].info.financialYear,
+    year: months[0].financialYear,
     months,
   }))
 }

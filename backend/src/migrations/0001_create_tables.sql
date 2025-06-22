@@ -60,3 +60,28 @@ CREATE TABLE standard_income_grades (
     FOREIGN KEY (income_table_id) REFERENCES standard_income_tables (id) ON DELETE RESTRICT,
     PRIMARY KEY (income_table_id, standard_income)
 );
+
+CREATE TABLE deduction_definitions (
+    id TEXT PRIMARY KEY NOT NULL,
+    user_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    value INT NOT NULL,
+    enabled_at INT NOT NULL,
+    disabled_at INT NOT NULL,
+    updated_at INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT
+);
+
+CREATE TABLE deduction_records (
+    user_id TEXT NOT NULL,
+    financial_month_id TEXT NOT NULL,
+    definition_id TEXT NOT NULL,
+    value INT NOT NULL,
+    updated_at INT NOT NULL,
+    updated_by TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT,
+    FOREIGN KEY (financial_month_id) REFERENCES financial_month_contexts (id) ON DELETE RESTRICT,
+    FOREIGN KEY (definition_id) REFERENCES deduction_definitions (id) ON DELETE RESTRICT,
+    PRIMARY KEY (financial_month_id, definition_id)
+);

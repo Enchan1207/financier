@@ -9,9 +9,22 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc'
 
+import type { Timestamp } from '@/domains/schema'
+
+declare module 'dayjs' {
+  interface Dayjs {
+    toTimestamp(): Timestamp
+  }
+}
+
 dayjs.extend(timezone)
 dayjs.extend(utc)
 dayjs.extend(isLeapYear)
 dayjs.extend(relativeTime)
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+dayjs.prototype.toTimestamp = function () {
+  return (this as dayjs.Dayjs).valueOf() as Timestamp
+}
 
 export default dayjs
