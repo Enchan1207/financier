@@ -11,7 +11,7 @@ CREATE TABLE financial_years (
     user_id TEXT NOT NULL,
     year INT NOT NULL,
     standard_income_table_id TEXT NOT NULL,
-    UNIQUE (user_id, financial_year),
+    UNIQUE (user_id, year),
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT,
     FOREIGN KEY (standard_income_table_id) REFERENCES standard_income_tables (id) ON DELETE RESTRICT
 );
@@ -25,7 +25,7 @@ CREATE TABLE monthly_contexts (
     ended_at INT NOT NULL,
     workday INT NOT NULL DEFAULT 20,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE RESTRICT,
-    FOREIGN KEY (financial_year_id) REFERENCES financial_years (id) ON DELETE RESTRICT,
+    FOREIGN KEY (financial_year_id) REFERENCES financial_years (id) ON DELETE RESTRICT
 );
 
 CREATE TABLE definitions (
