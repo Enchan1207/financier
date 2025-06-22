@@ -64,9 +64,9 @@ export const createDefinition = (
         userId: props.userId,
         name: props.name,
         value: props.value,
-        enabledAt: start.valueOf(),
-        disabledAt: end.valueOf(),
-        updatedAt: dayjs().valueOf(),
+        enabledAt: start.timestamp(),
+        disabledAt: end.timestamp(),
+        updatedAt: dayjs().timestamp(),
       }
 
       if (props.type === 'income') {
