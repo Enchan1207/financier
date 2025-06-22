@@ -1,16 +1,13 @@
 import { z } from 'zod'
 
-import { FinancialYearValueSchema } from '../financial_year'
-import { MonthsSchema } from '../monthly_context'
-import { EntityIdSchema, MoneySchema } from '../schema'
+import { EntityIdSchema, MoneySchema, TimestampSchema } from '../schema'
 
 export const ActualSchema = z.object({
-  id: EntityIdSchema('actual'),
   userId: EntityIdSchema('user'),
-  financialYear: FinancialYearValueSchema,
-  month: MonthsSchema,
+  monthlyContextId: EntityIdSchema('monthly_context'),
   definitionId: EntityIdSchema('definition'),
   value: MoneySchema,
+  updatedAt: TimestampSchema,
 })
 
 export type Actual = z.infer<typeof ActualSchema>
