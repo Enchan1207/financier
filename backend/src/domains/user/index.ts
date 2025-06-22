@@ -1,12 +1,19 @@
 import { z } from 'zod'
 
-export type UserData = {
-  name: string
-  auth0UserId: string
-  email: string
-}
+import { EntityIdSchema } from '@/domains/schema'
 
-export type User = UserData & { id: string }
+export const UserDataSchema = z.object({
+  name: z.string(),
+  auth0UserId: z.string(),
+  email: z.string(),
+})
+export type UserData = z.infer<typeof UserDataSchema>
+
+export const UserSchema = UserDataSchema.extend({
+  id: EntityIdSchema('user'),
+})
+
+export type User = z.infer<typeof UserSchema>
 
 export const Auth0UserInfoSchema = z.object({
   sub: z.string(),

@@ -1,15 +1,15 @@
 import { z } from 'zod'
 
-export const StandardIncomeGradeSchema = z
-  .object({
-    threshold: z.number().int().min(0),
-    standardIncome: z.number().int().min(0),
-  })
-  .brand()
+import { EntityIdSchema, MoneySchema } from '@/domains/schema'
+
+export const StandardIncomeGradeSchema = z.object({
+  threshold: MoneySchema,
+  standardIncome: MoneySchema,
+})
 
 export const StandardIncomeTableSchema = z.object({
-  id: z.string().ulid(),
-  userId: z.string().ulid(),
+  id: EntityIdSchema('standard_income_table'),
+  userId: EntityIdSchema('user'),
   name: z.string().min(1),
   grades: z.array(StandardIncomeGradeSchema).min(1),
 })
