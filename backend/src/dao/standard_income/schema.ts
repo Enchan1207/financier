@@ -43,11 +43,10 @@ export const makeStandardIncomeRecord = (
 
 export const makeStandardIncomeGradeEntity = (
   record: StandardIncomeGradeRecord,
-) =>
-  ({
-    threshold: record.threshold,
-    standardIncome: record.standard_income,
-  }) as StandardIncomeGrade // recordを作成する前段階でドメインモデルになっているはずなので、asで問題ない
+): StandardIncomeGrade => ({
+  threshold: record.threshold,
+  standardIncome: record.standard_income,
+})
 
 export const makeStandardIncomeTableEntity = (props: {
   tableRecord: StandardIncomeTableRecord

@@ -17,7 +17,7 @@ import {
   listStandardIncomeTables,
   updateStandardIncomeTableGrades,
   updateStandardIncomeTableName,
-} from '.'
+} from './d1'
 
 describe('基本的なCRUD', () => {
   const dummyUser: User = createUser({
