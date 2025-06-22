@@ -9,7 +9,8 @@ import {
   listStandardIncomeTables,
   updateStandardIncomeTableGrades,
   updateStandardIncomeTableName,
-} from '@/dao/standard_income'
+} from '@/dao/standard_income/d1'
+import { EntityIdSchema } from '@/domains/schema'
 import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import { getDefaultStandardIncomeGrades } from '@/domains/standard_income/logic/defaults'
 import dayjs from '@/logic/dayjs'
@@ -55,18 +56,25 @@ const app = new Hono<{ Bindings: Env }>()
   })
 
   // 単一の標準報酬月額表を取得
-  .get('/:id', zValidator('param', z.object({ id: z.string() })), async (c) => {
-    const stored = await getStandardIncomeTable(c.env.D1)({
-      userId: c.get('user').id,
-      id: c.req.valid('param').id,
-    })
+  .get(
+    '/:id',
+    zValidator(
+      'param',
+      z.object({ id: EntityIdSchema('standard_income_table') }),
+    ),
+    async (c) => {
+      const stored = await getStandardIncomeTable(c.env.D1)({
+        userId: c.get('user').id,
+        id: c.req.valid('param').id,
+      })
 
-    if (stored === undefined) {
-      return c.json({ error: 'not found' }, 404)
-    }
+      if (stored === undefined) {
+        return c.json({ error: 'not found' }, 404)
+      }
 
-    return c.json(stored)
-  })
+      return c.json(stored)
+    },
+  )
 
   // 新規標準報酬月額表を作成
   .post(
@@ -102,7 +110,10 @@ const app = new Hono<{ Bindings: Env }>()
   // 標準報酬月額表を更新（名前または階級）
   .patch(
     '/:id',
-    zValidator('param', z.object({ id: z.string().ulid() })),
+    zValidator(
+      'param',
+      z.object({ id: EntityIdSchema('standard_income_table') }),
+    ),
     zValidator(
       'json',
       z.object({
@@ -167,7 +178,10 @@ const app = new Hono<{ Bindings: Env }>()
   // 標準報酬月額表を複製
   .post(
     '/:id/duplicate',
-    zValidator('param', z.object({ id: z.string().ulid() })),
+    zValidator(
+      'param',
+      z.object({ id: EntityIdSchema('standard_income_table') }),
+    ),
     zValidator('json', z.object({ name: z.string() })),
     async (c) => {
       const command: DuplicateStandardIncomeTableCommand = {

@@ -2,6 +2,7 @@ import type { Result, ResultAsync } from 'neverthrow'
 import { err, ok } from 'neverthrow'
 import { z } from 'zod'
 
+import { EntityIdSchema } from '@/domains/schema'
 import type { StandardIncomeTable } from '@/domains/standard_income'
 import { createStandardIncomeTable } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
@@ -10,7 +11,7 @@ import { EntityNotFoundError } from '@/logic/errors'
 import { fromSafePromise } from '@/logic/neverthrow'
 
 export const DuplicateStandardIncomeTableSchema = z.object({
-  id: z.string().ulid(),
+  id: EntityIdSchema('standard_income_table'),
   name: z.string(),
 })
 type DuplicateStandardIncomeTableSchema = z.infer<

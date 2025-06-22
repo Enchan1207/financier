@@ -2,7 +2,7 @@ import type { MiddlewareHandler } from 'hono'
 import { every } from 'hono/combine'
 import { createMiddleware } from 'hono/factory'
 
-import { fetchUserInfo, findUserByAuth0Id, saveUser } from '@/dao/authorize'
+import { fetchUserInfo, findUserByAuth0Id, saveUser } from '@/dao/authorize/d1'
 import type { User } from '@/domains/user'
 import type { Auth0JWTPayload } from '@/logic/middlewares/jwk'
 import { jwkMiddleware, jwkValidationMiddleware } from '@/logic/middlewares/jwk'

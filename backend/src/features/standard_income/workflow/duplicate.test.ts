@@ -10,7 +10,7 @@ const dummyUser: User = createUser({
   name: 'testuser',
   email: 'test@example.com',
   auth0UserId: 'auth0_test_user',
-})
+})._unsafeUnwrap()
 
 describe('正常系', () => {
   const dummyTable = createStandardIncomeTable({

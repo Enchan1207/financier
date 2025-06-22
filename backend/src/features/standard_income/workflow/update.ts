@@ -1,13 +1,16 @@
 import { err, ok, Result } from 'neverthrow'
 
-import type { StandardIncomeGrade } from '@/domains/standard_income'
+import type {
+  StandardIncomeGrade,
+  StandardIncomeTable,
+} from '@/domains/standard_income'
 import { createStandardIncomeGrade } from '@/domains/standard_income/logic'
 import type { User } from '@/domains/user'
 import { ValidationError } from '@/logic/errors'
 
 export interface UpdateStandardIncomeTableCommand {
   input: {
-    id: string
+    id: StandardIncomeTable['id']
     name?: string
     grades?: {
       threshold: number
@@ -21,7 +24,7 @@ export interface UpdateStandardIncomeTableCommand {
 
 interface ValidatedCommand {
   input: {
-    id: string
+    id: StandardIncomeTable['id']
   } & (
     | {
         kind: 'name'
@@ -38,8 +41,8 @@ interface ValidatedCommand {
 }
 
 interface UpdateEventBase {
-  id: string
-  userId: string
+  id: StandardIncomeTable['id']
+  userId: User['id']
 }
 
 interface NameUpdateEvent extends UpdateEventBase {

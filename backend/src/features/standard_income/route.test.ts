@@ -3,11 +3,11 @@ import type { InferResponseType } from 'hono'
 import { sign } from 'hono/jwt'
 import { testClient } from 'hono/testing'
 
-import { saveUser } from '@/dao/authorize'
+import { saveUser } from '@/dao/authorize/d1'
 import {
   getStandardIncomeTable,
   insertStandardIncomeTable,
-} from '@/dao/standard_income'
+} from '@/dao/standard_income/d1'
 import {
   createStandardIncomeGrade,
   createStandardIncomeTable,
@@ -20,15 +20,15 @@ import standard_incomes from './route'
 describe('標準報酬月額表API', () => {
   const client = testClient(standard_incomes, env)
 
-  const testUser: User = createUser({
+  const dummyUser: User = createUser({
     name: 'test user',
     email: 'test@example.com',
     auth0UserId: 'test_user',
-  })
+  })._unsafeUnwrap()
 
   let token: string
   const testTable = createStandardIncomeTable({
-    userId: testUser.id,
+    userId: dummyUser.id,
     name: 'テスト用月額表',
     grades: [
       {
@@ -51,7 +51,7 @@ describe('標準報酬月額表API', () => {
       {
         exp: Math.floor(Date.now() / 1000) + 60 * 60,
         iss: `https://${env.AUTH_DOMAIN}/`,
-        sub: testUser.auth0UserId,
+        sub: dummyUser.auth0UserId,
         aud: [env.AUTH_AUDIENCE],
       },
       env.TEST_PRIVATE_KEY,
@@ -59,7 +59,7 @@ describe('標準報酬月額表API', () => {
     )
 
     // テストユーザとテスト用月額表を登録
-    await saveUser(env.D1)(testUser)
+    await saveUser(env.D1)(dummyUser)
     await insertStandardIncomeTable(env.D1)(testTable)
   })
 
@@ -79,7 +79,7 @@ describe('標準報酬月額表API', () => {
 
   test('複数の月額表を取得できること', async () => {
     const anotherTable = createStandardIncomeTable({
-      userId: testUser.id,
+      userId: dummyUser.id,
       name: '別の月額表',
       grades: [
         {
