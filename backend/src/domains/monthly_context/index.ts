@@ -21,15 +21,15 @@ export const FinancialMonthInfoSchema = z.object({
 /** 会計月度情報 */
 export type FinancialMonthInfo = z.infer<typeof FinancialMonthInfoSchema>
 
-export const MonthlyContextSchema = z
-  .object({
-    id: EntityIdSchema('monthly_context'),
-    userId: EntityIdSchema('user'),
-    workday: WorkdayValueSchema,
-    definitions: z.array(DefinitionSchema),
-    actuals: z.array(ActualSchema),
-  })
-  .merge(FinancialMonthInfoSchema)
+export const MonthlyContextSchema = z.object({
+  id: EntityIdSchema('monthly_context'),
+  userId: EntityIdSchema('user'),
+  financialYearId: EntityIdSchema('financial_year'),
+  month: MonthsSchema,
+  workday: WorkdayValueSchema,
+  definitions: z.array(DefinitionSchema),
+  actuals: z.array(ActualSchema),
+})
 
 /** 会計月度コンテキスト */
 export type MonthlyContext = z.infer<typeof MonthlyContextSchema>
