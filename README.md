@@ -1,4 +1,10 @@
-# Financier
+# financier
+
+> [!WARNING]
+>
+> This project is currently suspended during some personal issues of owner.
+
+## Overview
 
 personal finance system
 
