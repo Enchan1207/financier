@@ -4,7 +4,7 @@ import type { InferResponseType } from 'hono'
 
 import { client } from '../client'
 
-type PostListResponse = InferResponseType<typeof client.posts.$get, 200>
+type PostListResponse = InferResponseType<typeof client.posts.$get>
 type PostItem = PostListResponse['items'][number]
 type PostDetailResponse = InferResponseType<
   (typeof client.posts)[':id']['$get'],
@@ -22,15 +22,13 @@ export const usePostsQuery = () => {
     queryFn: async () => {
       const token = await getAccessTokenSilently()
 
-      const response = await client.posts.$get(undefined, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const response = await client.posts
+        .$get(undefined, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((res) => (res.ok ? res.json() : Promise.reject(res)))
 
-      if (!response.ok) {
-        throw new Error(`投稿一覧の取得に失敗しました: ${response.status}`)
-      }
-
-      return response.json()
+      return response
     },
   })
 }
@@ -38,36 +36,26 @@ export const usePostsQuery = () => {
 /**
  * 個別投稿を取得するクエリフック
  */
-export const usePostQuery = (id: string | null) => {
+export const usePostQuery = (id: string, options?: { enabled?: boolean }) => {
   const { getAccessTokenSilently } = useAuth0()
 
   return useQuery<PostDetailResponse>({
     queryKey: ['posts', id],
     queryFn: async () => {
-      if (!id) {
-        throw new Error('Post ID is required')
-      }
-
       const token = await getAccessTokenSilently()
 
-      const response = await client.posts[':id'].$get(
-        { param: { id } },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      )
+      const response = await client.posts[':id']
+        .$get(
+          { param: { id } },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          },
+        )
+        .then((res) => (res.ok ? res.json() : Promise.reject(res)))
 
-      if (response.status === 404) {
-        throw new Error('投稿が見つかりません')
-      }
-
-      if (!response.ok) {
-        throw new Error(`投稿の取得に失敗しました: ${response.status}`)
-      }
-
-      return response.json()
+      return response
     },
-    enabled: !!id, // idがnullの場合はクエリを実行しない
+    ...options,
   })
 }
 
@@ -92,7 +80,7 @@ export const useCreatePostMutation = () => {
       )
 
       if (!response.ok) {
-        throw new Error(`投稿の作成に失敗しました: ${response.status}`)
+        throw new Error('Failed to create post')
       }
 
       return response.json()

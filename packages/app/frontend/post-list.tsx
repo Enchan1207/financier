@@ -4,8 +4,10 @@ import { usePostQuery, usePostsQuery } from './hooks/use-posts'
 
 export const PostList: React.FC = () => {
   const { data, isLoading, error, refetch } = usePostsQuery()
-  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
-  const { data: selectedPost } = usePostQuery(selectedPostId)
+  const [selectedPostId, setSelectedPostId] = useState<string>('')
+  const { data: selectedPost } = usePostQuery(selectedPostId, {
+    enabled: !!selectedPostId,
+  })
 
   const lookupItem = (id: string) => {
     setSelectedPostId(id)
@@ -14,7 +16,7 @@ export const PostList: React.FC = () => {
   // 選択された投稿の詳細を表示
   if (selectedPost) {
     alert(selectedPost.content)
-    setSelectedPostId(null)
+    setSelectedPostId('')
   }
 
   if (isLoading) {
