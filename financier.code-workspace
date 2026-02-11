@@ -16,6 +16,10 @@
       "path": "./packages/infra-scripts",
     },
     {
+      "name": "docs",
+      "path": "./docs",
+    },
+    {
       "name": "(app)",
       "path": "./packages/app",
     },
@@ -58,6 +62,20 @@
     "[jsonc]": {
       "editor.defaultFormatter": "vscode.json-language-features",
     },
+    "chat.tools.terminal.autoApprove": {
+      "pnpm": true,
+      "git commit": true,
+      "git add": true
+    },
+    "files.readonlyInclude": {
+      "**/routeTree.gen.ts": true
+    },
+    "files.watcherExclude": {
+      "**/routeTree.gen.ts": true
+    },
+    "search.exclude": {
+      "**/routeTree.gen.ts": true
+    }
   },
   "extensions": {
     "recommendations": [

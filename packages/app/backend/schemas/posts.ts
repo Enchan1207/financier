@@ -1,5 +1,6 @@
 import { primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
+/** Posts テーブル定義 */
 export const postsTable = sqliteTable(
   'posts',
   {

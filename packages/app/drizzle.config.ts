@@ -18,7 +18,7 @@ type WranglerConfig = {
 
 const baseConfig: Partial<DrizzleKitConfig> = {
   out: './drizzle',
-  schema: ['./backend/schema.ts'],
+  schema: ['./backend/schemas/*.ts'],
 }
 
 const buildConfig = (mode: string): DrizzleKitConfig => {

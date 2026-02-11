@@ -18,6 +18,7 @@ export type Auth0JWTPayload = JWTPayload & {
 const jwkParser = createMiddleware<{ Bindings: Env }>(async (c, next) =>
   jwk({
     jwks_uri: `https://${import.meta.env.VITE_AUTH0_DOMAIN}/.well-known/jwks.json`,
+    alg: ['RS256'],
   })(c, next),
 )
 
