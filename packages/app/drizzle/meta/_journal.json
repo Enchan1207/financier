@@ -8,6 +8,13 @@
       "when": 1765590725971,
       "tag": "0000_unknown_scorpion",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1770817946448,
+      "tag": "0001_peaceful_loners",
+      "breakpoints": true
     }
   ]
 }
