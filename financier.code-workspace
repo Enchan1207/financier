@@ -16,6 +16,10 @@
       "path": "./packages/infra-scripts",
     },
     {
+      "name": "docs",
+      "path": "./docs",
+    },
+    {
       "name": "(app)",
       "path": "./packages/app",
     },
@@ -60,7 +64,8 @@
     },
     "chat.tools.terminal.autoApprove": {
       "pnpm": true,
-      "git commit": true
+      "git commit": true,
+      "git add": true
     },
     "files.readonlyInclude": {
       "**/routeTree.gen.ts": true
