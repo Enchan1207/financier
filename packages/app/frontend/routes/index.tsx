@@ -1,6 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { PostForm } from '../post-form'
-import { PostList } from '../post-list'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import UserButton from '../user-button'
 
 const Index: React.FC = () => {
@@ -8,8 +6,9 @@ const Index: React.FC = () => {
     <>
       <h2>Cloudflare Workers with static assets</h2>
       <UserButton />
-      <PostList />
-      <PostForm />
+      <nav>
+        <Link to="/posts">投稿一覧へ</Link>
+      </nav>
     </>
   )
 }
