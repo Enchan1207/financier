@@ -8,9 +8,7 @@ export const PostForm: React.FC = () => {
 
   const createPostMutation = useCreatePostMutation()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
+  const handleSubmit = async () => {
     await createPostMutation.mutateAsync({
       title,
       content,
@@ -21,7 +19,7 @@ export const PostForm: React.FC = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form>
       <div>
         <label>
           タイトル:
@@ -47,7 +45,11 @@ export const PostForm: React.FC = () => {
           />
         </label>
       </div>
-      <button type="submit" disabled={createPostMutation.isPending}>
+      <button
+        type="submit"
+        disabled={createPostMutation.isPending}
+        onClick={handleSubmit}
+      >
         {createPostMutation.isPending ? '送信中...' : '送信'}
       </button>
       {createPostMutation.isError && (
