@@ -1,64 +1,41 @@
-import { useAuth0 } from '@auth0/auth0-react'
-import type { InferResponseType } from 'hono'
 import { useState } from 'react'
 
-import { client } from './client'
-
-type ListItem = InferResponseType<typeof client.posts.$get>['items'][number]
+import { usePostQuery, usePostsQuery } from './hooks/use-posts'
 
 export const PostList: React.FC = () => {
-  // TODO: クレデンシャル管理どうにかする
-  const { getAccessTokenSilently } = useAuth0()
+  const { data, isLoading, error, refetch } = usePostsQuery()
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null)
+  const { data: selectedPost } = usePostQuery(selectedPostId)
 
-  const [items, setItems] = useState<ListItem[]>([])
-
-  const loadItems = async () => {
-    const token = await getAccessTokenSilently()
-
-    const response = await client.posts
-      .$get(undefined, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => (res.ok ? res.json() : undefined))
-
-    if (response === undefined) {
-      return
-    }
-
-    setItems(response.items)
+  const lookupItem = (id: string) => {
+    setSelectedPostId(id)
   }
 
-  const lookupItem = async (id: string) => {
-    const token = await getAccessTokenSilently()
+  // 選択された投稿の詳細を表示
+  if (selectedPost) {
+    alert(selectedPost.content)
+    setSelectedPostId(null)
+  }
 
-    const response = await client.posts[':id']
-      .$get(
-        { param: { id } },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      )
-      .then((res) => (res.ok ? res.json() : undefined))
+  if (isLoading) {
+    return <p>読み込み中...</p>
+  }
 
-    if (response === undefined) {
-      alert('エラーが発生しました')
-      return
-    }
-
-    alert(response.content)
+  if (error) {
+    return <p>エラーが発生しました: {error.message}</p>
   }
 
   return (
     <>
       <ul>
-        {items.map((item) => (
+        {data?.items.map((item) => (
           <li key={item.id}>
             {item.title}
             <button onClick={() => lookupItem(item.id)}>lookup</button>
           </li>
         ))}
       </ul>
-      <button onClick={loadItems}>refresh</button>
+      <button onClick={() => refetch()}>refresh</button>
     </>
   )
 }

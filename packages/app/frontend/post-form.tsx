@@ -1,31 +1,20 @@
-import { useAuth0 } from '@auth0/auth0-react'
 import { useState } from 'react'
 
-import { client } from './client'
+import { useCreatePostMutation } from './hooks/use-posts'
 
-// FIXME: copilotに作らせている。再レンダリングがちょっとひどい
 export const PostForm: React.FC = () => {
-  const { getAccessTokenSilently } = useAuth0()
-
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
+
+  const createPostMutation = useCreatePostMutation()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const token = await getAccessTokenSilently()
-
-    await client.posts.$post(
-      {
-        json: {
-          title,
-          content,
-        },
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      },
-    )
+    await createPostMutation.mutateAsync({
+      title,
+      content,
+    })
 
     setTitle('')
     setContent('')
@@ -58,7 +47,12 @@ export const PostForm: React.FC = () => {
           />
         </label>
       </div>
-      <button type="submit">送信</button>
+      <button type="submit" disabled={createPostMutation.isPending}>
+        {createPostMutation.isPending ? '送信中...' : '送信'}
+      </button>
+      {createPostMutation.isError && (
+        <p>エラーが発生しました: {createPostMutation.error.message}</p>
+      )}
     </form>
   )
 }
