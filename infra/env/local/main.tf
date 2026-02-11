@@ -16,7 +16,7 @@ terraform {
 
 variable "app_origin" {
   type    = string
-  default = "http://localhost:5173"
+  default = "http://financier.localhost:5173"
 }
 
 module "auth0" {

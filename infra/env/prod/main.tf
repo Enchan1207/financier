@@ -19,19 +19,6 @@ variable "cloudflare_account_id" {
   type = string
 }
 
-variable "supabase_access_token" {
-  type      = string
-  sensitive = true
-}
-
-variable "supabase_organization_id" {
-  type = string
-}
-
-variable "supabase_database_password" {
-  type = string
-}
-
 variable "mode" {
   type    = string
   default = "production"

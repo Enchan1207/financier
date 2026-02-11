@@ -9,6 +9,3 @@ export AWS_ENDPOINT_URL_S3=https://example.com
 
 export AUTH0_CLIENT_ID=account_client_id
 export AUTH0_CLIENT_SECRET=account_client_secret
-
-export TF_VAR_supabase_access_token=
-export TF_VAR_supabase_organization_id=
