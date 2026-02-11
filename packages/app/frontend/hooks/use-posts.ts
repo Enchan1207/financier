@@ -86,17 +86,13 @@ export const useCreatePostMutation = () => {
         },
       )
 
-      if (!response.ok) {
-        throw new Error('Failed to create post')
-      }
-
       return response.json()
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       // 投稿作成成功時に一覧のキャッシュを無効化して再フェッチ
-      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      await queryClient.invalidateQueries({ queryKey: ['posts'] })
     },
   })
 }
 
-export type { PostItem, PostListResponse, PostDetailResponse }
+export type { PostDetailResponse, PostItem, PostListResponse }

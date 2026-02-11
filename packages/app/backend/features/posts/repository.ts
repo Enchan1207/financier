@@ -1,5 +1,5 @@
-import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import { and, eq } from 'drizzle-orm'
+import type { DrizzleD1Database } from 'drizzle-orm/d1'
 
 import type { Post, PostId } from '../../domains/post'
 import type { UserId } from '../../domains/user'

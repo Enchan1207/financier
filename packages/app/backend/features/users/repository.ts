@@ -1,5 +1,5 @@
-import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import { eq } from 'drizzle-orm'
+import type { DrizzleD1Database } from 'drizzle-orm/d1'
 
 import type { User, UserId } from '../../domains/user'
 import { usersTable } from '../../schemas/users'

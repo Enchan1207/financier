@@ -1,14 +1,14 @@
 import { zValidator } from '@hono/zod-validator'
+import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import { Hono } from 'hono'
 import z from 'zod'
 
-import type { Auth0JWTPayload } from '../../middlewares/auth'
-import type { DrizzleD1Database } from 'drizzle-orm/d1'
+import type { PostId } from '../../domains/post'
 import type { User } from '../../domains/user'
-
+import type { Auth0JWTPayload } from '../../middlewares/auth'
+import { useAuth } from '../users/middleware'
 import { findPostById, findPostsByUserId, savePost } from './repository'
 import { buildCreatePostWorkflow } from './workflow'
-import { useAuth } from '../users/middleware'
 
 type Variables = {
   jwtPayload: Auth0JWTPayload
@@ -27,7 +27,7 @@ const postsApp = new Hono<{ Variables: Variables }>()
     return c.json({ items: posts })
   })
   .get('/:id', zValidator('param', z.object({ id: z.string() })), async (c) => {
-    const postId = c.req.valid('param').id as any
+    const postId = c.req.valid('param').id as PostId
     const userId = c.get('user').id
     const db = c.get('drizzle')
 

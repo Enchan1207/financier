@@ -1,7 +1,7 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute,Link } from '@tanstack/react-router'
 
-import { PostForm } from '../post-form'
 import { usePostsQuery } from '../hooks/use-posts'
+import { PostForm } from '../post-form'
 
 const PostsIndex: React.FC = () => {
   const { data, isLoading, error, refetch } = usePostsQuery()

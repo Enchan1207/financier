@@ -1,5 +1,5 @@
-import type { Context, MiddlewareHandler } from 'hono'
 import type { DrizzleD1Database } from 'drizzle-orm/d1'
+import type { Context, MiddlewareHandler } from 'hono'
 
 import type { User } from '../../domains/user'
 import type { Auth0JWTPayload } from '../../middlewares/auth'

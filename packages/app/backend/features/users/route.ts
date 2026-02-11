@@ -1,9 +1,8 @@
+import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import { Hono } from 'hono'
 
-import type { Auth0JWTPayload } from '../../middlewares/auth'
-import type { DrizzleD1Database } from 'drizzle-orm/d1'
 import type { User } from '../../domains/user'
-
+import type { Auth0JWTPayload } from '../../middlewares/auth'
 import { useAuth } from './middleware'
 
 type Variables = {
@@ -14,7 +13,7 @@ type Variables = {
 
 const usersApp = new Hono<{ Variables: Variables }>()
   .use(useAuth())
-  .get('/me', async (c) => {
+  .get('/me', (c) => {
     const user = c.get('user')
     return c.json(user)
   })
