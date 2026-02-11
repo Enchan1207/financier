@@ -4,10 +4,11 @@ import type { InferResponseType } from 'hono'
 
 import { client } from '../client'
 
-type PostListResponse = InferResponseType<typeof client.posts.$get>
+type PostListResponse = InferResponseType<typeof client.posts.$get, 200>
 type PostItem = PostListResponse['items'][number]
 type PostDetailResponse = InferResponseType<
-  (typeof client.posts)[':id']['$get']
+  (typeof client.posts)[':id']['$get'],
+  200
 >
 
 /**
@@ -21,13 +22,15 @@ export const usePostsQuery = () => {
     queryFn: async () => {
       const token = await getAccessTokenSilently()
 
-      const response = await client.posts
-        .$get(undefined, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+      const response = await client.posts.$get(undefined, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
 
-      return response
+      if (!response.ok) {
+        throw new Error(`投稿一覧の取得に失敗しました: ${response.status}`)
+      }
+
+      return response.json()
     },
   })
 }
@@ -47,16 +50,22 @@ export const usePostQuery = (id: string | null) => {
 
       const token = await getAccessTokenSilently()
 
-      const response = await client.posts[':id']
-        .$get(
-          { param: { id } },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        )
-        .then((res) => (res.ok ? res.json() : Promise.reject(res)))
+      const response = await client.posts[':id'].$get(
+        { param: { id } },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      )
 
-      return response
+      if (response.status === 404) {
+        throw new Error('投稿が見つかりません')
+      }
+
+      if (!response.ok) {
+        throw new Error(`投稿の取得に失敗しました: ${response.status}`)
+      }
+
+      return response.json()
     },
     enabled: !!id, // idがnullの場合はクエリを実行しない
   })
@@ -83,7 +92,7 @@ export const useCreatePostMutation = () => {
       )
 
       if (!response.ok) {
-        throw new Error('Failed to create post')
+        throw new Error(`投稿の作成に失敗しました: ${response.status}`)
       }
 
       return response.json()
