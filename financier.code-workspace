@@ -1,0 +1,69 @@
+{
+  "folders": [
+    {
+      "path": "packages/app/frontend",
+    },
+    {
+      "path": "packages/app/backend",
+    },
+    {
+      "path": "./infra",
+    },
+    {
+      "path": ".github/workflows",
+    },
+    {
+      "path": "./packages/infra-scripts",
+    },
+    {
+      "name": "(app)",
+      "path": "./packages/app",
+    },
+    {
+      "name": "(root)",
+      "path": "./",
+    },
+  ],
+  "settings": {
+    "typescript.format.enable": false,
+    "eslint.enable": true,
+    "eslint.format.enable": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "always",
+    },
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[json]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[javascriptreact]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[typescriptreact]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+    },
+    "[terraform]": {
+      "editor.defaultFormatter": "hashicorp.terraform",
+    },
+    "files.associations": {
+      "*.toml": "ini",
+      ".envrc*": "dotenv",
+      ".dev.vars*": "dotenv",
+    },
+    "[jsonc]": {
+      "editor.defaultFormatter": "vscode.json-language-features",
+    },
+  },
+  "extensions": {
+    "recommendations": [
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint",
+      "hashicorp.terraform"
+    ]
+  }
+}

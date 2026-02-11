@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.backend.tsbuildinfo",
+    "target": "esnext",
+    "lib": ["esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "rootDir": "./",
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "composite": true,
+    "verbatimModuleSyntax": true,
+    "types": ["@cloudflare/workers-types/experimental"]
+  },
+  "include": ["./**/*.ts", "../vite-env.d.ts", "../env.d.ts"],
+  "exclude": ["dist", "node_modules"]
+}
