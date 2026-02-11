@@ -4,18 +4,22 @@ import z from 'zod'
 
 import type { Auth0JWTPayload } from '../../middlewares/auth'
 import type { DrizzleD1Database } from 'drizzle-orm/d1'
+import type { User } from '../../domains/user'
 
 import { findPostById, findPostsByUserId, savePost } from './repository'
 import { buildCreatePostWorkflow } from './workflow'
+import { useAuth } from '../users/middleware'
 
 type Variables = {
   jwtPayload: Auth0JWTPayload
   drizzle: DrizzleD1Database
+  user: User
 }
 
 const postsApp = new Hono<{ Variables: Variables }>()
+  .use(useAuth())
   .get('/', async (c) => {
-    const userId = c.get('jwtPayload').sub
+    const userId = c.get('user').id
     const db = c.get('drizzle')
 
     const posts = await findPostsByUserId(db)(userId)
@@ -23,8 +27,8 @@ const postsApp = new Hono<{ Variables: Variables }>()
     return c.json({ items: posts })
   })
   .get('/:id', zValidator('param', z.object({ id: z.string() })), async (c) => {
-    const postId = c.req.valid('param').id
-    const userId = c.get('jwtPayload').sub
+    const postId = c.req.valid('param').id as any
+    const userId = c.get('user').id
     const db = c.get('drizzle')
 
     const post = await findPostById(db)(postId, userId)
@@ -46,12 +50,12 @@ const postsApp = new Hono<{ Variables: Variables }>()
     ),
     async (c) => {
       const body = c.req.valid('json')
-      const userId = c.get('jwtPayload').sub
+      const userId = c.get('user').id
       const db = c.get('drizzle')
 
       const event = await buildCreatePostWorkflow(savePost(db))({
         input: {
-          userId: userId as any,
+          userId: userId,
           title: body.title,
           content: body.content,
         },
