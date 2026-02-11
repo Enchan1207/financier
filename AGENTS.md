@@ -36,6 +36,8 @@
   - variables,functions: lowerCamelCase
   - classes,constants,components: PascalCase
   - module: kebab-case
+- follow the guidelines:
+  - backend: @ docs/architecture-guideline/backend.md
 
 ### forbidden operations
 

@@ -59,7 +59,8 @@
       "editor.defaultFormatter": "vscode.json-language-features",
     },
     "chat.tools.terminal.autoApprove": {
-      "pnpm": true
+      "pnpm": true,
+      "git commit": true
     },
     "files.readonlyInclude": {
       "**/routeTree.gen.ts": true
