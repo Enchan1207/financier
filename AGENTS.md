@@ -13,6 +13,9 @@
     - ORM: Drizzle
 - formatter: Prettier
 - linter: ESLint
+- deployment infrastructure
+  - compute: Cloudflare Workers (with static assets)
+  - database: Cloudflare D1
 
 ## scripts
 
