@@ -1,3 +1,4 @@
+import { PageHeader } from '@frontend/components/layout/page-header'
 import {
   Card,
   CardContent,
@@ -17,14 +18,10 @@ const DashboardPage = () => {
 
   return (
     <div className="grid gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>ダッシュボード</CardTitle>
-          <CardDescription>
-            UC-7.1 に沿って、内部残高・積立合計・当年度収支サマリを表示します。
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <PageHeader
+        title="ダッシュボード"
+        description="内部残高・積立残高・年度収支の主要指標を一覧で確認できます。"
+      />
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

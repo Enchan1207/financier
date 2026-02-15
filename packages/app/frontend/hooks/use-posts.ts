@@ -17,8 +17,8 @@ const postListeners = new Set<() => void>()
 let postsStore: PostItem[] = [
   {
     id: 'post-1',
-    title: 'posts モックガイド',
-    content: 'この機能は実装方針のガイド用です。',
+    title: 'お知らせ',
+    content: '投稿機能の初期データです。',
   },
 ]
 

@@ -1,3 +1,4 @@
+import { PageHeader } from '@frontend/components/layout/page-header'
 import {
   Alert,
   AlertDescription,
@@ -6,7 +7,6 @@ import {
 import { Button } from '@frontend/components/ui/button'
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -146,20 +146,15 @@ const EventTemplateNewPage = () => {
 
   return (
     <div className="grid gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>イベントテンプレートを作成</CardTitle>
-          <CardDescription>
-            UC-5.4
-            のモックです。繰り返し利用する取引セットを落ち着いて登録します。
-          </CardDescription>
-          <CardAction>
-            <Button asChild variant="outline">
-              <Link to="/events">イベント画面へ戻る</Link>
-            </Button>
-          </CardAction>
-        </CardHeader>
-      </Card>
+      <PageHeader
+        title="イベントテンプレートを作成"
+        description="繰り返し利用する取引セットをまとめて登録できます。"
+        actions={
+          <Button asChild variant="outline">
+            <Link to="/events">イベント画面へ戻る</Link>
+          </Button>
+        }
+      />
 
       <Card>
         <CardHeader>

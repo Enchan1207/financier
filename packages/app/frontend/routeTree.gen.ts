@@ -18,6 +18,7 @@ import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
 import { Route as BudgetsIndexRouteImport } from './routes/budgets/index'
 import { Route as AnalyticsIndexRouteImport } from './routes/analytics/index'
 import { Route as TransactionsTransactionIdRouteImport } from './routes/transactions/$transactionId'
+import { Route as SavingsSavingDefinitionIdRouteImport } from './routes/savings/$savingDefinitionId'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
 import { Route as EventsTemplatesNewRouteImport } from './routes/events/templates/new'
 
@@ -67,6 +68,12 @@ const TransactionsTransactionIdRoute =
     path: '/transactions/$transactionId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const SavingsSavingDefinitionIdRoute =
+  SavingsSavingDefinitionIdRouteImport.update({
+    id: '/savings/$savingDefinitionId',
+    path: '/savings/$savingDefinitionId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const PostsPostIdRoute = PostsPostIdRouteImport.update({
   id: '/posts/$postId',
   path: '/posts/$postId',
@@ -81,6 +88,7 @@ const EventsTemplatesNewRoute = EventsTemplatesNewRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/posts/$postId': typeof PostsPostIdRoute
+  '/savings/$savingDefinitionId': typeof SavingsSavingDefinitionIdRoute
   '/transactions/$transactionId': typeof TransactionsTransactionIdRoute
   '/analytics/': typeof AnalyticsIndexRoute
   '/budgets/': typeof BudgetsIndexRoute
@@ -94,6 +102,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/posts/$postId': typeof PostsPostIdRoute
+  '/savings/$savingDefinitionId': typeof SavingsSavingDefinitionIdRoute
   '/transactions/$transactionId': typeof TransactionsTransactionIdRoute
   '/analytics': typeof AnalyticsIndexRoute
   '/budgets': typeof BudgetsIndexRoute
@@ -108,6 +117,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/posts/$postId': typeof PostsPostIdRoute
+  '/savings/$savingDefinitionId': typeof SavingsSavingDefinitionIdRoute
   '/transactions/$transactionId': typeof TransactionsTransactionIdRoute
   '/analytics/': typeof AnalyticsIndexRoute
   '/budgets/': typeof BudgetsIndexRoute
@@ -123,6 +133,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/posts/$postId'
+    | '/savings/$savingDefinitionId'
     | '/transactions/$transactionId'
     | '/analytics/'
     | '/budgets/'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/posts/$postId'
+    | '/savings/$savingDefinitionId'
     | '/transactions/$transactionId'
     | '/analytics'
     | '/budgets'
@@ -149,6 +161,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/posts/$postId'
+    | '/savings/$savingDefinitionId'
     | '/transactions/$transactionId'
     | '/analytics/'
     | '/budgets/'
@@ -163,6 +176,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
+  SavingsSavingDefinitionIdRoute: typeof SavingsSavingDefinitionIdRoute
   TransactionsTransactionIdRoute: typeof TransactionsTransactionIdRoute
   AnalyticsIndexRoute: typeof AnalyticsIndexRoute
   BudgetsIndexRoute: typeof BudgetsIndexRoute
@@ -239,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TransactionsTransactionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/savings/$savingDefinitionId': {
+      id: '/savings/$savingDefinitionId'
+      path: '/savings/$savingDefinitionId'
+      fullPath: '/savings/$savingDefinitionId'
+      preLoaderRoute: typeof SavingsSavingDefinitionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/$postId': {
       id: '/posts/$postId'
       path: '/posts/$postId'
@@ -259,6 +280,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PostsPostIdRoute: PostsPostIdRoute,
+  SavingsSavingDefinitionIdRoute: SavingsSavingDefinitionIdRoute,
   TransactionsTransactionIdRoute: TransactionsTransactionIdRoute,
   AnalyticsIndexRoute: AnalyticsIndexRoute,
   BudgetsIndexRoute: BudgetsIndexRoute,

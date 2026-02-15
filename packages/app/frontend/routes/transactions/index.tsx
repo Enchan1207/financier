@@ -1,3 +1,4 @@
+import { PageHeader } from '@frontend/components/layout/page-header'
 import {
   Alert,
   AlertDescription,
@@ -109,15 +110,10 @@ const TransactionsPage = () => {
 
   return (
     <div className="grid gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>取引（Transaction）</CardTitle>
-          <CardDescription>
-            UC-1 系の基本導線です。未来日取引と積立拠出の業務ルールを mock hook
-            で判定します。
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <PageHeader
+        title="取引管理"
+        description="日々の収入・支出を登録し、未来日取引や年度帰属を含めて管理できます。"
+      />
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <Card>

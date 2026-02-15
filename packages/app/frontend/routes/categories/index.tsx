@@ -1,3 +1,4 @@
+import { PageHeader } from '@frontend/components/layout/page-header'
 import {
   Alert,
   AlertDescription,
@@ -112,14 +113,10 @@ const CategoriesPage = () => {
 
   return (
     <div className="grid gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>カテゴリ（Category）</CardTitle>
-          <CardDescription>
-            UC-2 系のモックです。支出カテゴリ作成時のみ積立カテゴリ化できます。
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <PageHeader
+        title="カテゴリ管理"
+        description="収入・支出カテゴリを管理し、必要に応じて積立カテゴリを設定できます。"
+      />
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <Card>

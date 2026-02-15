@@ -1,3 +1,4 @@
+import { PageHeader } from '@frontend/components/layout/page-header'
 import {
   Card,
   CardContent,
@@ -29,14 +30,13 @@ const phases = [
 const IndexPage = () => {
   return (
     <div className="grid gap-4">
+      <PageHeader
+        title="家計管理を始める"
+        description="収支の記録から予算管理、分析までを一つの画面構成で確認できます。"
+      />
+
       <Card>
-        <CardHeader>
-          <CardTitle>モック実装の進め方</CardTitle>
-          <CardDescription>
-            仕様に沿って、根幹機能から順に画面遷移と基本UIを確認できる構成にしています。
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3">
+        <CardContent className="grid gap-3 pt-6">
           <Link
             to="/dashboard"
             className="bg-primary text-primary-foreground inline-flex w-fit rounded-md px-4 py-2 text-sm font-medium"
@@ -44,8 +44,7 @@ const IndexPage = () => {
             ダッシュボードへ
           </Link>
           <p className="text-muted-foreground text-sm">
-            現在はバックエンド接続を行わず、全データを hooks
-            内のダミー実装で返します。
+            取引・カテゴリ・予算・積立・イベントを順に登録すると、分析画面まで連動して確認できます。
           </p>
         </CardContent>
       </Card>

@@ -1,3 +1,4 @@
+import { PageHeader } from '@frontend/components/layout/page-header'
 import { Badge } from '@frontend/components/ui/badge'
 import {
   Card,
@@ -45,15 +46,10 @@ const AnalyticsPage = () => {
 
   return (
     <div className="grid gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>分析・可視化（Analytics）</CardTitle>
-          <CardDescription>
-            UC-7
-            系のモックです。カテゴリ分析、年度比較、投資判断支援を切り替えて確認できます。
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <PageHeader
+        title="分析・可視化"
+        description="カテゴリ分析、年度比較、支出シミュレーションを切り替えて確認できます。"
+      />
 
       <Card>
         <CardHeader>
@@ -207,8 +203,7 @@ const AnalyticsPage = () => {
             <CardHeader>
               <CardTitle>投資判断支援</CardTitle>
               <CardDescription>
-                UC-7.7
-                のシナリオとして、仮想支出後の内部残高見込みを表示します。
+                仮想支出を入力し、実行後の内部残高見込みを確認できます。
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">

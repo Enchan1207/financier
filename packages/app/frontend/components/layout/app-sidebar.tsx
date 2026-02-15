@@ -1,13 +1,4 @@
 import {
-  ChartColumnBig,
-  CircleDollarSign,
-  LayoutDashboard,
-  PiggyBank,
-  ReceiptText,
-  Tags,
-  WalletCards,
-} from 'lucide-react'
-import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -18,6 +9,15 @@ import {
   SidebarMenuItem,
 } from '@frontend/components/ui/sidebar'
 import { Link, useRouterState } from '@tanstack/react-router'
+import {
+  ChartColumnBig,
+  CircleDollarSign,
+  LayoutDashboard,
+  PiggyBank,
+  ReceiptText,
+  Tags,
+  WalletCards,
+} from 'lucide-react'
 
 const navItems = [
   { to: '/dashboard', label: 'ダッシュボード', icon: LayoutDashboard },
@@ -41,7 +41,7 @@ export const AppSidebar = () => {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>画面遷移</SidebarGroupLabel>
+          <SidebarGroupLabel>メニュー</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
@@ -62,7 +62,7 @@ export const AppSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
       <div className="border-sidebar-border border-t p-3">
-        <p className="text-muted-foreground text-xs">financier / mock</p>
+        <p className="text-muted-foreground text-xs">financier</p>
         <p className="text-sm font-medium">個人財務マネジメント</p>
       </div>
     </Sidebar>

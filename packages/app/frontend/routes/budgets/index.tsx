@@ -1,3 +1,4 @@
+import { PageHeader } from '@frontend/components/layout/page-header'
 import {
   Alert,
   AlertDescription,
@@ -87,15 +88,10 @@ const BudgetsPage = () => {
 
   return (
     <div className="grid gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>予算（Budget）</CardTitle>
-          <CardDescription>
-            UC-3
-            系のモックです。年度×カテゴリ単位で予算を設定し、実績との差分を確認します。
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <PageHeader
+        title="予算管理"
+        description="年度とカテゴリごとに予算を設定し、実績との差分を把握できます。"
+      />
 
       <Card>
         <CardHeader>

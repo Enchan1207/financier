@@ -1,3 +1,4 @@
+import { PageHeader } from '@frontend/components/layout/page-header'
 import {
   Alert,
   AlertDescription,
@@ -92,14 +93,10 @@ const EventsPage = () => {
 
   return (
     <div className="grid gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>イベント（Event）</CardTitle>
-          <CardDescription>
-            UC-5 系のモックです。イベント作成とイベント単位集計を確認できます。
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <PageHeader
+        title="イベント管理"
+        description="ライフイベントごとに取引を集計し、費用の全体像を確認できます。"
+      />
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <Card>
@@ -256,7 +253,7 @@ const EventsPage = () => {
         <CardHeader>
           <CardTitle>イベントテンプレート一覧</CardTitle>
           <CardDescription>
-            UC-5.4/5.5 のモックとして定義内容を参照できます。
+            登録済みテンプレートの内容を確認できます。
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3">

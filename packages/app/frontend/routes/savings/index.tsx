@@ -1,8 +1,4 @@
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@frontend/components/ui/alert'
+import { PageHeader } from '@frontend/components/layout/page-header'
 import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import {
@@ -12,15 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
-import { Input } from '@frontend/components/ui/input'
-import { Label } from '@frontend/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@frontend/components/ui/select'
 import {
   Table,
   TableBody,
@@ -29,132 +16,19 @@ import {
   TableHeader,
   TableRow,
 } from '@frontend/components/ui/table'
-import {
-  useSavingActions,
-  useSavingListQuery,
-} from '@frontend/hooks/use-mock-finance-store'
+import { useSavingListQuery } from '@frontend/hooks/use-mock-finance-store'
 import { formatCurrency, formatRatio } from '@frontend/lib/financier-format'
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { createFileRoute, Link } from '@tanstack/react-router'
 
 const SavingsPage = () => {
   const { data: savings } = useSavingListQuery()
-  const { createSavingWithdrawal } = useSavingActions()
-
-  const [savingDefinitionId, setSavingDefinitionId] = useState('')
-  const [amount, setAmount] = useState('')
-  const [memo, setMemo] = useState('')
-  const [feedback, setFeedback] = useState<{
-    variant: 'default' | 'destructive'
-    title: string
-    description?: string
-  } | null>(null)
-
-  const handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
-    event.preventDefault()
-
-    const result = createSavingWithdrawal({
-      savingDefinitionId,
-      amount: Number.parseInt(amount, 10),
-      memo,
-    })
-
-    if (!result.ok) {
-      setFeedback({
-        variant: 'destructive',
-        title: '取り崩しに失敗しました',
-        description: result.message,
-      })
-
-      return
-    }
-
-    setFeedback({
-      variant: 'default',
-      title: '取り崩しを登録しました',
-      description: '取引は作成せず、取り崩し履歴のみ更新されます。',
-    })
-    setAmount('')
-    setMemo('')
-  }
 
   return (
     <div className="grid gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>積立（SavingDefinition）</CardTitle>
-          <CardDescription>
-            UC-4 系のモックです。拠出は取引画面、取り崩しはこの画面で扱います。
-          </CardDescription>
-        </CardHeader>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>積立取り崩し</CardTitle>
-          <CardDescription>
-            取り崩し日はシステム日付を自動適用します（利用者入力不可）。
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form className="grid gap-3 md:grid-cols-3" onSubmit={handleSubmit}>
-            <div className="grid gap-2 md:col-span-2">
-              <Label>対象積立</Label>
-              <Select
-                value={savingDefinitionId}
-                onValueChange={setSavingDefinitionId}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="積立を選択" />
-                </SelectTrigger>
-                <SelectContent>
-                  {savings.map((item) => (
-                    <SelectItem
-                      key={item.definition.id}
-                      value={item.definition.id}
-                    >
-                      {item.categoryName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="withdraw-amount">取り崩し額</Label>
-              <Input
-                id="withdraw-amount"
-                type="number"
-                min={1}
-                value={amount}
-                onChange={(event) => {
-                  setAmount(event.target.value)
-                }}
-                required
-              />
-            </div>
-            <div className="grid gap-2 md:col-span-3">
-              <Label htmlFor="withdraw-memo">メモ（任意）</Label>
-              <Input
-                id="withdraw-memo"
-                value={memo}
-                onChange={(event) => {
-                  setMemo(event.target.value)
-                }}
-              />
-            </div>
-            <Button type="submit" className="w-fit md:col-span-3">
-              取り崩しを実行
-            </Button>
-          </form>
-
-          {feedback !== null && (
-            <Alert className="mt-4" variant={feedback.variant}>
-              <AlertTitle>{feedback.title}</AlertTitle>
-              <AlertDescription>{feedback.description}</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
+      <PageHeader
+        title="積立管理"
+        description="積立の進捗を一覧で確認できます。取り崩し登録は詳細画面で実施します。"
+      />
 
       <Card>
         <CardHeader>
@@ -174,12 +48,21 @@ const SavingsPage = () => {
                 <TableHead className="text-right">進捗率</TableHead>
                 <TableHead className="text-right">残額</TableHead>
                 <TableHead className="text-right">月次差分</TableHead>
+                <TableHead>操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {savings.map((item) => (
                 <TableRow key={item.definition.id}>
-                  <TableCell>{item.categoryName}</TableCell>
+                  <TableCell>
+                    <Link
+                      to="/savings/$savingDefinitionId"
+                      params={{ savingDefinitionId: item.definition.id }}
+                      className="text-primary underline"
+                    >
+                      {item.categoryName}
+                    </Link>
+                  </TableCell>
                   <TableCell>
                     <Badge variant="outline">
                       {item.definition.type === 'goal' ? '目標型' : '自由型'}
@@ -207,6 +90,16 @@ const SavingsPage = () => {
                     {item.monthlyGap === undefined
                       ? '-'
                       : formatCurrency(item.monthlyGap)}
+                  </TableCell>
+                  <TableCell>
+                    <Button asChild size="sm" variant="ghost">
+                      <Link
+                        to="/savings/$savingDefinitionId"
+                        params={{ savingDefinitionId: item.definition.id }}
+                      >
+                        詳細
+                      </Link>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

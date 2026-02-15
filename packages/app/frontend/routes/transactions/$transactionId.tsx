@@ -1,9 +1,9 @@
+import { PageHeader } from '@frontend/components/layout/page-header'
 import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
@@ -32,11 +32,9 @@ const TransactionDetailPage = () => {
 
   return (
     <div className="grid gap-4">
+      <PageHeader title="取引詳細" description={`ID: ${data.id}`} />
+
       <Card>
-        <CardHeader>
-          <CardTitle>取引詳細</CardTitle>
-          <CardDescription>ID: {data.id}</CardDescription>
-        </CardHeader>
         <CardContent className="grid gap-2 text-sm">
           <p>日付: {formatDate(data.transactionDate)}</p>
           <p>年度帰属: {data.fiscalYear}年度</p>

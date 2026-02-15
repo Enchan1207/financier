@@ -1018,6 +1018,114 @@ export const useSavingListQuery = () => {
   }
 }
 
+export const useSavingDetailQuery = (savingDefinitionId: string) => {
+  const { state } = useMockFinanceStore()
+
+  const data = useMemo(() => {
+    const definition = state.savingDefinitions.find(
+      (item) => item.id === savingDefinitionId,
+    )
+
+    if (definition === undefined) {
+      return undefined
+    }
+
+    const category = state.categories.find(
+      (item) => item.id === definition.categoryId,
+    )
+    const balance = calculateSavingBalance(
+      definition,
+      state.transactions,
+      state.savingWithdrawals,
+    )
+
+    const goalProgress =
+      definition.type === 'goal' && definition.targetAmount !== undefined
+        ? Math.min((balance / definition.targetAmount) * 100, 100)
+        : undefined
+
+    const remainAmount =
+      definition.type === 'goal' && definition.targetAmount !== undefined
+        ? Math.max(definition.targetAmount - balance, 0)
+        : undefined
+
+    const monthlyGuideAmount =
+      definition.type === 'goal' &&
+      definition.targetAmount !== undefined &&
+      definition.deadline !== undefined
+        ? (() => {
+            const deadline = toDayDate(definition.deadline)
+            const today = getToday()
+
+            if (deadline.getTime() <= today.getTime()) {
+              return remainAmount
+            }
+
+            const monthDiff =
+              (deadline.getFullYear() - today.getFullYear()) * 12 +
+              (deadline.getMonth() - today.getMonth()) +
+              1
+
+            return Math.ceil((remainAmount ?? 0) / Math.max(monthDiff, 1))
+          })()
+        : undefined
+
+    const monthlyContribution = state.transactions
+      .filter((transaction) => {
+        if (transaction.categoryId !== definition.categoryId) {
+          return false
+        }
+
+        if (isFutureDate(transaction.transactionDate)) {
+          return false
+        }
+
+        const current = getToday()
+        const target = toDayDate(transaction.transactionDate)
+
+        return (
+          current.getFullYear() === target.getFullYear() &&
+          current.getMonth() === target.getMonth()
+        )
+      })
+      .reduce((sum, transaction) => sum + transaction.amount, 0)
+
+    const withdrawals = state.savingWithdrawals
+      .filter((withdrawal) => withdrawal.savingDefinitionId === definition.id)
+      .sort((a, b) =>
+        a.withdrawalDate === b.withdrawalDate
+          ? b.createdAt.localeCompare(a.createdAt)
+          : b.withdrawalDate.localeCompare(a.withdrawalDate),
+      )
+
+    return {
+      definition,
+      categoryName: category?.name ?? '不明カテゴリ',
+      balance,
+      goalProgress,
+      remainAmount,
+      monthlyGuideAmount,
+      monthlyGap:
+        monthlyGuideAmount === undefined
+          ? undefined
+          : monthlyContribution - monthlyGuideAmount,
+      withdrawals,
+    }
+  }, [
+    savingDefinitionId,
+    state.categories,
+    state.savingDefinitions,
+    state.savingWithdrawals,
+    state.transactions,
+  ])
+
+  return {
+    data,
+    isLoading: false,
+    error: data === undefined ? new Error('積立が見つかりません') : null,
+  }
+}
+
 export const useSavingActions = () => {
   const { createSavingWithdrawal } = useMockFinanceStore()
 
