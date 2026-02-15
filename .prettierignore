@@ -3,3 +3,4 @@ pnpm-lock.yaml
 *.tf
 **/drizzle/*
 wrangler.jsonc
+**/components/ui/*
