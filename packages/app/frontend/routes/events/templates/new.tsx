@@ -35,6 +35,7 @@ import {
   useEventActions,
 } from '@frontend/hooks/use-mock-finance-store'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { Minus, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 interface TemplateDraftRow {
@@ -249,14 +250,15 @@ const EventTemplateNewPage = () => {
                   <div className="flex items-end">
                     <Button
                       type="button"
-                      variant="ghost"
-                      size="sm"
+                      variant="destructive"
+                      size="icon"
+                      aria-label="行を削除"
                       disabled={templateRows.length === 1}
                       onClick={() => {
                         handleRemoveTemplateRow(rowIndex)
                       }}
                     >
-                      削除
+                      <Minus />
                     </Button>
                   </div>
                 </div>
@@ -267,10 +269,11 @@ const EventTemplateNewPage = () => {
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
+                size="icon"
+                aria-label="行を追加"
                 onClick={handleAddTemplateRow}
               >
-                行を追加
+                <Plus />
               </Button>
               <Button type="submit" className="w-fit">
                 作成する
