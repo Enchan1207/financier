@@ -4,21 +4,11 @@ import {
   AlertDescription,
   AlertTitle,
 } from '@frontend/components/ui/alert'
-import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@frontend/components/ui/card'
 import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -41,12 +31,13 @@ import {
   TableHeader,
   TableRow,
 } from '@frontend/components/ui/table'
+import { Tabs, TabsList, TabsTrigger } from '@frontend/components/ui/tabs'
 import {
   useCategoryActions,
   useCategoryListQuery,
 } from '@frontend/hooks/use-mock-finance-store'
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 
 const CategoriesPage = () => {
   const { data: categories } = useCategoryListQuery()
@@ -57,6 +48,12 @@ const CategoriesPage = () => {
   const [savingMode, setSavingMode] = useState<'none' | 'goal' | 'free'>('none')
   const [targetAmount, setTargetAmount] = useState('')
   const [deadline, setDeadline] = useState('')
+  const [listTypeFilter, setListTypeFilter] = useState<'income' | 'expense'>(
+    'expense',
+  )
+  const [expandedSavingCategoryId, setExpandedSavingCategoryId] = useState<
+    string | null
+  >(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [feedback, setFeedback] = useState<{
     variant: 'default' | 'destructive'
@@ -111,34 +108,24 @@ const CategoriesPage = () => {
     setFeedback({ variant: 'default', title: 'カテゴリをアーカイブしました' })
   }
 
+  const activeCategories = categories.filter((category) => {
+    return category.type === listTypeFilter && category.status === 'active'
+  })
+
   return (
     <div className="grid gap-4">
-      <PageHeader
-        title="カテゴリ管理"
-        description="収入・支出カテゴリを管理し、必要に応じて積立カテゴリを設定できます。"
-      />
+      <PageHeader title="カテゴリ管理" />
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <Card>
-          <CardHeader>
-            <CardTitle>カテゴリを作成</CardTitle>
-            <CardDescription>
-              作成はダイアログで行います。条件に応じて積立設定を指定できます。
-            </CardDescription>
-            <CardAction>
-              <DialogTrigger asChild>
-                <Button>カテゴリを追加</Button>
-              </DialogTrigger>
-            </CardAction>
-          </CardHeader>
-        </Card>
+        <div className="flex justify-end">
+          <DialogTrigger asChild>
+            <Button>カテゴリを作成</Button>
+          </DialogTrigger>
+        </div>
 
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>カテゴリを作成</DialogTitle>
-            <DialogDescription>
-              支出カテゴリの場合のみ積立カテゴリ化できます。
-            </DialogDescription>
           </DialogHeader>
 
           <form className="grid gap-4" onSubmit={handleCreate}>
@@ -244,76 +231,97 @@ const CategoriesPage = () => {
         </Alert>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>カテゴリ一覧</CardTitle>
-          <CardDescription>
-            `archived` は新規取引の選択肢から除外されます。
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>名前</TableHead>
-                <TableHead>種別</TableHead>
-                <TableHead>状態</TableHead>
-                <TableHead>積立</TableHead>
-                <TableHead>操作</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {categories.map((category) => (
-                <TableRow key={category.id}>
+      <div className="grid gap-2">
+        <Tabs
+          value={listTypeFilter}
+          onValueChange={(value) => {
+            setListTypeFilter(value as 'income' | 'expense')
+          }}
+        >
+          <TabsList>
+            <TabsTrigger value="expense">支出</TabsTrigger>
+            <TabsTrigger value="income">収入</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>名前</TableHead>
+              {listTypeFilter === 'expense' && <TableHead>積立</TableHead>}
+              <TableHead>操作</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {activeCategories.map((category) => (
+              <Fragment key={category.id}>
+                <TableRow>
                   <TableCell>{category.name}</TableCell>
+                  {listTypeFilter === 'expense' && (
+                    <TableCell>
+                      {category.isSavingCategory ? (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setExpandedSavingCategoryId((prev) => {
+                              return prev === category.id ? null : category.id
+                            })
+                          }}
+                        >
+                          {expandedSavingCategoryId === category.id
+                            ? '積立: あり（閉じる）'
+                            : '積立: あり（詳細）'}
+                        </Button>
+                      ) : (
+                        '積立: なし'
+                      )}
+                    </TableCell>
+                  )}
                   <TableCell>
-                    <Badge
-                      variant={
-                        category.type === 'income' ? 'secondary' : 'outline'
-                      }
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        handleArchive(category.id)
+                      }}
                     >
-                      {category.type === 'income' ? '収入' : '支出'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        category.status === 'active' ? 'default' : 'destructive'
-                      }
-                    >
-                      {category.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {category.isSavingCategory ? (
-                      <Badge variant="outline">
-                        {category.savingType === 'goal' ? '目標型' : '自由型'}
-                      </Badge>
-                    ) : (
-                      'なし'
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {category.status === 'active' ? (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          handleArchive(category.id)
-                        }}
-                      >
-                        アーカイブ
-                      </Button>
-                    ) : (
-                      <span className="text-muted-foreground text-xs">-</span>
-                    )}
+                      アーカイブ
+                    </Button>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                {listTypeFilter === 'expense' &&
+                  category.isSavingCategory &&
+                  expandedSavingCategoryId === category.id && (
+                    <TableRow>
+                      <TableCell colSpan={3}>
+                        <div className="grid gap-1 text-sm">
+                          <p>
+                            型:{' '}
+                            {category.savingType === 'goal'
+                              ? '目標型'
+                              : '自由型'}
+                          </p>
+                          <p>
+                            目標額:{' '}
+                            {category.targetAmount === undefined
+                              ? '-'
+                              : `${String(category.targetAmount)}円`}
+                          </p>
+                          <p>
+                            期限:{' '}
+                            {category.deadline === undefined
+                              ? '-'
+                              : category.deadline}
+                          </p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+              </Fragment>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 }
