@@ -1,4 +1,5 @@
 import { FinanceNavigation } from '@frontend/components/finance-navigation'
+import ModeToggle from '@frontend/components/theme/theme-toggle'
 import { Separator } from '@frontend/components/ui/separator'
 import { MockFinanceProvider } from '@frontend/hooks/use-mock-finance-store'
 import { createRootRoute, Outlet } from '@tanstack/react-router'
@@ -10,9 +11,12 @@ const RootLayout = () => {
       <div className="min-h-dvh bg-muted/30">
         <header className="border-b bg-background/90">
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 md:px-6">
-            <div>
-              <p className="text-muted-foreground text-sm">financier / mock</p>
-              <h1 className="text-xl font-semibold">個人財務マネジメント</h1>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-muted-foreground text-sm">financier / mock</p>
+                <h1 className="text-xl font-semibold">個人財務マネジメント</h1>
+              </div>
+              <ModeToggle />
             </div>
             <FinanceNavigation />
           </div>
