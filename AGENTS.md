@@ -13,6 +13,9 @@
     - ORM: Drizzle
 - formatter: Prettier
 - linter: ESLint
+- deployment infrastructure
+  - compute: Cloudflare Workers (with static assets)
+  - database: Cloudflare D1
 
 ## scripts
 
@@ -38,6 +41,10 @@
   - module: kebab-case
 - follow the guidelines:
   - backend: @ docs/architecture-guideline/backend.md
+- follow the specs:
+  - requirements: @docs/spec/requirements.md
+  - functions: @docs/spec/functions.md
+  - usecases: @docs/spec/usecases.md
 
 ### forbidden operations
 
