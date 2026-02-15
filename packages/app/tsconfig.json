@@ -10,5 +10,12 @@
     {
       "path": "./tsconfig.node.json"
     }
-  ]
+  ],
+  "compilerOptions": {
+    "paths": {
+      "@frontend/*": [
+        "./frontend/*"
+      ]
+    }
+  }
 }
