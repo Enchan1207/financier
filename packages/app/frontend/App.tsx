@@ -1,15 +1,9 @@
-import { PostForm } from './post-form'
-import { PostList } from './post-list'
-import UserButton from './user-button'
-
 const App: React.FC = () => {
   return (
-    <>
-      <h2>Cloudflare Workers with static assets</h2>
-      <UserButton />
-      <PostList />
-      <PostForm />
-    </>
+    <p>
+      このファイルは未使用です。画面は TanStack Router の file routes
+      で構成しています。
+    </p>
   )
 }
 

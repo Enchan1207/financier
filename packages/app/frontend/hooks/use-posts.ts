@@ -1,98 +1,127 @@
-import { useAuth0 } from '@auth0/auth0-react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { InferResponseType } from 'hono'
+import { useEffect, useMemo, useState } from 'react'
 
-import { client } from '../client'
+type PostItem = {
+  id: string
+  title: string
+  content: string
+}
 
-type PostListResponse = InferResponseType<typeof client.posts.$get, 200>
-type PostItem = PostListResponse['items'][number]
-type PostDetailResponse = InferResponseType<
-  (typeof client.posts)[':id']['$get'],
-  200
->
+type PostListResponse = {
+  items: PostItem[]
+}
 
-/**
- * 投稿一覧を取得するクエリフック
- */
+type PostDetailResponse = PostItem
+
+const postListeners = new Set<() => void>()
+
+let postsStore: PostItem[] = [
+  {
+    id: 'post-1',
+    title: 'posts モックガイド',
+    content: 'この機能は実装方針のガイド用です。',
+  },
+]
+
+const subscribePosts = (listener: () => void): (() => void) => {
+  postListeners.add(listener)
+
+  return () => {
+    postListeners.delete(listener)
+  }
+}
+
+const notifyPostsChanged = () => {
+  postListeners.forEach((listener) => {
+    listener()
+  })
+}
+
+const usePostsSnapshot = (): PostItem[] => {
+  const [version, setVersion] = useState(0)
+
+  useEffect(() => {
+    return subscribePosts(() => {
+      setVersion((current) => current + 1)
+    })
+  }, [])
+
+  return useMemo(() => {
+    void version
+    return postsStore
+  }, [version])
+}
+
 export const usePostsQuery = () => {
-  const { getAccessTokenSilently } = useAuth0()
+  const items = usePostsSnapshot()
 
-  return useQuery<PostListResponse>({
-    queryKey: ['posts'],
-    queryFn: async () => {
-      const token = await getAccessTokenSilently()
-
-      const response = await client.posts.$get(undefined, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      if (!response.ok) {
-        throw new Error(`投稿一覧の取得に失敗しました: ${response.status}`)
-      }
-
-      return response.json()
+  return {
+    data: {
+      items,
+    } satisfies PostListResponse,
+    isLoading: false,
+    error: null,
+    refetch: () => {
+      notifyPostsChanged()
+      return Promise.resolve()
     },
-  })
+  }
 }
 
-/**
- * 個別投稿を取得するクエリフック
- */
 export const usePostQuery = (id: string) => {
-  const { getAccessTokenSilently } = useAuth0()
+  const items = usePostsSnapshot()
 
-  return useQuery<PostDetailResponse>({
-    queryKey: ['posts', id],
-    queryFn: async () => {
-      const token = await getAccessTokenSilently()
+  const data = useMemo(() => {
+    return items.find((item) => item.id === id)
+  }, [id, items])
 
-      const response = await client.posts[':id'].$get(
-        { param: { id } },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      )
-
-      if (response.status === 404) {
-        throw new Error('投稿が見つかりません')
-      }
-
-      if (!response.ok) {
-        throw new Error(`投稿の取得に失敗しました: ${response.status}`)
-      }
-
-      return response.json()
-    },
-  })
+  return {
+    data: data,
+    isLoading: false,
+    error: data === undefined ? new Error('投稿が見つかりません') : null,
+  }
 }
 
-/**
- * 投稿を作成するミューテーションフック
- */
 export const useCreatePostMutation = () => {
-  const { getAccessTokenSilently } = useAuth0()
-  const queryClient = useQueryClient()
+  const [isPending, setIsPending] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
 
-  return useMutation({
-    mutationFn: async (data: { title: string; content: string }) => {
-      const token = await getAccessTokenSilently()
+  return {
+    isPending,
+    isError: error !== null,
+    error,
+    mutateAsync: (data: { title: string; content: string }) => {
+      setIsPending(true)
+      setError(null)
 
-      const response = await client.posts.$post(
-        {
-          json: data,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      )
+      try {
+        if (
+          data.title.trim().length === 0 ||
+          data.content.trim().length === 0
+        ) {
+          throw new Error('タイトルと内容を入力してください')
+        }
 
-      return response.json()
+        const newPost: PostItem = {
+          id: `post-${Date.now()}`,
+          title: data.title,
+          content: data.content,
+        }
+
+        postsStore = [newPost, ...postsStore]
+        notifyPostsChanged()
+
+        return Promise.resolve(newPost)
+      } catch (cause) {
+        const normalizedError =
+          cause instanceof Error ? cause : new Error('投稿の作成に失敗しました')
+
+        setError(normalizedError)
+        return Promise.reject(normalizedError)
+      } finally {
+        setIsPending(false)
+      }
     },
-    onSuccess: async () => {
-      // 投稿作成成功時に一覧のキャッシュを無効化して再フェッチ
-      await queryClient.invalidateQueries({ queryKey: ['posts'] })
-    },
-  })
+  }
 }
 
 export type { PostDetailResponse, PostItem, PostListResponse }

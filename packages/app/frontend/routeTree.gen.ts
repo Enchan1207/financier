@@ -10,53 +10,155 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PostsIndexRouteImport } from './routes/posts.index'
-import { Route as PostsIdRouteImport } from './routes/posts.$id'
+import { Route as TransactionsIndexRouteImport } from './routes/transactions/index'
+import { Route as SavingsIndexRouteImport } from './routes/savings/index'
+import { Route as EventsIndexRouteImport } from './routes/events/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
+import { Route as BudgetsIndexRouteImport } from './routes/budgets/index'
+import { Route as AnalyticsIndexRouteImport } from './routes/analytics/index'
+import { Route as TransactionsTransactionIdRouteImport } from './routes/transactions/$transactionId'
+import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PostsIndexRoute = PostsIndexRouteImport.update({
-  id: '/posts/',
-  path: '/posts/',
+const TransactionsIndexRoute = TransactionsIndexRouteImport.update({
+  id: '/transactions/',
+  path: '/transactions/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PostsIdRoute = PostsIdRouteImport.update({
-  id: '/posts/$id',
-  path: '/posts/$id',
+const SavingsIndexRoute = SavingsIndexRouteImport.update({
+  id: '/savings/',
+  path: '/savings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
+  id: '/categories/',
+  path: '/categories/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BudgetsIndexRoute = BudgetsIndexRouteImport.update({
+  id: '/budgets/',
+  path: '/budgets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsIndexRoute = AnalyticsIndexRouteImport.update({
+  id: '/analytics/',
+  path: '/analytics/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransactionsTransactionIdRoute =
+  TransactionsTransactionIdRouteImport.update({
+    id: '/transactions/$transactionId',
+    path: '/transactions/$transactionId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const PostsPostIdRoute = PostsPostIdRouteImport.update({
+  id: '/posts/$postId',
+  path: '/posts/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/posts/$id': typeof PostsIdRoute
-  '/posts/': typeof PostsIndexRoute
+  '/posts/$postId': typeof PostsPostIdRoute
+  '/transactions/$transactionId': typeof TransactionsTransactionIdRoute
+  '/analytics/': typeof AnalyticsIndexRoute
+  '/budgets/': typeof BudgetsIndexRoute
+  '/categories/': typeof CategoriesIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/events/': typeof EventsIndexRoute
+  '/savings/': typeof SavingsIndexRoute
+  '/transactions/': typeof TransactionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/posts/$id': typeof PostsIdRoute
-  '/posts': typeof PostsIndexRoute
+  '/posts/$postId': typeof PostsPostIdRoute
+  '/transactions/$transactionId': typeof TransactionsTransactionIdRoute
+  '/analytics': typeof AnalyticsIndexRoute
+  '/budgets': typeof BudgetsIndexRoute
+  '/categories': typeof CategoriesIndexRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/events': typeof EventsIndexRoute
+  '/savings': typeof SavingsIndexRoute
+  '/transactions': typeof TransactionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/posts/$id': typeof PostsIdRoute
-  '/posts/': typeof PostsIndexRoute
+  '/posts/$postId': typeof PostsPostIdRoute
+  '/transactions/$transactionId': typeof TransactionsTransactionIdRoute
+  '/analytics/': typeof AnalyticsIndexRoute
+  '/budgets/': typeof BudgetsIndexRoute
+  '/categories/': typeof CategoriesIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/events/': typeof EventsIndexRoute
+  '/savings/': typeof SavingsIndexRoute
+  '/transactions/': typeof TransactionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/posts/$id' | '/posts/'
+  fullPaths:
+    | '/'
+    | '/posts/$postId'
+    | '/transactions/$transactionId'
+    | '/analytics/'
+    | '/budgets/'
+    | '/categories/'
+    | '/dashboard/'
+    | '/events/'
+    | '/savings/'
+    | '/transactions/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/posts/$id' | '/posts'
-  id: '__root__' | '/' | '/posts/$id' | '/posts/'
+  to:
+    | '/'
+    | '/posts/$postId'
+    | '/transactions/$transactionId'
+    | '/analytics'
+    | '/budgets'
+    | '/categories'
+    | '/dashboard'
+    | '/events'
+    | '/savings'
+    | '/transactions'
+  id:
+    | '__root__'
+    | '/'
+    | '/posts/$postId'
+    | '/transactions/$transactionId'
+    | '/analytics/'
+    | '/budgets/'
+    | '/categories/'
+    | '/dashboard/'
+    | '/events/'
+    | '/savings/'
+    | '/transactions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  PostsIdRoute: typeof PostsIdRoute
-  PostsIndexRoute: typeof PostsIndexRoute
+  PostsPostIdRoute: typeof PostsPostIdRoute
+  TransactionsTransactionIdRoute: typeof TransactionsTransactionIdRoute
+  AnalyticsIndexRoute: typeof AnalyticsIndexRoute
+  BudgetsIndexRoute: typeof BudgetsIndexRoute
+  CategoriesIndexRoute: typeof CategoriesIndexRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  EventsIndexRoute: typeof EventsIndexRoute
+  SavingsIndexRoute: typeof SavingsIndexRoute
+  TransactionsIndexRoute: typeof TransactionsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,18 +170,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/posts/': {
-      id: '/posts/'
-      path: '/posts'
-      fullPath: '/posts/'
-      preLoaderRoute: typeof PostsIndexRouteImport
+    '/transactions/': {
+      id: '/transactions/'
+      path: '/transactions'
+      fullPath: '/transactions/'
+      preLoaderRoute: typeof TransactionsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/posts/$id': {
-      id: '/posts/$id'
-      path: '/posts/$id'
-      fullPath: '/posts/$id'
-      preLoaderRoute: typeof PostsIdRouteImport
+    '/savings/': {
+      id: '/savings/'
+      path: '/savings'
+      fullPath: '/savings/'
+      preLoaderRoute: typeof SavingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/': {
+      id: '/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories/': {
+      id: '/categories/'
+      path: '/categories'
+      fullPath: '/categories/'
+      preLoaderRoute: typeof CategoriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/budgets/': {
+      id: '/budgets/'
+      path: '/budgets'
+      fullPath: '/budgets/'
+      preLoaderRoute: typeof BudgetsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics/': {
+      id: '/analytics/'
+      path: '/analytics'
+      fullPath: '/analytics/'
+      preLoaderRoute: typeof AnalyticsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transactions/$transactionId': {
+      id: '/transactions/$transactionId'
+      path: '/transactions/$transactionId'
+      fullPath: '/transactions/$transactionId'
+      preLoaderRoute: typeof TransactionsTransactionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts/$postId': {
+      id: '/posts/$postId'
+      path: '/posts/$postId'
+      fullPath: '/posts/$postId'
+      preLoaderRoute: typeof PostsPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -87,8 +238,15 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PostsIdRoute: PostsIdRoute,
-  PostsIndexRoute: PostsIndexRoute,
+  PostsPostIdRoute: PostsPostIdRoute,
+  TransactionsTransactionIdRoute: TransactionsTransactionIdRoute,
+  AnalyticsIndexRoute: AnalyticsIndexRoute,
+  BudgetsIndexRoute: BudgetsIndexRoute,
+  CategoriesIndexRoute: CategoriesIndexRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+  EventsIndexRoute: EventsIndexRoute,
+  SavingsIndexRoute: SavingsIndexRoute,
+  TransactionsIndexRoute: TransactionsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

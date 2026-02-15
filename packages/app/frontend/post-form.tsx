@@ -53,7 +53,7 @@ export const PostForm: React.FC = () => {
         {createPostMutation.isPending ? '送信中...' : '送信'}
       </button>
       {createPostMutation.isError && (
-        <p>エラーが発生しました: {createPostMutation.error.message}</p>
+        <p>エラーが発生しました: {createPostMutation.error?.message}</p>
       )}
     </form>
   )
