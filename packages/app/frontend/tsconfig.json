@@ -2,7 +2,10 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.frontend.tsbuildinfo",
     "target": "es2020",
-    "lib": ["es2020", "dom"],
+    "lib": [
+      "es2020",
+      "dom"
+    ],
     "jsx": "react-jsx",
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -19,10 +22,19 @@
     "composite": true,
     "verbatimModuleSyntax": true,
     "paths": {
-      "@routes": ["../backend/index.ts"]
+      "@routes": [
+        "../backend/index.ts"
+      ],
+      "@frontend/*": [
+        "./*"
+      ]
     }
   },
-  "include": ["./**/*.ts", "./**/*.tsx", "../vite-env.d.ts"],
+  "include": [
+    "./**/*.ts",
+    "./**/*.tsx",
+    "../vite-env.d.ts"
+  ],
   "references": [
     {
       "path": "../backend"
