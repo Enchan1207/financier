@@ -20,9 +20,9 @@
 
 **確認根拠**:
 
-- `docs/spec/functions.md:267` で状態遷移は `active -> archived` に統一
-- `docs/spec/functions.md:273` で archived 紐づけカテゴリへの支出は「警告表示のうえ登録可能」と明記
-- `docs/spec/usecases.md:343` で UC-4.5 は「積立のアーカイブ」に統一し、`docs/spec/usecases.md:360` で同方針を明記
+- `docs/spec/functions.md` の `SavingDefinition` から `status` 属性が削除され、積立状態遷移の概念が廃止された
+- `docs/spec/functions.md` から積立の状態遷移節（旧 6.8）が削除され、年度との関係節に整理された
+- `docs/spec/usecases.md` から UC-4.5（積立のアーカイブ）が削除され、積立ユースケースは状態非依存の記述に統一された
 
 ### 2. 単一ユーザ前提と管理者解除ユースケースの矛盾（重大）
 
