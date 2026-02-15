@@ -10,7 +10,6 @@ import {
   Card,
   CardAction,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
@@ -18,7 +17,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -93,16 +91,12 @@ const EventsPage = () => {
 
   return (
     <div className="grid gap-4">
-      <PageHeader
-        title="イベント管理"
-        description="ライフイベントごとに取引を集計し、費用の全体像を確認できます。"
-      />
+      <PageHeader title="イベント管理" />
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <Card>
           <CardHeader>
             <CardTitle>イベントを作成</CardTitle>
-            <CardDescription>作成はダイアログで行います。</CardDescription>
             <CardAction>
               <DialogTrigger asChild>
                 <Button>イベントを追加</Button>
@@ -114,9 +108,6 @@ const EventsPage = () => {
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>イベントを作成</DialogTitle>
-            <DialogDescription>
-              期間は任意です。未設定の場合は後から紐付けのみ行えます。
-            </DialogDescription>
           </DialogHeader>
 
           <form className="grid gap-4" onSubmit={handleCreate}>
@@ -238,9 +229,6 @@ const EventsPage = () => {
       <Card>
         <CardHeader>
           <CardTitle>イベントテンプレート</CardTitle>
-          <CardDescription>
-            テンプレート作成は専用ページで行います。一覧はこの画面で確認できます。
-          </CardDescription>
           <CardAction>
             <Button asChild>
               <Link to="/events/templates/new">テンプレートを作成</Link>
@@ -252,9 +240,6 @@ const EventsPage = () => {
       <Card>
         <CardHeader>
           <CardTitle>イベントテンプレート一覧</CardTitle>
-          <CardDescription>
-            登録済みテンプレートの内容を確認できます。
-          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3">
           {templates.map((template) => (

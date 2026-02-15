@@ -2,7 +2,6 @@ import { PageHeader } from '@frontend/components/layout/page-header'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
@@ -18,35 +17,42 @@ const DashboardPage = () => {
 
   return (
     <div className="grid gap-4">
-      <PageHeader
-        title="ダッシュボード"
-        description="内部残高・積立残高・年度収支の主要指標を一覧で確認できます。"
-      />
+      <PageHeader title="ダッシュボード" />
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardDescription>内部残高（全期間）</CardDescription>
-            <CardTitle className="text-2xl">
+            <CardTitle className="text-sm font-medium">
+              内部残高（全期間）
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold">
               {formatCurrency(data.internalBalance)}
-            </CardTitle>
-          </CardHeader>
+            </p>
+          </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardDescription>積立残高合計</CardDescription>
-            <CardTitle className="text-2xl">
+            <CardTitle className="text-sm font-medium">積立残高合計</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold">
               {formatCurrency(data.savingTotal)}
-            </CardTitle>
-          </CardHeader>
+            </p>
+          </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardDescription>未来日取引（件数）</CardDescription>
-            <CardTitle className="text-2xl">
-              {data.futureTransactionCount}
+            <CardTitle className="text-sm font-medium">
+              未来日取引（件数）
             </CardTitle>
           </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-semibold">
+              {data.futureTransactionCount}
+            </p>
+          </CardContent>
         </Card>
       </div>
 
@@ -55,9 +61,6 @@ const DashboardPage = () => {
           <CardTitle>
             {formatFiscalYear(data.currentFiscalYear)} 収支サマリ
           </CardTitle>
-          <CardDescription>
-            未来日取引を除いた実績のみを集計しています。
-          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-2 text-sm md:grid-cols-3">
           <p>収入: {formatCurrency(data.fiscalSummary.income)}</p>
@@ -69,9 +72,6 @@ const DashboardPage = () => {
       <Card>
         <CardHeader>
           <CardTitle>主要画面への遷移</CardTitle>
-          <CardDescription>
-            根幹機能から順に確認しやすいよう、導線を固定しています。
-          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-2 text-sm md:grid-cols-2">
           <Link to="/transactions" className="text-primary underline">

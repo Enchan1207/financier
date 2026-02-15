@@ -10,7 +10,6 @@ import {
   Card,
   CardAction,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
@@ -18,7 +17,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -108,7 +106,6 @@ const SavingDetailPage = () => {
     <div className="grid gap-4">
       <PageHeader
         title={data.categoryName}
-        description="積立の詳細と取り崩し登録を行います。"
         actions={
           <Button asChild variant="outline">
             <Link to="/savings">一覧へ戻る</Link>
@@ -123,9 +120,6 @@ const SavingDetailPage = () => {
         <Card>
           <CardHeader>
             <CardTitle>積立取り崩し</CardTitle>
-            <CardDescription>
-              取り崩し日はシステム日付を自動適用します（利用者入力不可）。
-            </CardDescription>
             <CardAction>
               <DialogTrigger asChild>
                 <Button>取り崩しを登録</Button>
@@ -137,9 +131,6 @@ const SavingDetailPage = () => {
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>積立取り崩しを登録</DialogTitle>
-            <DialogDescription>
-              取り崩し額とメモを入力して登録します。
-            </DialogDescription>
           </DialogHeader>
 
           <form className="grid gap-4" onSubmit={handleSubmit}>

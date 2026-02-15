@@ -9,7 +9,6 @@ import { Button } from '@frontend/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
@@ -88,19 +87,16 @@ const BudgetsPage = () => {
 
   return (
     <div className="grid gap-4">
-      <PageHeader
-        title="予算管理"
-        description="年度とカテゴリごとに予算を設定し、実績との差分を把握できます。"
-      />
+      <PageHeader title="予算管理" />
 
       <Card>
         <CardHeader>
           <CardTitle>予算を設定・変更</CardTitle>
-          <CardDescription>
-            {formatFiscalYear(fiscalYear)} / 状態: {data.fiscalYearStatus}
-          </CardDescription>
         </CardHeader>
         <CardContent>
+          <p className="text-muted-foreground mb-3 text-sm">
+            {formatFiscalYear(fiscalYear)} / 状態: {data.fiscalYearStatus}
+          </p>
           <form className="grid gap-3 md:grid-cols-4" onSubmit={handleSubmit}>
             <div className="grid gap-2">
               <Label>年度</Label>

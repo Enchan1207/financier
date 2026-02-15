@@ -2,7 +2,6 @@ import { PageHeader } from '@frontend/components/layout/page-header'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
@@ -11,18 +10,14 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 const phases = [
   {
     title: '1. 取引入力と可視化',
-    description:
-      '日々の収支記録（収入/支出、カテゴリ、未来日、イベント紐付け）を先に固めます。',
     to: '/transactions',
   },
   {
     title: '2. 分類と計画',
-    description: 'カテゴリ・予算・積立を整備し、年度単位の差分を把握します。',
     to: '/categories',
   },
   {
     title: '3. 意思決定支援',
-    description: 'イベント集計と分析画面で、財政体力と将来判断を支援します。',
     to: '/analytics',
   },
 ] as const
@@ -30,10 +25,7 @@ const phases = [
 const IndexPage = () => {
   return (
     <div className="grid gap-4">
-      <PageHeader
-        title="家計管理を始める"
-        description="収支の記録から予算管理、分析までを一つの画面構成で確認できます。"
-      />
+      <PageHeader title="家計管理を始める" />
 
       <Card>
         <CardContent className="grid gap-3 pt-6">
@@ -54,7 +46,6 @@ const IndexPage = () => {
           <Card key={phase.title}>
             <CardHeader>
               <CardTitle className="text-base">{phase.title}</CardTitle>
-              <CardDescription>{phase.description}</CardDescription>
             </CardHeader>
             <CardContent>
               <Link to={phase.to} className="text-primary text-sm underline">

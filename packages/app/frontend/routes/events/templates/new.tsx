@@ -8,7 +8,6 @@ import { Button } from '@frontend/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
@@ -16,7 +15,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -148,7 +146,6 @@ const EventTemplateNewPage = () => {
     <div className="grid gap-4">
       <PageHeader
         title="イベントテンプレートを作成"
-        description="繰り返し利用する取引セットをまとめて登録できます。"
         actions={
           <Button asChild variant="outline">
             <Link to="/events">イベント画面へ戻る</Link>
@@ -159,9 +156,6 @@ const EventTemplateNewPage = () => {
       <Card>
         <CardHeader>
           <CardTitle>テンプレート定義</CardTitle>
-          <CardDescription>
-            カテゴリは `active` かつ積立でないもののみ選択できます。
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4" onSubmit={handleOpenConfirmDialog}>
@@ -282,9 +276,6 @@ const EventTemplateNewPage = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>作成内容の確認</DialogTitle>
-            <DialogDescription>
-              この内容でイベントテンプレートを作成しますか。
-            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 text-sm">
             <p>テンプレート名: {templateName}</p>

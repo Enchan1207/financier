@@ -7,18 +7,9 @@ import {
 import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@frontend/components/ui/card'
-import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -110,33 +101,18 @@ const TransactionsPage = () => {
 
   return (
     <div className="grid gap-4">
-      <PageHeader
-        title="取引管理"
-        description="日々の収入・支出を登録し、未来日取引や年度帰属を含めて管理できます。"
-      />
+      <PageHeader title="取引管理" />
 
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <Card>
-          <CardHeader>
-            <CardTitle>取引を登録</CardTitle>
-            <CardDescription>
-              作成はダイアログで行います。`名前`
-              を先に決めてから詳細を入力します。
-            </CardDescription>
-            <CardAction>
-              <DialogTrigger asChild>
-                <Button>取引を追加</Button>
-              </DialogTrigger>
-            </CardAction>
-          </CardHeader>
-        </Card>
+        <div className="flex justify-end">
+          <DialogTrigger asChild>
+            <Button>取引を追加</Button>
+          </DialogTrigger>
+        </div>
 
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>取引を登録</DialogTitle>
-            <DialogDescription>
-              入力後に登録すると、一覧へ即時反映されます。
-            </DialogDescription>
           </DialogHeader>
 
           <form className="grid gap-4" onSubmit={handleSubmit}>
@@ -258,68 +234,57 @@ const TransactionsPage = () => {
         </Alert>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>取引一覧</CardTitle>
-          <CardDescription>
-            未来日取引は「未来日」バッジで識別し、年度帰属を併記します。
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>日付</TableHead>
-                <TableHead>種別</TableHead>
-                <TableHead>カテゴリ</TableHead>
-                <TableHead className="text-right">金額</TableHead>
-                <TableHead>イベント</TableHead>
-                <TableHead>状態</TableHead>
-                <TableHead>操作</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transactions.map((transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell>
-                    {formatDate(transaction.transactionDate)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        transaction.type === 'income' ? 'secondary' : 'outline'
-                      }
+      <div className="grid gap-2">
+        <h2 className="text-lg font-semibold">取引一覧</h2>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>日付</TableHead>
+              <TableHead>種別</TableHead>
+              <TableHead>カテゴリ</TableHead>
+              <TableHead className="text-right">金額</TableHead>
+              <TableHead>イベント</TableHead>
+              <TableHead>状態</TableHead>
+              <TableHead>操作</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {transactions.map((transaction) => (
+              <TableRow key={transaction.id}>
+                <TableCell>{formatDate(transaction.transactionDate)}</TableCell>
+                <TableCell>
+                  <Badge
+                    variant={
+                      transaction.type === 'income' ? 'secondary' : 'outline'
+                    }
+                  >
+                    {transaction.type === 'income' ? '収入' : '支出'}
+                  </Badge>
+                </TableCell>
+                <TableCell>{transaction.categoryName}</TableCell>
+                <TableCell className="text-right">
+                  {formatCurrency(transaction.amount)}
+                </TableCell>
+                <TableCell>{transaction.eventName ?? 'なし'}</TableCell>
+                <TableCell className="space-x-2">
+                  {transaction.isFuture && <Badge>未来日</Badge>}
+                  <Badge variant="outline">{transaction.fiscalYear}年度</Badge>
+                </TableCell>
+                <TableCell>
+                  <Button asChild size="sm" variant="ghost">
+                    <Link
+                      to="/transactions/$transactionId"
+                      params={{ transactionId: transaction.id }}
                     >
-                      {transaction.type === 'income' ? '収入' : '支出'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{transaction.categoryName}</TableCell>
-                  <TableCell className="text-right">
-                    {formatCurrency(transaction.amount)}
-                  </TableCell>
-                  <TableCell>{transaction.eventName ?? 'なし'}</TableCell>
-                  <TableCell className="space-x-2">
-                    {transaction.isFuture && <Badge>未来日</Badge>}
-                    <Badge variant="outline">
-                      {transaction.fiscalYear}年度
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button asChild size="sm" variant="ghost">
-                      <Link
-                        to="/transactions/$transactionId"
-                        params={{ transactionId: transaction.id }}
-                      >
-                        詳細
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                      詳細
+                    </Link>
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 }

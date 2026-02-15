@@ -3,7 +3,6 @@ import { Badge } from '@frontend/components/ui/badge'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
@@ -46,10 +45,7 @@ const AnalyticsPage = () => {
 
   return (
     <div className="grid gap-4">
-      <PageHeader
-        title="分析・可視化"
-        description="カテゴリ分析、年度比較、支出シミュレーションを切り替えて確認できます。"
-      />
+      <PageHeader title="分析・可視化" />
 
       <Card>
         <CardHeader>
@@ -101,9 +97,6 @@ const AnalyticsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>{formatFiscalYear(fiscalYear)} カテゴリ分析</CardTitle>
-              <CardDescription>
-                予算との差分と構成比（円グラフ/棒グラフ相当の基礎データ）を一覧表示します。
-              </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3">
               <div className="grid gap-2 text-sm md:grid-cols-2">
@@ -163,9 +156,6 @@ const AnalyticsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>年度間比較</CardTitle>
-              <CardDescription>
-                年度ごとの収入・支出・差分を比較して推移を確認します。
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -202,9 +192,6 @@ const AnalyticsPage = () => {
           <Card>
             <CardHeader>
               <CardTitle>投資判断支援</CardTitle>
-              <CardDescription>
-                仮想支出を入力し、実行後の内部残高見込みを確認できます。
-              </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
               <div className="grid gap-2 text-sm md:grid-cols-3">
