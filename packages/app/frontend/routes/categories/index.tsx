@@ -92,20 +92,20 @@ const CategoriesPage = () => {
     setIsCreateDialogOpen(false)
   }
 
-  const handleArchive = (categoryId: string) => {
+  const handleDelete = (categoryId: string) => {
     const result = archiveCategory(categoryId)
 
     if (!result.ok) {
       setFeedback({
         variant: 'destructive',
-        title: 'アーカイブに失敗しました',
+        title: '削除に失敗しました',
         description: result.message,
       })
 
       return
     }
 
-    setFeedback({ variant: 'default', title: 'カテゴリをアーカイブしました' })
+    setFeedback({ variant: 'default', title: 'カテゴリを削除しました' })
   }
 
   const activeCategories = categories.filter((category) => {
@@ -280,12 +280,12 @@ const CategoriesPage = () => {
                   <TableCell>
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="destructive"
                       onClick={() => {
-                        handleArchive(category.id)
+                        handleDelete(category.id)
                       }}
                     >
-                      アーカイブ
+                      削除
                     </Button>
                   </TableCell>
                 </TableRow>

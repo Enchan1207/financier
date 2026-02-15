@@ -181,7 +181,7 @@ export const MockFinanceProvider = ({ children }: { children: ReactNode }) => {
       if (category.status !== 'active') {
         return {
           ok: false,
-          message: 'アーカイブ済みカテゴリには新規登録できません',
+          message: '削除済みカテゴリには新規登録できません',
         }
       }
 
@@ -318,7 +318,7 @@ export const MockFinanceProvider = ({ children }: { children: ReactNode }) => {
       }
 
       if (category.status === 'archived') {
-        return { ok: false, message: 'すでにアーカイブ済みです' }
+        return { ok: false, message: 'すでに削除済みです' }
       }
 
       setState((prev) => ({
@@ -458,7 +458,7 @@ export const MockFinanceProvider = ({ children }: { children: ReactNode }) => {
         if (category.status !== 'active') {
           return {
             ok: false,
-            message: `${rowNumber}行目のカテゴリはアーカイブ済みです`,
+            message: `${rowNumber}行目のカテゴリは削除済みです`,
           }
         }
 
