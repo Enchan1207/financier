@@ -78,7 +78,7 @@ export const mockFinanceInitialState: MockFinanceState = {
       categoryId: 'cat-income-salary',
       transactionDate: '2025-12-25',
       eventId: 'evt-bonus-allocation',
-      memo: '12月給与',
+      name: '12月給与',
       createdAt: '2025-12-25T09:00:00Z',
     },
     {
@@ -87,7 +87,7 @@ export const mockFinanceInitialState: MockFinanceState = {
       amount: 48000,
       categoryId: 'cat-income-side',
       transactionDate: '2026-01-12',
-      memo: 'フリーランス案件',
+      name: 'フリーランス案件',
       createdAt: '2026-01-12T12:00:00Z',
     },
     {
@@ -96,7 +96,7 @@ export const mockFinanceInitialState: MockFinanceState = {
       amount: 89000,
       categoryId: 'cat-expense-housing',
       transactionDate: '2026-01-30',
-      memo: '家賃',
+      name: '家賃',
       createdAt: '2026-01-30T08:00:00Z',
     },
     {
@@ -105,7 +105,7 @@ export const mockFinanceInitialState: MockFinanceState = {
       amount: 32000,
       categoryId: 'cat-expense-food',
       transactionDate: '2026-02-02',
-      memo: '食料品と外食',
+      name: '食料品と外食',
       createdAt: '2026-02-02T10:30:00Z',
     },
     {
@@ -114,7 +114,7 @@ export const mockFinanceInitialState: MockFinanceState = {
       amount: 12000,
       categoryId: 'cat-expense-transport',
       transactionDate: '2026-02-06',
-      memo: '定期代',
+      name: '定期代',
       createdAt: '2026-02-06T07:45:00Z',
     },
     {
@@ -124,7 +124,7 @@ export const mockFinanceInitialState: MockFinanceState = {
       categoryId: 'cat-expense-travel-saving',
       transactionDate: '2026-02-08',
       eventId: 'evt-kanazawa-trip',
-      memo: '旅行積立の拠出',
+      name: '旅行積立の拠出',
       createdAt: '2026-02-08T20:00:00Z',
     },
     {
@@ -133,7 +133,7 @@ export const mockFinanceInitialState: MockFinanceState = {
       amount: 25000,
       categoryId: 'cat-expense-emergency-saving',
       transactionDate: '2026-02-10',
-      memo: '緊急積立の拠出',
+      name: '緊急積立の拠出',
       createdAt: '2026-02-10T20:00:00Z',
     },
     {
@@ -143,7 +143,7 @@ export const mockFinanceInitialState: MockFinanceState = {
       categoryId: 'cat-expense-leisure',
       transactionDate: '2026-03-20',
       eventId: 'evt-kanazawa-trip',
-      memo: '未来日: 旅行予約金',
+      name: '未来日: 旅行予約金',
       createdAt: '2026-02-11T20:00:00Z',
     },
   ],
@@ -227,12 +227,12 @@ export const mockFinanceInitialState: MockFinanceState = {
         {
           categoryId: 'cat-income-salary',
           amount: 320000,
-          memo: '基本給',
+          name: '基本給',
         },
         {
           categoryId: 'cat-expense-transport',
           amount: 10000,
-          memo: '交通費精算',
+          name: '交通費精算',
         },
       ],
     },
@@ -243,12 +243,12 @@ export const mockFinanceInitialState: MockFinanceState = {
         {
           categoryId: 'cat-expense-transport',
           amount: 18000,
-          memo: '交通',
+          name: '交通',
         },
         {
           categoryId: 'cat-expense-leisure',
           amount: 25000,
-          memo: '観光・食事',
+          name: '観光・食事',
         },
       ],
     },

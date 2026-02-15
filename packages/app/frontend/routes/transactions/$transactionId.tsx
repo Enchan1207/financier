@@ -49,7 +49,7 @@ const TransactionDetailPage = () => {
           <p>カテゴリ: {data.categoryName}</p>
           <p>金額: {formatCurrency(data.amount)}</p>
           <p>イベント: {data.eventName ?? 'なし'}</p>
-          <p>メモ: {data.memo ?? 'なし'}</p>
+          <p>名前: {data.name}</p>
           <p>
             状態:{' '}
             {data.isFuture ? (

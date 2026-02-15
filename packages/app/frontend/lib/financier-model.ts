@@ -29,7 +29,7 @@ export interface Transaction {
   categoryId: string
   transactionDate: string
   eventId?: string
-  memo?: string
+  name: string
   createdAt: string
 }
 
@@ -66,7 +66,7 @@ export interface Event {
 export interface TemplateTransaction {
   categoryId: string
   amount: number
-  memo?: string
+  name: string
 }
 
 export interface EventTemplate {

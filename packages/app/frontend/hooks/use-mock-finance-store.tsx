@@ -9,14 +9,14 @@ import type {
   Transaction,
   TransactionType,
 } from '@frontend/lib/financier-model'
-import type {ReactNode} from 'react';
+import type { ReactNode } from 'react'
 import {
   createContext,
   useCallback,
   useContext,
   useMemo,
   useRef,
-  useState
+  useState,
 } from 'react'
 
 interface OperationResult {
@@ -30,7 +30,7 @@ interface CreateTransactionInput {
   categoryId: string
   transactionDate: string
   eventId?: string
-  memo?: string
+  name: string
 }
 
 interface CreateCategoryInput {
@@ -189,6 +189,10 @@ export const MockFinanceProvider = ({ children }: { children: ReactNode }) => {
         return { ok: false, message: '金額は1円以上で入力してください' }
       }
 
+      if (input.name.trim().length === 0) {
+        return { ok: false, message: '取引名を入力してください' }
+      }
+
       const targetFiscalYear = resolveFiscalYear(input.transactionDate)
 
       if (
@@ -215,7 +219,7 @@ export const MockFinanceProvider = ({ children }: { children: ReactNode }) => {
         categoryId: input.categoryId,
         transactionDate: input.transactionDate,
         eventId: input.eventId,
-        memo: input.memo,
+        name: input.name.trim(),
         createdAt: new Date().toISOString(),
       }
 

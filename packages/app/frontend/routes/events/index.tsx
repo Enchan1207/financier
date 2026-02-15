@@ -199,7 +199,7 @@ const EventsPage = () => {
                 {template.defaultTransactions.map((item, index) => (
                   <p key={`${template.id}-${item.categoryId}-${index}`}>
                     {item.categoryId} / {formatCurrency(item.amount)} /{' '}
-                    {item.memo ?? '-'}
+                    {item.name}
                   </p>
                 ))}
               </div>

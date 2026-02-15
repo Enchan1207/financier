@@ -49,7 +49,7 @@ const TransactionsPage = () => {
   const [amount, setAmount] = useState('')
   const [transactionDate, setTransactionDate] = useState('2026-02-15')
   const [eventId, setEventId] = useState('none')
-  const [memo, setMemo] = useState('')
+  const [name, setName] = useState('')
   const [feedback, setFeedback] = useState<{
     variant: 'default' | 'destructive'
     title: string
@@ -72,7 +72,7 @@ const TransactionsPage = () => {
       categoryId,
       transactionDate,
       eventId: eventId === 'none' ? undefined : eventId,
-      memo,
+      name,
     })
 
     if (!result.ok) {
@@ -91,7 +91,7 @@ const TransactionsPage = () => {
       description: '一覧に即時反映されています。',
     })
     setAmount('')
-    setMemo('')
+    setName('')
     setEventId('none')
   }
 
@@ -199,14 +199,15 @@ const TransactionsPage = () => {
               </div>
 
               <div className="grid gap-2 md:col-span-2">
-                <Label htmlFor="memo">メモ（任意）</Label>
+                <Label htmlFor="name">名前</Label>
                 <Textarea
-                  id="memo"
-                  value={memo}
+                  id="name"
+                  value={name}
                   onChange={(event) => {
-                    setMemo(event.target.value)
+                    setName(event.target.value)
                   }}
-                  placeholder="補足を入力"
+                  placeholder="取引の名前を入力"
+                  required
                 />
               </div>
             </div>
