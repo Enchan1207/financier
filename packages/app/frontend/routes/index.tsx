@@ -1,3 +1,4 @@
+import ModeToggle from '@frontend/components/theme/theme-toggle'
 import {
   Card,
   CardContent,
@@ -34,6 +35,7 @@ const IndexPage = () => {
           <CardTitle>モック実装の進め方</CardTitle>
           <CardDescription>
             仕様に沿って、根幹機能から順に画面遷移と基本UIを確認できる構成にしています。
+            <ModeToggle />
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3">
