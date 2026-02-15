@@ -1,35 +1,70 @@
-import { Button } from '@frontend/components/ui/button'
-import { Link } from '@tanstack/react-router'
+import {
+  ChartColumnBig,
+  CircleDollarSign,
+  LayoutDashboard,
+  PiggyBank,
+  ReceiptText,
+  Tags,
+  WalletCards,
+} from 'lucide-react'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '@frontend/components/ui/sidebar'
+import { Link, useRouterState } from '@tanstack/react-router'
 
 const navItems = [
-  { to: '/dashboard', label: 'ダッシュボード' },
-  { to: '/transactions', label: '取引' },
-  { to: '/categories', label: 'カテゴリ' },
-  { to: '/budgets', label: '予算' },
-  { to: '/savings', label: '積立' },
-  { to: '/events', label: 'イベント' },
-  { to: '/analytics', label: '分析' },
+  { to: '/dashboard', label: 'ダッシュボード', icon: LayoutDashboard },
+  { to: '/transactions', label: '取引', icon: ReceiptText },
+  { to: '/categories', label: 'カテゴリ', icon: Tags },
+  { to: '/budgets', label: '予算', icon: WalletCards },
+  { to: '/savings', label: '積立', icon: PiggyBank },
+  { to: '/events', label: 'イベント', icon: CircleDollarSign },
+  { to: '/analytics', label: '分析', icon: ChartColumnBig },
 ] as const
 
+const isPathActive = (pathname: string, to: string) =>
+  pathname === to || pathname.startsWith(`${to}/`)
+
 export const AppSidebar = () => {
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+
   return (
-    <aside className="w-full md:sticky md:top-6 md:w-56">
-      <div className="rounded-lg border bg-background p-3">
-        <p className="mb-2 text-muted-foreground text-xs">画面遷移</p>
-        <nav className="flex flex-col items-stretch gap-2">
-          {navItems.map((item) => (
-            <Button
-              key={item.to}
-              asChild
-              size="sm"
-              variant="outline"
-              className="justify-start"
-            >
-              <Link to={item.to}>{item.label}</Link>
-            </Button>
-          ))}
-        </nav>
+    <Sidebar>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>画面遷移</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navItems.map((item) => (
+                <SidebarMenuItem key={item.to}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isPathActive(pathname, item.to)}
+                  >
+                    <Link to={item.to}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <div className="border-sidebar-border border-t p-3">
+        <p className="text-muted-foreground text-xs">financier / mock</p>
+        <p className="text-sm font-medium">個人財務マネジメント</p>
       </div>
-    </aside>
+    </Sidebar>
   )
 }
