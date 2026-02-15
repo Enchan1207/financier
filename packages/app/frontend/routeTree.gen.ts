@@ -19,6 +19,7 @@ import { Route as BudgetsIndexRouteImport } from './routes/budgets/index'
 import { Route as AnalyticsIndexRouteImport } from './routes/analytics/index'
 import { Route as TransactionsTransactionIdRouteImport } from './routes/transactions/$transactionId'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
+import { Route as EventsTemplatesNewRouteImport } from './routes/events/templates/new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -71,6 +72,11 @@ const PostsPostIdRoute = PostsPostIdRouteImport.update({
   path: '/posts/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsTemplatesNewRoute = EventsTemplatesNewRouteImport.update({
+  id: '/events/templates/new',
+  path: '/events/templates/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/events/': typeof EventsIndexRoute
   '/savings/': typeof SavingsIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
+  '/events/templates/new': typeof EventsTemplatesNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/events': typeof EventsIndexRoute
   '/savings': typeof SavingsIndexRoute
   '/transactions': typeof TransactionsIndexRoute
+  '/events/templates/new': typeof EventsTemplatesNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/events/': typeof EventsIndexRoute
   '/savings/': typeof SavingsIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
+  '/events/templates/new': typeof EventsTemplatesNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/events/'
     | '/savings/'
     | '/transactions/'
+    | '/events/templates/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
     | '/events'
     | '/savings'
     | '/transactions'
+    | '/events/templates/new'
   id:
     | '__root__'
     | '/'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/events/'
     | '/savings/'
     | '/transactions/'
+    | '/events/templates/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -159,6 +171,7 @@ export interface RootRouteChildren {
   EventsIndexRoute: typeof EventsIndexRoute
   SavingsIndexRoute: typeof SavingsIndexRoute
   TransactionsIndexRoute: typeof TransactionsIndexRoute
+  EventsTemplatesNewRoute: typeof EventsTemplatesNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -233,6 +246,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/templates/new': {
+      id: '/events/templates/new'
+      path: '/events/templates/new'
+      fullPath: '/events/templates/new'
+      preLoaderRoute: typeof EventsTemplatesNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -247,6 +267,7 @@ const rootRouteChildren: RootRouteChildren = {
   EventsIndexRoute: EventsIndexRoute,
   SavingsIndexRoute: SavingsIndexRoute,
   TransactionsIndexRoute: TransactionsIndexRoute,
+  EventsTemplatesNewRoute: EventsTemplatesNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

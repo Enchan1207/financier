@@ -34,14 +34,16 @@ import {
   TableRow,
 } from '@frontend/components/ui/table'
 import {
+  useCategoryListQuery,
   useEventActions,
   useEventListQuery,
 } from '@frontend/hooks/use-mock-finance-store'
 import { formatCurrency, formatDate } from '@frontend/lib/financier-format'
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { createFileRoute, Link } from '@tanstack/react-router'
+import { useMemo, useState } from 'react'
 
 const EventsPage = () => {
+  const { data: categories } = useCategoryListQuery()
   const { data: events, templates } = useEventListQuery()
   const { createEvent } = useEventActions()
 
@@ -54,6 +56,10 @@ const EventsPage = () => {
     title: string
     description?: string
   } | null>(null)
+
+  const categoryNameById = useMemo(() => {
+    return new Map(categories.map((category) => [category.id, category.name]))
+  }, [categories])
 
   const handleCreate = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -234,7 +240,21 @@ const EventsPage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>イベントテンプレート（ガイド表示）</CardTitle>
+          <CardTitle>イベントテンプレート</CardTitle>
+          <CardDescription>
+            テンプレート作成は専用ページで行います。一覧はこの画面で確認できます。
+          </CardDescription>
+          <CardAction>
+            <Button asChild>
+              <Link to="/events/templates/new">テンプレートを作成</Link>
+            </Button>
+          </CardAction>
+        </CardHeader>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>イベントテンプレート一覧</CardTitle>
           <CardDescription>
             UC-5.4/5.5 のモックとして定義内容を参照できます。
           </CardDescription>
@@ -246,8 +266,8 @@ const EventsPage = () => {
               <div className="mt-2 space-y-1 text-sm">
                 {template.defaultTransactions.map((item, index) => (
                   <p key={`${template.id}-${item.categoryId}-${index}`}>
-                    {item.categoryId} / {formatCurrency(item.amount)} /{' '}
-                    {item.name}
+                    {categoryNameById.get(item.categoryId) ?? item.categoryId} /{' '}
+                    {formatCurrency(item.amount)} / {item.name}
                   </p>
                 ))}
               </div>

@@ -6,6 +6,7 @@ import type {
   MockFinanceState,
   SavingDefinition,
   SavingWithdrawal,
+  TemplateTransaction,
   Transaction,
   TransactionType,
 } from '@frontend/lib/financier-model'
@@ -54,6 +55,11 @@ interface CreateEventInput {
   endDate?: string
 }
 
+interface CreateEventTemplateInput {
+  name: string
+  defaultTransactions: TemplateTransaction[]
+}
+
 interface CreateSavingWithdrawalInput {
   savingDefinitionId: string
   amount: number
@@ -67,6 +73,7 @@ interface MockFinanceContextValue {
   archiveCategory: (categoryId: string) => OperationResult
   upsertBudget: (input: UpsertBudgetInput) => OperationResult
   createEvent: (input: CreateEventInput) => OperationResult
+  createEventTemplate: (input: CreateEventTemplateInput) => OperationResult
   createSavingWithdrawal: (
     input: CreateSavingWithdrawalInput,
   ) => OperationResult
@@ -415,6 +422,93 @@ export const MockFinanceProvider = ({ children }: { children: ReactNode }) => {
     [nextId],
   )
 
+  const createEventTemplate = useCallback(
+    (input: CreateEventTemplateInput): OperationResult => {
+      const trimmedName = input.name.trim()
+
+      if (trimmedName.length === 0) {
+        return { ok: false, message: 'テンプレート名を入力してください' }
+      }
+
+      const duplicatedTemplate = state.eventTemplates.some(
+        (item) => item.name.trim() === trimmedName,
+      )
+
+      if (duplicatedTemplate) {
+        return { ok: false, message: '同名テンプレートが既に存在します' }
+      }
+
+      if (input.defaultTransactions.length === 0) {
+        return { ok: false, message: '取引定義を1件以上入力してください' }
+      }
+
+      for (const [index, transaction] of input.defaultTransactions.entries()) {
+        const rowNumber = index + 1
+        const category = state.categories.find(
+          (item) => item.id === transaction.categoryId,
+        )
+
+        if (category === undefined) {
+          return {
+            ok: false,
+            message: `${rowNumber}行目のカテゴリが存在しません`,
+          }
+        }
+
+        if (category.status !== 'active') {
+          return {
+            ok: false,
+            message: `${rowNumber}行目のカテゴリはアーカイブ済みです`,
+          }
+        }
+
+        if (category.isSavingCategory) {
+          return {
+            ok: false,
+            message: `${rowNumber}行目のカテゴリは積立のため利用できません`,
+          }
+        }
+
+        if (!Number.isInteger(transaction.amount) || transaction.amount <= 0) {
+          return {
+            ok: false,
+            message: `${rowNumber}行目の金額は1円以上の整数で入力してください`,
+          }
+        }
+
+        if (transaction.name.trim().length === 0) {
+          return {
+            ok: false,
+            message: `${rowNumber}行目の名前を入力してください`,
+          }
+        }
+      }
+
+      setState((prev) => ({
+        ...prev,
+        eventTemplates: [
+          {
+            id: nextId('tpl'),
+            name: trimmedName,
+            defaultTransactions: input.defaultTransactions.map(
+              (transaction) => {
+                return {
+                  categoryId: transaction.categoryId,
+                  amount: transaction.amount,
+                  name: transaction.name.trim(),
+                }
+              },
+            ),
+          },
+          ...prev.eventTemplates,
+        ],
+      }))
+
+      return { ok: true }
+    },
+    [nextId, state.categories, state.eventTemplates],
+  )
+
   const createSavingWithdrawal = useCallback(
     (input: CreateSavingWithdrawalInput): OperationResult => {
       if (input.amount <= 0) {
@@ -477,6 +571,7 @@ export const MockFinanceProvider = ({ children }: { children: ReactNode }) => {
       archiveCategory,
       upsertBudget,
       createEvent,
+      createEventTemplate,
       createSavingWithdrawal,
     }
   }, [
@@ -486,6 +581,7 @@ export const MockFinanceProvider = ({ children }: { children: ReactNode }) => {
     archiveCategory,
     upsertBudget,
     createEvent,
+    createEventTemplate,
     createSavingWithdrawal,
   ])
 
@@ -999,10 +1095,11 @@ export const useEventListQuery = () => {
 }
 
 export const useEventActions = () => {
-  const { createEvent } = useMockFinanceStore()
+  const { createEvent, createEventTemplate } = useMockFinanceStore()
 
   return {
     createEvent,
+    createEventTemplate,
   }
 }
 
