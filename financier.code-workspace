@@ -68,7 +68,9 @@
       "git add": true
     },
     "files.readonlyInclude": {
-      "**/routeTree.gen.ts": true
+      "**/routeTree.gen.ts": true,
+      "**/components/ui/*": true,
+      "**/lib/shadcn-ui-utils.ts": true
     },
     "files.watcherExclude": {
       "**/routeTree.gen.ts": true
