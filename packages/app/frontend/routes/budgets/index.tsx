@@ -39,16 +39,12 @@ import {
 } from '@frontend/lib/financier-format'
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 const BudgetsPage = () => {
   const [fiscalYear, setFiscalYear] = useState(2025)
   const [categoryId, setCategoryId] = useState('')
   const [amount, setAmount] = useState('')
-  const [feedback, setFeedback] = useState<{
-    variant: 'default' | 'destructive'
-    title: string
-    description?: string
-  } | null>(null)
 
   const { data } = useBudgetQuery(fiscalYear)
   const { upsertBudget } = useBudgetActions()
@@ -68,18 +64,14 @@ const BudgetsPage = () => {
     })
 
     if (!result.ok) {
-      setFeedback({
-        variant: 'destructive',
-        title: '予算更新に失敗しました',
+      toast.error('予算更新に失敗しました', {
         description: result.message,
       })
 
       return
     }
 
-    setFeedback({
-      variant: 'default',
-      title: '予算を更新しました',
+    toast.success('予算を更新しました', {
       description: '一覧の差分に反映されています。',
     })
     setAmount('')
@@ -154,13 +146,6 @@ const BudgetsPage = () => {
               保存する
             </Button>
           </form>
-
-          {feedback !== null && (
-            <Alert className="mt-4" variant={feedback.variant}>
-              <AlertTitle>{feedback.title}</AlertTitle>
-              <AlertDescription>{feedback.description}</AlertDescription>
-            </Alert>
-          )}
 
           {data.showBudgetWarning && (
             <Alert className="mt-4" variant="destructive">

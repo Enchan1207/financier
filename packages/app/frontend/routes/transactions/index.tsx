@@ -1,9 +1,4 @@
 import { PageHeader } from '@frontend/components/layout/page-header'
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@frontend/components/ui/alert'
 import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import {
@@ -40,6 +35,7 @@ import {
 import { formatCurrency, formatDate } from '@frontend/lib/financier-format'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 const TransactionsPage = () => {
   const { data: transactions } = useTransactionListQuery()
@@ -53,11 +49,6 @@ const TransactionsPage = () => {
   const [eventId, setEventId] = useState('none')
   const [name, setName] = useState('')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [feedback, setFeedback] = useState<{
-    variant: 'default' | 'destructive'
-    title: string
-    description?: string
-  } | null>(null)
 
   const availableCategories = useMemo(() => {
     return type === 'income'
@@ -79,18 +70,14 @@ const TransactionsPage = () => {
     })
 
     if (!result.ok) {
-      setFeedback({
-        variant: 'destructive',
-        title: '登録に失敗しました',
+      toast.error('登録に失敗しました', {
         description: result.message,
       })
 
       return
     }
 
-    setFeedback({
-      variant: 'default',
-      title: '取引を登録しました',
+    toast.success('取引を登録しました', {
       description: '一覧に即時反映されています。',
     })
     setAmount('')
@@ -226,13 +213,6 @@ const TransactionsPage = () => {
           </form>
         </DialogContent>
       </Dialog>
-
-      {feedback !== null && (
-        <Alert variant={feedback.variant}>
-          <AlertTitle>{feedback.title}</AlertTitle>
-          <AlertDescription>{feedback.description}</AlertDescription>
-        </Alert>
-      )}
 
       <div className="grid gap-2">
         <h2 className="text-lg font-semibold">取引一覧</h2>

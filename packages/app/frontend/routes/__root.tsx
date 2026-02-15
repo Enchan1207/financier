@@ -1,6 +1,7 @@
 import { AppHeader } from '@frontend/components/layout/app-header'
 import { AppSidebar } from '@frontend/components/layout/app-sidebar'
 import { SidebarInset, SidebarProvider } from '@frontend/components/ui/sidebar'
+import { Toaster } from '@frontend/components/ui/sonner'
 import { MockFinanceProvider } from '@frontend/hooks/use-mock-finance-store'
 import { createRootRoute, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
@@ -21,6 +22,7 @@ const RootLayout = () => {
             </SidebarInset>
           </div>
         </div>
+        <Toaster />
         <TanStackRouterDevtools />
       </SidebarProvider>
     </MockFinanceProvider>

@@ -1,9 +1,4 @@
 import { PageHeader } from '@frontend/components/layout/page-header'
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@frontend/components/ui/alert'
 import { Button } from '@frontend/components/ui/button'
 import {
   Dialog,
@@ -38,6 +33,7 @@ import {
 } from '@frontend/hooks/use-mock-finance-store'
 import { createFileRoute } from '@tanstack/react-router'
 import { Fragment, useState } from 'react'
+import { toast } from 'sonner'
 
 const CategoriesPage = () => {
   const { data: categories } = useCategoryListQuery()
@@ -55,11 +51,6 @@ const CategoriesPage = () => {
     string | null
   >(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [feedback, setFeedback] = useState<{
-    variant: 'default' | 'destructive'
-    title: string
-    description?: string
-  } | null>(null)
 
   const handleCreate = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -75,16 +66,14 @@ const CategoriesPage = () => {
     })
 
     if (!result.ok) {
-      setFeedback({
-        variant: 'destructive',
-        title: 'カテゴリ作成に失敗しました',
+      toast.error('カテゴリ作成に失敗しました', {
         description: result.message,
       })
 
       return
     }
 
-    setFeedback({ variant: 'default', title: 'カテゴリを作成しました' })
+    toast.success('カテゴリを作成しました')
     setName('')
     setSavingMode('none')
     setTargetAmount('')
@@ -96,16 +85,14 @@ const CategoriesPage = () => {
     const result = archiveCategory(categoryId)
 
     if (!result.ok) {
-      setFeedback({
-        variant: 'destructive',
-        title: '削除に失敗しました',
+      toast.error('削除に失敗しました', {
         description: result.message,
       })
 
       return
     }
 
-    setFeedback({ variant: 'default', title: 'カテゴリを削除しました' })
+    toast.success('カテゴリを削除しました')
   }
 
   const activeCategories = categories.filter((category) => {
@@ -223,13 +210,6 @@ const CategoriesPage = () => {
           </form>
         </DialogContent>
       </Dialog>
-
-      {feedback !== null && (
-        <Alert variant={feedback.variant}>
-          <AlertTitle>{feedback.title}</AlertTitle>
-          <AlertDescription>{feedback.description}</AlertDescription>
-        </Alert>
-      )}
 
       <div className="grid gap-2">
         <Tabs

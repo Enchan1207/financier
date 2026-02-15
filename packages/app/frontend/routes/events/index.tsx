@@ -1,9 +1,4 @@
 import { PageHeader } from '@frontend/components/layout/page-header'
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@frontend/components/ui/alert'
 import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import {
@@ -40,6 +35,7 @@ import {
 import { formatCurrency, formatDate } from '@frontend/lib/financier-format'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 const EventsPage = () => {
   const { data: categories } = useCategoryListQuery()
@@ -50,11 +46,6 @@ const EventsPage = () => {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [feedback, setFeedback] = useState<{
-    variant: 'default' | 'destructive'
-    title: string
-    description?: string
-  } | null>(null)
 
   const categoryNameById = useMemo(() => {
     return new Map(categories.map((category) => [category.id, category.name]))
@@ -70,19 +61,14 @@ const EventsPage = () => {
     })
 
     if (!result.ok) {
-      setFeedback({
-        variant: 'destructive',
-        title: 'イベント作成に失敗しました',
+      toast.error('イベント作成に失敗しました', {
         description: result.message,
       })
 
       return
     }
 
-    setFeedback({
-      variant: 'default',
-      title: 'イベントを作成しました',
-    })
+    toast.success('イベントを作成しました')
     setName('')
     setStartDate('')
     setEndDate('')
@@ -158,13 +144,6 @@ const EventsPage = () => {
           </form>
         </DialogContent>
       </Dialog>
-
-      {feedback !== null && (
-        <Alert variant={feedback.variant}>
-          <AlertTitle>{feedback.title}</AlertTitle>
-          <AlertDescription>{feedback.description}</AlertDescription>
-        </Alert>
-      )}
 
       <Card>
         <CardHeader>

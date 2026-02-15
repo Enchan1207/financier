@@ -1,9 +1,4 @@
 import { PageHeader } from '@frontend/components/layout/page-header'
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@frontend/components/ui/alert'
 import { Button } from '@frontend/components/ui/button'
 import {
   Card,
@@ -35,6 +30,7 @@ import {
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Minus, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 interface TemplateDraftRow {
   categoryId: string
@@ -59,11 +55,6 @@ const EventTemplateNewPage = () => {
     createTemplateDraftRow(),
   ])
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
-  const [feedback, setFeedback] = useState<{
-    variant: 'default' | 'destructive'
-    title: string
-    description?: string
-  } | null>(null)
 
   const availableTemplateCategories = useMemo(() => {
     return categories.filter(
@@ -116,18 +107,14 @@ const EventTemplateNewPage = () => {
     })
 
     if (!result.ok) {
-      setFeedback({
-        variant: 'destructive',
-        title: 'テンプレート作成に失敗しました',
+      toast.error('テンプレート作成に失敗しました', {
         description: result.message,
       })
 
       return
     }
 
-    setFeedback({
-      variant: 'default',
-      title: 'イベントテンプレートを作成しました',
+    toast.success('イベントテンプレートを作成しました', {
       description: 'イベント画面の一覧にも即時反映されています。',
     })
     setTemplateName('')
@@ -298,13 +285,6 @@ const EventTemplateNewPage = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {feedback !== null && (
-        <Alert variant={feedback.variant}>
-          <AlertTitle>{feedback.title}</AlertTitle>
-          <AlertDescription>{feedback.description}</AlertDescription>
-        </Alert>
-      )}
     </div>
   )
 }

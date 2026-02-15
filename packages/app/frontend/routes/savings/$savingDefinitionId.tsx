@@ -1,9 +1,4 @@
 import { PageHeader } from '@frontend/components/layout/page-header'
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@frontend/components/ui/alert'
 import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import {
@@ -43,6 +38,7 @@ import {
 } from '@frontend/lib/financier-format'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 const SavingDetailPage = () => {
   const { savingDefinitionId } = Route.useParams()
@@ -52,11 +48,6 @@ const SavingDetailPage = () => {
   const [amount, setAmount] = useState('')
   const [memo, setMemo] = useState('')
   const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false)
-  const [feedback, setFeedback] = useState<{
-    variant: 'default' | 'destructive'
-    title: string
-    description?: string
-  } | null>(null)
 
   const handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -68,18 +59,14 @@ const SavingDetailPage = () => {
     })
 
     if (!result.ok) {
-      setFeedback({
-        variant: 'destructive',
-        title: '取り崩しに失敗しました',
+      toast.error('取り崩しに失敗しました', {
         description: result.message,
       })
 
       return
     }
 
-    setFeedback({
-      variant: 'default',
-      title: '取り崩しを登録しました',
+    toast.success('取り崩しを登録しました', {
       description: '取引は作成せず、取り崩し履歴のみ更新されます。',
     })
     setAmount('')
@@ -171,13 +158,6 @@ const SavingDetailPage = () => {
           </form>
         </DialogContent>
       </Dialog>
-
-      {feedback !== null && (
-        <Alert variant={feedback.variant}>
-          <AlertTitle>{feedback.title}</AlertTitle>
-          <AlertDescription>{feedback.description}</AlertDescription>
-        </Alert>
-      )}
 
       <Card>
         <CardHeader>
