@@ -22,7 +22,14 @@ import {
 const navItems = [
   { to: '/dashboard', label: 'ダッシュボード', icon: LayoutDashboard },
   { to: '/transactions', label: '取引', icon: ReceiptText },
-  { to: '/categories', label: 'カテゴリ', icon: Tags },
+  {
+    label: 'カテゴリ',
+    icon: Tags,
+    subItems: [
+      { to: '/categories/expense', label: '支出' },
+      { to: '/categories/income', label: '収入' },
+    ],
+  },
   { to: '/budgets', label: '予算', icon: WalletCards },
   { to: '/savings', label: '積立', icon: PiggyBank },
   { to: '/events', label: 'イベント', icon: CircleDollarSign },
@@ -45,16 +52,45 @@ export const AppSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
-                <SidebarMenuItem key={item.to}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isPathActive(pathname, item.to)}
-                  >
-                    <Link to={item.to}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
+                <SidebarMenuItem key={item.label}>
+                  {'to' in item ? (
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isPathActive(pathname, item.to)}
+                    >
+                      <Link to={item.to}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  ) : (
+                    <div className="px-2 py-2">
+                      <div
+                        className={
+                          isPathActive(pathname, '/categories')
+                            ? 'flex items-center gap-2 text-sm font-medium text-sidebar-accent-foreground'
+                            : 'text-sidebar-foreground flex items-center gap-2 text-sm'
+                        }
+                      >
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </div>
+                      <SidebarMenu className="mt-1 ml-6">
+                        {item.subItems.map((subItem) => (
+                          <SidebarMenuItem key={subItem.to}>
+                            <SidebarMenuButton
+                              asChild
+                              isActive={isPathActive(pathname, subItem.to)}
+                            >
+                              <Link to={subItem.to}>
+                                <span>{subItem.label}</span>
+                              </Link>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
+                      </SidebarMenu>
+                    </div>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

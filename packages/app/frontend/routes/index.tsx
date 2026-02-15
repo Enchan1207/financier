@@ -14,7 +14,7 @@ const phases = [
   },
   {
     title: '2. 分類と計画',
-    to: '/categories',
+    to: '/categories/expense',
   },
   {
     title: '3. 意思決定支援',

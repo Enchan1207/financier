@@ -20,6 +20,9 @@ import { Route as AnalyticsIndexRouteImport } from './routes/analytics/index'
 import { Route as TransactionsTransactionIdRouteImport } from './routes/transactions/$transactionId'
 import { Route as SavingsSavingDefinitionIdRouteImport } from './routes/savings/$savingDefinitionId'
 import { Route as PostsPostIdRouteImport } from './routes/posts/$postId'
+import { Route as CategoriesIncomeRouteImport } from './routes/categories/income'
+import { Route as CategoriesExpenseRouteImport } from './routes/categories/expense'
+import { Route as CategoriesCategoryIdRouteImport } from './routes/categories/$categoryId'
 import { Route as EventsTemplatesNewRouteImport } from './routes/events/templates/new'
 
 const IndexRoute = IndexRouteImport.update({
@@ -79,6 +82,21 @@ const PostsPostIdRoute = PostsPostIdRouteImport.update({
   path: '/posts/$postId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoriesIncomeRoute = CategoriesIncomeRouteImport.update({
+  id: '/categories/income',
+  path: '/categories/income',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesExpenseRoute = CategoriesExpenseRouteImport.update({
+  id: '/categories/expense',
+  path: '/categories/expense',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesCategoryIdRoute = CategoriesCategoryIdRouteImport.update({
+  id: '/categories/$categoryId',
+  path: '/categories/$categoryId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventsTemplatesNewRoute = EventsTemplatesNewRouteImport.update({
   id: '/events/templates/new',
   path: '/events/templates/new',
@@ -87,6 +105,9 @@ const EventsTemplatesNewRoute = EventsTemplatesNewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/categories/$categoryId': typeof CategoriesCategoryIdRoute
+  '/categories/expense': typeof CategoriesExpenseRoute
+  '/categories/income': typeof CategoriesIncomeRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/savings/$savingDefinitionId': typeof SavingsSavingDefinitionIdRoute
   '/transactions/$transactionId': typeof TransactionsTransactionIdRoute
@@ -101,6 +122,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/categories/$categoryId': typeof CategoriesCategoryIdRoute
+  '/categories/expense': typeof CategoriesExpenseRoute
+  '/categories/income': typeof CategoriesIncomeRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/savings/$savingDefinitionId': typeof SavingsSavingDefinitionIdRoute
   '/transactions/$transactionId': typeof TransactionsTransactionIdRoute
@@ -116,6 +140,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/categories/$categoryId': typeof CategoriesCategoryIdRoute
+  '/categories/expense': typeof CategoriesExpenseRoute
+  '/categories/income': typeof CategoriesIncomeRoute
   '/posts/$postId': typeof PostsPostIdRoute
   '/savings/$savingDefinitionId': typeof SavingsSavingDefinitionIdRoute
   '/transactions/$transactionId': typeof TransactionsTransactionIdRoute
@@ -132,6 +159,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/categories/$categoryId'
+    | '/categories/expense'
+    | '/categories/income'
     | '/posts/$postId'
     | '/savings/$savingDefinitionId'
     | '/transactions/$transactionId'
@@ -146,6 +176,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/categories/$categoryId'
+    | '/categories/expense'
+    | '/categories/income'
     | '/posts/$postId'
     | '/savings/$savingDefinitionId'
     | '/transactions/$transactionId'
@@ -160,6 +193,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/categories/$categoryId'
+    | '/categories/expense'
+    | '/categories/income'
     | '/posts/$postId'
     | '/savings/$savingDefinitionId'
     | '/transactions/$transactionId'
@@ -175,6 +211,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CategoriesCategoryIdRoute: typeof CategoriesCategoryIdRoute
+  CategoriesExpenseRoute: typeof CategoriesExpenseRoute
+  CategoriesIncomeRoute: typeof CategoriesIncomeRoute
   PostsPostIdRoute: typeof PostsPostIdRoute
   SavingsSavingDefinitionIdRoute: typeof SavingsSavingDefinitionIdRoute
   TransactionsTransactionIdRoute: typeof TransactionsTransactionIdRoute
@@ -267,6 +306,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsPostIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/categories/income': {
+      id: '/categories/income'
+      path: '/categories/income'
+      fullPath: '/categories/income'
+      preLoaderRoute: typeof CategoriesIncomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories/expense': {
+      id: '/categories/expense'
+      path: '/categories/expense'
+      fullPath: '/categories/expense'
+      preLoaderRoute: typeof CategoriesExpenseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories/$categoryId': {
+      id: '/categories/$categoryId'
+      path: '/categories/$categoryId'
+      fullPath: '/categories/$categoryId'
+      preLoaderRoute: typeof CategoriesCategoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/events/templates/new': {
       id: '/events/templates/new'
       path: '/events/templates/new'
@@ -279,6 +339,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CategoriesCategoryIdRoute: CategoriesCategoryIdRoute,
+  CategoriesExpenseRoute: CategoriesExpenseRoute,
+  CategoriesIncomeRoute: CategoriesIncomeRoute,
   PostsPostIdRoute: PostsPostIdRoute,
   SavingsSavingDefinitionIdRoute: SavingsSavingDefinitionIdRoute,
   TransactionsTransactionIdRoute: TransactionsTransactionIdRoute,

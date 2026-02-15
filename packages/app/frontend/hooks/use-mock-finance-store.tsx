@@ -70,6 +70,7 @@ interface MockFinanceContextValue {
   state: MockFinanceState
   createTransaction: (input: CreateTransactionInput) => OperationResult
   createCategory: (input: CreateCategoryInput) => OperationResult
+  updateCategoryName: (categoryId: string, name: string) => OperationResult
   archiveCategory: (categoryId: string) => OperationResult
   upsertBudget: (input: UpsertBudgetInput) => OperationResult
   createEvent: (input: CreateEventInput) => OperationResult
@@ -340,6 +341,51 @@ export const MockFinanceProvider = ({ children }: { children: ReactNode }) => {
     [state.categories],
   )
 
+  const updateCategoryName = useCallback(
+    (categoryId: string, name: string): OperationResult => {
+      const trimmedName = name.trim()
+
+      if (trimmedName.length === 0) {
+        return { ok: false, message: 'カテゴリ名を入力してください' }
+      }
+
+      const category = state.categories.find((item) => item.id === categoryId)
+
+      if (category === undefined) {
+        return { ok: false, message: 'カテゴリが存在しません' }
+      }
+
+      if (category.status !== 'active') {
+        return { ok: false, message: '削除済みカテゴリは編集できません' }
+      }
+
+      const duplicated = state.categories.some((item) => {
+        return item.id !== categoryId && item.name.trim() === trimmedName
+      })
+
+      if (duplicated) {
+        return { ok: false, message: '同名カテゴリが既に存在します' }
+      }
+
+      setState((prev) => ({
+        ...prev,
+        categories: prev.categories.map((item) => {
+          if (item.id !== categoryId) {
+            return item
+          }
+
+          return {
+            ...item,
+            name: trimmedName,
+          }
+        }),
+      }))
+
+      return { ok: true }
+    },
+    [state.categories],
+  )
+
   const upsertBudget = useCallback(
     (input: UpsertBudgetInput): OperationResult => {
       if (input.budgetAmount <= 0) {
@@ -568,6 +614,7 @@ export const MockFinanceProvider = ({ children }: { children: ReactNode }) => {
       state,
       createTransaction,
       createCategory,
+      updateCategoryName,
       archiveCategory,
       upsertBudget,
       createEvent,
@@ -578,6 +625,7 @@ export const MockFinanceProvider = ({ children }: { children: ReactNode }) => {
     state,
     createTransaction,
     createCategory,
+    updateCategoryName,
     archiveCategory,
     upsertBudget,
     createEvent,
@@ -823,11 +871,73 @@ export const useCategoryListQuery = () => {
   }
 }
 
+export const useCategoryDetailQuery = (categoryId: string) => {
+  const { state } = useMockFinanceStore()
+
+  const data = useMemo(() => {
+    const category = state.categories.find((item) => item.id === categoryId)
+
+    if (category === undefined) {
+      return undefined
+    }
+
+    const savingDefinition = state.savingDefinitions.find(
+      (item) => item.categoryId === category.id,
+    )
+    const recentTransactions = state.transactions
+      .filter((transaction) => transaction.categoryId === category.id)
+      .sort((left, right) => {
+        const byDate = right.transactionDate.localeCompare(left.transactionDate)
+
+        if (byDate !== 0) {
+          return byDate
+        }
+
+        return right.createdAt.localeCompare(left.createdAt)
+      })
+      .slice(0, 5)
+      .map((transaction) => {
+        const event =
+          transaction.eventId === undefined
+            ? undefined
+            : state.events.find((item) => item.id === transaction.eventId)
+
+        return {
+          id: transaction.id,
+          name: transaction.name,
+          amount: transaction.amount,
+          transactionDate: transaction.transactionDate,
+          eventName: event?.name,
+        }
+      })
+
+    return {
+      ...category,
+      savingDefinition,
+      recentTransactions,
+    }
+  }, [
+    categoryId,
+    state.categories,
+    state.events,
+    state.savingDefinitions,
+    state.transactions,
+  ])
+
+  return {
+    data,
+    isLoading: false,
+    error: null,
+  }
+}
+
 export const useCategoryActions = () => {
-  const { createCategory, archiveCategory } = useMockFinanceStore()
+  const { createCategory, updateCategoryName, archiveCategory } =
+    useMockFinanceStore()
 
   return {
     createCategory,
+    updateCategoryName,
     archiveCategory,
   }
 }

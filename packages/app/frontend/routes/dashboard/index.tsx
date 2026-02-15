@@ -77,7 +77,7 @@ const DashboardPage = () => {
           <Link to="/transactions" className="text-primary underline">
             取引入力と一覧へ
           </Link>
-          <Link to="/categories" className="text-primary underline">
+          <Link to="/categories/expense" className="text-primary underline">
             カテゴリ管理へ
           </Link>
           <Link to="/budgets" className="text-primary underline">
