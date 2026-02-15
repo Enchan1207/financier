@@ -7,12 +7,24 @@ import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@frontend/components/ui/dialog'
 import { Input } from '@frontend/components/ui/input'
+import { Label } from '@frontend/components/ui/label'
 import {
   Table,
   TableBody,
@@ -36,6 +48,7 @@ const EventsPage = () => {
   const [name, setName] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [feedback, setFeedback] = useState<{
     variant: 'default' | 'destructive'
     title: string
@@ -68,6 +81,7 @@ const EventsPage = () => {
     setName('')
     setStartDate('')
     setEndDate('')
+    setIsCreateDialogOpen(false)
   }
 
   return (
@@ -81,48 +95,82 @@ const EventsPage = () => {
         </CardHeader>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>イベントを作成</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form className="grid gap-3 md:grid-cols-3" onSubmit={handleCreate}>
-            <Input
-              value={name}
-              onChange={(event) => {
-                setName(event.target.value)
-              }}
-              placeholder="イベント名"
-              className="md:col-span-3"
-              required
-            />
-            <Input
-              type="date"
-              value={startDate}
-              onChange={(event) => {
-                setStartDate(event.target.value)
-              }}
-            />
-            <Input
-              type="date"
-              value={endDate}
-              onChange={(event) => {
-                setEndDate(event.target.value)
-              }}
-            />
-            <Button type="submit" className="w-fit">
-              作成する
-            </Button>
-          </form>
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <Card>
+          <CardHeader>
+            <CardTitle>イベントを作成</CardTitle>
+            <CardDescription>作成はダイアログで行います。</CardDescription>
+            <CardAction>
+              <DialogTrigger asChild>
+                <Button>イベントを追加</Button>
+              </DialogTrigger>
+            </CardAction>
+          </CardHeader>
+        </Card>
 
-          {feedback !== null && (
-            <Alert className="mt-4" variant={feedback.variant}>
-              <AlertTitle>{feedback.title}</AlertTitle>
-              <AlertDescription>{feedback.description}</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>イベントを作成</DialogTitle>
+            <DialogDescription>
+              期間は任意です。未設定の場合は後から紐付けのみ行えます。
+            </DialogDescription>
+          </DialogHeader>
+
+          <form className="grid gap-4" onSubmit={handleCreate}>
+            <div className="grid gap-2">
+              <Label htmlFor="event-name">イベント名</Label>
+              <Input
+                id="event-name"
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value)
+                }}
+                placeholder="イベント名"
+                required
+              />
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="event-start-date">開始日（任意）</Label>
+                <Input
+                  id="event-start-date"
+                  type="date"
+                  value={startDate}
+                  onChange={(event) => {
+                    setStartDate(event.target.value)
+                  }}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="event-end-date">終了日（任意）</Label>
+                <Input
+                  id="event-end-date"
+                  type="date"
+                  value={endDate}
+                  onChange={(event) => {
+                    setEndDate(event.target.value)
+                  }}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline">
+                  キャンセル
+                </Button>
+              </DialogClose>
+              <Button type="submit">作成する</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {feedback !== null && (
+        <Alert variant={feedback.variant}>
+          <AlertTitle>{feedback.title}</AlertTitle>
+          <AlertDescription>{feedback.description}</AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>

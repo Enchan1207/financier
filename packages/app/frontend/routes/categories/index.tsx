@@ -7,11 +7,22 @@ import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@frontend/components/ui/dialog'
 import { Input } from '@frontend/components/ui/input'
 import { Label } from '@frontend/components/ui/label'
 import {
@@ -45,6 +56,7 @@ const CategoriesPage = () => {
   const [savingMode, setSavingMode] = useState<'none' | 'goal' | 'free'>('none')
   const [targetAmount, setTargetAmount] = useState('')
   const [deadline, setDeadline] = useState('')
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [feedback, setFeedback] = useState<{
     variant: 'default' | 'destructive'
     title: string
@@ -79,6 +91,7 @@ const CategoriesPage = () => {
     setSavingMode('none')
     setTargetAmount('')
     setDeadline('')
+    setIsCreateDialogOpen(false)
   }
 
   const handleArchive = (categoryId: string) => {
@@ -108,12 +121,30 @@ const CategoriesPage = () => {
         </CardHeader>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>カテゴリを作成</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form className="grid gap-3" onSubmit={handleCreate}>
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <Card>
+          <CardHeader>
+            <CardTitle>カテゴリを作成</CardTitle>
+            <CardDescription>
+              作成はダイアログで行います。条件に応じて積立設定を指定できます。
+            </CardDescription>
+            <CardAction>
+              <DialogTrigger asChild>
+                <Button>カテゴリを追加</Button>
+              </DialogTrigger>
+            </CardAction>
+          </CardHeader>
+        </Card>
+
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>カテゴリを作成</DialogTitle>
+            <DialogDescription>
+              支出カテゴリの場合のみ積立カテゴリ化できます。
+            </DialogDescription>
+          </DialogHeader>
+
+          <form className="grid gap-4" onSubmit={handleCreate}>
             <div className="grid gap-3 md:grid-cols-2">
               <div className="grid gap-2">
                 <Label htmlFor="name">カテゴリ名</Label>
@@ -197,19 +228,24 @@ const CategoriesPage = () => {
               )}
             </div>
 
-            <Button type="submit" className="w-fit">
-              作成する
-            </Button>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline">
+                  キャンセル
+                </Button>
+              </DialogClose>
+              <Button type="submit">作成する</Button>
+            </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
 
-          {feedback !== null && (
-            <Alert className="mt-4" variant={feedback.variant}>
-              <AlertTitle>{feedback.title}</AlertTitle>
-              <AlertDescription>{feedback.description}</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
+      {feedback !== null && (
+        <Alert variant={feedback.variant}>
+          <AlertTitle>{feedback.title}</AlertTitle>
+          <AlertDescription>{feedback.description}</AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>

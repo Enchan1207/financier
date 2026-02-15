@@ -7,11 +7,22 @@ import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@frontend/components/ui/dialog'
 import { Input } from '@frontend/components/ui/input'
 import { Label } from '@frontend/components/ui/label'
 import {
@@ -29,7 +40,6 @@ import {
   TableHeader,
   TableRow,
 } from '@frontend/components/ui/table'
-import { Textarea } from '@frontend/components/ui/textarea'
 import {
   useTransactionActions,
   useTransactionFormOptionsQuery,
@@ -50,6 +60,7 @@ const TransactionsPage = () => {
   const [transactionDate, setTransactionDate] = useState('2026-02-15')
   const [eventId, setEventId] = useState('none')
   const [name, setName] = useState('')
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [feedback, setFeedback] = useState<{
     variant: 'default' | 'destructive'
     title: string
@@ -93,6 +104,7 @@ const TransactionsPage = () => {
     setAmount('')
     setName('')
     setEventId('none')
+    setIsCreateDialogOpen(false)
   }
 
   return (
@@ -107,12 +119,44 @@ const TransactionsPage = () => {
         </CardHeader>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>取引を登録</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form className="grid gap-3" onSubmit={handleSubmit}>
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <Card>
+          <CardHeader>
+            <CardTitle>取引を登録</CardTitle>
+            <CardDescription>
+              作成はダイアログで行います。`名前`
+              を先に決めてから詳細を入力します。
+            </CardDescription>
+            <CardAction>
+              <DialogTrigger asChild>
+                <Button>取引を追加</Button>
+              </DialogTrigger>
+            </CardAction>
+          </CardHeader>
+        </Card>
+
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>取引を登録</DialogTitle>
+            <DialogDescription>
+              入力後に登録すると、一覧へ即時反映されます。
+            </DialogDescription>
+          </DialogHeader>
+
+          <form className="grid gap-4" onSubmit={handleSubmit}>
+            <div className="grid gap-2">
+              <Label htmlFor="name">名前</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value)
+                }}
+                placeholder="取引の名前を入力"
+                required
+              />
+            </div>
+
             <div className="grid gap-3 md:grid-cols-2">
               <div className="grid gap-2">
                 <Label>種別</Label>
@@ -197,34 +241,26 @@ const TransactionsPage = () => {
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="grid gap-2 md:col-span-2">
-                <Label htmlFor="name">名前</Label>
-                <Textarea
-                  id="name"
-                  value={name}
-                  onChange={(event) => {
-                    setName(event.target.value)
-                  }}
-                  placeholder="取引の名前を入力"
-                  required
-                />
-              </div>
             </div>
 
-            <Button type="submit" className="w-fit">
-              登録する
-            </Button>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline">
+                  キャンセル
+                </Button>
+              </DialogClose>
+              <Button type="submit">登録する</Button>
+            </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
 
-          {feedback !== null && (
-            <Alert className="mt-4" variant={feedback.variant}>
-              <AlertTitle>{feedback.title}</AlertTitle>
-              <AlertDescription>{feedback.description}</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
+      {feedback !== null && (
+        <Alert variant={feedback.variant}>
+          <AlertTitle>{feedback.title}</AlertTitle>
+          <AlertDescription>{feedback.description}</AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>
