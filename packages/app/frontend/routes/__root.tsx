@@ -4,7 +4,7 @@ import { SidebarInset, SidebarProvider } from '@frontend/components/ui/sidebar'
 import { Toaster } from '@frontend/components/ui/sonner'
 import { MockFinanceProvider } from '@frontend/hooks/use-mock-finance-store'
 import { createRootRoute, Outlet } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 const RootLayout = () => {
   return (
