@@ -41,7 +41,7 @@
       "d1_databases": [
         {
           "binding": "D1",
-          "database_id": "6efa8bf9-ca83-4bb1-b9fe-c3898f9711bf",
+          "database_id": "9a377955-06b1-4da0-841d-04a93494ca02",
           "database_name": "financier-stg",
           "migrations_dir": "drizzle"
         }
