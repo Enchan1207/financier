@@ -1,0 +1,46 @@
+name: lint
+
+on:
+  push:
+    paths:
+      - 'packages/**'
+      - 'package.json'
+      - '**/package.json'
+      - 'eslint.config.mjs'
+  pull_request:
+    paths:
+      - 'packages/**'
+      - 'package.json'
+      - '**/package.json'
+      - 'eslint.config.mjs'
+    branches:
+      - main
+
+concurrency:
+  group: lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: install
+        run: pnpm i --frozen-lockfile
+
+      - name: check format
+        run: pnpm prettier
+
+      - name: lint
+        run: pnpm lint

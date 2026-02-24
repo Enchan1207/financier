@@ -1,0 +1,50 @@
+name: test
+
+on:
+  push:
+    paths:
+      - 'packages/**'
+      - 'package.json'
+      - '**/package.json'
+  pull_request:
+    paths:
+      - 'packages/**'
+      - 'package.json'
+      - '**/package.json'
+    branches:
+      - main
+
+concurrency:
+  group: test-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - app
+          - infra-scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+          cache-dependency-path: 'pnpm-lock.yaml'
+
+      - name: install
+        run: pnpm i --frozen-lockfile
+
+      - name: build
+        run: pnpm -F ${{ matrix.package }} build
+
+      - name: test
+        run: pnpm -F ${{ matrix.package }} test
