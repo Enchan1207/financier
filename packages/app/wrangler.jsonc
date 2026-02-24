@@ -2,7 +2,9 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "financier",
   "compatibility_date": "2026-01-20",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "main": "./backend/index.ts",
   "preview_urls": false,
   "workers_dev": false,
@@ -12,7 +14,9 @@
   "assets": {
     "directory": "./frontend/dist",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": [
+      "/api/*"
+    ]
   },
   "env": {
     "development": {
@@ -38,7 +42,7 @@
       "d1_databases": [
         {
           "binding": "D1",
-          "database_id": "d78a545d-fa62-4dbc-9463-31d5a59cdae8",
+          "database_id": "9a377955-06b1-4da0-841d-04a93494ca02",
           "database_name": "financier-stg",
           "migrations_dir": "drizzle"
         }
@@ -55,7 +59,7 @@
       "d1_databases": [
         {
           "binding": "D1",
-          "database_id": "2d56b70f-487a-4b32-bd86-a8c2170e3229",
+          "database_id": "daa2ca38-d997-4de3-8a47-d17f9ea08378",
           "database_name": "financier-prod",
           "migrations_dir": "drizzle"
         }
