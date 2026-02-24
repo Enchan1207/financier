@@ -83,6 +83,7 @@
       "esbenp.prettier-vscode",
       "dbaeumer.vscode-eslint",
       "hashicorp.terraform",
+      "pomdtr.excalidraw-editor",
     ],
   },
 }
