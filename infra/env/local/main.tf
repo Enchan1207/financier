@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket = "terraform-remote-state"
-    key    = "web-app-template/terraform-local.tfstate"
+    key    = "financier/terraform-local.tfstate"
     region = "auto"
 
     // R2のための設定
@@ -16,13 +16,13 @@ terraform {
 
 variable "app_origin" {
   type    = string
-  default = "http://web-app-template.localhost:5173"
+  default = "http://financier.localhost:5173"
 }
 
 module "auth0" {
   source                    = "../../modules/auth0"
   auth0_callback            = "${var.app_origin}/api/auth/callback"
-  auth0_app_name            = "web-app-template-local"
+  auth0_app_name            = "financier-local"
   auth0_resource_identifier = var.app_origin
   auth0_logout_url          = var.app_origin
   auth0_web_origin          = var.app_origin

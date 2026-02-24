@@ -1,5 +1,5 @@
 {
-    "name": "web-app-template",
+    "name": "financier",
     "scripts": {
         "lint": "eslint",
         "lint:fix": "eslint --fix",

@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "web-app-template",
+  "name": "financier",
   "compatibility_date": "2026-01-20",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./backend/index.ts",
@@ -16,22 +16,22 @@
   },
   "env": {
     "development": {
-      "name": "web-app-template-local",
+      "name": "financier-local",
       "d1_databases": [
         {
           "binding": "D1",
           "database_id": "00000000-0000-0000-0000-000000000000",
-          "database_name": "web-app-template-local",
+          "database_name": "financier-local",
           "migrations_dir": "drizzle",
           "remote": false
         }
       ]
     },
     "staging": {
-      "name": "web-app-template-stg",
+      "name": "financier-stg",
       "routes": [
         {
-          "pattern": "stg-web-app-template.example.com",
+          "pattern": "stg-financier.enchan.me",
           "custom_domain": true
         }
       ],
@@ -39,16 +39,16 @@
         {
           "binding": "D1",
           "database_id": "d78a545d-fa62-4dbc-9463-31d5a59cdae8",
-          "database_name": "web-app-template-stg",
+          "database_name": "financier-stg",
           "migrations_dir": "drizzle"
         }
       ]
     },
     "production": {
-      "name": "web-app-template-prod",
+      "name": "financier-prod",
       "routes": [
         {
-          "pattern": "web-app-template.example.com",
+          "pattern": "financier.enchan.me",
           "custom_domain": true
         }
       ],
@@ -56,7 +56,7 @@
         {
           "binding": "D1",
           "database_id": "2d56b70f-487a-4b32-bd86-a8c2170e3229",
-          "database_name": "web-app-template-prod",
+          "database_name": "financier-prod",
           "migrations_dir": "drizzle"
         }
       ]

@@ -28,7 +28,7 @@ variable "auth0_app_name" {
 }
 
 provider "auth0" {
-  domain = "tenant.region.auth0.com"
+  domain = "enchan.jp.auth0.com"
   debug  = true
 }
 

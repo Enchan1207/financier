@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket = "terraform-remote-state"
-    key    = "web-app-template/terraform-prod.tfstate"
+    key    = "financier/terraform-prod.tfstate"
     region = "auto"
 
     // R2のための設定
@@ -26,19 +26,19 @@ variable "mode" {
 
 variable "app_origin" {
   type    = string
-  default = "https://web-app-template.example.com"
+  default = "https://financier.enchan.me"
 }
 
 module "cloudflare_workers" {
   source                = "../../modules/cloudflare_workers"
   cloudflare_account_id = var.cloudflare_account_id
-  worker_name           = "web-app-template-prod"
+  worker_name           = "financier-prod"
 }
 
 module "auth0" {
   source                    = "../../modules/auth0"
   auth0_callback            = "${var.app_origin}/api/auth/callback"
-  auth0_app_name            = "web-app-template-prod"
+  auth0_app_name            = "financier-prod"
   auth0_resource_identifier = var.app_origin
   auth0_logout_url          = var.app_origin
   auth0_web_origin          = var.app_origin
@@ -47,7 +47,7 @@ module "auth0" {
 module "d1_database" {
   source                = "../../modules/cloudflare_d1"
   cloudflare_account_id = var.cloudflare_account_id
-  database_name         = "web-app-template-prod"
+  database_name         = "financier-prod"
 }
 
 module "update_environment" {

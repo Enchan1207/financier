@@ -2,7 +2,7 @@
 
 ## project overview
 
-- purpose: build web application
+- purpose: build personal finance system named _financier_
 - language: TypeScript
 - frameworks:
   - frontend:
@@ -40,8 +40,11 @@
   - classes,constants,components: PascalCase
   - module: kebab-case
 - follow the guidelines:
-  - testing: @ docs/architecture-guideline/testing.md
   - backend: @ docs/architecture-guideline/backend.md
+- follow the specs:
+  - requirements: @docs/spec/requirements.md
+  - functions: @docs/spec/functions.md
+  - usecases: @docs/spec/usecases.md
 
 ### forbidden operations
 
