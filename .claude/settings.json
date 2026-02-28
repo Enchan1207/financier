@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__shadcn__*",
+      "Bash(pnpm -F app build)",
+      "Bash(pnpm tsc --noEmit)",
+      "Bash(pnpm -w lint:fix)",
+      "Bash(pnpm -w lint:fix *)"
+    ],
+    "deny": ["Read(./.envrc)"],
+    "defaultMode": "plan"
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": ["shadcn"]
+}
