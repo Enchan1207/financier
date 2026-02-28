@@ -9,6 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from '@frontend/components/ui/sidebar'
 import { useUser } from '@frontend/hooks/use-user'
 import { Link, useRouterState } from '@tanstack/react-router'
@@ -24,9 +25,16 @@ const Sidebar: React.FC = () => {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
+  const { isMobile, setOpenMobile } = useSidebar()
   const isAuthenticated =
     userQuery.data !== undefined && userQuery.data !== null
   const visibleGroups = filterGroupsByAuth(navGroups, isAuthenticated)
+
+  const handleItemClick = () => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
 
   return (
     <AppSidebarContainer
@@ -36,7 +44,9 @@ const Sidebar: React.FC = () => {
       <SidebarContent>
         {visibleGroups.map((group, i) => (
           <SidebarGroup key={i}>
-            {group.label && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
+            {group.label && (
+              <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+            )}
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => (
@@ -45,6 +55,7 @@ const Sidebar: React.FC = () => {
                       asChild
                       isActive={isPathActive(pathname, item.to)}
                       tooltip={item.label}
+                      onClick={handleItemClick}
                     >
                       <Link to={item.to}>
                         <item.icon />
