@@ -10,7 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TransactionsIndexRouteImport } from './routes/transactions/index'
 import { Route as SecretIndexRouteImport } from './routes/secret/index'
+import { Route as SavingsIndexRouteImport } from './routes/savings/index'
+import { Route as EventsIndexRouteImport } from './routes/events/index'
+import { Route as BudgetIndexRouteImport } from './routes/budget/index'
 import { Route as AboutIndexRouteImport } from './routes/about/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -18,9 +22,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TransactionsIndexRoute = TransactionsIndexRouteImport.update({
+  id: '/transactions/',
+  path: '/transactions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SecretIndexRoute = SecretIndexRouteImport.update({
   id: '/secret/',
   path: '/secret/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SavingsIndexRoute = SavingsIndexRouteImport.update({
+  id: '/savings/',
+  path: '/savings/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BudgetIndexRoute = BudgetIndexRouteImport.update({
+  id: '/budget/',
+  path: '/budget/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutIndexRoute = AboutIndexRouteImport.update({
@@ -32,31 +56,69 @@ const AboutIndexRoute = AboutIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about/': typeof AboutIndexRoute
+  '/budget/': typeof BudgetIndexRoute
+  '/events/': typeof EventsIndexRoute
+  '/savings/': typeof SavingsIndexRoute
   '/secret/': typeof SecretIndexRoute
+  '/transactions/': typeof TransactionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutIndexRoute
+  '/budget': typeof BudgetIndexRoute
+  '/events': typeof EventsIndexRoute
+  '/savings': typeof SavingsIndexRoute
   '/secret': typeof SecretIndexRoute
+  '/transactions': typeof TransactionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about/': typeof AboutIndexRoute
+  '/budget/': typeof BudgetIndexRoute
+  '/events/': typeof EventsIndexRoute
+  '/savings/': typeof SavingsIndexRoute
   '/secret/': typeof SecretIndexRoute
+  '/transactions/': typeof TransactionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about/' | '/secret/'
+  fullPaths:
+    | '/'
+    | '/about/'
+    | '/budget/'
+    | '/events/'
+    | '/savings/'
+    | '/secret/'
+    | '/transactions/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/secret'
-  id: '__root__' | '/' | '/about/' | '/secret/'
+  to:
+    | '/'
+    | '/about'
+    | '/budget'
+    | '/events'
+    | '/savings'
+    | '/secret'
+    | '/transactions'
+  id:
+    | '__root__'
+    | '/'
+    | '/about/'
+    | '/budget/'
+    | '/events/'
+    | '/savings/'
+    | '/secret/'
+    | '/transactions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutIndexRoute: typeof AboutIndexRoute
+  BudgetIndexRoute: typeof BudgetIndexRoute
+  EventsIndexRoute: typeof EventsIndexRoute
+  SavingsIndexRoute: typeof SavingsIndexRoute
   SecretIndexRoute: typeof SecretIndexRoute
+  TransactionsIndexRoute: typeof TransactionsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,11 +130,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/transactions/': {
+      id: '/transactions/'
+      path: '/transactions'
+      fullPath: '/transactions/'
+      preLoaderRoute: typeof TransactionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/secret/': {
       id: '/secret/'
       path: '/secret'
       fullPath: '/secret/'
       preLoaderRoute: typeof SecretIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/savings/': {
+      id: '/savings/'
+      path: '/savings'
+      fullPath: '/savings/'
+      preLoaderRoute: typeof SavingsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/': {
+      id: '/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/budget/': {
+      id: '/budget/'
+      path: '/budget'
+      fullPath: '/budget/'
+      preLoaderRoute: typeof BudgetIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about/': {
@@ -88,7 +178,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutIndexRoute: AboutIndexRoute,
+  BudgetIndexRoute: BudgetIndexRoute,
+  EventsIndexRoute: EventsIndexRoute,
+  SavingsIndexRoute: SavingsIndexRoute,
   SecretIndexRoute: SecretIndexRoute,
+  TransactionsIndexRoute: TransactionsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
