@@ -244,15 +244,15 @@ const TransactionsPage: React.FC = () => {
   const groups = [...groupMap.entries()]
 
   return (
-    <div className="space-y-6">
-      <Card>
+    <div className="flex flex-col flex-1 min-h-0">
+      <Card className="flex flex-col flex-1 min-h-0">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">取引一覧</CardTitle>
             <AddTransactionDialog />
           </div>
         </CardHeader>
-        <CardContent className="px-1 md:px-6">
+        <CardContent className="flex-1 overflow-y-auto px-1 md:px-6">
           <Table>
             <TableHeader>
               <TableRow>
