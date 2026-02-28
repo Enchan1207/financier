@@ -1,6 +1,7 @@
 import {
   Sidebar as AppSidebarContainer,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -12,6 +13,7 @@ import {
 import { useUser } from '@frontend/hooks/use-user'
 import { Link, useRouterState } from '@tanstack/react-router'
 
+import ThemeToggle from '../theme/theme-toggle'
 import { filterGroupsByAuth, navGroups } from './nav-items'
 
 const isPathActive = (pathname: string, to: string) =>
@@ -56,6 +58,9 @@ const Sidebar: React.FC = () => {
           </SidebarGroup>
         ))}
       </SidebarContent>
+      <SidebarFooter className="items-start">
+        <ThemeToggle />
+      </SidebarFooter>
       <SidebarRail />
     </AppSidebarContainer>
   )

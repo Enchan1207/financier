@@ -1,7 +1,6 @@
 import { SidebarTrigger } from '@frontend/components/ui/sidebar'
 
 import AccountMenu from '../account/account-menu'
-import ThemeToggle from '../theme/theme-toggle'
 
 const Header: React.FC = () => {
   return (
@@ -12,7 +11,6 @@ const Header: React.FC = () => {
           Financier
         </div>
         <div className="flex items-center gap-1 md:gap-2">
-          <ThemeToggle />
           <AccountMenu />
         </div>
       </div>
