@@ -90,7 +90,7 @@ export const transactions: Transaction[] = [
 
 // 積立カテゴリは予算設定対象外
 export const annualBudgets: AnnualBudget[] = [
-  { categoryId: 'cat-10', categoryName: '給与', annualBudget: 3384000, currentMonthActual: 282000 },
+  { categoryId: 'cat-10', categoryName: '給与', annualBudget: 5000000, currentMonthActual: 282000 },
   { categoryId: 'cat-1',  categoryName: '食費',       annualBudget: 264000,  currentMonthActual: 7830 },
   { categoryId: 'cat-2',  categoryName: '交通費',     annualBudget: 120000,  currentMonthActual: 3300 },
   { categoryId: 'cat-3',  categoryName: '外食',       annualBudget: 96000,   currentMonthActual: 6800 },

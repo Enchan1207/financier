@@ -54,6 +54,12 @@ const expenseBudgets = annualBudgets.filter(
   (b) => categoryTypeMap[b.categoryId] === 'expense',
 )
 
+const totalIncomeBudget = incomeBudgets.reduce((sum, b) => sum + b.annualBudget, 0)
+const totalExpenseBudget = expenseBudgets.reduce((sum, b) => sum + b.annualBudget, 0)
+const unallocatedBudget = totalIncomeBudget - totalExpenseBudget
+
+const UNALLOCATED_COLOR = 'oklch(0.75 0 0)'
+
 const incomePieConfig = incomeBudgets.reduce<ChartConfig>(
   (acc, b) => ({
     ...acc,
@@ -64,27 +70,37 @@ const incomePieConfig = incomeBudgets.reduce<ChartConfig>(
   }),
   {},
 )
-const expensePieConfig = expenseBudgets.reduce<ChartConfig>(
-  (acc, b) => ({
-    ...acc,
-    [b.categoryId]: {
-      label: b.categoryName,
-      color: categoryColorMap[b.categoryId],
-    },
-  }),
-  {},
-)
+const expensePieConfig: ChartConfig = {
+  ...expenseBudgets.reduce<ChartConfig>(
+    (acc, b) => ({
+      ...acc,
+      [b.categoryId]: {
+        label: b.categoryName,
+        color: categoryColorMap[b.categoryId],
+      },
+    }),
+    {},
+  ),
+  ...(unallocatedBudget > 0
+    ? { unallocated: { label: '未割り当て', color: UNALLOCATED_COLOR } }
+    : {}),
+}
 
 const incomePieData = incomeBudgets.map((b) => ({
   name: b.categoryId,
   value: b.annualBudget,
   fill: `var(--color-${b.categoryId})`,
 }))
-const expensePieData = expenseBudgets.map((b) => ({
-  name: b.categoryId,
-  value: b.annualBudget,
-  fill: `var(--color-${b.categoryId})`,
-}))
+const expensePieData = [
+  ...expenseBudgets.map((b) => ({
+    name: b.categoryId,
+    value: b.annualBudget,
+    fill: `var(--color-${b.categoryId})`,
+  })),
+  ...(unallocatedBudget > 0
+    ? [{ name: 'unallocated', value: unallocatedBudget, fill: 'var(--color-unallocated)' }]
+    : []),
+]
 
 const BudgetPage: React.FC = () => {
   const sorted = expenseBudgets.slice().sort((a, b) => {
