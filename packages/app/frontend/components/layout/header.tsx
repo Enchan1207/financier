@@ -9,7 +9,7 @@ const Header: React.FC = () => {
       <div className="flex flex-row items-center">
         <SidebarTrigger className="mr-1 h-8 w-8" />
         <div className="flex-1 text-base font-semibold md:text-xl">
-          Web application template
+          Financier
         </div>
         <div className="flex items-center gap-1 md:gap-2">
           <ThemeToggle />
