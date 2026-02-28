@@ -258,7 +258,7 @@ const TransactionsPage: React.FC = () => {
               <TableRow>
                 <TableHead>日付</TableHead>
                 <TableHead>内容</TableHead>
-                <TableHead>カテゴリ</TableHead>
+                <TableHead className="hidden md:table-cell">カテゴリ</TableHead>
                 <TableHead className="text-right">金額</TableHead>
               </TableRow>
             </TableHeader>
@@ -306,7 +306,7 @@ const TransactionsPage: React.FC = () => {
                               )}
                             </div>
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="hidden md:table-cell">
                             <Badge variant="outline" className="text-xs">
                               {tx.categoryName}
                             </Badge>
