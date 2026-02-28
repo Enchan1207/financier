@@ -1,3 +1,5 @@
+import dayjs from '@frontend/lib/date'
+
 export type TransactionType = 'income' | 'expense'
 
 export type Category = {
@@ -5,6 +7,7 @@ export type Category = {
   name: string
   type: TransactionType
   isSaving: boolean
+  color: string
 }
 
 export type Transaction = {
@@ -47,16 +50,16 @@ export type Event = {
 }
 
 export const categories: Category[] = [
-  { id: 'cat-1', name: '食費', type: 'expense', isSaving: false },
-  { id: 'cat-2', name: '交通費', type: 'expense', isSaving: false },
-  { id: 'cat-3', name: '外食', type: 'expense', isSaving: false },
-  { id: 'cat-4', name: '娯楽・グッズ', type: 'expense', isSaving: false },
-  { id: 'cat-5', name: '衣服', type: 'expense', isSaving: false },
-  { id: 'cat-6', name: '日用品', type: 'expense', isSaving: false },
-  { id: 'cat-7', name: '美容', type: 'expense', isSaving: false },
-  { id: 'cat-8', name: '積立：遠征費', type: 'expense', isSaving: true },
-  { id: 'cat-9', name: '積立：グッズ', type: 'expense', isSaving: true },
-  { id: 'cat-10', name: '給与', type: 'income', isSaving: false },
+  { id: 'cat-1',  name: '食費',       type: 'expense', isSaving: false, color: 'var(--chart-1)' },
+  { id: 'cat-2',  name: '交通費',     type: 'expense', isSaving: false, color: 'var(--chart-2)' },
+  { id: 'cat-3',  name: '外食',       type: 'expense', isSaving: false, color: 'var(--chart-3)' },
+  { id: 'cat-4',  name: '娯楽・グッズ', type: 'expense', isSaving: false, color: 'var(--chart-4)' },
+  { id: 'cat-5',  name: '衣服',       type: 'expense', isSaving: false, color: 'var(--chart-5)' },
+  { id: 'cat-6',  name: '日用品',     type: 'expense', isSaving: false, color: 'oklch(0.65 0.2 290)' },
+  { id: 'cat-7',  name: '美容',       type: 'expense', isSaving: false, color: 'oklch(0.72 0.18 350)' },
+  { id: 'cat-8',  name: '積立：遠征費', type: 'expense', isSaving: true,  color: 'oklch(0.60 0.15 210)' },
+  { id: 'cat-9',  name: '積立：グッズ', type: 'expense', isSaving: true,  color: 'oklch(0.55 0.15 150)' },
+  { id: 'cat-10', name: '給与',       type: 'income',  isSaving: false, color: 'oklch(0.70 0.15 140)' },
 ]
 
 export const transactions: Transaction[] = [
@@ -85,15 +88,16 @@ export const transactions: Transaction[] = [
   { id: 'tx-22', type: 'expense', amount: 15000, categoryId: 'cat-5', categoryName: '衣服', transactionDate: '2026-04-05', name: '春物購入予定' },
 ]
 
-// 予算未設定のカテゴリ（積立カテゴリ・給与など）は含まない
+// 積立カテゴリは予算設定対象外
 export const annualBudgets: AnnualBudget[] = [
-  { categoryId: 'cat-1', categoryName: '食費', annualBudget: 264000, currentMonthActual: 7830 },
-  { categoryId: 'cat-2', categoryName: '交通費', annualBudget: 120000, currentMonthActual: 3300 },
-  { categoryId: 'cat-3', categoryName: '外食', annualBudget: 96000, currentMonthActual: 6800 },
-  { categoryId: 'cat-4', categoryName: '娯楽・グッズ', annualBudget: 216000, currentMonthActual: 12700 },
-  { categoryId: 'cat-5', categoryName: '衣服', annualBudget: 120000, currentMonthActual: 7800 },
-  { categoryId: 'cat-6', categoryName: '日用品', annualBudget: 60000, currentMonthActual: 1800 },
-  { categoryId: 'cat-7', categoryName: '美容', annualBudget: 84000, currentMonthActual: 6500 },
+  { categoryId: 'cat-10', categoryName: '給与', annualBudget: 3384000, currentMonthActual: 282000 },
+  { categoryId: 'cat-1',  categoryName: '食費',       annualBudget: 264000,  currentMonthActual: 7830 },
+  { categoryId: 'cat-2',  categoryName: '交通費',     annualBudget: 120000,  currentMonthActual: 3300 },
+  { categoryId: 'cat-3',  categoryName: '外食',       annualBudget: 96000,   currentMonthActual: 6800 },
+  { categoryId: 'cat-4',  categoryName: '娯楽・グッズ', annualBudget: 216000, currentMonthActual: 12700 },
+  { categoryId: 'cat-5',  categoryName: '衣服',       annualBudget: 120000,  currentMonthActual: 7800 },
+  { categoryId: 'cat-6',  categoryName: '日用品',     annualBudget: 60000,   currentMonthActual: 1800 },
+  { categoryId: 'cat-7',  categoryName: '美容',       annualBudget: 84000,   currentMonthActual: 6500 },
 ]
 
 export const savings: SavingDefinition[] = [
@@ -144,6 +148,6 @@ export const formatCurrency = (amount: number) =>
   `¥${amount.toLocaleString('ja-JP')}`
 
 export const formatDate = (dateStr: string) => {
-  const d = new Date(dateStr)
-  return `${d.getMonth() + 1}/${d.getDate()}`
+  const d = dayjs(dateStr)
+  return `${d.month() + 1}/${d.date()}`
 }

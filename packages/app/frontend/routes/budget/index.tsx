@@ -1,43 +1,157 @@
 import { Badge } from '@frontend/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@frontend/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@frontend/components/ui/card'
+import type { ChartConfig } from '@frontend/components/ui/chart'
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+} from '@frontend/components/ui/chart'
 import { Progress } from '@frontend/components/ui/progress'
-import { annualBudgets, formatCurrency } from '@frontend/lib/mock-data'
+import {
+  annualBudgets,
+  categories,
+  formatCurrency,
+  TODAY,
+  transactions,
+} from '@frontend/lib/mock-data'
 import { createFileRoute } from '@tanstack/react-router'
+import { Pie, PieChart } from 'recharts'
+
+const FISCAL_YEAR = TODAY.slice(0, 4)
+
+const categoryColorMap: Record<string, string> = Object.fromEntries(
+  categories.map((c) => [c.id, c.color]),
+)
+
+const categoryTypeMap: Record<string, string> = Object.fromEntries(
+  categories.map((c) => [c.id, c.type]),
+)
+
+// カテゴリごとの年度内支出実績をトランザクションから算出
+const ytdActualByCategory = transactions
+  .filter(
+    (tx) =>
+      tx.type === 'expense' &&
+      tx.transactionDate <= TODAY &&
+      tx.transactionDate.startsWith(FISCAL_YEAR),
+  )
+  .reduce<Record<string, number>>((acc, tx) => {
+    acc[tx.categoryId] = (acc[tx.categoryId] ?? 0) + tx.amount
+    return acc
+  }, {})
+
+const incomeBudgets = annualBudgets.filter(
+  (b) => categoryTypeMap[b.categoryId] === 'income',
+)
+const expenseBudgets = annualBudgets.filter(
+  (b) => categoryTypeMap[b.categoryId] === 'expense',
+)
+
+const incomePieConfig = incomeBudgets.reduce<ChartConfig>(
+  (acc, b) => ({
+    ...acc,
+    [b.categoryId]: {
+      label: b.categoryName,
+      color: categoryColorMap[b.categoryId],
+    },
+  }),
+  {},
+)
+const expensePieConfig = expenseBudgets.reduce<ChartConfig>(
+  (acc, b) => ({
+    ...acc,
+    [b.categoryId]: {
+      label: b.categoryName,
+      color: categoryColorMap[b.categoryId],
+    },
+  }),
+  {},
+)
+
+const incomePieData = incomeBudgets.map((b) => ({
+  name: b.categoryId,
+  value: b.annualBudget,
+  fill: `var(--color-${b.categoryId})`,
+}))
+const expensePieData = expenseBudgets.map((b) => ({
+  name: b.categoryId,
+  value: b.annualBudget,
+  fill: `var(--color-${b.categoryId})`,
+}))
 
 const BudgetPage: React.FC = () => {
-  const totalMonthlyBudget = annualBudgets.reduce(
-    (s, b) => s + Math.round(b.annualBudget / 12),
-    0,
-  )
-  const totalActual = (annualBudgets).reduce(
-    (s, b) => s + b.currentMonthActual,
-    0,
-  )
-  const totalRate = Math.round((totalActual / totalMonthlyBudget) * 100)
-
-  const sorted = (annualBudgets).slice().sort((a, b) => {
-    const rateA = a.currentMonthActual / (a.annualBudget / 12)
-    const rateB = b.currentMonthActual / (b.annualBudget / 12)
-    return rateB - rateA
+  const sorted = expenseBudgets.slice().sort((a, b) => {
+    const ytdA = ytdActualByCategory[a.categoryId] ?? 0
+    const ytdB = ytdActualByCategory[b.categoryId] ?? 0
+    return ytdB / b.annualBudget - ytdA / a.annualBudget
   })
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">予算</h1>
-
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">今月の合計</CardTitle>
+          <CardTitle className="text-base">カテゴリ別 予算配分</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-end justify-between">
-            <span className="text-3xl font-bold">{formatCurrency(totalActual)}</span>
-            <span className="text-muted-foreground">/ {formatCurrency(totalMonthlyBudget)}</span>
+        <CardContent>
+          <div className="flex flex-col gap-2 md:flex-row">
+            <div className="flex-1 space-y-1">
+              <p className="text-xs text-center font-medium text-muted-foreground">
+                収入
+              </p>
+              <ChartContainer
+                config={incomePieConfig}
+                className="mx-auto aspect-square max-h-[220px]"
+              >
+                <PieChart>
+                  <ChartTooltip
+                    content={<ChartTooltipContent nameKey="name" hideLabel />}
+                  />
+                  <Pie
+                    data={incomePieData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={40}
+                    outerRadius={75}
+                  />
+                  <ChartLegend
+                    content={<ChartLegendContent nameKey="name" />}
+                  />
+                </PieChart>
+              </ChartContainer>
+            </div>
+            <div className="flex-1 space-y-1">
+              <p className="text-xs text-center font-medium text-muted-foreground">
+                支出
+              </p>
+              <ChartContainer
+                config={expensePieConfig}
+                className="mx-auto aspect-square max-h-[220px]"
+              >
+                <PieChart>
+                  <ChartTooltip
+                    content={<ChartTooltipContent nameKey="name" hideLabel />}
+                  />
+                  <Pie
+                    data={expensePieData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={40}
+                    outerRadius={75}
+                  />
+                  <ChartLegend
+                    content={<ChartLegendContent nameKey="name" />}
+                  />
+                </PieChart>
+              </ChartContainer>
+            </div>
           </div>
-          <Progress value={totalRate} className="h-2" />
-          <p className="text-sm text-muted-foreground">
-            残り {formatCurrency(totalMonthlyBudget - totalActual)}（{100 - totalRate}%）
-          </p>
         </CardContent>
       </Card>
 
@@ -47,27 +161,35 @@ const BudgetPage: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-5">
           {sorted.map((b) => {
-            const monthlyBudget = Math.round(b.annualBudget / 12)
-            const rate = Math.round((b.currentMonthActual / monthlyBudget) * 100)
-            const remaining = monthlyBudget - b.currentMonthActual
-            const status =
-              rate >= 100 ? 'over' : rate >= 80 ? 'warning' : 'ok'
+            const ytdActual = ytdActualByCategory[b.categoryId] ?? 0
+            const rate = Math.round((ytdActual / b.annualBudget) * 100)
+            const remaining = b.annualBudget - ytdActual
+            const status = rate >= 100 ? 'over' : rate >= 80 ? 'warning' : 'ok'
 
             return (
               <div key={b.categoryId} className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{b.categoryName}</span>
+                    <span className="text-sm font-medium">
+                      {b.categoryName}
+                    </span>
                     {status === 'over' && (
-                      <Badge variant="destructive" className="text-xs">超過</Badge>
+                      <Badge variant="destructive" className="text-xs">
+                        超過
+                      </Badge>
                     )}
                     {status === 'warning' && (
-                      <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-600">注意</Badge>
+                      <Badge
+                        variant="outline"
+                        className="text-xs border-yellow-500 text-yellow-600"
+                      >
+                        注意
+                      </Badge>
                     )}
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    {formatCurrency(b.currentMonthActual)} / {formatCurrency(monthlyBudget)}
-                    <span className="text-xs ml-1 opacity-60">（年{formatCurrency(b.annualBudget)}）</span>
+                    {formatCurrency(ytdActual)} /{' '}
+                    {formatCurrency(b.annualBudget)}
                   </span>
                 </div>
                 <Progress
@@ -77,11 +199,18 @@ const BudgetPage: React.FC = () => {
                       ? '[&>div]:bg-destructive'
                       : status === 'warning'
                         ? '[&>div]:bg-yellow-500'
-                        : ''
+                        : '[&>div]:bg-[var(--bar-color)]'
                   }`}
+                  style={
+                    {
+                      '--bar-color': categoryColorMap[b.categoryId],
+                    } as React.CSSProperties
+                  }
                 />
                 <p className="text-xs text-muted-foreground text-right">
-                  {remaining >= 0 ? `残り ${formatCurrency(remaining)}` : `${formatCurrency(-remaining)} 超過`}
+                  {remaining >= 0
+                    ? `残り ${formatCurrency(remaining)}（${100 - rate}%）`
+                    : `${formatCurrency(-remaining)} 超過`}
                 </p>
               </div>
             )

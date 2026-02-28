@@ -48,6 +48,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Plus } from 'lucide-react'
 import React, { useState } from 'react'
 
+const categoryColorMap: Record<string, string> = Object.fromEntries(
+  categories.map((c) => [c.id, c.color]),
+)
+
 // 年度（4月始まり）を返す
 const getFiscalYear = (dateStr: string): number => {
   const d = dayjs(dateStr)
@@ -311,7 +315,11 @@ const TransactionsPage: React.FC = () => {
                             </div>
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
-                            <Badge variant="outline" className="text-xs">
+                            <Badge
+                              variant="outline"
+                              className="text-xs border-[var(--badge-color)] text-[var(--badge-color)]"
+                              style={{ '--badge-color': categoryColorMap[tx.categoryId] } as React.CSSProperties}
+                            >
                               {tx.categoryName}
                             </Badge>
                           </TableCell>
