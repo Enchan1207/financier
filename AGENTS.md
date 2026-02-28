@@ -45,7 +45,7 @@
   - requirements: @docs/spec/requirements.md
   - functions: @docs/spec/functions.md
   - usecases: @docs/spec/usecases.md
-- after all edits, make sure your build (`pnpm -F app build`) and lint (`pnpm -w lint:fix`) are successful.
+- after all edits, make sure your lint (`pnpm -w lint:fix`) and build (`pnpm -F app build`)are successful.
 
 ### forbidden operations
 
