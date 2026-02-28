@@ -30,6 +30,11 @@ import {
   TableHeader,
   TableRow,
 } from '@frontend/components/ui/table'
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from '@frontend/components/ui/toggle-group'
+import dayjs from '@frontend/lib/date'
 import type { TransactionType } from '@frontend/lib/mock-data'
 import {
   categories,
@@ -45,9 +50,9 @@ import React, { useState } from 'react'
 
 // 年度（4月始まり）を返す
 const getFiscalYear = (dateStr: string): number => {
-  const d = new Date(dateStr)
-  const month = d.getMonth() + 1
-  const year = d.getFullYear()
+  const d = dayjs(dateStr)
+  const month = d.month() + 1
+  const year = d.year()
   return month >= 4 ? year : year - 1
 }
 
@@ -58,8 +63,8 @@ const getGroupKey = (dateStr: string): string => {
 
 // 表示ラベル: "2025年度 2月"
 const formatFiscalYearMonth = (dateStr: string): string => {
-  const d = new Date(dateStr)
-  const month = d.getMonth() + 1
+  const d = dayjs(dateStr)
+  const month = d.month() + 1
   const fy = getFiscalYear(dateStr)
   return `${fy}年度 ${month}月`
 }
@@ -109,37 +114,29 @@ const AddTransactionDialog: React.FC = () => {
           {/* 収支種別 */}
           <div className="space-y-1.5">
             <Label>種別</Label>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant={formType === 'expense' ? 'default' : 'outline'}
-                size="sm"
-                className="flex-1"
-                onClick={() => {
-                  handleTypeChange('expense')
-                }}
-              >
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={formType}
+              onValueChange={(v) => {
+                if (v) handleTypeChange(v as TransactionType)
+              }}
+              className="w-full"
+            >
+              <ToggleGroupItem value="expense" className="flex-1">
                 支出
-              </Button>
-              <Button
-                type="button"
-                variant={formType === 'income' ? 'default' : 'outline'}
-                size="sm"
-                className="flex-1"
-                onClick={() => {
-                  handleTypeChange('income')
-                }}
-              >
+              </ToggleGroupItem>
+              <ToggleGroupItem value="income" className="flex-1">
                 収入
-              </Button>
-            </div>
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
 
           {/* カテゴリ */}
           <div className="space-y-1.5">
             <Label htmlFor="dialog-category">カテゴリ</Label>
             <Select value={formCategory} onValueChange={setFormCategory}>
-              <SelectTrigger id="dialog-category">
+              <SelectTrigger id="dialog-category" className="w-full">
                 <SelectValue placeholder="カテゴリを選択" />
               </SelectTrigger>
               <SelectContent>
@@ -177,7 +174,6 @@ const AddTransactionDialog: React.FC = () => {
             <Label htmlFor="dialog-name">内容</Label>
             <Input
               id="dialog-name"
-              placeholder="例：スーパー"
               value={formName}
               onChange={(e) => {
                 setFormName(e.target.value)
@@ -200,12 +196,18 @@ const AddTransactionDialog: React.FC = () => {
 
           {/* イベント（任意） */}
           <div className="space-y-1.5">
-            <Label htmlFor="dialog-event">イベント（任意）</Label>
-            <Select value={formEvent} onValueChange={setFormEvent}>
-              <SelectTrigger id="dialog-event">
-                <SelectValue placeholder="なし" />
+            <Label htmlFor="dialog-event">イベント</Label>
+            <Select
+              value={formEvent || '_none'}
+              onValueChange={(v) => {
+                setFormEvent(v === '_none' ? '' : v)
+              }}
+            >
+              <SelectTrigger id="dialog-event" className="w-full">
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="_none">なし</SelectItem>
                 {events.map((ev) => (
                   <SelectItem key={ev.id} value={ev.id}>
                     {ev.name}
@@ -239,7 +241,7 @@ const TransactionsPage: React.FC = () => {
   for (const tx of sorted) {
     const key = getGroupKey(tx.transactionDate)
     if (!groupMap.has(key)) groupMap.set(key, [])
-    groupMap.get(key)!.push(tx)
+    groupMap.get(key)?.push(tx)
   }
   const groups = [...groupMap.entries()]
 
@@ -265,8 +267,10 @@ const TransactionsPage: React.FC = () => {
             <TableBody>
               {groups.map(([key, txList]) => {
                 // key = "YYYY-MM"、先頭取引から年度月ラベルを生成
-                const label = formatFiscalYearMonth(txList[0]!.transactionDate)
-                const isFutureGroup = txList[0]!.transactionDate > TODAY
+                const label = formatFiscalYearMonth(
+                  txList[0]?.transactionDate ?? '',
+                )
+                const isFutureGroup = (txList[0]?.transactionDate ?? '') > TODAY
 
                 return (
                   <React.Fragment key={key}>
