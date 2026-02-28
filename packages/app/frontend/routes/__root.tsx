@@ -10,12 +10,12 @@ const RootLayout = () => {
   return (
     <SidebarProvider defaultOpen>
       <TooltipProvider>
-        <div className="flex min-h-dvh w-full flex-col bg-muted/30">
+        <div className="flex h-dvh overflow-hidden w-full flex-col bg-muted/30">
           <Header />
           <div className="flex min-h-0 flex-1">
             <Sidebar />
 
-            <SidebarInset>
+            <SidebarInset className="overflow-y-auto">
               <main className="mx-auto min-w-0 w-full max-w-7xl flex-1 px-4 py-6 md:px-6">
                 <Outlet />
               </main>
