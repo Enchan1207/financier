@@ -1,17 +1,23 @@
 import { Badge } from '@frontend/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@frontend/components/ui/card'
 import { Progress } from '@frontend/components/ui/progress'
-import { formatCurrency, monthlyBudgets } from '@frontend/lib/mock-data'
+import { annualBudgets, formatCurrency } from '@frontend/lib/mock-data'
 import { createFileRoute } from '@tanstack/react-router'
 
 const BudgetPage: React.FC = () => {
-  const totalBudget = monthlyBudgets.reduce((s, b) => s + b.monthlyBudget, 0)
-  const totalActual = monthlyBudgets.reduce((s, b) => s + b.actualAmount, 0)
-  const totalRate = Math.round((totalActual / totalBudget) * 100)
+  const totalMonthlyBudget = annualBudgets.reduce(
+    (s, b) => s + Math.round(b.annualBudget / 12),
+    0,
+  )
+  const totalActual = (annualBudgets).reduce(
+    (s, b) => s + b.currentMonthActual,
+    0,
+  )
+  const totalRate = Math.round((totalActual / totalMonthlyBudget) * 100)
 
-  const sorted = [...monthlyBudgets].sort((a, b) => {
-    const rateA = a.actualAmount / a.monthlyBudget
-    const rateB = b.actualAmount / b.monthlyBudget
+  const sorted = (annualBudgets).slice().sort((a, b) => {
+    const rateA = a.currentMonthActual / (a.annualBudget / 12)
+    const rateB = b.currentMonthActual / (b.annualBudget / 12)
     return rateB - rateA
   })
 
@@ -26,11 +32,11 @@ const BudgetPage: React.FC = () => {
         <CardContent className="space-y-3">
           <div className="flex items-end justify-between">
             <span className="text-3xl font-bold">{formatCurrency(totalActual)}</span>
-            <span className="text-muted-foreground">/ {formatCurrency(totalBudget)}</span>
+            <span className="text-muted-foreground">/ {formatCurrency(totalMonthlyBudget)}</span>
           </div>
           <Progress value={totalRate} className="h-2" />
           <p className="text-sm text-muted-foreground">
-            残り {formatCurrency(totalBudget - totalActual)}（{100 - totalRate}%）
+            残り {formatCurrency(totalMonthlyBudget - totalActual)}（{100 - totalRate}%）
           </p>
         </CardContent>
       </Card>
@@ -41,8 +47,9 @@ const BudgetPage: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-5">
           {sorted.map((b) => {
-            const rate = Math.round((b.actualAmount / b.monthlyBudget) * 100)
-            const remaining = b.monthlyBudget - b.actualAmount
+            const monthlyBudget = Math.round(b.annualBudget / 12)
+            const rate = Math.round((b.currentMonthActual / monthlyBudget) * 100)
+            const remaining = monthlyBudget - b.currentMonthActual
             const status =
               rate >= 100 ? 'over' : rate >= 80 ? 'warning' : 'ok'
 
@@ -59,7 +66,8 @@ const BudgetPage: React.FC = () => {
                     )}
                   </div>
                   <span className="text-sm text-muted-foreground">
-                    {formatCurrency(b.actualAmount)} / {formatCurrency(b.monthlyBudget)}
+                    {formatCurrency(b.currentMonthActual)} / {formatCurrency(monthlyBudget)}
+                    <span className="text-xs ml-1 opacity-60">（年{formatCurrency(b.annualBudget)}）</span>
                   </span>
                 </div>
                 <Progress

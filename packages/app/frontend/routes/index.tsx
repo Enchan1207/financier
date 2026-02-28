@@ -15,12 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@frontend/components/ui/select'
+import type { AnnualBudget } from '@frontend/lib/mock-data'
 import {
+  annualBudgets,
   categories,
   formatCurrency,
   formatDate,
   internalBalance,
-  monthlyBudgets,
   savings,
   TODAY,
   transactions,
@@ -56,15 +57,15 @@ const HomePage: React.FC = () => {
     .sort((a, b) => a.transactionDate.localeCompare(b.transactionDate))
     .slice(0, 4)
 
-  const totalMonthlyBudget = monthlyBudgets.reduce(
-    (s, b) => s + b.monthlyBudget,
+  const totalMonthlyBudget = annualBudgets.reduce(
+    (s, b) => s + Math.round(b.annualBudget / 12),
     0,
   )
   const overallRate = Math.round((thisMonthExpense / totalMonthlyBudget) * 100)
 
-  const budgetsSorted = [...monthlyBudgets].sort((a, b) => {
-    const rateA = a.actualAmount / a.monthlyBudget
-    const rateB = b.actualAmount / b.monthlyBudget
+  const budgetsSorted: AnnualBudget[] = (annualBudgets).sort((a, b) => {
+    const rateA = a.currentMonthActual / (a.annualBudget / 12)
+    const rateB = b.currentMonthActual / (b.annualBudget / 12)
     return rateB - rateA
   })
 
@@ -182,7 +183,8 @@ const HomePage: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             {budgetsSorted.map((b) => {
-              const rate = Math.round((b.actualAmount / b.monthlyBudget) * 100)
+              const monthlyBudget = Math.round(b.annualBudget / 12)
+              const rate = Math.round((b.currentMonthActual / monthlyBudget) * 100)
               const status =
                 rate >= 100 ? 'over' : rate >= 80 ? 'warning' : 'ok'
 
@@ -209,10 +211,10 @@ const HomePage: React.FC = () => {
                       )}
                     </div>
                     <span className="text-muted-foreground tabular-nums">
-                      {formatCurrency(b.actualAmount)}
+                      {formatCurrency(b.currentMonthActual)}
                       <span className="text-xs">
                         {' '}
-                        / {formatCurrency(b.monthlyBudget)}
+                        / {formatCurrency(monthlyBudget)}
                       </span>
                     </span>
                   </div>

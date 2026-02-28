@@ -19,11 +19,13 @@ export type Transaction = {
   name: string
 }
 
-export type MonthlyBudget = {
+// 予算は年度単位。表示時は /12 で月次目安を算出する
+export type AnnualBudget = {
   categoryId: string
   categoryName: string
-  monthlyBudget: number
-  actualAmount: number
+  annualBudget: number
+  // 当月実績（本来はAPIから取得。モックでは手動設定）
+  currentMonthActual: number
 }
 
 export type SavingDefinition = {
@@ -83,14 +85,15 @@ export const transactions: Transaction[] = [
   { id: 'tx-22', type: 'expense', amount: 15000, categoryId: 'cat-5', categoryName: '衣服', transactionDate: '2026-04-05', name: '春物購入予定' },
 ]
 
-export const monthlyBudgets: MonthlyBudget[] = [
-  { categoryId: 'cat-1', categoryName: '食費', monthlyBudget: 22000, actualAmount: 7830 },
-  { categoryId: 'cat-2', categoryName: '交通費', monthlyBudget: 10000, actualAmount: 3300 },
-  { categoryId: 'cat-3', categoryName: '外食', monthlyBudget: 8000, actualAmount: 6800 },
-  { categoryId: 'cat-4', categoryName: '娯楽・グッズ', monthlyBudget: 18000, actualAmount: 12700 },
-  { categoryId: 'cat-5', categoryName: '衣服', monthlyBudget: 10000, actualAmount: 7800 },
-  { categoryId: 'cat-6', categoryName: '日用品', monthlyBudget: 5000, actualAmount: 1800 },
-  { categoryId: 'cat-7', categoryName: '美容', monthlyBudget: 7000, actualAmount: 6500 },
+// 予算未設定のカテゴリ（積立カテゴリ・給与など）は含まない
+export const annualBudgets: AnnualBudget[] = [
+  { categoryId: 'cat-1', categoryName: '食費', annualBudget: 264000, currentMonthActual: 7830 },
+  { categoryId: 'cat-2', categoryName: '交通費', annualBudget: 120000, currentMonthActual: 3300 },
+  { categoryId: 'cat-3', categoryName: '外食', annualBudget: 96000, currentMonthActual: 6800 },
+  { categoryId: 'cat-4', categoryName: '娯楽・グッズ', annualBudget: 216000, currentMonthActual: 12700 },
+  { categoryId: 'cat-5', categoryName: '衣服', annualBudget: 120000, currentMonthActual: 7800 },
+  { categoryId: 'cat-6', categoryName: '日用品', annualBudget: 60000, currentMonthActual: 1800 },
+  { categoryId: 'cat-7', categoryName: '美容', annualBudget: 84000, currentMonthActual: 6500 },
 ]
 
 export const savings: SavingDefinition[] = [
