@@ -22,8 +22,10 @@ export const BudgetBar: React.FC<Props> = ({
 }) => {
   const rate = Math.round((current / max) * 100)
 
+  // TODO: スタイルなんとかする
+
   return (
-    <div className="space-y-1.5">
+    <div>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{label}</span>
@@ -45,6 +47,7 @@ export const BudgetBar: React.FC<Props> = ({
           {formatCurrency(current)} / {formatCurrency(max)}
         </span>
       </div>
+
       <Progress
         value={Math.min(rate, 100)}
         className={`h-2 bg-[var(--track-color)] ${

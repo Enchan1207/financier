@@ -33,7 +33,11 @@ type PaginatorProps = {
   onPageChange: (page: number) => void
 }
 
-const Paginator: React.FC<PaginatorProps> = ({ page, totalPages, onPageChange }) => {
+const Paginator: React.FC<PaginatorProps> = ({
+  page,
+  totalPages,
+  onPageChange,
+}) => {
   if (totalPages <= 1) return null
 
   return (
@@ -59,9 +63,7 @@ const Paginator: React.FC<PaginatorProps> = ({ page, totalPages, onPageChange })
               onPageChange(Math.min(totalPages, page + 1))
             }}
             className={
-              page === totalPages
-                ? 'pointer-events-none opacity-50'
-                : undefined
+              page === totalPages ? 'pointer-events-none opacity-50' : undefined
             }
           />
         </PaginationItem>
@@ -91,7 +93,8 @@ export const CategoryBudgetCard: React.FC<Props> = ({
         <CardTitle className="text-base">{title}</CardTitle>
         <Paginator page={page} totalPages={totalPages} onPageChange={setPage} />
       </CardHeader>
-      <CardContent className="min-h-[40vh] space-y-5">
+      {/* // TODO BudgetBarListみたいにした方が良さそう */}
+      <CardContent className="min-h-[40vh]">
         {pagedItems.map((item) => (
           <BudgetBar
             key={item.categoryId}
