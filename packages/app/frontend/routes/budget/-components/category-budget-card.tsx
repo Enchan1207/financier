@@ -73,7 +73,7 @@ export const CategoryBudgetCard: React.FC<Props> = ({
             収入
           </ToggleGroupItem>
         </ToggleGroup>
-        <div className="overflow-y-auto max-h-[60vh]">
+        <div className="overflow-y-auto max-h-[60vh] grid grid-cols-1 md:grid-cols-2 gap-y-2 md:gap-x-4 lg:gap-x-6">
           {items.map((item) => (
             <BudgetBar
               key={item.categoryId}
