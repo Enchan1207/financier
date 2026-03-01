@@ -1,6 +1,7 @@
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
@@ -130,6 +131,9 @@ export const BudgetSummaryChart: React.FC<Props> = ({
     <Card>
       <CardHeader>
         <CardTitle>サマリー</CardTitle>
+        <CardDescription>
+          収入の合計額を100%とした収支の割合を表示しています。
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <SummaryBar sectionLabel="収入" items={incomeItems} />
