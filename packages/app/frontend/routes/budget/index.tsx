@@ -1,3 +1,4 @@
+import { Button } from '@frontend/components/ui/button'
 import {
   annualBudgets,
   categories,
@@ -5,6 +6,7 @@ import {
   transactions,
 } from '@frontend/lib/mock-data'
 import { createFileRoute } from '@tanstack/react-router'
+import { PencilIcon } from 'lucide-react'
 
 import type { SummaryBarItem } from './-components/budget-summary-chart'
 import { BudgetSummaryChart } from './-components/budget-summary-chart'
@@ -125,8 +127,18 @@ const BudgetPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between">
+        <h1 className="text-2xl font-bold text-foreground">
+          {FISCAL_YEAR}年度 予算
+        </h1>
+
+        <Button size="sm">
+          <PencilIcon />
+          編集
+        </Button>
+      </div>
+
       <BudgetSummaryChart
-        fiscalYear={FISCAL_YEAR}
         incomeItems={incomeSummaryItems}
         expenseItems={expenseSummaryItems}
       />

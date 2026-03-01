@@ -1,6 +1,7 @@
 import {
   Card,
   CardContent,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
@@ -89,9 +90,8 @@ export const CategoryBudgetCard: React.FC<Props> = ({
 
   return (
     <Card className="min-w-0">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="flex-shrink-0">{title}</CardTitle>
-        <Paginator page={page} totalPages={totalPages} onPageChange={setPage} />
+      <CardHeader className="pb-2">
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       {/* // TODO BudgetBarListみたいにした方が良さそう */}
       <CardContent className="h-[350px]">
@@ -106,6 +106,9 @@ export const CategoryBudgetCard: React.FC<Props> = ({
           />
         ))}
       </CardContent>
+      <CardFooter className="justify-end">
+        <Paginator page={page} totalPages={totalPages} onPageChange={setPage} />
+      </CardFooter>
     </Card>
   )
 }

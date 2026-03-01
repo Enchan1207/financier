@@ -118,20 +118,18 @@ const SummaryBar: React.FC<SummaryBarProps> = ({ sectionLabel, items }) => {
 }
 
 type Props = {
-  fiscalYear: string
   incomeItems: SummaryBarItem[]
   expenseItems: SummaryBarItem[]
 }
 
 export const BudgetSummaryChart: React.FC<Props> = ({
-  fiscalYear,
   incomeItems,
   expenseItems,
 }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{fiscalYear}年度 予算サマリー</CardTitle>
+        <CardTitle>サマリー</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <SummaryBar sectionLabel="収入" items={incomeItems} />
