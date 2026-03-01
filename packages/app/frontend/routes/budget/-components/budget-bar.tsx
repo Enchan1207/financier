@@ -32,7 +32,7 @@ export const BudgetBar: React.FC<Props> = ({
   const rate = Math.round((current / max) * 100)
 
   return (
-    <div className="flex flex-col gap-1 justify-start">
+    <div className="flex flex-col gap-1 justify-start h-[60px]">
       <div className="text-sm flex items-center justify-between gap-2 min-w-0">
         <span className="truncate">{label}</span>
 
