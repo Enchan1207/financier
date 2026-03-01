@@ -1,10 +1,19 @@
 import type { FileRouteTypes } from '@frontend/routeTree.gen'
-import { CalendarDays, Home, PiggyBank, Receipt, Wallet } from 'lucide-react'
+import {
+  CalendarDays,
+  Home,
+  PiggyBank,
+  PlusCircleIcon,
+  Receipt,
+  Wallet,
+} from 'lucide-react'
 
 export type NavVisibility = 'public' | 'authenticated'
 
 export type NavSubItem = {
+  to: string
   label: string
+  icon?: React.ComponentType<{ className?: string }>
   visibility: NavVisibility
 }
 
@@ -24,7 +33,12 @@ export type NavGroup = {
 export const navGroups: NavGroup[] = [
   {
     items: [
-      { to: '/', label: 'ホーム', icon: Home, visibility: 'public' },
+      {
+        to: '/',
+        label: 'ホーム',
+        icon: Home,
+        visibility: 'public',
+      },
       {
         to: '/transactions',
         label: '取引一覧',
@@ -42,12 +56,35 @@ export const navGroups: NavGroup[] = [
         icon: Wallet,
         visibility: 'public',
         children: [
-          { label: '2026年度', visibility: 'public' },
-          { label: '2025年度', visibility: 'public' },
-          { label: '2024年度', visibility: 'public' },
+          {
+            label: '新規作成…',
+            to: '/budget/new',
+            icon: PlusCircleIcon,
+            visibility: 'public',
+          },
+          {
+            label: '2026年度',
+            to: '/budget/2026',
+            visibility: 'public',
+          },
+          {
+            label: '2025年度',
+            to: '/budget/2025',
+            visibility: 'public',
+          },
+          {
+            label: '2024年度',
+            to: '/budget/2024',
+            visibility: 'public',
+          },
         ],
       },
-      { to: '/savings', label: '積立', icon: PiggyBank, visibility: 'public' },
+      {
+        to: '/savings',
+        label: '積立',
+        icon: PiggyBank,
+        visibility: 'public',
+      },
       {
         to: '/events',
         label: 'イベント',

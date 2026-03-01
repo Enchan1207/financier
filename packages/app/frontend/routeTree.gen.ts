@@ -16,6 +16,8 @@ import { Route as SavingsIndexRouteImport } from './routes/savings/index'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as BudgetIndexRouteImport } from './routes/budget/index'
 import { Route as AboutIndexRouteImport } from './routes/about/index'
+import { Route as BudgetNewIndexRouteImport } from './routes/budget/new/index'
+import { Route as BudgetYearIndexRouteImport } from './routes/budget/$year/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +54,16 @@ const AboutIndexRoute = AboutIndexRouteImport.update({
   path: '/about/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BudgetNewIndexRoute = BudgetNewIndexRouteImport.update({
+  id: '/budget/new/',
+  path: '/budget/new/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BudgetYearIndexRoute = BudgetYearIndexRouteImport.update({
+  id: '/budget/$year/',
+  path: '/budget/$year/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +73,8 @@ export interface FileRoutesByFullPath {
   '/savings/': typeof SavingsIndexRoute
   '/secret/': typeof SecretIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
+  '/budget/$year/': typeof BudgetYearIndexRoute
+  '/budget/new/': typeof BudgetNewIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +84,8 @@ export interface FileRoutesByTo {
   '/savings': typeof SavingsIndexRoute
   '/secret': typeof SecretIndexRoute
   '/transactions': typeof TransactionsIndexRoute
+  '/budget/$year': typeof BudgetYearIndexRoute
+  '/budget/new': typeof BudgetNewIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +96,8 @@ export interface FileRoutesById {
   '/savings/': typeof SavingsIndexRoute
   '/secret/': typeof SecretIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
+  '/budget/$year/': typeof BudgetYearIndexRoute
+  '/budget/new/': typeof BudgetNewIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +109,8 @@ export interface FileRouteTypes {
     | '/savings/'
     | '/secret/'
     | '/transactions/'
+    | '/budget/$year/'
+    | '/budget/new/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +120,8 @@ export interface FileRouteTypes {
     | '/savings'
     | '/secret'
     | '/transactions'
+    | '/budget/$year'
+    | '/budget/new'
   id:
     | '__root__'
     | '/'
@@ -109,6 +131,8 @@ export interface FileRouteTypes {
     | '/savings/'
     | '/secret/'
     | '/transactions/'
+    | '/budget/$year/'
+    | '/budget/new/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +143,8 @@ export interface RootRouteChildren {
   SavingsIndexRoute: typeof SavingsIndexRoute
   SecretIndexRoute: typeof SecretIndexRoute
   TransactionsIndexRoute: typeof TransactionsIndexRoute
+  BudgetYearIndexRoute: typeof BudgetYearIndexRoute
+  BudgetNewIndexRoute: typeof BudgetNewIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +198,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/budget/new/': {
+      id: '/budget/new/'
+      path: '/budget/new'
+      fullPath: '/budget/new/'
+      preLoaderRoute: typeof BudgetNewIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/budget/$year/': {
+      id: '/budget/$year/'
+      path: '/budget/$year'
+      fullPath: '/budget/$year/'
+      preLoaderRoute: typeof BudgetYearIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +223,8 @@ const rootRouteChildren: RootRouteChildren = {
   SavingsIndexRoute: SavingsIndexRoute,
   SecretIndexRoute: SecretIndexRoute,
   TransactionsIndexRoute: TransactionsIndexRoute,
+  BudgetYearIndexRoute: BudgetYearIndexRoute,
+  BudgetNewIndexRoute: BudgetNewIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

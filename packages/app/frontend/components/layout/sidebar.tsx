@@ -22,6 +22,7 @@ import {
 import { useUser } from '@frontend/hooks/use-user'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { ChevronRightIcon } from 'lucide-react'
+import { useState } from 'react'
 
 import ThemeToggle from '../theme/theme-toggle'
 import type { NavItem } from './nav-items'
@@ -36,37 +37,70 @@ type NavMenuItemProps = {
   onItemClick: () => void
 }
 
+// アコーディオン付きアイテム用コンポーネント（useState を使用するため分離）
+const NavMenuCollapsibleItem: React.FC<NavMenuItemProps> = ({
+  item,
+  pathname,
+  onItemClick,
+}) => {
+  const isActive = isPathActive(pathname, item.to)
+  const [localOpen, setLocalOpen] = useState(isActive)
+
+  // 子ルートがアクティブな場合は常に開いた状態を維持する
+  const open = isActive || localOpen
+
+  return (
+    <Collapsible
+      asChild
+      open={open}
+      onOpenChange={(val) => {
+        if (!isActive) setLocalOpen(val)
+      }}
+      className="group/collapsible"
+    >
+      <SidebarMenuItem>
+        <CollapsibleTrigger asChild>
+          <SidebarMenuButton isActive={isActive} tooltip={item.label}>
+            <item.icon />
+            <span>{item.label}</span>
+            <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+          </SidebarMenuButton>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {(item.children ?? []).map((child) => (
+              <SidebarMenuSubItem key={child.label}>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={isPathActive(pathname, child.to)}
+                  onClick={onItemClick}
+                >
+                  <Link to={child.to as unknown as string}>
+                    {child.icon && <child.icon />}
+                    <span>{child.label}</span>
+                  </Link>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            ))}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
+  )
+}
+
 const NavMenuItem: React.FC<NavMenuItemProps> = ({
   item,
   pathname,
   onItemClick,
 }) => {
   if (item.children && item.children.length > 0) {
-    const isActive = isPathActive(pathname, item.to)
-
     return (
-      <Collapsible asChild defaultOpen={isActive} className="group/collapsible">
-        <SidebarMenuItem>
-          <CollapsibleTrigger asChild>
-            <SidebarMenuButton isActive={isActive} tooltip={item.label}>
-              <item.icon />
-              <span>{item.label}</span>
-              <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-            </SidebarMenuButton>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <SidebarMenuSub>
-              {item.children.map((child) => (
-                <SidebarMenuSubItem key={child.label}>
-                  <SidebarMenuSubButton>
-                    <span>{child.label}</span>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-              ))}
-            </SidebarMenuSub>
-          </CollapsibleContent>
-        </SidebarMenuItem>
-      </Collapsible>
+      <NavMenuCollapsibleItem
+        item={item}
+        pathname={pathname}
+        onItemClick={onItemClick}
+      />
     )
   }
 
