@@ -69,7 +69,6 @@ const expenseSummaryItems: SummaryBarItem[] = [
 
 const BudgetYearPage: React.FC = () => {
   const { year } = Route.useParams()
-
   const ytdExpenseByCategory = transactions
     .filter(
       (tx) =>
@@ -139,10 +138,10 @@ const BudgetYearPage: React.FC = () => {
         expenseItems={expenseSummaryItems}
       />
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <CategoryBudgetCard title="収入" items={incomeItems} showRate={false} />
-        <CategoryBudgetCard title="支出" items={expenseItems} showRate />
-      </div>
+      <CategoryBudgetCard
+        incomeItems={incomeItems}
+        expenseItems={expenseItems}
+      />
     </div>
   )
 }
