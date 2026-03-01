@@ -1,5 +1,4 @@
-import { Badge } from '@frontend/components/ui/badge'
-import { Progress } from '@frontend/components/ui/progress'
+import { ColoredProgress } from '@frontend/components/ui-custom/colored-progress'
 import { formatCurrency } from '@frontend/lib/mock-data'
 import type React from 'react'
 
@@ -9,7 +8,18 @@ type Props = {
   current: number
   max: number
   showRate?: boolean
-  status?: 'over' | 'warning' | 'ok'
+}
+
+const getRateLabelStyle = (rate: number) => {
+  if (rate < 80) {
+    return 'text-foreground'
+  }
+
+  if (rate <= 100) {
+    return 'text-yellow-500 font-bold'
+  }
+
+  return 'text-destructive font-bold'
 }
 
 export const BudgetBar: React.FC<Props> = ({
@@ -17,55 +27,26 @@ export const BudgetBar: React.FC<Props> = ({
   label,
   current,
   max,
-  showRate = false,
-  status = 'ok',
+  showRate,
 }) => {
   const rate = Math.round((current / max) * 100)
 
-  // TODO: スタイルなんとかする
-
   return (
-    <div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">{label}</span>
-          {status === 'over' && (
-            <Badge variant="destructive" className="text-xs">
-              超過
-            </Badge>
-          )}
-          {status === 'warning' && (
-            <Badge
-              variant="outline"
-              className="text-xs border-yellow-500 text-yellow-600"
-            >
-              注意
-            </Badge>
-          )}
-        </div>
-        <span className="text-sm text-muted-foreground">
+    <div className="flex flex-col gap-1 justify-start h-[70px]">
+      <div className="text-sm flex items-center justify-between gap-2 min-w-0">
+        <span className="truncate">{label}</span>
+
+        <span className="text-foreground min-w-1/5 text-right flex-shrink-0">
           {formatCurrency(current)} / {formatCurrency(max)}
         </span>
       </div>
 
-      <Progress
-        value={Math.min(rate, 100)}
-        className={`h-2 bg-[var(--track-color)] ${
-          status === 'over'
-            ? '[&>div]:bg-destructive'
-            : status === 'warning'
-              ? '[&>div]:bg-yellow-500'
-              : '[&>div]:bg-[var(--bar-color)]'
-        }`}
-        style={
-          {
-            '--bar-color': color,
-            '--track-color': `color-mix(in srgb, ${color} 20%, var(--background))`,
-          } as React.CSSProperties
-        }
-      />
+      <ColoredProgress rate={rate} color={color} />
+
       {showRate && (
-        <p className="text-xs text-muted-foreground text-right">{`${rate}%`}</p>
+        <p className={`text-xs text-right ${getRateLabelStyle(rate)}`}>
+          {rate}%
+        </p>
       )}
     </div>
   )

@@ -132,7 +132,7 @@ const BudgetPage: React.FC = () => {
       />
 
       <div className="grid gap-6 md:grid-cols-2">
-        <CategoryBudgetCard title="収入" items={incomeItems} />
+        <CategoryBudgetCard title="収入" items={incomeItems} showRate={false} />
         <CategoryBudgetCard title="支出" items={expenseItems} showRate />
       </div>
     </div>

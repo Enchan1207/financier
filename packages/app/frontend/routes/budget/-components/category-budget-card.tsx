@@ -75,26 +75,26 @@ const Paginator: React.FC<PaginatorProps> = ({
 type Props = {
   title: string
   items: BudgetItem[]
-  showRate?: boolean
+  showRate: boolean
 }
 
 export const CategoryBudgetCard: React.FC<Props> = ({
   title,
   items,
-  showRate = false,
+  showRate,
 }) => {
   const [page, setPage] = useState(1)
   const totalPages = Math.ceil(items.length / PAGE_SIZE)
   const pagedItems = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
-    <Card>
+    <Card className="min-w-0">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base">{title}</CardTitle>
+        <CardTitle className="flex-shrink-0">{title}</CardTitle>
         <Paginator page={page} totalPages={totalPages} onPageChange={setPage} />
       </CardHeader>
       {/* // TODO BudgetBarListみたいにした方が良さそう */}
-      <CardContent className="min-h-[40vh]">
+      <CardContent className="h-[350px]">
         {pagedItems.map((item) => (
           <BudgetBar
             key={item.categoryId}
@@ -103,7 +103,6 @@ export const CategoryBudgetCard: React.FC<Props> = ({
             current={item.ytdActual}
             max={item.annualBudget}
             showRate={showRate}
-            status={item.status}
           />
         ))}
       </CardContent>
