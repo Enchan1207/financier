@@ -14,10 +14,14 @@ import { Route as TransactionsIndexRouteImport } from './routes/transactions/ind
 import { Route as SecretIndexRouteImport } from './routes/secret/index'
 import { Route as SavingsIndexRouteImport } from './routes/savings/index'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
+import { Route as EventTemplatesIndexRouteImport } from './routes/event-templates/index'
 import { Route as BudgetIndexRouteImport } from './routes/budget/index'
 import { Route as AboutIndexRouteImport } from './routes/about/index'
 import { Route as SavingsNewIndexRouteImport } from './routes/savings/new/index'
 import { Route as SavingsIdIndexRouteImport } from './routes/savings/$id/index'
+import { Route as EventsIdIndexRouteImport } from './routes/events/$id/index'
+import { Route as EventTemplatesNewIndexRouteImport } from './routes/event-templates/new/index'
+import { Route as EventTemplatesIdIndexRouteImport } from './routes/event-templates/$id/index'
 import { Route as BudgetNewIndexRouteImport } from './routes/budget/new/index'
 import { Route as BudgetYearIndexRouteImport } from './routes/budget/$year/index'
 
@@ -46,6 +50,11 @@ const EventsIndexRoute = EventsIndexRouteImport.update({
   path: '/events/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventTemplatesIndexRoute = EventTemplatesIndexRouteImport.update({
+  id: '/event-templates/',
+  path: '/event-templates/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BudgetIndexRoute = BudgetIndexRouteImport.update({
   id: '/budget/',
   path: '/budget/',
@@ -66,6 +75,21 @@ const SavingsIdIndexRoute = SavingsIdIndexRouteImport.update({
   path: '/savings/$id/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsIdIndexRoute = EventsIdIndexRouteImport.update({
+  id: '/events/$id/',
+  path: '/events/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventTemplatesNewIndexRoute = EventTemplatesNewIndexRouteImport.update({
+  id: '/event-templates/new/',
+  path: '/event-templates/new/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventTemplatesIdIndexRoute = EventTemplatesIdIndexRouteImport.update({
+  id: '/event-templates/$id/',
+  path: '/event-templates/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BudgetNewIndexRoute = BudgetNewIndexRouteImport.update({
   id: '/budget/new/',
   path: '/budget/new/',
@@ -81,12 +105,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about/': typeof AboutIndexRoute
   '/budget/': typeof BudgetIndexRoute
+  '/event-templates/': typeof EventTemplatesIndexRoute
   '/events/': typeof EventsIndexRoute
   '/savings/': typeof SavingsIndexRoute
   '/secret/': typeof SecretIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
   '/budget/$year/': typeof BudgetYearIndexRoute
   '/budget/new/': typeof BudgetNewIndexRoute
+  '/event-templates/$id/': typeof EventTemplatesIdIndexRoute
+  '/event-templates/new/': typeof EventTemplatesNewIndexRoute
+  '/events/$id/': typeof EventsIdIndexRoute
   '/savings/$id/': typeof SavingsIdIndexRoute
   '/savings/new/': typeof SavingsNewIndexRoute
 }
@@ -94,12 +122,16 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutIndexRoute
   '/budget': typeof BudgetIndexRoute
+  '/event-templates': typeof EventTemplatesIndexRoute
   '/events': typeof EventsIndexRoute
   '/savings': typeof SavingsIndexRoute
   '/secret': typeof SecretIndexRoute
   '/transactions': typeof TransactionsIndexRoute
   '/budget/$year': typeof BudgetYearIndexRoute
   '/budget/new': typeof BudgetNewIndexRoute
+  '/event-templates/$id': typeof EventTemplatesIdIndexRoute
+  '/event-templates/new': typeof EventTemplatesNewIndexRoute
+  '/events/$id': typeof EventsIdIndexRoute
   '/savings/$id': typeof SavingsIdIndexRoute
   '/savings/new': typeof SavingsNewIndexRoute
 }
@@ -108,12 +140,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about/': typeof AboutIndexRoute
   '/budget/': typeof BudgetIndexRoute
+  '/event-templates/': typeof EventTemplatesIndexRoute
   '/events/': typeof EventsIndexRoute
   '/savings/': typeof SavingsIndexRoute
   '/secret/': typeof SecretIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
   '/budget/$year/': typeof BudgetYearIndexRoute
   '/budget/new/': typeof BudgetNewIndexRoute
+  '/event-templates/$id/': typeof EventTemplatesIdIndexRoute
+  '/event-templates/new/': typeof EventTemplatesNewIndexRoute
+  '/events/$id/': typeof EventsIdIndexRoute
   '/savings/$id/': typeof SavingsIdIndexRoute
   '/savings/new/': typeof SavingsNewIndexRoute
 }
@@ -123,12 +159,16 @@ export interface FileRouteTypes {
     | '/'
     | '/about/'
     | '/budget/'
+    | '/event-templates/'
     | '/events/'
     | '/savings/'
     | '/secret/'
     | '/transactions/'
     | '/budget/$year/'
     | '/budget/new/'
+    | '/event-templates/$id/'
+    | '/event-templates/new/'
+    | '/events/$id/'
     | '/savings/$id/'
     | '/savings/new/'
   fileRoutesByTo: FileRoutesByTo
@@ -136,12 +176,16 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/budget'
+    | '/event-templates'
     | '/events'
     | '/savings'
     | '/secret'
     | '/transactions'
     | '/budget/$year'
     | '/budget/new'
+    | '/event-templates/$id'
+    | '/event-templates/new'
+    | '/events/$id'
     | '/savings/$id'
     | '/savings/new'
   id:
@@ -149,12 +193,16 @@ export interface FileRouteTypes {
     | '/'
     | '/about/'
     | '/budget/'
+    | '/event-templates/'
     | '/events/'
     | '/savings/'
     | '/secret/'
     | '/transactions/'
     | '/budget/$year/'
     | '/budget/new/'
+    | '/event-templates/$id/'
+    | '/event-templates/new/'
+    | '/events/$id/'
     | '/savings/$id/'
     | '/savings/new/'
   fileRoutesById: FileRoutesById
@@ -163,12 +211,16 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutIndexRoute: typeof AboutIndexRoute
   BudgetIndexRoute: typeof BudgetIndexRoute
+  EventTemplatesIndexRoute: typeof EventTemplatesIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
   SavingsIndexRoute: typeof SavingsIndexRoute
   SecretIndexRoute: typeof SecretIndexRoute
   TransactionsIndexRoute: typeof TransactionsIndexRoute
   BudgetYearIndexRoute: typeof BudgetYearIndexRoute
   BudgetNewIndexRoute: typeof BudgetNewIndexRoute
+  EventTemplatesIdIndexRoute: typeof EventTemplatesIdIndexRoute
+  EventTemplatesNewIndexRoute: typeof EventTemplatesNewIndexRoute
+  EventsIdIndexRoute: typeof EventsIdIndexRoute
   SavingsIdIndexRoute: typeof SavingsIdIndexRoute
   SavingsNewIndexRoute: typeof SavingsNewIndexRoute
 }
@@ -210,6 +262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/event-templates/': {
+      id: '/event-templates/'
+      path: '/event-templates'
+      fullPath: '/event-templates/'
+      preLoaderRoute: typeof EventTemplatesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/budget/': {
       id: '/budget/'
       path: '/budget'
@@ -238,6 +297,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SavingsIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/$id/': {
+      id: '/events/$id/'
+      path: '/events/$id'
+      fullPath: '/events/$id/'
+      preLoaderRoute: typeof EventsIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event-templates/new/': {
+      id: '/event-templates/new/'
+      path: '/event-templates/new'
+      fullPath: '/event-templates/new/'
+      preLoaderRoute: typeof EventTemplatesNewIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event-templates/$id/': {
+      id: '/event-templates/$id/'
+      path: '/event-templates/$id'
+      fullPath: '/event-templates/$id/'
+      preLoaderRoute: typeof EventTemplatesIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/budget/new/': {
       id: '/budget/new/'
       path: '/budget/new'
@@ -259,12 +339,16 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutIndexRoute: AboutIndexRoute,
   BudgetIndexRoute: BudgetIndexRoute,
+  EventTemplatesIndexRoute: EventTemplatesIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
   SavingsIndexRoute: SavingsIndexRoute,
   SecretIndexRoute: SecretIndexRoute,
   TransactionsIndexRoute: TransactionsIndexRoute,
   BudgetYearIndexRoute: BudgetYearIndexRoute,
   BudgetNewIndexRoute: BudgetNewIndexRoute,
+  EventTemplatesIdIndexRoute: EventTemplatesIdIndexRoute,
+  EventTemplatesNewIndexRoute: EventTemplatesNewIndexRoute,
+  EventsIdIndexRoute: EventsIdIndexRoute,
   SavingsIdIndexRoute: SavingsIdIndexRoute,
   SavingsNewIndexRoute: SavingsNewIndexRoute,
 }

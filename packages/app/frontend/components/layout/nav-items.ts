@@ -2,6 +2,7 @@ import type { FileRouteTypes } from '@frontend/routeTree.gen'
 import {
   CalendarDays,
   Home,
+  LayoutTemplate,
   PiggyBank,
   PlusCircleIcon,
   Receipt,
@@ -89,6 +90,12 @@ export const navGroups: NavGroup[] = [
         to: '/events',
         label: 'イベント',
         icon: CalendarDays,
+        visibility: 'public',
+      },
+      {
+        to: '/event-templates',
+        label: 'テンプレート',
+        icon: LayoutTemplate,
         visibility: 'public',
       },
     ],
