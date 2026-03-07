@@ -3,19 +3,29 @@ import { Card, CardContent } from '@frontend/components/ui/card'
 import { Progress } from '@frontend/components/ui/progress'
 import { Separator } from '@frontend/components/ui/separator'
 import dayjs from '@frontend/lib/date'
-import type { SavingDefinition } from '@frontend/lib/mock-data'
+import type {
+  SavingDefinition,
+  SavingWithdrawal,
+  Transaction,
+} from '@frontend/lib/mock-data'
 import { formatCurrency, TODAY } from '@frontend/lib/mock-data'
 import type React from 'react'
+
+import { SavingBurnupChart } from './saving-burnup-chart'
 
 type Props = {
   saving: SavingDefinition
   /** 今月の拠出実績合計 */
   thisMonthContribution: number
+  contributions: Transaction[]
+  withdrawals: SavingWithdrawal[]
 }
 
 export const SavingSummaryCard: React.FC<Props> = ({
   saving,
   thisMonthContribution,
+  contributions,
+  withdrawals,
 }) => {
   const { type, targetAmount, deadline, balance } = saving
 
@@ -47,15 +57,16 @@ export const SavingSummaryCard: React.FC<Props> = ({
 
   return (
     <Card>
-      <CardContent className="space-y-4 pt-6">
+      <CardContent className="space-y-4">
         {/* 残高 + 型バッジ */}
         <div className="flex items-start justify-between gap-4">
-          <div>
+          <div className="truncate">
             <p className="text-xs text-muted-foreground">積立残高</p>
             <p className="text-3xl font-bold tabular-nums">
               {formatCurrency(balance)}
             </p>
           </div>
+
           <Badge variant={type === 'goal' ? 'default' : 'secondary'}>
             {type === 'goal' ? '目標型' : '自由型'}
           </Badge>
@@ -80,20 +91,23 @@ export const SavingSummaryCard: React.FC<Props> = ({
                       : 'h-2'
                   }
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{formatCurrency(balance)}</span>
-                  <span>{formatCurrency(targetAmount)}</span>
+                <div className="flex justify-between text-xs text-muted-foreground min-w-0 gap-4">
+                  <span className="truncate">{formatCurrency(balance)}</span>
+                  <span className="truncate">
+                    {formatCurrency(targetAmount)}
+                  </span>
                 </div>
               </div>
 
               {/* 残額 + 期限 */}
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="truncate">
                   <p className="text-xs text-muted-foreground">残額</p>
-                  <p className="text-lg font-semibold tabular-nums">
+                  <p className="text-lg font-semibold tabular-nums truncate">
                     {formatCurrency(remaining ?? 0)}
                   </p>
                 </div>
+
                 {deadline !== undefined && (
                   <div>
                     <p className="text-xs text-muted-foreground">期限まで</p>
@@ -109,17 +123,17 @@ export const SavingSummaryCard: React.FC<Props> = ({
 
               {/* 月次目安額 + 今月の差分（期限設定時のみ） */}
               {monthlyGuide !== null && (
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4 truncate">
                   <div>
                     <p className="text-xs text-muted-foreground">月次目安額</p>
-                    <p className="text-lg font-semibold tabular-nums">
+                    <p className="text-lg font-semibold tabular-nums truncate">
                       {formatCurrency(monthlyGuide)}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">今月の差分</p>
                     <p
-                      className={`text-lg font-semibold tabular-nums ${
+                      className={`text-lg font-semibold tabular-nums truncate ${
                         (monthlyGuideDiff ?? 0) >= 0
                           ? 'text-green-600'
                           : 'text-rose-600'
@@ -134,6 +148,17 @@ export const SavingSummaryCard: React.FC<Props> = ({
             </div>
           </>
         )}
+
+        {/* バーンアップチャート（データが2件以上の場合のみ表示） */}
+        <Separator />
+        <div>
+          <p className="text-xs text-muted-foreground mb-2">積立推移</p>
+          <SavingBurnupChart
+            contributions={contributions}
+            withdrawals={withdrawals}
+            targetAmount={targetAmount}
+          />
+        </div>
       </CardContent>
     </Card>
   )

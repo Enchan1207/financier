@@ -3,6 +3,7 @@ import dayjs from '@frontend/lib/date'
 import type {
   SavingDefinition,
   SavingWithdrawal,
+  Transaction,
 } from '@frontend/lib/mock-data'
 import {
   savings,
@@ -20,6 +21,7 @@ import {
 import { useState } from 'react'
 
 import { ContributionHistoryTable } from './-components/contribution-history-table'
+import { SavingContributionDialog } from './-components/saving-contribution-dialog'
 import { SavingEditDialog } from './-components/saving-edit-dialog'
 import { SavingSummaryCard } from './-components/saving-summary-card'
 import { SavingWithdrawalDialog } from './-components/saving-withdrawal-dialog'
@@ -29,18 +31,25 @@ const SavingDetailPage: React.FC = () => {
   const { id } = Route.useParams()
 
   const initialSaving = savings.find((s) => s.id === id)
-  const categoryTransactions = transactions.filter(
-    (tx) => tx.categoryId === initialSaving?.categoryId,
-  )
   const initialWithdrawals = savingWithdrawals.filter(
     (w) => w.savingDefinitionId === id,
   )
+  const initialContributions = transactions
+    .filter(
+      (tx) =>
+        tx.categoryId === initialSaving?.categoryId &&
+        tx.transactionDate <= TODAY,
+    )
+    .sort((a, b) => b.transactionDate.localeCompare(a.transactionDate))
 
   const [saving, setSaving] = useState<SavingDefinition | undefined>(
     initialSaving,
   )
   const [withdrawals, setWithdrawals] =
     useState<SavingWithdrawal[]>(initialWithdrawals)
+  const [contributions, setContributions] =
+    useState<Transaction[]>(initialContributions)
+  const [contributionOpen, setContributionOpen] = useState(false)
   const [withdrawalOpen, setWithdrawalOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
 
@@ -58,14 +67,34 @@ const SavingDetailPage: React.FC = () => {
     )
   }
 
-  // 今月の拠出実績（transactionDate <= TODAY かつ今月のもの）
+  // 今月の拠出実績
   const currentMonth = TODAY.slice(0, 7)
-  const contributions = categoryTransactions.filter(
-    (tx) => tx.transactionDate <= TODAY,
-  )
   const thisMonthContribution = contributions
     .filter((tx) => tx.transactionDate.startsWith(currentMonth))
     .reduce((sum, tx) => sum + tx.amount, 0)
+
+  // 拠出実行（UC-4.2）
+  const handleContribute = (amount: number, date: string, name: string) => {
+    // モック：実際にはAPIを呼び出して支出トランザクションを作成する
+    const newTx: Transaction = {
+      id: `tx-mock-${dayjs().valueOf()}`,
+      type: 'expense',
+      amount,
+      categoryId: saving.categoryId,
+      categoryName: saving.categoryName,
+      transactionDate: date,
+      name,
+    }
+    setContributions((prev) =>
+      [...prev, newTx].sort((a, b) =>
+        b.transactionDate.localeCompare(a.transactionDate),
+      ),
+    )
+    setSaving((prev) =>
+      prev ? { ...prev, balance: prev.balance + amount } : prev,
+    )
+    setContributionOpen(false)
+  }
 
   // 取り崩し実行（UC-4.4）
   const handleWithdraw = (amount: number, memo: string) => {
@@ -136,20 +165,23 @@ const SavingDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 残高サマリーカード */}
+      {/* 残高サマリーカード（バーンアップチャート含む） */}
       <SavingSummaryCard
         saving={saving}
         thisMonthContribution={thisMonthContribution}
+        contributions={contributions}
+        withdrawals={withdrawals}
       />
 
       {/* アクション */}
       <div className="flex gap-2">
-        {/* 拠出はトランザクション作成（通常の支出）から行う */}
-        <Button asChild>
-          <Link to="/transactions">
-            <PiggyBankIcon />
-            拠出する
-          </Link>
+        <Button
+          onClick={() => {
+            setContributionOpen(true)
+          }}
+        >
+          <PiggyBankIcon />
+          拠出する
         </Button>
         <Button
           variant="outline"
@@ -174,6 +206,15 @@ const SavingDetailPage: React.FC = () => {
         <h2 className="text-base font-semibold">拠出履歴</h2>
         <ContributionHistoryTable transactions={contributions} />
       </div>
+
+      {/* 拠出ダイアログ */}
+      <SavingContributionDialog
+        open={contributionOpen}
+        onOpenChange={setContributionOpen}
+        categoryName={saving.categoryName}
+        balance={saving.balance}
+        onContribute={handleContribute}
+      />
 
       {/* 取り崩しダイアログ */}
       <SavingWithdrawalDialog
