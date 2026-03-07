@@ -65,11 +65,6 @@ const EventsPage: React.FC = () => {
     setEvents((prev) => [...prev, created])
   }
 
-  const handleDelete = (id: string) => {
-    // トランザクション0件の場合のみ削除可能（UC-5.7）
-    setEvents((prev) => prev.filter((ev) => ev.id !== id))
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -94,7 +89,7 @@ const EventsPage: React.FC = () => {
             <CollapsibleContent>
               <div className="grid gap-4 lg:grid-cols-2">
                 {upcoming.map((ev) => (
-                  <EventCard key={ev.id} ev={ev} onDelete={handleDelete} />
+                  <EventCard key={ev.id} ev={ev} />
                 ))}
               </div>
             </CollapsibleContent>
@@ -114,7 +109,7 @@ const EventsPage: React.FC = () => {
             <CollapsibleContent>
               <div className="grid gap-4 lg:grid-cols-2">
                 {past.map((ev) => (
-                  <EventCard key={ev.id} ev={ev} onDelete={handleDelete} />
+                  <EventCard key={ev.id} ev={ev} />
                 ))}
               </div>
             </CollapsibleContent>
