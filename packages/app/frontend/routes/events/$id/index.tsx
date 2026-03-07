@@ -6,15 +6,13 @@ import {
   CardTitle,
 } from '@frontend/components/ui/card'
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@frontend/components/ui/dialog'
-import { Input } from '@frontend/components/ui/input'
-import { Label } from '@frontend/components/ui/label'
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@frontend/components/ui/empty'
 import { Progress } from '@frontend/components/ui/progress'
 import { Separator } from '@frontend/components/ui/separator'
 import {
@@ -26,9 +24,13 @@ import {
   TableRow,
 } from '@frontend/components/ui/table'
 import dayjs from '@frontend/lib/date'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowLeftIcon, PencilIcon } from 'lucide-react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { ArrowLeftIcon, ReceiptIcon, Trash2Icon } from 'lucide-react'
 import { useState } from 'react'
+
+import type { NewTransaction } from '../-components/event-add-transaction-dialog'
+import { EventAddTransactionDialog } from '../-components/event-add-transaction-dialog'
+import { EventEditDialog } from '../-components/event-edit-dialog'
 
 const TODAY = '2026-02-28'
 
@@ -165,17 +167,9 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
     id: 'ev-4',
     name: '年末飲み会',
     occurredOn: '2025-12-28',
-    transactions: [
-      {
-        id: 'tx-99',
-        date: '2025-12-28',
-        name: '飲み会費',
-        categoryName: '外食',
-        amount: 4500,
-      },
-    ],
-    categoryBreakdown: [{ categoryName: '外食', amount: 4500 }],
-    yearBreakdown: [{ fiscalYear: 2025, amount: 4500 }],
+    transactions: [],
+    categoryBreakdown: [],
+    yearBreakdown: [],
   },
 }
 
@@ -187,10 +181,11 @@ const EventDetailPage: React.FC = () => {
   const { id } = Route.useParams()
   const event = EVENT_DETAILS[id]
 
+  const navigate = useNavigate()
   const [editOpen, setEditOpen] = useState(false)
-  const [formName, setFormName] = useState(event?.name ?? '')
-  const [formDate, setFormDate] = useState(event?.occurredOn ?? '')
+  const [addOpen, setAddOpen] = useState(false)
   const [currentName, setCurrentName] = useState(event?.name ?? '')
+  const [transactions, setTransactions] = useState(event?.transactions ?? [])
 
   if (!event) {
     return (
@@ -206,11 +201,19 @@ const EventDetailPage: React.FC = () => {
     )
   }
 
-  const total = event.transactions.reduce((sum, tx) => sum + tx.amount, 0)
+  const total = transactions.reduce((sum, tx) => sum + tx.amount, 0)
 
-  const handleEdit = () => {
-    setCurrentName(formName)
-    setEditOpen(false)
+  const handleAddTransaction = (tx: NewTransaction) => {
+    // モック：実際にはAPIを呼び出してトランザクションを追加する
+    setTransactions((prev) => [
+      ...prev,
+      { id: `tx-mock-${dayjs().valueOf()}`, ...tx },
+    ])
+  }
+
+  const handleDelete = () => {
+    // モック：実際にはAPIを呼び出してイベントを削除する（UC-5.7）
+    void navigate({ to: '/events' })
   }
 
   return (
@@ -230,57 +233,26 @@ const EventDetailPage: React.FC = () => {
               {formatDateFull(event.occurredOn)}
             </p>
           </div>
-          {/* 編集ダイアログ（UC-5.6） */}
-          <Dialog open={editOpen} onOpenChange={setEditOpen}>
-            <DialogTrigger asChild>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setFormName(currentName)
-                }}
-              >
-                <PencilIcon />
-                編集
+          <div className="flex items-center gap-2">
+            {/* 編集ダイアログ（UC-5.6） */}
+            <EventEditDialog
+              open={editOpen}
+              onOpenChange={setEditOpen}
+              defaultName={currentName}
+              defaultDate={event.occurredOn}
+              onSave={(name) => {
+                setCurrentName(name)
+              }}
+            />
+
+            {/* transactionCount === 0 の場合のみ削除可能（UC-5.7） */}
+            {transactions.length === 0 && (
+              <Button size="sm" variant="destructive" onClick={handleDelete}>
+                <Trash2Icon />
+                削除
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>イベントを編集</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="edit-ev-name">イベント名 *</Label>
-                  <Input
-                    id="edit-ev-name"
-                    value={formName}
-                    onChange={(e) => {
-                      setFormName(e.target.value)
-                    }}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="edit-ev-date">発生日 *</Label>
-                  <Input
-                    id="edit-ev-date"
-                    type="date"
-                    value={formDate}
-                    onChange={(e) => {
-                      setFormDate(e.target.value)
-                    }}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  onClick={handleEdit}
-                  disabled={!formName.trim() || !formDate}
-                >
-                  保存
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+            )}
+          </div>
         </div>
       </div>
 
@@ -296,79 +268,124 @@ const EventDetailPage: React.FC = () => {
           </div>
           <Separator />
           {/* カテゴリ別内訳 */}
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">
-              カテゴリ別
-            </p>
-            {event.categoryBreakdown.map((cat) => (
-              <div key={cat.categoryName} className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span>{cat.categoryName}</span>
-                  <span className="font-mono">
-                    {formatCurrency(cat.amount)}
-                  </span>
-                </div>
-                <Progress
-                  value={total > 0 ? (cat.amount / total) * 100 : 0}
-                  className="h-1.5"
-                />
+          {event.categoryBreakdown.length > 0 && (
+            <>
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-muted-foreground">
+                  カテゴリ別
+                </p>
+                {event.categoryBreakdown.map((cat) => (
+                  <div key={cat.categoryName} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>{cat.categoryName}</span>
+                      <span className="font-mono">
+                        {formatCurrency(cat.amount)}
+                      </span>
+                    </div>
+                    <Progress
+                      value={total > 0 ? (cat.amount / total) * 100 : 0}
+                      className="h-1.5"
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <Separator />
+              <Separator />
+            </>
+          )}
           {/* 年度別内訳 */}
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">年度別</p>
-            {event.yearBreakdown.map((yr) => (
-              <div key={yr.fiscalYear} className="flex justify-between text-sm">
-                <span>{yr.fiscalYear}年度</span>
-                <span className="font-mono">{formatCurrency(yr.amount)}</span>
-              </div>
-            ))}
-          </div>
+          {event.yearBreakdown.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">
+                年度別
+              </p>
+              {event.yearBreakdown.map((yr) => (
+                <div
+                  key={yr.fiscalYear}
+                  className="flex justify-between text-sm"
+                >
+                  <span>{yr.fiscalYear}年度</span>
+                  <span className="font-mono">{formatCurrency(yr.amount)}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* トランザクション一覧 */}
       <div className="space-y-3">
-        <h2 className="text-base font-semibold">トランザクション一覧</h2>
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="h-9 text-xs">日付</TableHead>
-                  <TableHead className="h-9 text-xs">内容</TableHead>
-                  <TableHead className="h-9 text-xs">カテゴリ</TableHead>
-                  <TableHead className="h-9 text-right text-xs">金額</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {event.transactions.map((tx) => {
-                  const isFuture = tx.date > TODAY
-                  return (
-                    <TableRow
-                      key={tx.id}
-                      className={isFuture ? 'text-muted-foreground' : ''}
-                    >
-                      <TableCell className="py-2 font-mono text-xs">
-                        {formatDate(tx.date)}
-                        {isFuture && ' (予定)'}
-                      </TableCell>
-                      <TableCell className="py-2 text-xs">{tx.name}</TableCell>
-                      <TableCell className="py-2 text-xs">
-                        {tx.categoryName}
-                      </TableCell>
-                      <TableCell className="py-2 text-right font-mono text-xs">
-                        -{formatCurrency(tx.amount)}
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold">トランザクション一覧</h2>
+          {transactions.length > 0 && (
+            <EventAddTransactionDialog
+              open={addOpen}
+              onOpenChange={setAddOpen}
+              onAdd={handleAddTransaction}
+            />
+          )}
+        </div>
+        {transactions.length === 0 ? (
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ReceiptIcon />
+              </EmptyMedia>
+              <EmptyTitle>トランザクションがありません</EmptyTitle>
+              <EmptyDescription>
+                このイベントにトランザクションを追加してください
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <EventAddTransactionDialog
+                open={addOpen}
+                onOpenChange={setAddOpen}
+                onAdd={handleAddTransaction}
+              />
+            </EmptyContent>
+          </Empty>
+        ) : (
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="h-9 text-xs">日付</TableHead>
+                    <TableHead className="h-9 text-xs">内容</TableHead>
+                    <TableHead className="h-9 text-xs">カテゴリ</TableHead>
+                    <TableHead className="h-9 text-right text-xs">
+                      金額
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions.map((tx) => {
+                    const isFuture = tx.date > TODAY
+                    return (
+                      <TableRow
+                        key={tx.id}
+                        className={isFuture ? 'text-muted-foreground' : ''}
+                      >
+                        <TableCell className="py-2 font-mono text-xs">
+                          {formatDate(tx.date)}
+                          {isFuture && ' (予定)'}
+                        </TableCell>
+                        <TableCell className="py-2 text-xs">
+                          {tx.name}
+                        </TableCell>
+                        <TableCell className="py-2 text-xs">
+                          {tx.categoryName}
+                        </TableCell>
+                        <TableCell className="py-2 text-right font-mono text-xs">
+                          -{formatCurrency(tx.amount)}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )
