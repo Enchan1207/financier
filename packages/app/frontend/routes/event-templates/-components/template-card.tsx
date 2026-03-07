@@ -9,10 +9,15 @@ import {
 import { Link } from '@tanstack/react-router'
 import { ChevronRightIcon } from 'lucide-react'
 
-import type { BulkRegisterItem } from './bulk-register-dialog'
-import { BulkRegisterDialog } from './bulk-register-dialog'
-
 const PREVIEW_LIMIT = 3
+
+export type BulkRegisterItem = {
+  id: string
+  categoryName: string
+  name: string
+  defaultAmount: number
+  type: 'income' | 'expense'
+}
 
 type Props = {
   id: string
@@ -56,11 +61,11 @@ export const TemplateCard: React.FC<Props> = ({ id, name, items }) => {
       </CardContent>
       <CardFooter className="flex items-center justify-between">
         {/* テンプレートからイベント作成（UC-5.5） */}
-        <BulkRegisterDialog
-          templateName={name}
-          items={items}
-          trigger={<Button size="sm">イベントを作成</Button>}
-        />
+        <Button asChild size="sm">
+          <Link to="/event-templates/$id/register" params={{ id }}>
+            イベントを作成
+          </Link>
+        </Button>
         <Button asChild size="sm" variant="ghost">
           <Link to="/event-templates/$id" params={{ id }}>
             詳細を見る

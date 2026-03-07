@@ -17,7 +17,6 @@ import {
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeftIcon, PencilIcon } from 'lucide-react'
 
-import { BulkRegisterDialog } from '../-components/bulk-register-dialog'
 import { TEMPLATE_DETAILS } from '../-components/template-data'
 
 const formatCurrency = (amount: number) => `¥${amount.toLocaleString('ja-JP')}`
@@ -45,16 +44,8 @@ const EventTemplateDetailPage: React.FC = () => {
     0,
   )
 
-  const bulkItems = template.items.map((it) => ({
-    id: it.id,
-    categoryName: it.categoryName,
-    name: it.name,
-    defaultAmount: it.amount,
-    type: it.type,
-  }))
-
   return (
-    <div className="space-y-6">
+    <div className="max-w-2xl space-y-6">
       {/* ヘッダー */}
       <div>
         <Button asChild variant="ghost" size="sm" className="-ml-2 mb-2">
@@ -133,11 +124,11 @@ const EventTemplateDetailPage: React.FC = () => {
       </Card>
 
       {/* テンプレートからイベント作成（UC-5.5） */}
-      <BulkRegisterDialog
-        templateName={template.name}
-        items={bulkItems}
-        trigger={<Button>このテンプレートでイベント作成</Button>}
-      />
+      <Button asChild>
+        <Link to="/event-templates/$id/register" params={{ id }}>
+          このテンプレートでイベント作成
+        </Link>
+      </Button>
     </div>
   )
 }

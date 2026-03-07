@@ -24,6 +24,8 @@ import { Route as EventTemplatesNewIndexRouteImport } from './routes/event-templ
 import { Route as EventTemplatesIdIndexRouteImport } from './routes/event-templates/$id/index'
 import { Route as BudgetNewIndexRouteImport } from './routes/budget/new/index'
 import { Route as BudgetYearIndexRouteImport } from './routes/budget/$year/index'
+import { Route as EventTemplatesIdRegisterIndexRouteImport } from './routes/event-templates/$id/register/index'
+import { Route as EventTemplatesIdEditIndexRouteImport } from './routes/event-templates/$id/edit/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -100,6 +102,18 @@ const BudgetYearIndexRoute = BudgetYearIndexRouteImport.update({
   path: '/budget/$year/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventTemplatesIdRegisterIndexRoute =
+  EventTemplatesIdRegisterIndexRouteImport.update({
+    id: '/event-templates/$id/register/',
+    path: '/event-templates/$id/register/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const EventTemplatesIdEditIndexRoute =
+  EventTemplatesIdEditIndexRouteImport.update({
+    id: '/event-templates/$id/edit/',
+    path: '/event-templates/$id/edit/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +131,8 @@ export interface FileRoutesByFullPath {
   '/events/$id/': typeof EventsIdIndexRoute
   '/savings/$id/': typeof SavingsIdIndexRoute
   '/savings/new/': typeof SavingsNewIndexRoute
+  '/event-templates/$id/edit/': typeof EventTemplatesIdEditIndexRoute
+  '/event-templates/$id/register/': typeof EventTemplatesIdRegisterIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -134,6 +150,8 @@ export interface FileRoutesByTo {
   '/events/$id': typeof EventsIdIndexRoute
   '/savings/$id': typeof SavingsIdIndexRoute
   '/savings/new': typeof SavingsNewIndexRoute
+  '/event-templates/$id/edit': typeof EventTemplatesIdEditIndexRoute
+  '/event-templates/$id/register': typeof EventTemplatesIdRegisterIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,6 +170,8 @@ export interface FileRoutesById {
   '/events/$id/': typeof EventsIdIndexRoute
   '/savings/$id/': typeof SavingsIdIndexRoute
   '/savings/new/': typeof SavingsNewIndexRoute
+  '/event-templates/$id/edit/': typeof EventTemplatesIdEditIndexRoute
+  '/event-templates/$id/register/': typeof EventTemplatesIdRegisterIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +191,8 @@ export interface FileRouteTypes {
     | '/events/$id/'
     | '/savings/$id/'
     | '/savings/new/'
+    | '/event-templates/$id/edit/'
+    | '/event-templates/$id/register/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -188,6 +210,8 @@ export interface FileRouteTypes {
     | '/events/$id'
     | '/savings/$id'
     | '/savings/new'
+    | '/event-templates/$id/edit'
+    | '/event-templates/$id/register'
   id:
     | '__root__'
     | '/'
@@ -205,6 +229,8 @@ export interface FileRouteTypes {
     | '/events/$id/'
     | '/savings/$id/'
     | '/savings/new/'
+    | '/event-templates/$id/edit/'
+    | '/event-templates/$id/register/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -223,6 +249,8 @@ export interface RootRouteChildren {
   EventsIdIndexRoute: typeof EventsIdIndexRoute
   SavingsIdIndexRoute: typeof SavingsIdIndexRoute
   SavingsNewIndexRoute: typeof SavingsNewIndexRoute
+  EventTemplatesIdEditIndexRoute: typeof EventTemplatesIdEditIndexRoute
+  EventTemplatesIdRegisterIndexRoute: typeof EventTemplatesIdRegisterIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -332,6 +360,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BudgetYearIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/event-templates/$id/register/': {
+      id: '/event-templates/$id/register/'
+      path: '/event-templates/$id/register'
+      fullPath: '/event-templates/$id/register/'
+      preLoaderRoute: typeof EventTemplatesIdRegisterIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/event-templates/$id/edit/': {
+      id: '/event-templates/$id/edit/'
+      path: '/event-templates/$id/edit'
+      fullPath: '/event-templates/$id/edit/'
+      preLoaderRoute: typeof EventTemplatesIdEditIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -351,6 +393,8 @@ const rootRouteChildren: RootRouteChildren = {
   EventsIdIndexRoute: EventsIdIndexRoute,
   SavingsIdIndexRoute: SavingsIdIndexRoute,
   SavingsNewIndexRoute: SavingsNewIndexRoute,
+  EventTemplatesIdEditIndexRoute: EventTemplatesIdEditIndexRoute,
+  EventTemplatesIdRegisterIndexRoute: EventTemplatesIdRegisterIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

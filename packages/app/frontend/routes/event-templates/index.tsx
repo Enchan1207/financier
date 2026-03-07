@@ -2,7 +2,7 @@ import { Button } from '@frontend/components/ui/button'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { PlusIcon } from 'lucide-react'
 
-import type { BulkRegisterItem } from './-components/bulk-register-dialog'
+import type { BulkRegisterItem } from './-components/template-card'
 import { TemplateCard } from './-components/template-card'
 
 type TemplateSummary = {
@@ -129,7 +129,6 @@ const TEMPLATES: TemplateSummary[] = [
     ],
   },
 ]
-
 
 const EventTemplatesPage: React.FC = () => {
   return (
