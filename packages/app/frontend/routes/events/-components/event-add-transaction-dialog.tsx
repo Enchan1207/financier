@@ -5,11 +5,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@frontend/components/ui/dialog'
 import { Input } from '@frontend/components/ui/input'
 import { Label } from '@frontend/components/ui/label'
-import { PlusIcon } from 'lucide-react'
 import type React from 'react'
 import { useState } from 'react'
 
@@ -56,12 +54,6 @@ export const EventAddTransactionDialog: React.FC<Props> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
-          <PlusIcon />
-          追加
-        </Button>
-      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>イベントにトランザクションを追加</DialogTitle>

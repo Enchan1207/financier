@@ -6,6 +6,12 @@ import {
   CardTitle,
 } from '@frontend/components/ui/card'
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@frontend/components/ui/dropdown-menu'
+import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -25,12 +31,20 @@ import {
 } from '@frontend/components/ui/table'
 import dayjs from '@frontend/lib/date'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeftIcon, ReceiptIcon, Trash2Icon } from 'lucide-react'
+import {
+  ArrowLeftIcon,
+  ChevronDownIcon,
+  PlusIcon,
+  ReceiptIcon,
+  Trash2Icon,
+} from 'lucide-react'
 import { useState } from 'react'
 
 import type { NewTransaction } from '../-components/event-add-transaction-dialog'
 import { EventAddTransactionDialog } from '../-components/event-add-transaction-dialog'
 import { EventEditDialog } from '../-components/event-edit-dialog'
+import type { LinkedTransaction } from '../-components/event-link-transaction-dialog'
+import { EventLinkTransactionDialog } from '../-components/event-link-transaction-dialog'
 
 const TODAY = '2026-02-28'
 
@@ -47,18 +61,12 @@ type CategoryBreakdown = {
   amount: number
 }
 
-type YearBreakdown = {
-  fiscalYear: number
-  amount: number
-}
-
 type EventDetail = {
   id: string
   name: string
   occurredOn: string
   transactions: EventTransaction[]
   categoryBreakdown: CategoryBreakdown[]
-  yearBreakdown: YearBreakdown[]
 }
 
 // モックデータ：本番ではAPIから /events/:id を呼び出す
@@ -87,7 +95,6 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
       { categoryName: '衣服', amount: 150000 },
       { categoryName: '娯楽・グッズ', amount: 4200 },
     ],
-    yearBreakdown: [{ fiscalYear: 2025, amount: 154200 }],
   },
   'ev-2': {
     id: 'ev-2',
@@ -142,10 +149,6 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
       { categoryName: '娯楽・グッズ', amount: 20500 },
       { categoryName: '外食', amount: 5400 },
     ],
-    yearBreakdown: [
-      { fiscalYear: 2025, amount: 13700 },
-      { fiscalYear: 2026, amount: 23000 },
-    ],
   },
   'ev-3': {
     id: 'ev-3',
@@ -161,7 +164,6 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
       },
     ],
     categoryBreakdown: [{ categoryName: '娯楽・グッズ', amount: 5500 }],
-    yearBreakdown: [{ fiscalYear: 2025, amount: 5500 }],
   },
   'ev-4': {
     id: 'ev-4',
@@ -169,7 +171,6 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
     occurredOn: '2025-12-28',
     transactions: [],
     categoryBreakdown: [],
-    yearBreakdown: [],
   },
 }
 
@@ -183,7 +184,8 @@ const EventDetailPage: React.FC = () => {
 
   const navigate = useNavigate()
   const [editOpen, setEditOpen] = useState(false)
-  const [addOpen, setAddOpen] = useState(false)
+  const [newOpen, setNewOpen] = useState(false)
+  const [linkOpen, setLinkOpen] = useState(false)
   const [currentName, setCurrentName] = useState(event?.name ?? '')
   const [transactions, setTransactions] = useState(event?.transactions ?? [])
 
@@ -209,6 +211,11 @@ const EventDetailPage: React.FC = () => {
       ...prev,
       { id: `tx-mock-${dayjs().valueOf()}`, ...tx },
     ])
+  }
+
+  const handleLinkTransaction = (tx: LinkedTransaction) => {
+    // モック：実際にはAPIを呼び出してトランザクションを紐付ける
+    setTransactions((prev) => [...prev, tx])
   }
 
   const handleDelete = () => {
@@ -289,25 +296,7 @@ const EventDetailPage: React.FC = () => {
                   </div>
                 ))}
               </div>
-              <Separator />
             </>
-          )}
-          {/* 年度別内訳 */}
-          {event.yearBreakdown.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground">
-                年度別
-              </p>
-              {event.yearBreakdown.map((yr) => (
-                <div
-                  key={yr.fiscalYear}
-                  className="flex justify-between text-sm"
-                >
-                  <span>{yr.fiscalYear}年度</span>
-                  <span className="font-mono">{formatCurrency(yr.amount)}</span>
-                </div>
-              ))}
-            </div>
           )}
         </CardContent>
       </Card>
@@ -317,13 +306,44 @@ const EventDetailPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold">トランザクション一覧</h2>
           {transactions.length > 0 && (
-            <EventAddTransactionDialog
-              open={addOpen}
-              onOpenChange={setAddOpen}
-              onAdd={handleAddTransaction}
-            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="outline">
+                  <PlusIcon />
+                  追加
+                  <ChevronDownIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setNewOpen(true)
+                  }}
+                >
+                  新規作成
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setLinkOpen(true)
+                  }}
+                >
+                  既存の項目を追加
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
+        <EventAddTransactionDialog
+          open={newOpen}
+          onOpenChange={setNewOpen}
+          onAdd={handleAddTransaction}
+        />
+        <EventLinkTransactionDialog
+          open={linkOpen}
+          onOpenChange={setLinkOpen}
+          alreadyLinkedIds={transactions.map((tx) => tx.id)}
+          onLink={handleLinkTransaction}
+        />
         {transactions.length === 0 ? (
           <Empty>
             <EmptyHeader>
@@ -336,11 +356,26 @@ const EventDetailPage: React.FC = () => {
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <EventAddTransactionDialog
-                open={addOpen}
-                onOpenChange={setAddOpen}
-                onAdd={handleAddTransaction}
-              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setNewOpen(true)
+                  }}
+                >
+                  <PlusIcon />
+                  新規作成
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setLinkOpen(true)
+                  }}
+                >
+                  既存の項目を追加
+                </Button>
+              </div>
             </EmptyContent>
           </Empty>
         ) : (
