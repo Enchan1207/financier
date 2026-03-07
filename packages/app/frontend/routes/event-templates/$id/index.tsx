@@ -26,6 +26,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -246,7 +247,10 @@ const EventTemplateDetailPage: React.FC = () => {
     )
   }
 
-  const totalDefault = template.items.reduce((sum, it) => sum + it.amount, 0)
+  const netDefault = template.items.reduce(
+    (sum, it) => sum + (it.type === 'income' ? it.amount : -it.amount),
+    0,
+  )
 
   const addEditItem = () => {
     setEditItems((prev) => [...prev, newEditItem()])
@@ -317,8 +321,7 @@ const EventTemplateDetailPage: React.FC = () => {
           <div>
             <h1 className="text-2xl font-bold">{template.name}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              取引定義 {template.items.length} 件 / デフォルト合計{' '}
-              {formatCurrency(totalDefault)}
+              取引定義 {template.items.length} 件
             </p>
           </div>
           <Button size="sm" variant="outline" onClick={handleEditOpen}>
@@ -337,7 +340,8 @@ const EventTemplateDetailPage: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="h-9 pl-6 text-xs">カテゴリ</TableHead>
+                <TableHead className="h-9 pl-6 text-xs">種別</TableHead>
+                <TableHead className="h-9 text-xs">カテゴリ</TableHead>
                 <TableHead className="h-9 text-xs">内容</TableHead>
                 <TableHead className="h-9 pr-6 text-right text-xs">
                   デフォルト金額
@@ -348,15 +352,34 @@ const EventTemplateDetailPage: React.FC = () => {
               {template.items.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="py-2 pl-6 text-xs">
+                    {item.type === 'income' ? (
+                      <span className="text-emerald-600">収入</span>
+                    ) : (
+                      <span className="text-rose-600">支出</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="py-2 text-xs">
                     {item.categoryName}
                   </TableCell>
                   <TableCell className="py-2 text-xs">{item.name}</TableCell>
                   <TableCell className="py-2 pr-6 text-right font-mono text-xs">
+                    {item.type === 'income' ? '+' : '-'}
                     {formatCurrency(item.amount)}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={3} className="py-2 pl-6 text-xs">
+                  収支合計
+                </TableCell>
+                <TableCell className="py-2 pr-6 text-right font-mono text-xs font-bold">
+                  {netDefault >= 0 ? '+' : ''}
+                  {formatCurrency(netDefault)}
+                </TableCell>
+              </TableRow>
+            </TableFooter>
           </Table>
         </CardContent>
       </Card>
@@ -409,6 +432,26 @@ const EventTemplateDetailPage: React.FC = () => {
                     </div>
                   </CardHeader>
                   <CardContent className="px-4 pb-4 space-y-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor={`edit-type-${item.uid}`}>種別 *</Label>
+                      <Select
+                        value={item.type}
+                        onValueChange={(v: 'income' | 'expense') => {
+                          updateEditItem(item.uid, { type: v })
+                        }}
+                      >
+                        <SelectTrigger
+                          id={`edit-type-${item.uid}`}
+                          className="w-full"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="income">収入</SelectItem>
+                          <SelectItem value="expense">支出</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <div className="space-y-1.5">
                       <Label htmlFor={`edit-cat-${item.uid}`}>カテゴリ *</Label>
                       <Select
