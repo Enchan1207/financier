@@ -42,6 +42,15 @@ export type SavingDefinition = {
   monthlyGuide?: number
 }
 
+export type SavingWithdrawal = {
+  id: string
+  savingDefinitionId: string
+  amount: number
+  withdrawalDate: string
+  memo?: string
+  createdAt: string
+}
+
 export type Event = {
   id: string
   name: string
@@ -307,6 +316,138 @@ export const transactions: Transaction[] = [
     transactionDate: '2026-02-28',
     name: 'コンビニ',
   },
+  // 積立拠出トランザクション
+  // 遠征費積立 (cat-8): tx-5(30000) + 以下2件 = 90000
+  {
+    id: 'tx-s1',
+    type: 'expense',
+    amount: 30000,
+    categoryId: 'cat-8',
+    categoryName: '積立：遠征費',
+    transactionDate: '2025-12-01',
+    name: '12月分積立',
+  },
+  {
+    id: 'tx-s2',
+    type: 'expense',
+    amount: 30000,
+    categoryId: 'cat-8',
+    categoryName: '積立：遠征費',
+    transactionDate: '2026-01-05',
+    name: '1月分積立',
+  },
+  // グッズ積立 (cat-9): 合計 35000
+  {
+    id: 'tx-s3',
+    type: 'expense',
+    amount: 10000,
+    categoryId: 'cat-9',
+    categoryName: '積立：グッズ',
+    transactionDate: '2025-11-01',
+    name: '11月分積立',
+  },
+  {
+    id: 'tx-s4',
+    type: 'expense',
+    amount: 15000,
+    categoryId: 'cat-9',
+    categoryName: '積立：グッズ',
+    transactionDate: '2025-12-01',
+    name: '12月分積立',
+  },
+  {
+    id: 'tx-s5',
+    type: 'expense',
+    amount: 10000,
+    categoryId: 'cat-9',
+    categoryName: '積立：グッズ',
+    transactionDate: '2026-02-10',
+    name: '2月分積立',
+  },
+  // 旅行費積立 (cat-11): 拠出 30000 - 取り崩し 12000 = 18000
+  {
+    id: 'tx-s6',
+    type: 'expense',
+    amount: 15000,
+    categoryId: 'cat-11',
+    categoryName: '積立：旅行費',
+    transactionDate: '2025-11-01',
+    name: '11月分積立',
+  },
+  {
+    id: 'tx-s7',
+    type: 'expense',
+    amount: 15000,
+    categoryId: 'cat-11',
+    categoryName: '積立：旅行費',
+    transactionDate: '2026-01-05',
+    name: '1月分積立',
+  },
+  // 機材費積立 (cat-12): 拠出 180000 - 取り崩し 10000 = 170000
+  {
+    id: 'tx-s8',
+    type: 'expense',
+    amount: 50000,
+    categoryId: 'cat-12',
+    categoryName: '積立：機材費',
+    transactionDate: '2025-09-01',
+    name: '9月分積立',
+  },
+  {
+    id: 'tx-s9',
+    type: 'expense',
+    amount: 50000,
+    categoryId: 'cat-12',
+    categoryName: '積立：機材費',
+    transactionDate: '2025-10-01',
+    name: '10月分積立',
+  },
+  {
+    id: 'tx-s10',
+    type: 'expense',
+    amount: 50000,
+    categoryId: 'cat-12',
+    categoryName: '積立：機材費',
+    transactionDate: '2025-11-01',
+    name: '11月分積立',
+  },
+  {
+    id: 'tx-s11',
+    type: 'expense',
+    amount: 30000,
+    categoryId: 'cat-12',
+    categoryName: '積立：機材費',
+    transactionDate: '2026-01-05',
+    name: '1月分積立',
+  },
+  // 緊急資金 (cat-13): 合計 150000
+  {
+    id: 'tx-s12',
+    type: 'expense',
+    amount: 50000,
+    categoryId: 'cat-13',
+    categoryName: '積立：緊急資金',
+    transactionDate: '2025-10-01',
+    name: '初期積立',
+  },
+  {
+    id: 'tx-s13',
+    type: 'expense',
+    amount: 50000,
+    categoryId: 'cat-13',
+    categoryName: '積立：緊急資金',
+    transactionDate: '2025-11-01',
+    name: '追加積立',
+  },
+  {
+    id: 'tx-s14',
+    type: 'expense',
+    amount: 50000,
+    categoryId: 'cat-13',
+    categoryName: '積立：緊急資金',
+    transactionDate: '2026-01-05',
+    name: '追加積立',
+  },
   // 未来取引
   {
     id: 'tx-18',
@@ -480,6 +621,25 @@ export const events: Event[] = [
     name: '春グッズ',
     dateRange: { start: '2026-03-05' },
     totalAmount: 5500,
+  },
+]
+
+export const savingWithdrawals: SavingWithdrawal[] = [
+  {
+    id: 'wdl-1',
+    savingDefinitionId: 'sav-3',
+    amount: 12000,
+    withdrawalDate: '2025-11-15',
+    memo: '旅行費の一部として使用',
+    createdAt: '2025-11-15T10:30:00Z',
+  },
+  {
+    id: 'wdl-2',
+    savingDefinitionId: 'sav-4',
+    amount: 10000,
+    withdrawalDate: '2026-01-20',
+    memo: 'カメラバッグ購入',
+    createdAt: '2026-01-20T14:00:00Z',
   },
 ]
 
