@@ -24,6 +24,7 @@ export type BulkRegisterItem = {
   categoryName: string
   name: string
   defaultAmount: number
+  type: 'income' | 'expense'
 }
 
 type Props = {
@@ -53,7 +54,8 @@ export const BulkRegisterDialog: React.FC<Props> = ({
 
   const total = items.reduce((sum, item) => {
     const v = parseInt(amounts[item.id] ?? '0', 10)
-    return sum + (isNaN(v) ? 0 : v)
+    const signed = isNaN(v) ? 0 : item.type === 'income' ? v : -v
+    return sum + signed
   }, 0)
 
   const handleSave = () => {
@@ -83,6 +85,7 @@ export const BulkRegisterDialog: React.FC<Props> = ({
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="h-8 text-xs">種別</TableHead>
                 <TableHead className="h-8 text-xs">カテゴリ</TableHead>
                 <TableHead className="h-8 text-xs">内容</TableHead>
                 <TableHead className="h-8 text-right text-xs">
@@ -93,6 +96,13 @@ export const BulkRegisterDialog: React.FC<Props> = ({
             <TableBody>
               {items.map((item) => (
                 <TableRow key={item.id}>
+                  <TableCell className="py-2 text-xs">
+                    {item.type === 'income' ? (
+                      <span className="text-emerald-600">収入</span>
+                    ) : (
+                      <span className="text-rose-600">支出</span>
+                    )}
+                  </TableCell>
                   <TableCell className="py-2 text-xs">
                     {item.categoryName}
                   </TableCell>
@@ -116,7 +126,8 @@ export const BulkRegisterDialog: React.FC<Props> = ({
             </TableBody>
           </Table>
           <p className="text-right text-sm font-bold">
-            合計：{formatCurrency(total)}
+            収支合計：{total >= 0 ? '+' : ''}
+            {formatCurrency(total)}
           </p>
         </div>
         <DialogFooter>
