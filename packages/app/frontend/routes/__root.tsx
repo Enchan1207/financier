@@ -16,7 +16,7 @@ const RootLayout = () => {
             <Sidebar />
 
             <SidebarInset className="overflow-hidden min-h-0">
-              <main className="mx-auto min-w-0 w-full max-w-7xl flex flex-col flex-1 min-h-0 overflow-y-auto px-4 py-6 md:px-6">
+              <main className="mx-auto min-w-0 w-full max-w-6xl lg:max-w-4xl flex flex-col flex-1 min-h-0 overflow-y-auto px-4 py-6 md:px-6">
                 <Outlet />
               </main>
             </SidebarInset>

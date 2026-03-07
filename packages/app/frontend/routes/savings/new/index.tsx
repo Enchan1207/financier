@@ -41,7 +41,7 @@ const SavingNewPage: React.FC = () => {
         <h1 className="text-2xl font-bold">積立新規作成</h1>
       </div>
 
-      <div className="space-y-6 max-w-2xl">
+      <div className="space-y-6 max-w-2xl lg:max-w-full">
         <div className="space-y-1.5">
           <Label htmlFor="category-name">カテゴリ名 *</Label>
           <Input

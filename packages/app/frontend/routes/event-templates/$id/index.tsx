@@ -45,7 +45,7 @@ const EventTemplateDetailPage: React.FC = () => {
   )
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-2xl lg:max-w-full space-y-6">
       {/* ヘッダー */}
       <div>
         <Button asChild variant="ghost" size="sm" className="-ml-2 mb-2">

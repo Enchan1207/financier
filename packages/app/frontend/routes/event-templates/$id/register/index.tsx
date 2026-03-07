@@ -68,7 +68,7 @@ const EventTemplateRegisterPage: React.FC = () => {
         <h1 className="text-2xl font-bold">一括登録：{template.name}</h1>
       </div>
 
-      <div className="max-w-2xl space-y-4">
+      <div className="max-w-2xl lg:max-w-full space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="bulk-date">取引日（全件共通）*</Label>
           <Input

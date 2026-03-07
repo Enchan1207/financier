@@ -81,7 +81,7 @@ const EventTemplateEditPage: React.FC = () => {
         <h1 className="text-2xl font-bold">テンプレートを編集</h1>
       </div>
 
-      <div className="space-y-6 max-w-2xl">
+      <div className="space-y-6 max-w-2xl lg:max-w-full">
         <div className="space-y-1.5">
           <Label htmlFor="tmpl-name">テンプレート名 *</Label>
           <Input
