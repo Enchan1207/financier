@@ -3,6 +3,7 @@ import { Progress } from '@frontend/components/ui/progress'
 import dayjs from '@frontend/lib/date'
 import { formatCurrency } from '@frontend/lib/mock-data'
 import { Link } from '@tanstack/react-router'
+import { ChevronRight } from 'lucide-react'
 import type React from 'react'
 
 type Props = {
@@ -31,12 +32,15 @@ export const SavingCardMobile: React.FC<Props> = ({
     <Link to="/savings/$id" params={{ id }} className="block h-full">
       <Card className="h-full">
         <CardContent className="flex-1 flex flex-col">
-          <span className="line-clamp-2 text-base font-semibold">
-            {categoryName}
-          </span>
+          <div className="flex items-start justify-between gap-2">
+            <span className="line-clamp-2 text-base font-semibold">
+              {categoryName}
+            </span>
+            <ChevronRight className="mt-0.5 shrink-0 text-muted-foreground" />
+          </div>
 
           <div className="mt-4 flex items-baseline gap-x-1 flex-wrap">
-            <span className="text-3xl font-bold truncate tabular-nums">
+            <span className="text-2xl font-bold truncate tabular-nums">
               {formatCurrency(balance)}
             </span>
             {type === 'goal' && targetAmount && (

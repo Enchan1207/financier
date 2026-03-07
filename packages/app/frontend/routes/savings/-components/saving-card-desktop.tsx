@@ -37,8 +37,8 @@ export const SavingCardDesktop: React.FC<Props> = ({
   return (
     <Link to="/savings/$id" params={{ id }} className="block">
       <Card className="h-30 py-4 transition-colors hover:bg-accent">
-        <CardContent className="flex-1 flex items-stretch justify-between py-1 px-3 lg:px-5">
-          <div className="flex flex-col justify-between w-[40%] px-2">
+        <CardContent className="flex-1 flex items-stretch justify-between px-3 py-2 lg:pl-6 lg:pr-1">
+          <div className="flex flex-col justify-between w-[40%]">
             <span className="line-clamp-2 text-base font-semibold">
               {categoryName}
             </span>
@@ -62,9 +62,9 @@ export const SavingCardDesktop: React.FC<Props> = ({
             )}
           </div>
 
-          <div className="shrink-0 flex flex-col flex-1 max-w-[50%] justify-center gap-y-2 px-2">
+          <div className="shrink-0 flex flex-col flex-1 max-w-[50%] justify-top gap-y-2 px-2">
             <div className="flex items-baseline gap-x-1.5 flex-wrap">
-              <span className="text-2xl font-bold tracking-tight tabular-nums truncate">
+              <span className="text-xl font-bold tracking-tight tabular-nums truncate">
                 {formatCurrency(balance)}
               </span>
               <span
