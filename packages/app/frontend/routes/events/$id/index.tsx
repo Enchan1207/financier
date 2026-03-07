@@ -1,4 +1,3 @@
-import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import {
   Card,
@@ -54,7 +53,7 @@ type YearBreakdown = {
 type EventDetail = {
   id: string
   name: string
-  dateRange?: { start: string; end?: string }
+  occurredOn: string
   transactions: EventTransaction[]
   categoryBreakdown: CategoryBreakdown[]
   yearBreakdown: YearBreakdown[]
@@ -65,7 +64,7 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
   'ev-1': {
     id: 'ev-1',
     name: 'バレンタインイベント',
-    dateRange: { start: '2026-02-14' },
+    occurredOn: '2026-02-14',
     transactions: [
       {
         id: 'tx-8',
@@ -91,7 +90,7 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
   'ev-2': {
     id: 'ev-2',
     name: '春ライブ遠征',
-    dateRange: { start: '2026-02-20', end: '2026-03-21' },
+    occurredOn: '2026-02-20',
     transactions: [
       {
         id: 'tx-12',
@@ -149,7 +148,7 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
   'ev-3': {
     id: 'ev-3',
     name: '春グッズ',
-    dateRange: { start: '2026-03-05' },
+    occurredOn: '2026-03-05',
     transactions: [
       {
         id: 'tx-18',
@@ -165,7 +164,7 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
   'ev-4': {
     id: 'ev-4',
     name: '年末飲み会',
-    dateRange: { start: '2025-12-28' },
+    occurredOn: '2025-12-28',
     transactions: [
       {
         id: 'tx-99',
@@ -190,8 +189,7 @@ const EventDetailPage: React.FC = () => {
 
   const [editOpen, setEditOpen] = useState(false)
   const [formName, setFormName] = useState(event?.name ?? '')
-  const [formStart, setFormStart] = useState(event?.dateRange?.start ?? '')
-  const [formEnd, setFormEnd] = useState(event?.dateRange?.end ?? '')
+  const [formDate, setFormDate] = useState(event?.occurredOn ?? '')
   const [currentName, setCurrentName] = useState(event?.name ?? '')
 
   if (!event) {
@@ -209,8 +207,6 @@ const EventDetailPage: React.FC = () => {
   }
 
   const total = event.transactions.reduce((sum, tx) => sum + tx.amount, 0)
-  const isPast =
-    event.dateRange && (event.dateRange.end ?? event.dateRange.start) < TODAY
 
   const handleEdit = () => {
     setCurrentName(formName)
@@ -230,18 +226,9 @@ const EventDetailPage: React.FC = () => {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">{currentName}</h1>
-            {event.dateRange && (
-              <p className="mt-1 text-sm text-muted-foreground">
-                {formatDateFull(event.dateRange.start)}
-                {event.dateRange.end &&
-                  ` 〜 ${formatDateFull(event.dateRange.end)}`}
-              </p>
-            )}
-            {isPast && (
-              <Badge variant="secondary" className="mt-1 text-xs">
-                終了
-              </Badge>
-            )}
+            <p className="mt-1 text-sm text-muted-foreground">
+              {formatDateFull(event.occurredOn)}
+            </p>
           </div>
           {/* 編集ダイアログ（UC-5.6） */}
           <Dialog open={editOpen} onOpenChange={setEditOpen}>
@@ -273,30 +260,22 @@ const EventDetailPage: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="edit-ev-start">開始日</Label>
+                  <Label htmlFor="edit-ev-date">発生日 *</Label>
                   <Input
-                    id="edit-ev-start"
+                    id="edit-ev-date"
                     type="date"
-                    value={formStart}
+                    value={formDate}
                     onChange={(e) => {
-                      setFormStart(e.target.value)
-                    }}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="edit-ev-end">終了日</Label>
-                  <Input
-                    id="edit-ev-end"
-                    type="date"
-                    value={formEnd}
-                    onChange={(e) => {
-                      setFormEnd(e.target.value)
+                      setFormDate(e.target.value)
                     }}
                   />
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleEdit} disabled={!formName.trim()}>
+                <Button
+                  onClick={handleEdit}
+                  disabled={!formName.trim() || !formDate}
+                >
                   保存
                 </Button>
               </DialogFooter>

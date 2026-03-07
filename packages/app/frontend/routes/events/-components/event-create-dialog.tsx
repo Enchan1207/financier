@@ -16,7 +16,7 @@ import { useState } from 'react'
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreate: (name: string, dateRange?: { start: string; end?: string }) => void
+  onCreate: (name: string, occurredOn: string) => void
 }
 
 export const EventCreateDialog: React.FC<Props> = ({
@@ -25,18 +25,13 @@ export const EventCreateDialog: React.FC<Props> = ({
   onCreate,
 }) => {
   const [formName, setFormName] = useState('')
-  const [formStart, setFormStart] = useState('')
-  const [formEnd, setFormEnd] = useState('')
+  const [formDate, setFormDate] = useState('')
 
   const handleSubmit = () => {
-    if (!formName.trim()) return
-    onCreate(
-      formName.trim(),
-      formStart ? { start: formStart, end: formEnd || undefined } : undefined,
-    )
+    if (!formName.trim() || !formDate) return
+    onCreate(formName.trim(), formDate)
     setFormName('')
-    setFormStart('')
-    setFormEnd('')
+    setFormDate('')
     onOpenChange(false)
   }
 
@@ -65,30 +60,22 @@ export const EventCreateDialog: React.FC<Props> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="ev-start">開始日</Label>
+            <Label htmlFor="ev-date">発生日 *</Label>
             <Input
-              id="ev-start"
+              id="ev-date"
               type="date"
-              value={formStart}
+              value={formDate}
               onChange={(e) => {
-                setFormStart(e.target.value)
-              }}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="ev-end">終了日</Label>
-            <Input
-              id="ev-end"
-              type="date"
-              value={formEnd}
-              onChange={(e) => {
-                setFormEnd(e.target.value)
+                setFormDate(e.target.value)
               }}
             />
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleSubmit} disabled={!formName.trim()}>
+          <Button
+            onClick={handleSubmit}
+            disabled={!formName.trim() || !formDate}
+          >
             作成
           </Button>
         </DialogFooter>
