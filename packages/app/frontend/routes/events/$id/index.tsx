@@ -1,3 +1,14 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@frontend/components/ui/alert-dialog'
 import { Button } from '@frontend/components/ui/button'
 import {
   Card,
@@ -254,10 +265,30 @@ const EventDetailPage: React.FC = () => {
 
             {/* transactionCount === 0 の場合のみ削除可能（UC-5.7） */}
             {transactions.length === 0 && (
-              <Button size="sm" variant="destructive" onClick={handleDelete}>
-                <Trash2Icon />
-                削除
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button size="sm" variant="destructive">
+                    <Trash2Icon />
+                    削除
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      イベントを削除しますか？
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      「{currentName}」を削除します。この操作は取り消せません。
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>
+                      削除
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         </div>
