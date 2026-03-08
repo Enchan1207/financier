@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TransactionsIndexRouteImport } from './routes/transactions/index'
-import { Route as SecretIndexRouteImport } from './routes/secret/index'
 import { Route as SavingsIndexRouteImport } from './routes/savings/index'
 import { Route as EventsIndexRouteImport } from './routes/events/index'
 import { Route as EventTemplatesIndexRouteImport } from './routes/event-templates/index'
@@ -35,11 +34,6 @@ const IndexRoute = IndexRouteImport.update({
 const TransactionsIndexRoute = TransactionsIndexRouteImport.update({
   id: '/transactions/',
   path: '/transactions/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SecretIndexRoute = SecretIndexRouteImport.update({
-  id: '/secret/',
-  path: '/secret/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SavingsIndexRoute = SavingsIndexRouteImport.update({
@@ -122,7 +116,6 @@ export interface FileRoutesByFullPath {
   '/event-templates/': typeof EventTemplatesIndexRoute
   '/events/': typeof EventsIndexRoute
   '/savings/': typeof SavingsIndexRoute
-  '/secret/': typeof SecretIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
   '/budget/$year/': typeof BudgetYearIndexRoute
   '/budget/new/': typeof BudgetNewIndexRoute
@@ -141,7 +134,6 @@ export interface FileRoutesByTo {
   '/event-templates': typeof EventTemplatesIndexRoute
   '/events': typeof EventsIndexRoute
   '/savings': typeof SavingsIndexRoute
-  '/secret': typeof SecretIndexRoute
   '/transactions': typeof TransactionsIndexRoute
   '/budget/$year': typeof BudgetYearIndexRoute
   '/budget/new': typeof BudgetNewIndexRoute
@@ -161,7 +153,6 @@ export interface FileRoutesById {
   '/event-templates/': typeof EventTemplatesIndexRoute
   '/events/': typeof EventsIndexRoute
   '/savings/': typeof SavingsIndexRoute
-  '/secret/': typeof SecretIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
   '/budget/$year/': typeof BudgetYearIndexRoute
   '/budget/new/': typeof BudgetNewIndexRoute
@@ -182,7 +173,6 @@ export interface FileRouteTypes {
     | '/event-templates/'
     | '/events/'
     | '/savings/'
-    | '/secret/'
     | '/transactions/'
     | '/budget/$year/'
     | '/budget/new/'
@@ -201,7 +191,6 @@ export interface FileRouteTypes {
     | '/event-templates'
     | '/events'
     | '/savings'
-    | '/secret'
     | '/transactions'
     | '/budget/$year'
     | '/budget/new'
@@ -220,7 +209,6 @@ export interface FileRouteTypes {
     | '/event-templates/'
     | '/events/'
     | '/savings/'
-    | '/secret/'
     | '/transactions/'
     | '/budget/$year/'
     | '/budget/new/'
@@ -240,7 +228,6 @@ export interface RootRouteChildren {
   EventTemplatesIndexRoute: typeof EventTemplatesIndexRoute
   EventsIndexRoute: typeof EventsIndexRoute
   SavingsIndexRoute: typeof SavingsIndexRoute
-  SecretIndexRoute: typeof SecretIndexRoute
   TransactionsIndexRoute: typeof TransactionsIndexRoute
   BudgetYearIndexRoute: typeof BudgetYearIndexRoute
   BudgetNewIndexRoute: typeof BudgetNewIndexRoute
@@ -267,13 +254,6 @@ declare module '@tanstack/react-router' {
       path: '/transactions'
       fullPath: '/transactions/'
       preLoaderRoute: typeof TransactionsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/secret/': {
-      id: '/secret/'
-      path: '/secret'
-      fullPath: '/secret/'
-      preLoaderRoute: typeof SecretIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/savings/': {
@@ -384,7 +364,6 @@ const rootRouteChildren: RootRouteChildren = {
   EventTemplatesIndexRoute: EventTemplatesIndexRoute,
   EventsIndexRoute: EventsIndexRoute,
   SavingsIndexRoute: SavingsIndexRoute,
-  SecretIndexRoute: SecretIndexRoute,
   TransactionsIndexRoute: TransactionsIndexRoute,
   BudgetYearIndexRoute: BudgetYearIndexRoute,
   BudgetNewIndexRoute: BudgetNewIndexRoute,
