@@ -1,5 +1,5 @@
 import { ColoredProgress } from '@frontend/components/ui-custom/colored-progress'
-import { formatCurrency } from '@frontend/lib/mock-data'
+import { formatCurrency } from '@frontend/lib/format'
 import type React from 'react'
 
 type Props = {

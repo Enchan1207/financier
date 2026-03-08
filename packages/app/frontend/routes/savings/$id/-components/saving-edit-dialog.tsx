@@ -9,7 +9,7 @@ import {
 import { Field } from '@frontend/components/ui/field'
 import { Input } from '@frontend/components/ui/input'
 import { Label } from '@frontend/components/ui/label'
-import type { SavingDefinition } from '@frontend/lib/mock-data'
+import type { SavingDefinition } from '@frontend/lib/types'
 import { XIcon } from 'lucide-react'
 import type React from 'react'
 import { useEffect, useState } from 'react'

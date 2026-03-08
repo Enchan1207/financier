@@ -1,14 +1,16 @@
 import { useState } from 'react'
 
-import { newFormItem } from './template-form-item'
 import type { FormItem } from './template-form-item'
+import { newFormItem } from './template-form-item'
 
 export const useTemplateForm = (
   initialName = '',
   initialItems?: FormItem[],
 ) => {
   const [templateName, setTemplateName] = useState(initialName)
-  const [items, setItems] = useState<FormItem[]>(initialItems ?? [newFormItem()])
+  const [items, setItems] = useState<FormItem[]>(
+    initialItems ?? [newFormItem()],
+  )
 
   const addItem = () => {
     setItems((prev) => [...prev, newFormItem()])

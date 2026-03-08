@@ -11,17 +11,24 @@ const EventTemplateEditPage: React.FC = () => {
   const navigate = useNavigate()
   const original = TEMPLATE_DETAILS[id]
 
-  const { templateName, setTemplateName, items, addItem, removeItem, updateItem, isValid } =
-    useTemplateForm(
-      original?.name,
-      original?.items.map((it) => ({
-        uid: it.id,
-        categoryId: it.categoryId,
-        name: it.name,
-        amount: String(it.amount),
-        type: it.type,
-      })),
-    )
+  const {
+    templateName,
+    setTemplateName,
+    items,
+    addItem,
+    removeItem,
+    updateItem,
+    isValid,
+  } = useTemplateForm(
+    original?.name,
+    original?.items.map((it) => ({
+      uid: it.id,
+      categoryId: it.categoryId,
+      name: it.name,
+      amount: String(it.amount),
+      type: it.type,
+    })),
+  )
 
   if (!original) {
     return (

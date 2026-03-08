@@ -9,7 +9,8 @@ import {
 import { Input } from '@frontend/components/ui/input'
 import { Label } from '@frontend/components/ui/label'
 import dayjs from '@frontend/lib/date'
-import { formatCurrency, TODAY } from '@frontend/lib/mock-data'
+import { formatCurrency } from '@frontend/lib/format'
+import { TODAY } from '@frontend/lib/today'
 import type React from 'react'
 import { useEffect, useState } from 'react'
 

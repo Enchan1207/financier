@@ -95,14 +95,18 @@ const EventTemplateDetailPage: React.FC = () => {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>テンプレートを削除しますか？</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    テンプレートを削除しますか？
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
                     「{template.name}」を削除します。この操作は取り消せません。
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>キャンセル</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>削除する</AlertDialogAction>
+                  <AlertDialogAction onClick={handleDelete}>
+                    削除する
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>

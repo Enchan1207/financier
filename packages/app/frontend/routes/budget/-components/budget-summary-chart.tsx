@@ -11,7 +11,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@frontend/components/ui/chart'
-import { formatCurrency } from '@frontend/lib/mock-data'
+import { formatCurrency } from '@frontend/lib/format'
 import type React from 'react'
 import { Bar, BarChart, LabelList, XAxis, YAxis } from 'recharts'
 

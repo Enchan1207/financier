@@ -15,8 +15,8 @@ import {
   TableRow,
 } from '@frontend/components/ui/table'
 import dayjs from '@frontend/lib/date'
-import type { Transaction } from '@frontend/lib/mock-data'
-import { formatCurrency } from '@frontend/lib/mock-data'
+import { formatCurrency } from '@frontend/lib/format'
+import type { Transaction } from '@frontend/lib/types'
 import { PiggyBankIcon } from 'lucide-react'
 import type React from 'react'
 

@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from '@frontend/components/ui/tooltip'
 import dayjs from '@frontend/lib/date'
-import { formatCurrency } from '@frontend/lib/mock-data'
+import { formatCurrency } from '@frontend/lib/format'
 import { Link } from '@tanstack/react-router'
 import { ChevronRight } from 'lucide-react'
 import type React from 'react'

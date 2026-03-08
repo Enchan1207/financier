@@ -1,8 +1,9 @@
 import type { ChartConfig } from '@frontend/components/ui/chart'
 import { ChartContainer, ChartTooltip } from '@frontend/components/ui/chart'
 import dayjs from '@frontend/lib/date'
-import type { SavingWithdrawal, Transaction } from '@frontend/lib/mock-data'
-import { formatCurrency, TODAY } from '@frontend/lib/mock-data'
+import { formatCurrency } from '@frontend/lib/format'
+import { TODAY } from '@frontend/lib/today'
+import type { SavingWithdrawal, Transaction } from '@frontend/lib/types'
 import type React from 'react'
 import type { TooltipProps } from 'recharts'
 import {

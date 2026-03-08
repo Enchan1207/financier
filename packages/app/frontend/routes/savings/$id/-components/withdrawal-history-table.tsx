@@ -15,8 +15,8 @@ import {
   TableRow,
 } from '@frontend/components/ui/table'
 import dayjs from '@frontend/lib/date'
-import type { SavingWithdrawal } from '@frontend/lib/mock-data'
-import { formatCurrency } from '@frontend/lib/mock-data'
+import { formatCurrency } from '@frontend/lib/format'
+import type { SavingWithdrawal } from '@frontend/lib/types'
 import { ArrowDownLeftIcon } from 'lucide-react'
 import type React from 'react'
 

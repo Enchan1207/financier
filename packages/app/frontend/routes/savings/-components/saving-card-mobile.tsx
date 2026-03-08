@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@frontend/components/ui/card'
 import { Progress } from '@frontend/components/ui/progress'
 import dayjs from '@frontend/lib/date'
-import { formatCurrency } from '@frontend/lib/mock-data'
+import { formatCurrency } from '@frontend/lib/format'
 import { Link } from '@tanstack/react-router'
 import { ChevronRight } from 'lucide-react'
 import type React from 'react'

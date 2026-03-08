@@ -8,7 +8,7 @@ import {
 } from '@frontend/components/ui/dialog'
 import { Input } from '@frontend/components/ui/input'
 import { Label } from '@frontend/components/ui/label'
-import { formatCurrency } from '@frontend/lib/mock-data'
+import { formatCurrency } from '@frontend/lib/format'
 import type React from 'react'
 import { useState } from 'react'
 

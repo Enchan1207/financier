@@ -1,10 +1,58 @@
 import { Button } from '@frontend/components/ui/button'
-import { savings } from '@frontend/lib/mock-data'
+import type { SavingDefinition } from '@frontend/lib/types'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { PlusIcon } from 'lucide-react'
 
 import { SavingCardDesktop } from './-components/saving-card-desktop'
 import { SavingCardMobile } from './-components/saving-card-mobile'
+
+// モックデータ：本番ではAPIから取得する
+const savings: SavingDefinition[] = [
+  {
+    id: 'sav-1',
+    categoryId: 'cat-8',
+    categoryName: '遠征費積立',
+    type: 'goal',
+    targetAmount: 200000,
+    deadline: '2026-08-01',
+    balance: 90000,
+    monthlyGuide: 22000,
+  },
+  {
+    id: 'sav-2',
+    categoryId: 'cat-9',
+    categoryName: 'グッズ積立',
+    type: 'free',
+    balance: 35000,
+  },
+  {
+    id: 'sav-3',
+    categoryId: 'cat-11',
+    categoryName: '旅行費積立',
+    type: 'goal',
+    targetAmount: 70000,
+    deadline: '2026-12-01',
+    balance: 18000,
+    monthlyGuide: 6000,
+  },
+  {
+    id: 'sav-4',
+    categoryId: 'cat-12',
+    categoryName: '機材費積立',
+    type: 'goal',
+    targetAmount: 200000,
+    deadline: '2026-06-30',
+    balance: 170000,
+    monthlyGuide: 25000,
+  },
+  {
+    id: 'sav-5',
+    categoryId: 'cat-13',
+    categoryName: '緊急資金',
+    type: 'free',
+    balance: 150000,
+  },
+]
 
 const SavingsPage: React.FC = () => {
   return (

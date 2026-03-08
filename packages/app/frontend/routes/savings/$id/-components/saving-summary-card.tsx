@@ -3,12 +3,13 @@ import { Card, CardContent } from '@frontend/components/ui/card'
 import { Progress } from '@frontend/components/ui/progress'
 import { Separator } from '@frontend/components/ui/separator'
 import dayjs from '@frontend/lib/date'
+import { formatCurrency } from '@frontend/lib/format'
+import { TODAY } from '@frontend/lib/today'
 import type {
   SavingDefinition,
   SavingWithdrawal,
   Transaction,
-} from '@frontend/lib/mock-data'
-import { formatCurrency, TODAY } from '@frontend/lib/mock-data'
+} from '@frontend/lib/types'
 import type React from 'react'
 
 import { SavingBurnupChart } from './saving-burnup-chart'
