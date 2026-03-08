@@ -40,6 +40,7 @@
   - classes,constants,components: PascalCase
   - module: kebab-case
 - follow the guidelines:
+  - frontend: @ docs/architecture-guideline/frontend.md
   - backend: @ docs/architecture-guideline/backend.md
 - follow the specs:
   - requirements: @docs/spec/requirements.md
