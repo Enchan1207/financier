@@ -1,4 +1,3 @@
-import { Badge } from '@frontend/components/ui/badge'
 import { Card, CardContent } from '@frontend/components/ui/card'
 import { Progress } from '@frontend/components/ui/progress'
 import { Separator } from '@frontend/components/ui/separator'
@@ -59,18 +58,12 @@ export const SavingSummaryCard: React.FC<Props> = ({
   return (
     <Card>
       <CardContent className="space-y-4">
-        {/* 残高 + 型バッジ */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="truncate">
-            <p className="text-xs text-muted-foreground">積立残高</p>
-            <p className="text-3xl font-bold tabular-nums">
-              {formatCurrency(balance)}
-            </p>
-          </div>
-
-          <Badge variant={type === 'goal' ? 'default' : 'secondary'}>
-            {type === 'goal' ? '目標型' : '自由型'}
-          </Badge>
+        {/* 残高 */}
+        <div className="truncate">
+          <p className="text-xs text-muted-foreground">積立残高</p>
+          <p className="text-3xl font-bold tabular-nums">
+            {formatCurrency(balance)}
+          </p>
         </div>
 
         {/* goal 型のみ詳細表示 */}
