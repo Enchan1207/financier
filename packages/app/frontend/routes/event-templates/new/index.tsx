@@ -1,42 +1,21 @@
 import { Button } from '@frontend/components/ui/button'
-import { Input } from '@frontend/components/ui/input'
-import { Label } from '@frontend/components/ui/label'
-import { Separator } from '@frontend/components/ui/separator'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeftIcon, PlusIcon } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowLeftIcon } from 'lucide-react'
 
-import type { FormItem } from '../-components/template-form-item'
-import {
-  newFormItem,
-  TemplateFormItem,
-} from '../-components/template-form-item'
+import { TemplateFormFields } from '../-components/template-form-fields'
+import { useTemplateForm } from '../-components/use-template-form'
 
 const EventTemplateNewPage: React.FC = () => {
   const navigate = useNavigate()
-  const [templateName, setTemplateName] = useState('')
-  const [items, setItems] = useState<FormItem[]>([newFormItem()])
-
-  const addItem = () => {
-    setItems((prev) => [...prev, newFormItem()])
-  }
-
-  const removeItem = (uid: string) => {
-    setItems((prev) => prev.filter((it) => it.uid !== uid))
-  }
-
-  const updateItem = (uid: string, patch: Partial<Omit<FormItem, 'uid'>>) => {
-    setItems((prev) =>
-      prev.map((it) => (it.uid === uid ? { ...it, ...patch } : it)),
-    )
-  }
-
-  const isValid =
-    templateName.trim().length > 0 &&
-    items.length > 0 &&
-    items.every(
-      (it) => it.categoryId && it.name.trim() && parseInt(it.amount, 10) > 0,
-    )
+  const {
+    templateName,
+    setTemplateName,
+    items,
+    addItem,
+    removeItem,
+    updateItem,
+    isValid,
+  } = useTemplateForm()
 
   const handleSave = () => {
     // モック：実際にはAPIを呼び出してテンプレートを作成する
@@ -55,42 +34,16 @@ const EventTemplateNewPage: React.FC = () => {
         <h1 className="text-2xl font-bold">テンプレート新規作成</h1>
       </div>
 
-      <div className="space-y-6 max-w-2xl">
-        <div className="space-y-1.5">
-          <Label htmlFor="tmpl-name">テンプレート名 *</Label>
-          <Input
-            id="tmpl-name"
-            value={templateName}
-            onChange={(e) => {
-              setTemplateName(e.target.value)
-            }}
-            placeholder="例：ライブ遠征セット"
-          />
-        </div>
-
-        <Separator />
-
-        <div className="space-y-3">
-          <h2 className="text-sm font-medium">取引定義</h2>
-          {items.map((item, idx) => (
-            <TemplateFormItem
-              key={item.uid}
-              item={item}
-              index={idx}
-              canRemove={items.length > 1}
-              onRemove={() => {
-                removeItem(item.uid)
-              }}
-              onUpdate={(patch) => {
-                updateItem(item.uid, patch)
-              }}
-            />
-          ))}
-          <Button variant="outline" size="sm" onClick={addItem}>
-            <PlusIcon />
-            取引を追加
-          </Button>
-        </div>
+      <div className="space-y-6 max-w-2xl lg:max-w-full">
+        <TemplateFormFields
+          templateName={templateName}
+          onTemplateNameChange={setTemplateName}
+          items={items}
+          onAddItem={addItem}
+          onRemoveItem={removeItem}
+          onUpdateItem={updateItem}
+          namePlaceholder="例：ライブ遠征セット"
+        />
 
         <div className="flex gap-2">
           <Button onClick={handleSave} disabled={!isValid}>

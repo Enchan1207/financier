@@ -1,33 +1,27 @@
 import { Button } from '@frontend/components/ui/button'
-import { Input } from '@frontend/components/ui/input'
-import { Label } from '@frontend/components/ui/label'
-import { Separator } from '@frontend/components/ui/separator'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeftIcon, PlusIcon } from 'lucide-react'
-import { useState } from 'react'
+import { ArrowLeftIcon } from 'lucide-react'
 
 import { TEMPLATE_DETAILS } from '../../-components/template-data'
-import type { FormItem } from '../../-components/template-form-item'
-import {
-  newFormItem,
-  TemplateFormItem,
-} from '../../-components/template-form-item'
+import { TemplateFormFields } from '../../-components/template-form-fields'
+import { useTemplateForm } from '../../-components/use-template-form'
 
 const EventTemplateEditPage: React.FC = () => {
   const { id } = Route.useParams()
   const navigate = useNavigate()
   const original = TEMPLATE_DETAILS[id]
 
-  const [templateName, setTemplateName] = useState(original?.name ?? '')
-  const [items, setItems] = useState<FormItem[]>(
-    original?.items.map((it) => ({
-      uid: it.id,
-      categoryId: it.categoryId,
-      name: it.name,
-      amount: String(it.amount),
-      type: it.type,
-    })) ?? [newFormItem()],
-  )
+  const { templateName, setTemplateName, items, addItem, removeItem, updateItem, isValid } =
+    useTemplateForm(
+      original?.name,
+      original?.items.map((it) => ({
+        uid: it.id,
+        categoryId: it.categoryId,
+        name: it.name,
+        amount: String(it.amount),
+        type: it.type,
+      })),
+    )
 
   if (!original) {
     return (
@@ -42,27 +36,6 @@ const EventTemplateEditPage: React.FC = () => {
       </div>
     )
   }
-
-  const addItem = () => {
-    setItems((prev) => [...prev, newFormItem()])
-  }
-
-  const removeItem = (uid: string) => {
-    setItems((prev) => prev.filter((it) => it.uid !== uid))
-  }
-
-  const updateItem = (uid: string, patch: Partial<Omit<FormItem, 'uid'>>) => {
-    setItems((prev) =>
-      prev.map((it) => (it.uid === uid ? { ...it, ...patch } : it)),
-    )
-  }
-
-  const isValid =
-    templateName.trim().length > 0 &&
-    items.length > 0 &&
-    items.every(
-      (it) => it.categoryId && it.name.trim() && parseInt(it.amount, 10) > 0,
-    )
 
   const handleSave = () => {
     // モック：実際にはAPIを呼び出してテンプレートを更新する
@@ -82,40 +55,14 @@ const EventTemplateEditPage: React.FC = () => {
       </div>
 
       <div className="space-y-6 max-w-2xl lg:max-w-full">
-        <div className="space-y-1.5">
-          <Label htmlFor="tmpl-name">テンプレート名 *</Label>
-          <Input
-            id="tmpl-name"
-            value={templateName}
-            onChange={(e) => {
-              setTemplateName(e.target.value)
-            }}
-          />
-        </div>
-
-        <Separator />
-
-        <div className="space-y-3">
-          <h2 className="text-sm font-medium">取引定義</h2>
-          {items.map((item, idx) => (
-            <TemplateFormItem
-              key={item.uid}
-              item={item}
-              index={idx}
-              canRemove={items.length > 1}
-              onRemove={() => {
-                removeItem(item.uid)
-              }}
-              onUpdate={(patch) => {
-                updateItem(item.uid, patch)
-              }}
-            />
-          ))}
-          <Button variant="outline" size="sm" onClick={addItem}>
-            <PlusIcon />
-            取引を追加
-          </Button>
-        </div>
+        <TemplateFormFields
+          templateName={templateName}
+          onTemplateNameChange={setTemplateName}
+          items={items}
+          onAddItem={addItem}
+          onRemoveItem={removeItem}
+          onUpdateItem={updateItem}
+        />
 
         <div className="flex gap-2">
           <Button onClick={handleSave} disabled={!isValid}>

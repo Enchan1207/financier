@@ -17,6 +17,7 @@ import {
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeftIcon, PencilIcon } from 'lucide-react'
 
+import { RegisterEventButton } from '../-components/register-event-button'
 import { TEMPLATE_DETAILS } from '../-components/template-data'
 
 const formatCurrency = (amount: number) => `¥${amount.toLocaleString('ja-JP')}`
@@ -124,11 +125,7 @@ const EventTemplateDetailPage: React.FC = () => {
       </Card>
 
       {/* テンプレートからイベント作成（UC-5.5） */}
-      <Button asChild>
-        <Link to="/event-templates/$id/register" params={{ id }}>
-          このテンプレートでイベント作成
-        </Link>
-      </Button>
+      <RegisterEventButton id={id} />
     </div>
   )
 }
