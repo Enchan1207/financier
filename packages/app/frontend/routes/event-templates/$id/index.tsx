@@ -1,3 +1,14 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@frontend/components/ui/alert-dialog'
 import { Button } from '@frontend/components/ui/button'
 import {
   Card,
@@ -14,8 +25,8 @@ import {
   TableHeader,
   TableRow,
 } from '@frontend/components/ui/table'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowLeftIcon, PencilIcon } from 'lucide-react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { ArrowLeftIcon, PencilIcon, Trash2Icon } from 'lucide-react'
 
 import { RegisterEventButton } from '../-components/register-event-button'
 import { TEMPLATE_DETAILS } from '../-components/template-data'
@@ -24,7 +35,13 @@ const formatCurrency = (amount: number) => `¥${amount.toLocaleString('ja-JP')}`
 
 const EventTemplateDetailPage: React.FC = () => {
   const { id } = Route.useParams()
+  const navigate = useNavigate()
   const template = TEMPLATE_DETAILS[id]
+
+  const handleDelete = () => {
+    // モック：実際にはAPIを呼び出してテンプレートを削除する
+    void navigate({ to: '/event-templates' })
+  }
 
   if (!template) {
     return (
@@ -62,12 +79,34 @@ const EventTemplateDetailPage: React.FC = () => {
               取引定義 {template.items.length} 件
             </p>
           </div>
-          <Button asChild size="sm" variant="outline">
-            <Link to="/event-templates/$id/edit" params={{ id }}>
-              <PencilIcon />
-              編集
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild size="sm" variant="outline">
+              <Link to="/event-templates/$id/edit" params={{ id }}>
+                <PencilIcon />
+                編集
+              </Link>
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" variant="destructive">
+                  <Trash2Icon />
+                  削除
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>テンプレートを削除しますか？</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    「{template.name}」を削除します。この操作は取り消せません。
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>削除する</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </div>
 
