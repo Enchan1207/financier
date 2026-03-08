@@ -237,7 +237,7 @@ TanStack Form のフィールドアレイ機能（`form.Field` + `field.pushValu
 
 ---
 
-### 1. SavingEditDialog の実装詳細
+### 1. SavingEditDialog の実装詳細 ✅ 完了
 
 ```ts
 const formSchema = z.object({
@@ -249,13 +249,14 @@ const formSchema = z.object({
 })
 ```
 
-- `useEffect` によるリセットを `handleOpenChange` 内の `form.reset(...)` に置き換える
-- 日付フィールドは既存の `<input type="date">` を維持（CalendarPicker への変更はスコープ外）
-- `onSave` コールバックは現在 sync のため `onSubmit` も sync で実装する
+- `useEffect` によるリセットを `handleOpenChange` 内の `form.reset(...)` に置き換えた
+- `deadline` は `<input type="date">` から Calendar/Popover（DatePicker）に変更した
+- クリアボタンは `Field orientation="horizontal"` で横並びに配置した
+- `onSave` コールバックは sync のため `onSubmit` も sync で実装した
 
 ---
 
-### 2. SavingContributionDialog の実装詳細
+### 2. SavingContributionDialog の実装詳細 ✅ 完了
 
 ```ts
 const formSchema = z.object({
@@ -266,17 +267,21 @@ const formSchema = z.object({
   date: z
     .string()
     .min(1, '日付を入力してください')
-    .refine((d) => d <= TODAY, '本日以前の日付を入力してください'),
+    .refine(
+      (d) => d <= dayjs().format('YYYY-MM-DD'),
+      '本日以前の日付を入力してください',
+    ),
   name: z.string().min(1, '内容を入力してください'),
 })
 ```
 
-- `defaultName`（`N月分積立`）は `defaultValues.name` に直接設定する
-- 重複していたリセット処理を `handleOpenChange` 内の `form.reset()` に統一する
+- `defaultName`・`defaultValues.date` は `TODAY` 定数を廃止し `dayjs()` を使用した
+- 重複していたリセット処理を `handleOpenChange` 内の `form.reset()` に統一した
+- 金額フィールドに `InputGroup` + `InputGroupAddon` で `¥` プレフィックスを追加した（`input-group` コンポーネントを新規インストール）
 
 ---
 
-### 3. SavingWithdrawalDialog の実装詳細
+### 3. SavingWithdrawalDialog の実装詳細 ✅ 完了
 
 `balance` は props であり動的なため、Zod スキーマをコンポーネント関数内（`balance` のスコープ内）で定義してクロージャとして参照する。
 
@@ -295,9 +300,14 @@ const formSchema = z.object({
 })
 ```
 
+- `balance` props のクロージャとして Zod スキーマをコンポーネント内で定義した
+- 金額フィールドに `InputGroup` + `InputGroupAddon` で `¥` プレフィックスを追加した
+- `memo` フィールドは任意のため `z.string()` のみ（min なし）
+- `form.Subscribe` で `[amount, isSubmitting]` を購読し送信ボタンの disabled 状態を制御した
+
 ---
 
-### 4. SavingNewPage の実装詳細
+### 4. SavingNewPage の実装詳細 ✅ 完了
 
 `savingType` に応じた条件付きバリデーションを `superRefine` で実装する。
 
@@ -321,6 +331,12 @@ const formSchema = z
 ```
 
 `targetAmount` / `deadline` フィールドの表示制御には `form.Subscribe selector={s => s.values.savingType}` を使う。`savingType` の切り替え時は `form.setFieldValue('targetAmount', '')` でリセットする。
+
+- `superRefine` で `savingType === 'goal'` のとき `targetAmount` を必須・正整数バリデーションとした
+- `form.Subscribe` で `savingType` を購読し、`goal` のときのみ `targetAmount` / `deadline` フィールドを表示した
+- 金額フィールドに `InputGroup` + `InputGroupAddon` で `¥` プレフィックスを追加した
+- `deadline` は Calendar/Popover（DatePicker）と横並びクリアボタンで実装した
+- ナビゲートのみのモック `onSubmit` のため async 化は行わなかった
 
 ---
 
