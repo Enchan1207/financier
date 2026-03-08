@@ -6,11 +6,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@frontend/components/ui/dialog'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@frontend/components/ui/field'
 import { Input } from '@frontend/components/ui/input'
-import { Label } from '@frontend/components/ui/label'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from '@frontend/components/ui/input-group'
 import { formatCurrency } from '@frontend/lib/format'
+import { useForm } from '@tanstack/react-form'
 import type React from 'react'
-import { useState } from 'react'
+import { z } from 'zod'
 
 type Props = {
   open: boolean
@@ -26,26 +38,36 @@ export const SavingWithdrawalDialog: React.FC<Props> = ({
   balance,
   onWithdraw,
 }) => {
-  const [amount, setAmount] = useState('')
-  const [memo, setMemo] = useState('')
+  const formSchema = z.object({
+    amount: z
+      .string()
+      .min(1, '取り崩し額を入力してください')
+      .refine((v) => parseInt(v, 10) > 0, '1以上の金額を入力してください')
+      .refine(
+        (v) => parseInt(v, 10) <= balance,
+        `上限（${formatCurrency(balance)}）以下の金額を入力してください`,
+      ),
+    memo: z.string(),
+  })
 
-  const parsedAmount = parseInt(amount, 10)
-  const isValid =
-    !isNaN(parsedAmount) && parsedAmount > 0 && parsedAmount <= balance
+  const form = useForm({
+    defaultValues: {
+      amount: '',
+      memo: '',
+    },
+    validators: {
+      onSubmit: formSchema,
+    },
+    onSubmit: ({ value, formApi }) => {
+      onWithdraw(parseInt(value.amount, 10), value.memo)
+      formApi.reset()
+      onOpenChange(false)
+    },
+  })
 
-  const handleSubmit = () => {
-    if (!isValid) return
-    onWithdraw(parsedAmount, memo)
-    setAmount('')
-    setMemo('')
-  }
-
-  const handleOpenChange = (next: boolean) => {
-    if (!next) {
-      setAmount('')
-      setMemo('')
-    }
-    onOpenChange(next)
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) form.reset()
+    onOpenChange(nextOpen)
   }
 
   return (
@@ -54,55 +76,106 @@ export const SavingWithdrawalDialog: React.FC<Props> = ({
         <DialogHeader>
           <DialogTitle>積立を取り崩す</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="withdrawal-amount">取り崩し額 *</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                ¥
-              </span>
-              <Input
-                id="withdrawal-amount"
-                type="number"
-                min="1"
-                max={balance}
-                value={amount}
-                onChange={(e) => {
-                  setAmount(e.target.value)
+
+        <form.Subscribe
+          selector={(state) =>
+            [state.values.amount, state.isSubmitting] as const
+          }
+          children={([amount, isSubmitting]) => (
+            <>
+              <form
+                id="saving-withdrawal-form"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  void form.handleSubmit()
                 }}
-                className="pl-7"
-                placeholder="10000"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              上限: {formatCurrency(balance)}
-            </p>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="withdrawal-memo">メモ（任意）</Label>
-            <Input
-              id="withdrawal-memo"
-              value={memo}
-              onChange={(e) => {
-                setMemo(e.target.value)
-              }}
-              placeholder="例：旅行費用として使用"
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              handleOpenChange(false)
-            }}
-          >
-            キャンセル
-          </Button>
-          <Button onClick={handleSubmit} disabled={!isValid}>
-            取り崩す
-          </Button>
-        </DialogFooter>
+              >
+                <FieldGroup>
+                  <form.Field
+                    name="amount"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid
+
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>
+                            取り崩し額
+                          </FieldLabel>
+                          <InputGroup>
+                            <InputGroupAddon>
+                              <InputGroupText>¥</InputGroupText>
+                            </InputGroupAddon>
+                            <InputGroupInput
+                              id={field.name}
+                              name={field.name}
+                              type="number"
+                              min="1"
+                              max={balance}
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => {
+                                field.handleChange(e.target.value)
+                              }}
+                              aria-invalid={isInvalid}
+                              disabled={isSubmitting}
+                            />
+                          </InputGroup>
+                          <p className="text-xs text-muted-foreground">
+                            上限: {formatCurrency(balance)}
+                          </p>
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      )
+                    }}
+                  />
+
+                  <form.Field
+                    name="memo"
+                    children={(field) => (
+                      <Field>
+                        <FieldLabel htmlFor={field.name}>
+                          メモ（任意）
+                        </FieldLabel>
+                        <Input
+                          id={field.name}
+                          name={field.name}
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => {
+                            field.handleChange(e.target.value)
+                          }}
+                          disabled={isSubmitting}
+                        />
+                      </Field>
+                    )}
+                  />
+                </FieldGroup>
+              </form>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    handleOpenChange(false)
+                  }}
+                >
+                  キャンセル
+                </Button>
+                <Button
+                  type="submit"
+                  form="saving-withdrawal-form"
+                  disabled={!amount || isSubmitting}
+                >
+                  取り崩す
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        />
       </DialogContent>
     </Dialog>
   )
