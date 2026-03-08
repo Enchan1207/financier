@@ -1,4 +1,5 @@
 import { Button } from '@frontend/components/ui/button'
+import { Calendar } from '@frontend/components/ui/calendar'
 import {
   Dialog,
   DialogContent,
@@ -14,8 +15,14 @@ import {
   FieldLabel,
 } from '@frontend/components/ui/field'
 import { Input } from '@frontend/components/ui/input'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@frontend/components/ui/popover'
+import dayjs from '@frontend/lib/date'
 import { useForm } from '@tanstack/react-form'
-import { PlusIcon } from 'lucide-react'
+import { CalendarIcon, PlusIcon } from 'lucide-react'
 import type React from 'react'
 import { z } from 'zod'
 
@@ -84,7 +91,7 @@ export const EventCreateDialog: React.FC<Props> = ({
 
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>イベント名</FieldLabel>
+                    <FieldLabel htmlFor={field.name}>名前</FieldLabel>
                     <Input
                       id={field.name}
                       name={field.name}
@@ -109,21 +116,47 @@ export const EventCreateDialog: React.FC<Props> = ({
               children={(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid
+                const selectedDate = field.state.value
+                  ? dayjs(field.state.value).toDate()
+                  : undefined
 
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>発生日</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="date"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => {
-                        field.handleChange(e.target.value)
+                    <FieldLabel htmlFor={field.name}>日時</FieldLabel>
+                    <Popover
+                      onOpenChange={(open) => {
+                        if (!open) field.handleBlur()
                       }}
-                      aria-invalid={isInvalid}
-                    />
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          id={field.name}
+                          variant="outline"
+                          aria-invalid={isInvalid}
+                          className={
+                            selectedDate
+                              ? 'w-full justify-start text-left font-normal'
+                              : 'w-full justify-start text-left font-normal text-muted-foreground'
+                          }
+                        >
+                          <CalendarIcon />
+                          {selectedDate
+                            ? dayjs(selectedDate).format('YYYY/MM/DD')
+                            : '日付を選択'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={(date) => {
+                            field.handleChange(
+                              date ? dayjs(date).format('YYYY-MM-DD') : '',
+                            )
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
 
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
