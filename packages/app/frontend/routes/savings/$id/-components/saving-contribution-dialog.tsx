@@ -28,8 +28,9 @@ import {
 import dayjs from '@frontend/lib/date'
 import { formatCurrency } from '@frontend/lib/format'
 import { useForm } from '@tanstack/react-form'
-import { CalendarIcon } from 'lucide-react'
+import { CalendarIcon, Loader2Icon } from 'lucide-react'
 import type React from 'react'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 const formSchema = z.object({
@@ -52,7 +53,7 @@ type Props = {
   onOpenChange: (open: boolean) => void
   categoryName: string
   balance: number
-  onContribute: (amount: number, date: string, name: string) => void
+  onContribute: (amount: number, date: string, name: string) => Promise<void>
 }
 
 export const SavingContributionDialog: React.FC<Props> = ({
@@ -73,10 +74,18 @@ export const SavingContributionDialog: React.FC<Props> = ({
     validators: {
       onSubmit: formSchema,
     },
-    onSubmit: ({ value, formApi }) => {
-      onContribute(parseInt(value.amount, 10), value.date, value.name.trim())
-      formApi.reset()
-      onOpenChange(false)
+    onSubmit: async ({ value, formApi }) => {
+      try {
+        await onContribute(
+          parseInt(value.amount, 10),
+          value.date,
+          value.name.trim(),
+        )
+        formApi.reset()
+        onOpenChange(false)
+      } catch {
+        toast.error('拠出に失敗しました')
+      }
     },
   })
 
@@ -105,9 +114,9 @@ export const SavingContributionDialog: React.FC<Props> = ({
             <>
               <form
                 id="saving-contribution-form"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault()
-                  void form.handleSubmit()
+                  await form.handleSubmit()
                 }}
               >
                 <FieldGroup>
@@ -266,6 +275,9 @@ export const SavingContributionDialog: React.FC<Props> = ({
                   form="saving-contribution-form"
                   disabled={!amount || !date || !name.trim() || isSubmitting}
                 >
+                  <Loader2Icon
+                    className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
+                  />
                   拠出する
                 </Button>
               </DialogFooter>

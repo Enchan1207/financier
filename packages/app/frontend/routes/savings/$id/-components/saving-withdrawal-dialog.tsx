@@ -21,7 +21,9 @@ import {
 } from '@frontend/components/ui/input-group'
 import { formatCurrency } from '@frontend/lib/format'
 import { useForm } from '@tanstack/react-form'
+import { Loader2Icon } from 'lucide-react'
 import type React from 'react'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 type Props = {
@@ -29,7 +31,7 @@ type Props = {
   onOpenChange: (open: boolean) => void
   /** 現在の積立残高（上限として使用） */
   balance: number
-  onWithdraw: (amount: number, memo: string) => void
+  onWithdraw: (amount: number, memo: string) => Promise<void>
 }
 
 export const SavingWithdrawalDialog: React.FC<Props> = ({
@@ -58,10 +60,14 @@ export const SavingWithdrawalDialog: React.FC<Props> = ({
     validators: {
       onSubmit: formSchema,
     },
-    onSubmit: ({ value, formApi }) => {
-      onWithdraw(parseInt(value.amount, 10), value.memo)
-      formApi.reset()
-      onOpenChange(false)
+    onSubmit: async ({ value, formApi }) => {
+      try {
+        await onWithdraw(parseInt(value.amount, 10), value.memo)
+        formApi.reset()
+        onOpenChange(false)
+      } catch {
+        toast.error('取り崩しに失敗しました')
+      }
     },
   })
 
@@ -85,9 +91,9 @@ export const SavingWithdrawalDialog: React.FC<Props> = ({
             <>
               <form
                 id="saving-withdrawal-form"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault()
-                  void form.handleSubmit()
+                  await form.handleSubmit()
                 }}
               >
                 <FieldGroup>
@@ -170,6 +176,9 @@ export const SavingWithdrawalDialog: React.FC<Props> = ({
                   form="saving-withdrawal-form"
                   disabled={!amount || isSubmitting}
                 >
+                  <Loader2Icon
+                    className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
+                  />
                   取り崩す
                 </Button>
               </DialogFooter>

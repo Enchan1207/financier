@@ -274,8 +274,13 @@ const SavingDetailPage: React.FC = () => {
     .reduce((sum, tx) => sum + tx.amount, 0)
 
   // 拠出実行（UC-4.2）
-  const handleContribute = (amount: number, date: string, name: string) => {
+  const handleContribute = async (
+    amount: number,
+    date: string,
+    name: string,
+  ) => {
     // モック：実際にはAPIを呼び出して支出トランザクションを作成する
+    await new Promise((resolve) => setTimeout(resolve, 1000))
     const newTx: Transaction = {
       id: `tx-mock-${dayjs().valueOf()}`,
       type: 'expense',
@@ -293,12 +298,12 @@ const SavingDetailPage: React.FC = () => {
     setSaving((prev) =>
       prev ? { ...prev, balance: prev.balance + amount } : prev,
     )
-    setContributionOpen(false)
   }
 
   // 取り崩し実行（UC-4.4）
-  const handleWithdraw = (amount: number, memo: string) => {
+  const handleWithdraw = async (amount: number, memo: string) => {
     // モック：実際にはAPIを呼び出して SavingWithdrawal を作成する
+    await new Promise((resolve) => setTimeout(resolve, 1000))
     const newWithdrawal: SavingWithdrawal = {
       id: `wdl-${dayjs().valueOf()}`,
       savingDefinitionId: id,
@@ -311,7 +316,6 @@ const SavingDetailPage: React.FC = () => {
     setSaving((prev) =>
       prev ? { ...prev, balance: prev.balance - amount } : prev,
     )
-    setWithdrawalOpen(false)
   }
 
   // 積立設定の編集（目標額・期限の変更）
