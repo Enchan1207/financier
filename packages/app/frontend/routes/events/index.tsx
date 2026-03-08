@@ -53,8 +53,12 @@ const EventsPage: React.FC = () => {
   const upcoming = events.filter((ev) => ev.occurredOn >= TODAY)
   const past = events.filter((ev) => ev.occurredOn < TODAY)
 
-  const handleCreate = (name: string, occurredOn: string) => {
+  const handleCreate = async (
+    name: string,
+    occurredOn: string,
+  ): Promise<void> => {
     // モック：実際にはAPIを呼び出してイベントを作成する（UC-5.1）
+    await new Promise((resolve) => setTimeout(resolve, 1000))
     const created: EventSummary = {
       id: `ev-${dayjs().valueOf()}`,
       name,

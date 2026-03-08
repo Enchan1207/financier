@@ -258,7 +258,9 @@ const EventDetailPage: React.FC = () => {
               onOpenChange={setEditOpen}
               defaultName={currentName}
               defaultDate={event.occurredOn}
-              onSave={(name) => {
+              onSave={async (name) => {
+                // モック：実際にはAPIを呼び出してイベントを更新する（UC-5.6）
+                await new Promise((resolve) => setTimeout(resolve, 1000))
                 setCurrentName(name)
               }}
             />

@@ -22,8 +22,9 @@ import {
 } from '@frontend/components/ui/popover'
 import dayjs from '@frontend/lib/date'
 import { useForm } from '@tanstack/react-form'
-import { CalendarIcon, PlusIcon } from 'lucide-react'
+import { CalendarIcon, Loader2Icon, PlusIcon } from 'lucide-react'
 import type React from 'react'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 const formSchema = z.object({
@@ -34,7 +35,7 @@ const formSchema = z.object({
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreate: (name: string, occurredOn: string) => void
+  onCreate: (name: string, occurredOn: string) => Promise<void>
 }
 
 export const EventCreateDialog: React.FC<Props> = ({
@@ -45,15 +46,19 @@ export const EventCreateDialog: React.FC<Props> = ({
   const form = useForm({
     defaultValues: {
       name: '',
-      occurredOn: '',
+      occurredOn: dayjs().format('YYYY-MM-DD'),
     },
     validators: {
       onSubmit: formSchema,
     },
-    onSubmit: ({ value, formApi }) => {
-      onCreate(value.name.trim(), value.occurredOn)
-      formApi.reset()
-      onOpenChange(false)
+    onSubmit: async ({ value, formApi }) => {
+      try {
+        await onCreate(value.name.trim(), value.occurredOn)
+        formApi.reset()
+        onOpenChange(false)
+      } catch {
+        toast.error('イベントの作成に失敗しました')
+      }
     },
   })
 
@@ -75,111 +80,133 @@ export const EventCreateDialog: React.FC<Props> = ({
           <DialogTitle>イベントを新規作成</DialogTitle>
         </DialogHeader>
 
-        <form
-          id="event-create-form"
-          onSubmit={async (e) => {
-            e.preventDefault()
-            await form.handleSubmit()
-          }}
-        >
-          <FieldGroup>
-            <form.Field
-              name="name"
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid
+        <form.Subscribe
+          selector={(state) =>
+            [
+              state.values.name,
+              state.values.occurredOn,
+              state.isSubmitting,
+            ] as const
+          }
+          children={([name, occurredOn, isSubmitting]) => (
+            <>
+              <form
+                id="event-create-form"
+                onSubmit={async (e) => {
+                  e.preventDefault()
+                  await form.handleSubmit()
+                }}
+              >
+                <FieldGroup>
+                  <form.Field
+                    name="name"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid
 
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>名前</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => {
-                        field.handleChange(e.target.value)
-                      }}
-                      aria-invalid={isInvalid}
-                    />
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>
+                            イベント名
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => {
+                              field.handleChange(e.target.value)
+                            }}
+                            aria-invalid={isInvalid}
+                            disabled={isSubmitting}
+                          />
 
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                )
-              }}
-            />
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      )
+                    }}
+                  />
 
-            <form.Field
-              name="occurredOn"
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid
-                const selectedDate = field.state.value
-                  ? dayjs(field.state.value).toDate()
-                  : undefined
+                  <form.Field
+                    name="occurredOn"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid
+                      const selectedDate = field.state.value
+                        ? dayjs(field.state.value).toDate()
+                        : undefined
 
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>日時</FieldLabel>
-                    <Popover
-                      onOpenChange={(open) => {
-                        if (!open) field.handleBlur()
-                      }}
-                    >
-                      <PopoverTrigger asChild>
-                        <Button
-                          id={field.name}
-                          variant="outline"
-                          aria-invalid={isInvalid}
-                          className={
-                            selectedDate
-                              ? 'w-full justify-start text-left font-normal'
-                              : 'w-full justify-start text-left font-normal text-muted-foreground'
-                          }
-                        >
-                          <CalendarIcon />
-                          {selectedDate
-                            ? dayjs(selectedDate).format('YYYY/MM/DD')
-                            : '日付を選択'}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={(date) => {
-                            field.handleChange(
-                              date ? dayjs(date).format('YYYY-MM-DD') : '',
-                            )
-                          }}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>発生日</FieldLabel>
+                          <Popover
+                            onOpenChange={(open) => {
+                              if (!open) field.handleBlur()
+                            }}
+                          >
+                            <PopoverTrigger asChild>
+                              <Button
+                                id={field.name}
+                                variant="outline"
+                                aria-invalid={isInvalid}
+                                disabled={isSubmitting}
+                                className={
+                                  selectedDate
+                                    ? 'w-full justify-start text-left font-normal'
+                                    : 'w-full justify-start text-left font-normal text-muted-foreground'
+                                }
+                              >
+                                <CalendarIcon />
+                                {selectedDate
+                                  ? dayjs(selectedDate).format('YYYY/MM/DD')
+                                  : '日付を選択'}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
+                              <Calendar
+                                mode="single"
+                                selected={selectedDate}
+                                onSelect={(date) => {
+                                  field.handleChange(
+                                    date
+                                      ? dayjs(date).format('YYYY-MM-DD')
+                                      : '',
+                                  )
+                                }}
+                              />
+                            </PopoverContent>
+                          </Popover>
 
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                )
-              }}
-            />
-          </FieldGroup>
-        </form>
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      )
+                    }}
+                  />
+                </FieldGroup>
+              </form>
 
-        <DialogFooter>
-          <form.Subscribe
-            selector={(state) =>
-              [state.values.name, state.values.occurredOn] as const
-            }
-            children={() => (
-              <Button type="submit" form="event-create-form">
-                作成
-              </Button>
-            )}
-          />
-        </DialogFooter>
+              <DialogFooter>
+                <Button
+                  type="submit"
+                  form="event-create-form"
+                  disabled={!name.trim() || !occurredOn || isSubmitting}
+                >
+                  <Loader2Icon
+                    className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
+                  />
+                  作成
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        />
       </DialogContent>
     </Dialog>
   )
