@@ -1,73 +1,78 @@
 import { Button } from '@frontend/components/ui/button'
+import { Field, FieldError, FieldLabel } from '@frontend/components/ui/field'
 import { Input } from '@frontend/components/ui/input'
-import { Label } from '@frontend/components/ui/label'
 import { Separator } from '@frontend/components/ui/separator'
 import { PlusIcon } from 'lucide-react'
 
-import type { FormItem } from './template-form-item'
 import { TemplateFormItem } from './template-form-item'
+import type { useTemplateForm } from './use-template-form'
+import { newFormItemValues } from './use-template-form'
 
 type Props = {
-  templateName: string
-  onTemplateNameChange: (name: string) => void
-  items: FormItem[]
-  onAddItem: () => void
-  onRemoveItem: (uid: string) => void
-  onUpdateItem: (uid: string, patch: Partial<Omit<FormItem, 'uid'>>) => void
-  namePlaceholder?: string
+  form: ReturnType<typeof useTemplateForm>
 }
 
-export const TemplateFormFields: React.FC<Props> = ({
-  templateName,
-  onTemplateNameChange,
-  items,
-  onAddItem,
-  onRemoveItem,
-  onUpdateItem,
-  namePlaceholder,
-}) => {
-  return (
-    <>
-      <div className="space-y-1.5">
-        <Label htmlFor="tmpl-name">テンプレート名 *</Label>
-        <Input
-          id="tmpl-name"
-          value={templateName}
-          onChange={(e) => {
-            onTemplateNameChange(e.target.value)
-          }}
-          placeholder={namePlaceholder}
-        />
-      </div>
+export const TemplateFormFields: React.FC<Props> = ({ form }) => (
+  <>
+    <form.Field
+      name="templateName"
+      children={(field) => {
+        const isInvalid =
+          field.state.meta.isTouched && !field.state.meta.isValid
+        return (
+          <Field data-invalid={isInvalid}>
+            <FieldLabel htmlFor={field.name}>テンプレート名</FieldLabel>
+            <Input
+              id={field.name}
+              name={field.name}
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(e) => {
+                field.handleChange(e.target.value)
+              }}
+              aria-invalid={isInvalid}
+            />
+            {isInvalid && <FieldError errors={field.state.meta.errors} />}
+          </Field>
+        )
+      }}
+    />
 
-      <Separator />
+    <Separator />
 
-      <div className="space-y-3">
-        <h2 className="text-sm font-medium">取引定義</h2>
-        {items.map((item, idx) => (
-          <TemplateFormItem
-            key={item.uid}
-            item={item}
-            index={idx}
-            canRemove={items.length > 1}
-            onRemove={() => {
-              onRemoveItem(item.uid)
-            }}
-            onUpdate={(patch) => {
-              onUpdateItem(item.uid, patch)
-            }}
-          />
-        ))}
-        <Button
-          variant="outline"
-          className="rounded-full"
-          size="sm"
-          onClick={onAddItem}
-        >
-          <PlusIcon />
-          追加
-        </Button>
-      </div>
-    </>
-  )
-}
+    <div className="space-y-3">
+      <h2 className="text-sm font-medium">取引定義</h2>
+      <form.Field
+        name="items"
+        mode="array"
+        children={(field) => (
+          <>
+            {field.state.value.map((_, index) => (
+              <TemplateFormItem
+                key={index}
+                form={form}
+                index={index}
+                canRemove={field.state.value.length > 1}
+                onRemove={() => {
+                  field.removeValue(index)
+                }}
+              />
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full"
+              size="sm"
+              onClick={() => {
+                field.pushValue(newFormItemValues())
+              }}
+            >
+              <PlusIcon />
+              追加
+            </Button>
+          </>
+        )}
+      />
+    </div>
+  </>
+)

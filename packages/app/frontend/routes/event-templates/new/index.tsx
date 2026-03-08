@@ -1,26 +1,17 @@
 import { Button } from '@frontend/components/ui/button'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeftIcon } from 'lucide-react'
+import { ArrowLeftIcon, Loader2Icon } from 'lucide-react'
 
 import { TemplateFormFields } from '../-components/template-form-fields'
 import { useTemplateForm } from '../-components/use-template-form'
 
 const EventTemplateNewPage: React.FC = () => {
   const navigate = useNavigate()
-  const {
-    templateName,
-    setTemplateName,
-    items,
-    addItem,
-    removeItem,
-    updateItem,
-    isValid,
-  } = useTemplateForm()
-
-  const handleSave = () => {
+  const form = useTemplateForm({}, async () => {
     // モック：実際にはAPIを呼び出してテンプレートを作成する
+    await new Promise((resolve) => setTimeout(resolve, 1000))
     void navigate({ to: '/event-templates' })
-  }
+  })
 
   return (
     <div className="space-y-6">
@@ -34,26 +25,32 @@ const EventTemplateNewPage: React.FC = () => {
         <h1 className="text-2xl font-bold">テンプレート新規作成</h1>
       </div>
 
-      <div className="space-y-6 max-w-2xl lg:max-w-full">
-        <TemplateFormFields
-          templateName={templateName}
-          onTemplateNameChange={setTemplateName}
-          items={items}
-          onAddItem={addItem}
-          onRemoveItem={removeItem}
-          onUpdateItem={updateItem}
-          namePlaceholder="例：ライブ遠征セット"
-        />
+      <form
+        className="space-y-6 max-w-2xl lg:max-w-full"
+        onSubmit={async (e) => {
+          e.preventDefault()
+          await form.handleSubmit()
+        }}
+      >
+        <TemplateFormFields form={form} />
 
-        <div className="flex gap-2">
-          <Button onClick={handleSave} disabled={!isValid}>
-            テンプレートを保存
-          </Button>
-          <Button asChild variant="ghost">
-            <Link to="/event-templates">キャンセル</Link>
-          </Button>
-        </div>
-      </div>
+        <form.Subscribe
+          selector={(state) => state.isSubmitting}
+          children={(isSubmitting) => (
+            <div className="flex gap-2">
+              <Button type="submit" disabled={isSubmitting}>
+                <Loader2Icon
+                  className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
+                />
+                テンプレートを保存
+              </Button>
+              <Button asChild variant="ghost">
+                <Link to="/event-templates">キャンセル</Link>
+              </Button>
+            </div>
+          )}
+        />
+      </form>
     </div>
   )
 }

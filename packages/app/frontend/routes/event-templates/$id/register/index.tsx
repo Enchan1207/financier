@@ -1,6 +1,12 @@
 import { Button } from '@frontend/components/ui/button'
+import { Calendar } from '@frontend/components/ui/calendar'
+import { Field, FieldLabel } from '@frontend/components/ui/field'
 import { Input } from '@frontend/components/ui/input'
-import { Label } from '@frontend/components/ui/label'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@frontend/components/ui/popover'
 import {
   Table,
   TableBody,
@@ -9,8 +15,9 @@ import {
   TableHeader,
   TableRow,
 } from '@frontend/components/ui/table'
+import dayjs from '@frontend/lib/date'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeftIcon } from 'lucide-react'
+import { ArrowLeftIcon, CalendarIcon, Loader2Icon } from 'lucide-react'
 import { useState } from 'react'
 
 import { TEMPLATE_DETAILS } from '../../-components/template-data'
@@ -30,6 +37,7 @@ const EventTemplateRegisterPage: React.FC = () => {
         )
       : {},
   )
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   if (!template) {
     return (
@@ -51,10 +59,18 @@ const EventTemplateRegisterPage: React.FC = () => {
     return sum + signed
   }, 0)
 
-  const handleSave = () => {
-    // モック：実際にはAPIを呼び出してトランザクションを一括作成する
-    void navigate({ to: '/event-templates/$id', params: { id } })
+  const handleSave = async () => {
+    setIsSubmitting(true)
+    try {
+      // モック：実際にはAPIを呼び出してトランザクションを一括作成する
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      void navigate({ to: '/event-templates/$id', params: { id } })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
+
+  const selectedDate = date ? dayjs(date).toDate() : undefined
 
   return (
     <div className="space-y-6">
@@ -69,17 +85,38 @@ const EventTemplateRegisterPage: React.FC = () => {
       </div>
 
       <div className="max-w-2xl lg:max-w-full space-y-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="bulk-date">取引日（全件共通）*</Label>
-          <Input
-            id="bulk-date"
-            type="date"
-            value={date}
-            onChange={(e) => {
-              setDate(e.target.value)
-            }}
-          />
-        </div>
+        <Field>
+          <FieldLabel htmlFor="bulk-date">取引日（全件共通）</FieldLabel>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                id="bulk-date"
+                type="button"
+                variant="outline"
+                className={
+                  selectedDate
+                    ? 'w-full justify-start text-left font-normal'
+                    : 'w-full justify-start text-left font-normal text-muted-foreground'
+                }
+              >
+                <CalendarIcon />
+                {selectedDate
+                  ? dayjs(selectedDate).format('YYYY/MM/DD')
+                  : '日付を選択'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(d) => {
+                  setDate(d ? dayjs(d).format('YYYY-MM-DD') : '')
+                }}
+              />
+            </PopoverContent>
+          </Popover>
+        </Field>
+
         <Table>
           <TableHeader>
             <TableRow>
@@ -128,7 +165,15 @@ const EventTemplateRegisterPage: React.FC = () => {
           {formatCurrency(total)}
         </p>
         <div className="flex gap-2">
-          <Button onClick={handleSave} disabled={!date}>
+          <Button
+            onClick={() => {
+              void handleSave()
+            }}
+            disabled={!date || isSubmitting}
+          >
+            <Loader2Icon
+              className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
+            />
             一括保存
           </Button>
           <Button asChild variant="ghost">

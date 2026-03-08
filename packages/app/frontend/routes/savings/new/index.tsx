@@ -103,7 +103,6 @@ const SavingNewPage: React.FC = () => {
                     onChange={(e) => {
                       field.handleChange(e.target.value)
                     }}
-                    placeholder="例：旅行積立"
                     aria-invalid={isInvalid}
                   />
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
@@ -189,7 +188,6 @@ const SavingNewPage: React.FC = () => {
                                 onChange={(e) => {
                                   field.handleChange(e.target.value)
                                 }}
-                                placeholder="100000"
                                 aria-invalid={isInvalid}
                               />
                             </InputGroup>

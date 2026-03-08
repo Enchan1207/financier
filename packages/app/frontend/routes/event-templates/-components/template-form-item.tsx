@@ -5,8 +5,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@frontend/components/ui/card'
+import { Field, FieldError, FieldLabel } from '@frontend/components/ui/field'
 import { Input } from '@frontend/components/ui/input'
-import { Label } from '@frontend/components/ui/label'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from '@frontend/components/ui/input-group'
 import {
   Select,
   SelectContent,
@@ -14,8 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@frontend/components/ui/select'
-import dayjs from '@frontend/lib/date'
 import { Trash2Icon } from 'lucide-react'
+
+import type { useTemplateForm } from './use-template-form'
 
 // 選択可能カテゴリ：isSaving=false のアクティブカテゴリのみ（UC-5.4）
 export const SELECTABLE_CATEGORIES = [
@@ -28,36 +35,18 @@ export const SELECTABLE_CATEGORIES = [
   { id: 'cat-7', name: '美容' },
 ]
 
-export type FormItem = {
-  uid: string
-  categoryId: string
-  name: string
-  amount: string
-  type: 'income' | 'expense'
-}
-
-export const newFormItem = (): FormItem => ({
-  uid: `item-${dayjs().valueOf()}-${Math.random()}`,
-  categoryId: '',
-  name: '',
-  amount: '',
-  type: 'expense',
-})
-
 type Props = {
-  item: FormItem
+  form: ReturnType<typeof useTemplateForm>
   index: number
   canRemove: boolean
   onRemove: () => void
-  onUpdate: (patch: Partial<Omit<FormItem, 'uid'>>) => void
 }
 
 export const TemplateFormItem: React.FC<Props> = ({
-  item,
+  form,
   index,
   canRemove,
   onRemove,
-  onUpdate,
 }) => (
   <Card>
     <CardHeader className="pb-2 pt-3 px-4">
@@ -73,67 +62,118 @@ export const TemplateFormItem: React.FC<Props> = ({
       </div>
     </CardHeader>
     <CardContent className="px-4 pb-4 space-y-3">
-      <div className="space-y-1.5">
-        <Label htmlFor={`type-${item.uid}`}>種別 *</Label>
-        <Select
-          value={item.type}
-          onValueChange={(v: 'income' | 'expense') => {
-            onUpdate({ type: v })
-          }}
-        >
-          <SelectTrigger id={`type-${item.uid}`} className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="income">収入</SelectItem>
-            <SelectItem value="expense">支出</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor={`cat-${item.uid}`}>カテゴリ *</Label>
-        <Select
-          value={item.categoryId}
-          onValueChange={(v) => {
-            onUpdate({ categoryId: v })
-          }}
-        >
-          <SelectTrigger id={`cat-${item.uid}`} className="w-full">
-            <SelectValue placeholder="カテゴリを選択" />
-          </SelectTrigger>
-          <SelectContent>
-            {SELECTABLE_CATEGORIES.map((cat) => (
-              <SelectItem key={cat.id} value={cat.id}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor={`name-${item.uid}`}>内容名 *</Label>
-        <Input
-          id={`name-${item.uid}`}
-          value={item.name}
-          onChange={(e) => {
-            onUpdate({ name: e.target.value })
-          }}
-          placeholder="例：新幹線代"
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor={`amount-${item.uid}`}>デフォルト金額（円）*</Label>
-        <Input
-          id={`amount-${item.uid}`}
-          type="number"
-          min={1}
-          value={item.amount}
-          onChange={(e) => {
-            onUpdate({ amount: e.target.value })
-          }}
-          placeholder="例：8000"
-        />
-      </div>
+      <form.Field
+        name={`items[${index}].type`}
+        children={(field) => (
+          <Field>
+            <FieldLabel htmlFor={`type-${index}`}>種別</FieldLabel>
+            <Select
+              value={field.state.value}
+              onValueChange={(v: 'income' | 'expense') => {
+                field.handleChange(v)
+              }}
+            >
+              <SelectTrigger id={`type-${index}`} className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="income">収入</SelectItem>
+                <SelectItem value="expense">支出</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+        )}
+      />
+
+      <form.Field
+        name={`items[${index}].categoryId`}
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor={`cat-${index}`}>カテゴリ</FieldLabel>
+              <Select
+                value={field.state.value}
+                onValueChange={(v) => {
+                  field.handleChange(v)
+                }}
+              >
+                <SelectTrigger
+                  id={`cat-${index}`}
+                  className="w-full"
+                  aria-invalid={isInvalid}
+                >
+                  <SelectValue placeholder="カテゴリを選択" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SELECTABLE_CATEGORIES.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          )
+        }}
+      />
+
+      <form.Field
+        name={`items[${index}].name`}
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor={`name-${index}`}>内容名</FieldLabel>
+              <Input
+                id={`name-${index}`}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => {
+                  field.handleChange(e.target.value)
+                }}
+                aria-invalid={isInvalid}
+              />
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          )
+        }}
+      />
+
+      <form.Field
+        name={`items[${index}].amount`}
+        children={(field) => {
+          const isInvalid =
+            field.state.meta.isTouched && !field.state.meta.isValid
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor={`amount-${index}`}>
+                デフォルト金額
+              </FieldLabel>
+              <InputGroup>
+                <InputGroupAddon>
+                  <InputGroupText>¥</InputGroupText>
+                </InputGroupAddon>
+                <InputGroupInput
+                  id={`amount-${index}`}
+                  type="number"
+                  min="1"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => {
+                    field.handleChange(e.target.value)
+                  }}
+                  aria-invalid={isInvalid}
+                />
+              </InputGroup>
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          )
+        }}
+      />
     </CardContent>
   </Card>
 )

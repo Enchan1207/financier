@@ -1,45 +1,51 @@
-import { useState } from 'react'
+import { useForm } from '@tanstack/react-form'
+import { z } from 'zod'
 
-import type { FormItem } from './template-form-item'
-import { newFormItem } from './template-form-item'
+const itemSchema = z.object({
+  categoryId: z.string().min(1, 'カテゴリを選択してください'),
+  name: z.string().min(1, '内容名を入力してください'),
+  amount: z
+    .string()
+    .refine((v) => parseInt(v, 10) > 0, '1以上の金額を入力してください'),
+  type: z.enum(['income', 'expense']),
+})
+
+export const templateFormSchema = z.object({
+  templateName: z.string().min(1, 'テンプレート名を入力してください'),
+  items: z.array(itemSchema).min(1, '取引を1件以上追加してください'),
+})
+
+export type FormItemValues = {
+  categoryId: string
+  name: string
+  amount: string
+  type: 'income' | 'expense'
+}
+
+export const newFormItemValues = (): FormItemValues => ({
+  categoryId: '',
+  name: '',
+  amount: '',
+  type: 'expense',
+})
 
 export const useTemplateForm = (
-  initialName = '',
-  initialItems?: FormItem[],
+  initialValues: { templateName?: string; items?: FormItemValues[] } = {},
+  onSubmit: (value: {
+    templateName: string
+    items: FormItemValues[]
+  }) => void | Promise<void> = () => {},
 ) => {
-  const [templateName, setTemplateName] = useState(initialName)
-  const [items, setItems] = useState<FormItem[]>(
-    initialItems ?? [newFormItem()],
-  )
-
-  const addItem = () => {
-    setItems((prev) => [...prev, newFormItem()])
-  }
-
-  const removeItem = (uid: string) => {
-    setItems((prev) => prev.filter((it) => it.uid !== uid))
-  }
-
-  const updateItem = (uid: string, patch: Partial<Omit<FormItem, 'uid'>>) => {
-    setItems((prev) =>
-      prev.map((it) => (it.uid === uid ? { ...it, ...patch } : it)),
-    )
-  }
-
-  const isValid =
-    templateName.trim().length > 0 &&
-    items.length > 0 &&
-    items.every(
-      (it) => it.categoryId && it.name.trim() && parseInt(it.amount, 10) > 0,
-    )
-
-  return {
-    templateName,
-    setTemplateName,
-    items,
-    addItem,
-    removeItem,
-    updateItem,
-    isValid,
-  }
+  return useForm({
+    defaultValues: {
+      templateName: initialValues.templateName ?? '',
+      items: initialValues.items ?? [newFormItemValues()],
+    },
+    validators: {
+      onSubmit: templateFormSchema,
+    },
+    onSubmit: async ({ value }) => {
+      await onSubmit(value)
+    },
+  })
 }

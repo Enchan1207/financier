@@ -340,7 +340,7 @@ const formSchema = z
 
 ---
 
-### 5. useTemplateForm 系の実装詳細
+### 5. useTemplateForm 系の実装詳細 ✅ 完了
 
 #### ファイル構成の変更
 
@@ -391,6 +391,13 @@ const formSchema = z.object({
   )}
 </form.Field>
 ```
+
+- `useTemplateForm` は `initialValues` と `onSubmit` を引数として受け取り、`useForm` の結果をそのまま返すラッパーに変更した
+- `FormItem` 型と `newFormItem` 関数を廃止し、`FormItemValues`（`uid` なし）と `newFormItemValues` を `use-template-form.ts` に移した
+- `TemplateFormFields` の Props を `form` オブジェクト受け取りに変更し、`form.Field name="items" mode="array"` で配列フィールドを展開した
+- `TemplateFormItem` の Props を `form` + `index` 受け取りに変更し、`form.Field name={`items[${index}].xxx`}` 形式でサブフィールドをバインドした
+- `uid` による識別を廃止し、配列インデックスで管理するようになった
+- 各ページでは `<form onSubmit>` 要素でラップし、`form.Subscribe` で `isSubmitting` を購読して送信ボタンを制御した
 
 ---
 

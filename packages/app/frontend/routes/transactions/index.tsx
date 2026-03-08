@@ -492,7 +492,6 @@ const AddTransactionDialog: React.FC = () => {
               <Input
                 id="dialog-amount"
                 type="number"
-                placeholder="0"
                 value={formAmount}
                 onChange={(e) => {
                   setFormAmount(e.target.value)

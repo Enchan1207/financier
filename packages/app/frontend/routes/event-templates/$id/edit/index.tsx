@@ -1,6 +1,6 @@
 import { Button } from '@frontend/components/ui/button'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeftIcon } from 'lucide-react'
+import { ArrowLeftIcon, Loader2Icon } from 'lucide-react'
 
 import { TEMPLATE_DETAILS } from '../../-components/template-data'
 import { TemplateFormFields } from '../../-components/template-form-fields'
@@ -11,23 +11,21 @@ const EventTemplateEditPage: React.FC = () => {
   const navigate = useNavigate()
   const original = TEMPLATE_DETAILS[id]
 
-  const {
-    templateName,
-    setTemplateName,
-    items,
-    addItem,
-    removeItem,
-    updateItem,
-    isValid,
-  } = useTemplateForm(
-    original?.name,
-    original?.items.map((it) => ({
-      uid: it.id,
-      categoryId: it.categoryId,
-      name: it.name,
-      amount: String(it.amount),
-      type: it.type,
-    })),
+  const form = useTemplateForm(
+    {
+      templateName: original?.name,
+      items: original?.items.map((it) => ({
+        categoryId: it.categoryId,
+        name: it.name,
+        amount: String(it.amount),
+        type: it.type,
+      })),
+    },
+    async () => {
+      // モック：実際にはAPIを呼び出してテンプレートを更新する
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      void navigate({ to: '/event-templates/$id', params: { id } })
+    },
   )
 
   if (!original) {
@@ -44,11 +42,6 @@ const EventTemplateEditPage: React.FC = () => {
     )
   }
 
-  const handleSave = () => {
-    // モック：実際にはAPIを呼び出してテンプレートを更新する
-    void navigate({ to: '/event-templates/$id', params: { id } })
-  }
-
   return (
     <div className="space-y-6">
       <div>
@@ -61,27 +54,34 @@ const EventTemplateEditPage: React.FC = () => {
         <h1 className="text-2xl font-bold">テンプレートを編集</h1>
       </div>
 
-      <div className="space-y-6 max-w-2xl lg:max-w-full">
-        <TemplateFormFields
-          templateName={templateName}
-          onTemplateNameChange={setTemplateName}
-          items={items}
-          onAddItem={addItem}
-          onRemoveItem={removeItem}
-          onUpdateItem={updateItem}
-        />
+      <form
+        className="space-y-6 max-w-2xl lg:max-w-full"
+        onSubmit={async (e) => {
+          e.preventDefault()
+          await form.handleSubmit()
+        }}
+      >
+        <TemplateFormFields form={form} />
 
-        <div className="flex gap-2">
-          <Button onClick={handleSave} disabled={!isValid}>
-            テンプレートを更新
-          </Button>
-          <Button asChild variant="ghost">
-            <Link to="/event-templates/$id" params={{ id }}>
-              キャンセル
-            </Link>
-          </Button>
-        </div>
-      </div>
+        <form.Subscribe
+          selector={(state) => state.isSubmitting}
+          children={(isSubmitting) => (
+            <div className="flex gap-2">
+              <Button type="submit" disabled={isSubmitting}>
+                <Loader2Icon
+                  className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
+                />
+                テンプレートを更新
+              </Button>
+              <Button asChild variant="ghost">
+                <Link to="/event-templates/$id" params={{ id }}>
+                  キャンセル
+                </Link>
+              </Button>
+            </div>
+          )}
+        />
+      </form>
     </div>
   )
 }
