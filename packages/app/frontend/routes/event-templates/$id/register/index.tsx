@@ -16,28 +16,49 @@ import {
   TableRow,
 } from '@frontend/components/ui/table'
 import dayjs from '@frontend/lib/date'
+import { useForm } from '@tanstack/react-form'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeftIcon, CalendarIcon, Loader2Icon } from 'lucide-react'
-import { useState } from 'react'
+import { z } from 'zod'
 
 import { TEMPLATE_DETAILS } from '../../-components/template-data'
 
 const formatCurrency = (amount: number) => `¥${amount.toLocaleString('ja-JP')}`
+
+const formSchema = z.object({
+  date: z.string().min(1, '取引日を入力してください'),
+  items: z.array(
+    z.object({
+      id: z.string(),
+      amount: z.string(),
+    }),
+  ),
+})
 
 const EventTemplateRegisterPage: React.FC = () => {
   const { id } = Route.useParams()
   const navigate = useNavigate()
   const template = TEMPLATE_DETAILS[id]
 
-  const [date, setDate] = useState('')
-  const [amounts, setAmounts] = useState<Record<string, string>>(
-    template
-      ? Object.fromEntries(
-          template.items.map((item) => [item.id, String(item.amount)]),
-        )
-      : {},
-  )
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const form = useForm({
+    defaultValues: {
+      date: dayjs().format('YYYY-MM-DD'),
+      items: template
+        ? template.items.map((item) => ({
+            id: item.id,
+            amount: String(item.amount),
+          }))
+        : [],
+    },
+    validators: {
+      onSubmit: formSchema,
+    },
+    onSubmit: async () => {
+      // モック：実際にはAPIを呼び出してトランザクションを一括作成する
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      void navigate({ to: '/event-templates/$id', params: { id } })
+    },
+  })
 
   if (!template) {
     return (
@@ -53,25 +74,6 @@ const EventTemplateRegisterPage: React.FC = () => {
     )
   }
 
-  const total = template.items.reduce((sum, item) => {
-    const v = parseInt(amounts[item.id] ?? '0', 10)
-    const signed = isNaN(v) ? 0 : item.type === 'income' ? v : -v
-    return sum + signed
-  }, 0)
-
-  const handleSave = async () => {
-    setIsSubmitting(true)
-    try {
-      // モック：実際にはAPIを呼び出してトランザクションを一括作成する
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      void navigate({ to: '/event-templates/$id', params: { id } })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const selectedDate = date ? dayjs(date).toDate() : undefined
-
   return (
     <div className="space-y-6">
       <div>
@@ -84,38 +86,60 @@ const EventTemplateRegisterPage: React.FC = () => {
         <h1 className="text-2xl font-bold">一括登録：{template.name}</h1>
       </div>
 
-      <div className="max-w-2xl lg:max-w-full space-y-4">
-        <Field>
-          <FieldLabel htmlFor="bulk-date">取引日（全件共通）</FieldLabel>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                id="bulk-date"
-                type="button"
-                variant="outline"
-                className={
-                  selectedDate
-                    ? 'w-full justify-start text-left font-normal'
-                    : 'w-full justify-start text-left font-normal text-muted-foreground'
-                }
-              >
-                <CalendarIcon />
-                {selectedDate
-                  ? dayjs(selectedDate).format('YYYY/MM/DD')
-                  : '日付を選択'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(d) => {
-                  setDate(d ? dayjs(d).format('YYYY-MM-DD') : '')
-                }}
-              />
-            </PopoverContent>
-          </Popover>
-        </Field>
+      <form
+        className="max-w-2xl lg:max-w-full space-y-4"
+        onSubmit={async (e) => {
+          e.preventDefault()
+          await form.handleSubmit()
+        }}
+      >
+        <form.Field
+          name="date"
+          children={(field) => {
+            const selectedDate = field.state.value
+              ? dayjs(field.state.value).toDate()
+              : undefined
+            return (
+              <Field>
+                <FieldLabel htmlFor="bulk-date">取引日（全件共通）</FieldLabel>
+                <Popover
+                  onOpenChange={(popoverOpen) => {
+                    if (!popoverOpen) field.handleBlur()
+                  }}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="bulk-date"
+                      type="button"
+                      variant="outline"
+                      className={
+                        selectedDate
+                          ? 'w-full justify-start text-left font-normal'
+                          : 'w-full justify-start text-left font-normal text-muted-foreground'
+                      }
+                    >
+                      <CalendarIcon />
+                      {selectedDate
+                        ? dayjs(selectedDate).format('YYYY/MM/DD')
+                        : '日付を選択'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(d) => {
+                        field.handleChange(
+                          d ? dayjs(d).format('YYYY-MM-DD') : '',
+                        )
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </Field>
+            )
+          }}
+        />
 
         <Table>
           <TableHeader>
@@ -129,7 +153,7 @@ const EventTemplateRegisterPage: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {template.items.map((item) => (
+            {template.items.map((item, index) => (
               <TableRow key={item.id}>
                 <TableCell className="py-2 text-xs">
                   {item.type === 'income' ? (
@@ -143,46 +167,61 @@ const EventTemplateRegisterPage: React.FC = () => {
                 </TableCell>
                 <TableCell className="py-2 text-xs">{item.name}</TableCell>
                 <TableCell className="py-2 text-right">
-                  <Input
-                    type="number"
-                    min={0}
-                    value={amounts[item.id] ?? ''}
-                    onChange={(e) => {
-                      setAmounts((prev) => ({
-                        ...prev,
-                        [item.id]: e.target.value,
-                      }))
-                    }}
-                    className="h-7 w-28 text-right text-xs"
+                  <form.Field
+                    name={`items[${index}].amount`}
+                    children={(field) => (
+                      <Input
+                        type="number"
+                        min={0}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => {
+                          field.handleChange(e.target.value)
+                        }}
+                        className="h-7 w-28 text-right text-xs"
+                      />
+                    )}
                   />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-        <p className="text-right text-sm font-bold">
-          収支合計：{total >= 0 ? '+' : ''}
-          {formatCurrency(total)}
-        </p>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => {
-              void handleSave()
-            }}
-            disabled={!date || isSubmitting}
-          >
-            <Loader2Icon
-              className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
-            />
-            一括保存
-          </Button>
-          <Button asChild variant="ghost">
-            <Link to="/event-templates/$id" params={{ id }}>
-              キャンセル
-            </Link>
-          </Button>
-        </div>
-      </div>
+
+        <form.Subscribe
+          selector={(state) =>
+            [state.values.date, state.values.items, state.isSubmitting] as const
+          }
+          children={([date, items, isSubmitting]) => {
+            const total = template.items.reduce((sum, item, index) => {
+              const v = parseInt(items[index]?.amount ?? '0', 10)
+              const signed = isNaN(v) ? 0 : item.type === 'income' ? v : -v
+              return sum + signed
+            }, 0)
+            return (
+              <>
+                <p className="text-right text-sm font-bold">
+                  収支合計：{total >= 0 ? '+' : ''}
+                  {formatCurrency(total)}
+                </p>
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={!date || isSubmitting}>
+                    <Loader2Icon
+                      className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
+                    />
+                    一括保存
+                  </Button>
+                  <Button asChild variant="ghost">
+                    <Link to="/event-templates/$id" params={{ id }}>
+                      キャンセル
+                    </Link>
+                  </Button>
+                </div>
+              </>
+            )
+          }}
+        />
+      </form>
     </div>
   )
 }
