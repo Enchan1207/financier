@@ -7,11 +7,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@frontend/components/ui/dialog'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@frontend/components/ui/field'
 import { Input } from '@frontend/components/ui/input'
-import { Label } from '@frontend/components/ui/label'
+import { useForm } from '@tanstack/react-form'
 import { PlusIcon } from 'lucide-react'
 import type React from 'react'
-import { useState } from 'react'
+import { z } from 'zod'
+
+const formSchema = z.object({
+  name: z.string().min(1, 'イベント名を入力してください'),
+  occurredOn: z.string().min(1, '発生日を入力してください'),
+})
 
 type Props = {
   open: boolean
@@ -24,19 +35,28 @@ export const EventCreateDialog: React.FC<Props> = ({
   onOpenChange,
   onCreate,
 }) => {
-  const [formName, setFormName] = useState('')
-  const [formDate, setFormDate] = useState('')
+  const form = useForm({
+    defaultValues: {
+      name: '',
+      occurredOn: '',
+    },
+    validators: {
+      onSubmit: formSchema,
+    },
+    onSubmit: ({ value, formApi }) => {
+      onCreate(value.name.trim(), value.occurredOn)
+      formApi.reset()
+      onOpenChange(false)
+    },
+  })
 
-  const handleSubmit = () => {
-    if (!formName.trim() || !formDate) return
-    onCreate(formName.trim(), formDate)
-    setFormName('')
-    setFormDate('')
-    onOpenChange(false)
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) form.reset()
+    onOpenChange(nextOpen)
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm">
           <PlusIcon />
@@ -47,37 +67,85 @@ export const EventCreateDialog: React.FC<Props> = ({
         <DialogHeader>
           <DialogTitle>イベントを新規作成</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="ev-name">イベント名 *</Label>
-            <Input
-              id="ev-name"
-              value={formName}
-              onChange={(e) => {
-                setFormName(e.target.value)
+
+        <form
+          id="event-create-form"
+          onSubmit={async (e) => {
+            e.preventDefault()
+            await form.handleSubmit()
+          }}
+        >
+          <FieldGroup>
+            <form.Field
+              name="name"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>イベント名</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => {
+                        field.handleChange(e.target.value)
+                      }}
+                      aria-invalid={isInvalid}
+                    />
+
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                )
               }}
-              placeholder="例：春ライブ遠征"
             />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="ev-date">発生日 *</Label>
-            <Input
-              id="ev-date"
-              type="date"
-              value={formDate}
-              onChange={(e) => {
-                setFormDate(e.target.value)
+
+            <form.Field
+              name="occurredOn"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>発生日</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="date"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => {
+                        field.handleChange(e.target.value)
+                      }}
+                      aria-invalid={isInvalid}
+                    />
+
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                )
               }}
             />
-          </div>
-        </div>
+          </FieldGroup>
+        </form>
+
         <DialogFooter>
-          <Button
-            onClick={handleSubmit}
-            disabled={!formName.trim() || !formDate}
-          >
-            作成
-          </Button>
+          <form.Subscribe
+            selector={(state) =>
+              [state.values.name, state.values.occurredOn] as const
+            }
+            children={() => (
+              <Button type="submit" form="event-create-form">
+                作成
+              </Button>
+            )}
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>
