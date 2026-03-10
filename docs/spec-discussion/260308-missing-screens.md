@@ -17,7 +17,7 @@
 | 年度予算作成 | UC-3.1 | ✅ 実装済み | 高 |
 | カテゴリ予算の設定・変更 | UC-3.2 | ❌ 未実装 | 高 |
 | 予算の再配分 | UC-3.3 | ❌ 未実装 | 中 |
-| 年度締め | UC-6.1 | ❌ 未実装 | 中 |
+| 年度締め | UC-6.1 | ✅ 実装済み | 中 |
 | 分析・可視化 | UC-7.1〜7.7 | ❌ 未実装 | 低 |
 
 ---
@@ -190,35 +190,36 @@ routes/budget/
 
 ---
 
-## 4. 年度締め（UC-6.1）
+## 4. 年度締め（UC-6.1）✅ 実装済み
 
-### 現状
+### 実装内容
 
-年度締め機能に対応する画面・操作が一切ない。
+**UI:**
 
-### 必要な機能
+- `status === 'active'` のとき: ヘッダー右端に「編集」ボタン（既存）と「年度を締める」ボタン（`variant="destructive"`）を表示
+- 「年度を締める」クリック → `FiscalYearCloseDialog` を表示
+- `status === 'closed'` のとき: ボタン類を非表示にし「締め済み」バッジを表示
 
-- `/budget/$year` ページに「年度を締める」ボタンを追加
-- `AlertDialog` で「締めると編集・削除が不可になります」を明示してから実行
-- ダイアログ内に「次年度へ予算をコピーする」チェックボックスを設ける
-- モックでは締め後に年度の `status` を `closed` に変えてローカル状態を更新し、編集系ボタンを非表示にする
+**ダイアログ（`FiscalYearCloseDialog`）:**
 
-### 実装手順
+- 説明文と「次年度の予算設定をコピーする」チェックボックスを表示
+- 「締める」クリック中は `Loader2` スピナーを表示し、ボタン・チェックボックス・キャンセルをすべて無効化
+- ESC・背景クリックによる中断を処理中は防止（`onOpenChange` ガード）
+- `onConfirm` の型は `(copyBudget: boolean) => Promise<void>`
 
-1. `routes/budget/-components/fiscal-year-close-dialog.tsx` を新規作成
-   - `AlertDialog` をベースに確認メッセージを表示
-   - 「次年度へ予算をコピーする」チェックボックスを追加（モックでは表示のみ）
-2. `routes/budget/$year/index.tsx` を改修
-   - ページ上部に「年度を締める」ボタンを追加（`status=active` のときのみ表示）
-   - 締め後は `useState` で `status` を `closed` に更新し、編集・削除ボタンを非表示化
+**state 管理:**
 
-### ファイル構成
+- `status: 'active' | 'closed'` と `closeDialogOpen: boolean` を `BudgetYearPage` の `useState` で管理
+- モックの待機は `setTimeout(800ms)` で表現
+
+### ファイル構成（実装後）
 
 ```
 routes/budget/
-├── $year/index.tsx                       ← 改修（締めボタン追加）
-└── -components/
-    └── fiscal-year-close-dialog.tsx      ← 新規
+└── $year/
+    ├── index.tsx                             ← 改修
+    └── -components/
+        └── fiscal-year-close-dialog.tsx      ← 新規
 ```
 
 ---
