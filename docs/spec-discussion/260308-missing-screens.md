@@ -14,7 +14,7 @@
 |------|-------------|------|--------|
 | トランザクション編集・削除 | UC-1.3, UC-1.4 | ❌ 未実装 | 高 |
 | カテゴリ管理 | UC-2.1〜2.3 | ❌ 未実装 | 高 |
-| 年度予算作成 | UC-3.1 | ⚠️ 工事中 | 高 |
+| 年度予算作成 | UC-3.1 | ✅ 実装済み | 高 |
 | カテゴリ予算の設定・変更 | UC-3.2 | ❌ 未実装 | 高 |
 | 予算の再配分 | UC-3.3 | ❌ 未実装 | 中 |
 | 年度締め | UC-6.1 | ❌ 未実装 | 中 |
@@ -153,9 +153,7 @@ routes/categories/
 
 ### 実装手順
 
-1. `routes/budget/new/index.tsx` を実装（UC-3.1）
-   - モックのカテゴリ一覧をインラインで定義し、配列フィールドとして並べる
-   - 保存後は `/budget/$year` へ遷移（モックのため実際の保存は不要）
+1. ~~`routes/budget/new/index.tsx` を実装（UC-3.1）~~ → **実装済み**
 2. `routes/budget/-components/budget-input-dialog.tsx` を新規作成（UC-3.2）
    - タブ切り替えで「月額固定」と「月ごと変動」を提供
    - 変動タブでは 12 か月分の入力フィールドを並べ、合算を `form.Subscribe` でリアルタイム表示
@@ -166,14 +164,34 @@ routes/categories/
    - ページ上部に「再配分」ボタン追加（→ `reallocation-dialog.tsx`）
    - 収支バランス警告バナーをページ上部に追加
 
-### ファイル構成
+### 実装済み内容（UC-3.1）
+
+Container-Presentation パターンで分割して実装した。
+
+```
+routes/budget/new/
+├── index.tsx                              ← 薄いコンテナ
+└── -components/
+    ├── use-budget-new-form.ts             ← フォームフック・スキーマ・モックデータ
+    └── budget-new-form/
+        ├── index.tsx                      ← BudgetNewFormFields（年度フィールド + 合成）
+        ├── budget-entries-section.tsx     ← AddCategorySelect + BudgetEntriesSection
+        └── budget-summary.tsx            ← BudgetSummary
+```
+
+**設計上の決定事項**:
+
+- カテゴリ一覧は空スタートとし、`Select` から自由に追加・削除できる（全カテゴリに一括表示しない）
+- 収入・支出セクションはタブではなく縦並びで表示し、ひと目で両方の合計が把握できるようにした
+- 各セクションの末尾に合計行（`TableFooter`）を表示
+- ページ末尾の収支サマリに積み上げ横棒グラフを表示。`BudgetSummaryBar` を `$year/` ページと共通化し、収支逆転時は「不足分」を収入バーへ、余剰時は「未割り当て」を支出バーへ追加して両バーの軸スケールを揃える
+
+### 残りのファイル構成（UC-3.2〜3.3）
 
 ```
 routes/budget/
-├── new/index.tsx                         ← 工事中 → 実装
 ├── $year/index.tsx                       ← 改修（編集・再配分ボタン追加）
 └── -components/
-    ├── budget-table.tsx                  ← 既存（改修して編集ボタンを追加）
     ├── budget-input-dialog.tsx           ← 新規（UC-3.2）
     └── reallocation-dialog.tsx           ← 新規（UC-3.3）
 ```
