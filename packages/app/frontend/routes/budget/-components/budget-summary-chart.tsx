@@ -30,7 +30,10 @@ type SummaryBarProps = {
 
 const LABEL_MIN_WIDTH = 60
 
-const SummaryBar: React.FC<SummaryBarProps> = ({ sectionLabel, items }) => {
+export const BudgetSummaryBar: React.FC<SummaryBarProps> = ({
+  sectionLabel,
+  items,
+}) => {
   const total = items.reduce((sum, item) => sum + item.amount, 0)
 
   const data = [
@@ -136,8 +139,8 @@ export const BudgetSummaryChart: React.FC<Props> = ({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <SummaryBar sectionLabel="収入" items={incomeItems} />
-        <SummaryBar sectionLabel="支出" items={expenseItems} />
+        <BudgetSummaryBar sectionLabel="収入" items={incomeItems} />
+        <BudgetSummaryBar sectionLabel="支出" items={expenseItems} />
       </CardContent>
     </Card>
   )

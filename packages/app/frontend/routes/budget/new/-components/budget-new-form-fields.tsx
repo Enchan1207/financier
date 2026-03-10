@@ -1,10 +1,4 @@
 import { Button } from '@frontend/components/ui/button'
-import type { ChartConfig } from '@frontend/components/ui/chart'
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@frontend/components/ui/chart'
 import {
   Field,
   FieldError,
@@ -37,8 +31,9 @@ import {
 } from '@frontend/components/ui/table'
 import { CopyIcon, Trash2Icon } from 'lucide-react'
 import { useState } from 'react'
-import { Bar, BarChart, XAxis, YAxis } from 'recharts'
 
+import type { SummaryBarItem } from '../../-components/budget-summary-chart'
+import { BudgetSummaryBar } from '../../-components/budget-summary-chart'
 import type {
   AvailableCategory,
   BudgetEntry,
@@ -215,7 +210,6 @@ const BudgetEntriesSection: React.FC<{
   </div>
 )
 
-// カテゴリ別積み上げ横棒グラフ
 const CHART_COLORS = [
   'var(--chart-1)',
   'var(--chart-2)',
@@ -223,74 +217,7 @@ const CHART_COLORS = [
   'var(--chart-4)',
   'var(--chart-5)',
 ]
-
-type SummaryBarChartItem = {
-  categoryId: string
-  categoryName: string
-  amount: number
-  color: string
-}
-
-const SummaryBarChart: React.FC<{
-  items: SummaryBarChartItem[]
-  label: string
-  total: number
-}> = ({ items, label, total }) => {
-  if (items.length === 0) return null
-
-  const data = [
-    Object.fromEntries(items.map((item) => [item.categoryId, item.amount])),
-  ]
-  const config: ChartConfig = Object.fromEntries(
-    items.map((item) => [
-      item.categoryId,
-      { label: item.categoryName, color: item.color },
-    ]),
-  )
-
-  return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-xs">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="tabular-nums font-medium">
-          ¥{total.toLocaleString('ja-JP')}
-        </span>
-      </div>
-      <ChartContainer config={config} className="h-8 aspect-auto">
-        <BarChart
-          layout="vertical"
-          data={data}
-          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-        >
-          <XAxis type="number" domain={[0, total]} hide />
-          <YAxis type="category" hide />
-          <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-          {items.map((item, idx) => {
-            const isFirst = idx === 0
-            const isLast = idx === items.length - 1
-            const radius: [number, number, number, number] =
-              isFirst && isLast
-                ? [4, 4, 4, 4]
-                : isFirst
-                  ? [4, 0, 0, 4]
-                  : isLast
-                    ? [0, 4, 4, 0]
-                    : [0, 0, 0, 0]
-            return (
-              <Bar
-                key={item.categoryId}
-                dataKey={item.categoryId}
-                stackId="stack"
-                fill={`var(--color-${item.categoryId})`}
-                radius={radius}
-              />
-            )
-          })}
-        </BarChart>
-      </ChartContainer>
-    </div>
-  )
-}
+const PADDING_COLOR = 'var(--border)'
 
 // 収支サマリ
 const BudgetSummary: React.FC<{ form: FormInstance }> = ({ form }) => (
@@ -300,9 +227,7 @@ const BudgetSummary: React.FC<{ form: FormInstance }> = ({ form }) => (
       expenseEntries: state.values.expenseEntries,
     })}
     children={({ incomeEntries, expenseEntries }) => {
-      const toChartItems = (
-        entries: typeof incomeEntries,
-      ): SummaryBarChartItem[] =>
+      const toBarItems = (entries: typeof incomeEntries): SummaryBarItem[] =>
         entries
           .filter((e) => parseInt(e.annualBudget, 10) > 0)
           .map((e, i) => ({
@@ -312,29 +237,53 @@ const BudgetSummary: React.FC<{ form: FormInstance }> = ({ form }) => (
             color: CHART_COLORS[i % CHART_COLORS.length] ?? 'var(--chart-1)',
           }))
 
-      const incomeItems = toChartItems(incomeEntries)
-      const expenseItems = toChartItems(expenseEntries)
-      const incomeTotal = incomeItems.reduce((sum, e) => sum + e.amount, 0)
-      const expenseTotal = expenseItems.reduce((sum, e) => sum + e.amount, 0)
+      const baseIncomeItems = toBarItems(incomeEntries)
+      const baseExpenseItems = toBarItems(expenseEntries)
+      const incomeTotal = baseIncomeItems.reduce((sum, e) => sum + e.amount, 0)
+      const expenseTotal = baseExpenseItems.reduce(
+        (sum, e) => sum + e.amount,
+        0,
+      )
       const balance = incomeTotal - expenseTotal
       const isDeficit = balance < 0
+
+      // 収支が一致するようパディングを追加して両バーの軸を揃える
+      const incomeItems: SummaryBarItem[] = isDeficit
+        ? [
+            ...baseIncomeItems,
+            {
+              categoryId: 'shortfall',
+              categoryName: '不足分',
+              amount: -balance,
+              color: PADDING_COLOR,
+              labelColor: 'var(--muted-foreground)',
+            },
+          ]
+        : baseIncomeItems
+      const expenseItems: SummaryBarItem[] =
+        !isDeficit && balance > 0
+          ? [
+              ...baseExpenseItems,
+              {
+                categoryId: 'unallocated',
+                categoryName: '未割り当て',
+                amount: balance,
+                color: PADDING_COLOR,
+                labelColor: 'var(--muted-foreground)',
+              },
+            ]
+          : baseExpenseItems
+
+      const hasData = baseIncomeItems.length > 0 || baseExpenseItems.length > 0
 
       return (
         <div className="rounded-lg border p-4 space-y-4">
           <h2 className="text-sm font-semibold">収支サマリ</h2>
 
-          {(incomeItems.length > 0 || expenseItems.length > 0) && (
+          {hasData && (
             <div className="space-y-3">
-              <SummaryBarChart
-                items={incomeItems}
-                label="収入"
-                total={incomeTotal}
-              />
-              <SummaryBarChart
-                items={expenseItems}
-                label="支出"
-                total={expenseTotal}
-              />
+              <BudgetSummaryBar sectionLabel="収入" items={incomeItems} />
+              <BudgetSummaryBar sectionLabel="支出" items={expenseItems} />
             </div>
           )}
 
