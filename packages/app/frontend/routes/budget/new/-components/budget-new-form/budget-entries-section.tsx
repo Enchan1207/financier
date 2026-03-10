@@ -1,11 +1,5 @@
 import { Button } from '@frontend/components/ui/button'
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from '@frontend/components/ui/field'
-import { Input } from '@frontend/components/ui/input'
+import { Field, FieldError } from '@frontend/components/ui/field'
 import {
   InputGroup,
   InputGroupAddon,
@@ -19,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@frontend/components/ui/select'
-import { Separator } from '@frontend/components/ui/separator'
 import {
   Table,
   TableBody,
@@ -29,23 +22,14 @@ import {
   TableHeader,
   TableRow,
 } from '@frontend/components/ui/table'
-import { CopyIcon, Trash2Icon } from 'lucide-react'
+import { Trash2Icon } from 'lucide-react'
 import { useState } from 'react'
 
-import type { SummaryBarItem } from '../../-components/budget-summary-chart'
-import { BudgetSummaryBar } from '../../-components/budget-summary-chart'
 import type {
   AvailableCategory,
   BudgetEntry,
-  useBudgetNewForm,
-} from './use-budget-new-form'
-import {
-  AVAILABLE_EXPENSE_CATEGORIES,
-  AVAILABLE_INCOME_CATEGORIES,
-  PREV_YEAR_ENTRIES,
-} from './use-budget-new-form'
-
-type FormInstance = ReturnType<typeof useBudgetNewForm>
+  FormInstance,
+} from '../use-budget-new-form'
 
 // カテゴリ追加セレクト（ローカル state を持つため独立コンポーネント化）
 const AddCategorySelect: React.FC<{
@@ -81,7 +65,7 @@ const AddCategorySelect: React.FC<{
 }
 
 // 収入 or 支出の予算入力セクション
-const BudgetEntriesSection: React.FC<{
+export const BudgetEntriesSection: React.FC<{
   form: FormInstance
   fieldName: 'incomeEntries' | 'expenseEntries'
   allCategories: AvailableCategory[]
@@ -208,179 +192,4 @@ const BudgetEntriesSection: React.FC<{
       }}
     />
   </div>
-)
-
-const CHART_COLORS = [
-  'var(--chart-1)',
-  'var(--chart-2)',
-  'var(--chart-3)',
-  'var(--chart-4)',
-  'var(--chart-5)',
-]
-const PADDING_COLOR = 'var(--border)'
-
-// 収支サマリ
-const BudgetSummary: React.FC<{ form: FormInstance }> = ({ form }) => (
-  <form.Subscribe
-    selector={(state) => ({
-      incomeEntries: state.values.incomeEntries,
-      expenseEntries: state.values.expenseEntries,
-    })}
-    children={({ incomeEntries, expenseEntries }) => {
-      const toBarItems = (entries: typeof incomeEntries): SummaryBarItem[] =>
-        entries
-          .filter((e) => parseInt(e.annualBudget, 10) > 0)
-          .map((e, i) => ({
-            categoryId: e.categoryId,
-            categoryName: e.categoryName,
-            amount: parseInt(e.annualBudget, 10),
-            color: CHART_COLORS[i % CHART_COLORS.length] ?? 'var(--chart-1)',
-          }))
-
-      const baseIncomeItems = toBarItems(incomeEntries)
-      const baseExpenseItems = toBarItems(expenseEntries)
-      const incomeTotal = baseIncomeItems.reduce((sum, e) => sum + e.amount, 0)
-      const expenseTotal = baseExpenseItems.reduce(
-        (sum, e) => sum + e.amount,
-        0,
-      )
-      const balance = incomeTotal - expenseTotal
-      const isDeficit = balance < 0
-
-      // 収支が一致するようパディングを追加して両バーの軸を揃える
-      const incomeItems: SummaryBarItem[] = isDeficit
-        ? [
-            ...baseIncomeItems,
-            {
-              categoryId: 'shortfall',
-              categoryName: '不足分',
-              amount: -balance,
-              color: PADDING_COLOR,
-              labelColor: 'var(--muted-foreground)',
-            },
-          ]
-        : baseIncomeItems
-      const expenseItems: SummaryBarItem[] =
-        !isDeficit && balance > 0
-          ? [
-              ...baseExpenseItems,
-              {
-                categoryId: 'unallocated',
-                categoryName: '未割り当て',
-                amount: balance,
-                color: PADDING_COLOR,
-                labelColor: 'var(--muted-foreground)',
-              },
-            ]
-          : baseExpenseItems
-
-      const hasData = baseIncomeItems.length > 0 || baseExpenseItems.length > 0
-
-      return (
-        <div className="rounded-lg border p-4 space-y-4">
-          <h2 className="text-sm font-semibold">収支サマリ</h2>
-
-          {hasData && (
-            <div className="space-y-3">
-              <BudgetSummaryBar sectionLabel="収入" items={incomeItems} />
-              <BudgetSummaryBar sectionLabel="支出" items={expenseItems} />
-            </div>
-          )}
-
-          <div className="space-y-1 text-sm">
-            <Separator />
-            <div className="flex justify-between font-medium">
-              <span>収支差分</span>
-              <span
-                className={`tabular-nums ${isDeficit ? 'text-destructive' : ''}`}
-              >
-                {isDeficit ? '−' : '+'}¥
-                {Math.abs(balance).toLocaleString('ja-JP')}
-              </span>
-            </div>
-          </div>
-
-          {isDeficit && (
-            <p className="text-xs text-destructive">
-              支出合計が収入合計を超えています。予算配分を見直してください。
-            </p>
-          )}
-        </div>
-      )
-    }}
-  />
-)
-
-type Props = {
-  form: FormInstance
-}
-
-export const BudgetNewFormFields: React.FC<Props> = ({ form }) => (
-  <>
-    <div className="flex flex-wrap items-end gap-4">
-      <FieldGroup className="flex-none">
-        <form.Field
-          name="year"
-          children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid
-            return (
-              <Field data-invalid={isInvalid} className="w-36">
-                <FieldLabel htmlFor={field.name}>年度 *</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="number"
-                  min="2000"
-                  max="2100"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => {
-                    field.handleChange(e.target.value)
-                  }}
-                  aria-invalid={isInvalid}
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            )
-          }}
-        />
-      </FieldGroup>
-
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => {
-          form.setFieldValue('incomeEntries', PREV_YEAR_ENTRIES.income)
-          form.setFieldValue('expenseEntries', PREV_YEAR_ENTRIES.expense)
-        }}
-      >
-        <CopyIcon />
-        前年度からコピー
-      </Button>
-    </div>
-
-    <Separator />
-
-    <BudgetEntriesSection
-      form={form}
-      fieldName="incomeEntries"
-      allCategories={AVAILABLE_INCOME_CATEGORIES}
-      label="収入予算"
-    />
-
-    <Separator />
-
-    <BudgetEntriesSection
-      form={form}
-      fieldName="expenseEntries"
-      allCategories={AVAILABLE_EXPENSE_CATEGORIES}
-      label="支出予算"
-    />
-
-    <Separator />
-
-    <BudgetSummary form={form} />
-  </>
 )

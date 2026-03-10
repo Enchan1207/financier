@@ -2,7 +2,7 @@ import { Button } from '@frontend/components/ui/button'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeftIcon } from 'lucide-react'
 
-import { BudgetNewFormFields } from './-components/budget-new-form-fields'
+import { BudgetNewFormFields } from './-components/budget-new-form'
 import { useBudgetNewForm } from './-components/use-budget-new-form'
 
 const BudgetNewPage: React.FC = () => {

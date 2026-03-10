@@ -120,6 +120,8 @@ export const PREV_YEAR_ENTRIES = {
   ] satisfies BudgetEntry[],
 }
 
+export type FormInstance = ReturnType<typeof useBudgetNewForm>
+
 export const useBudgetNewForm = (
   onSubmit: (value: {
     year: string
