@@ -1,3 +1,13 @@
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@frontend/components/ui/alert-dialog'
 import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import {
@@ -38,9 +48,34 @@ import dayjs from '@frontend/lib/date'
 import { formatCurrency, formatDate } from '@frontend/lib/format'
 import { TODAY } from '@frontend/lib/today'
 import type { TransactionType } from '@frontend/lib/types'
+import { useForm } from '@tanstack/react-form'
 import { createFileRoute } from '@tanstack/react-router'
-import { Plus } from 'lucide-react'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
 import React, { useState } from 'react'
+import { z } from 'zod'
+
+type Transaction = {
+  id: string
+  type: TransactionType
+  amount: number
+  categoryId: string
+  categoryName: string
+  transactionDate: string
+  name: string
+  eventId?: string
+  eventName?: string
+}
+
+const transactionFormSchema = z.object({
+  type: z.enum(['income', 'expense'] as const),
+  categoryId: z.string().min(1),
+  amount: z.string().refine((v) => v !== '' && Number(v) > 0),
+  name: z.string().min(1),
+  transactionDate: z.string().min(1),
+  eventId: z.string(),
+})
+
+type TransactionFormValues = z.infer<typeof transactionFormSchema>
 
 // モックデータ：本番ではAPIから取得する
 const categories = [
@@ -137,10 +172,10 @@ const categories = [
   },
 ]
 
-const transactions = [
+const initialTransactions: Transaction[] = [
   {
     id: 'tx-1',
-    type: 'income' as TransactionType,
+    type: 'income',
     amount: 282000,
     categoryId: 'cat-10',
     categoryName: '給与',
@@ -149,7 +184,7 @@ const transactions = [
   },
   {
     id: 'tx-2',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 500,
     categoryId: 'cat-2',
     categoryName: '交通費',
@@ -158,7 +193,7 @@ const transactions = [
   },
   {
     id: 'tx-3',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 1850,
     categoryId: 'cat-1',
     categoryName: '食費',
@@ -167,7 +202,7 @@ const transactions = [
   },
   {
     id: 'tx-4',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 1200,
     categoryId: 'cat-3',
     categoryName: '外食',
@@ -176,7 +211,7 @@ const transactions = [
   },
   {
     id: 'tx-5',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 30000,
     categoryId: 'cat-8',
     categoryName: '積立：遠征費',
@@ -185,7 +220,7 @@ const transactions = [
   },
   {
     id: 'tx-6',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 6500,
     categoryId: 'cat-7',
     categoryName: '美容',
@@ -194,7 +229,7 @@ const transactions = [
   },
   {
     id: 'tx-7',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 2200,
     categoryId: 'cat-1',
     categoryName: '食費',
@@ -203,7 +238,7 @@ const transactions = [
   },
   {
     id: 'tx-8',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 150000,
     categoryId: 'cat-5',
     categoryName: '衣服',
@@ -214,7 +249,7 @@ const transactions = [
   },
   {
     id: 'tx-9',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 4200,
     categoryId: 'cat-4',
     categoryName: '娯楽・グッズ',
@@ -225,7 +260,7 @@ const transactions = [
   },
   {
     id: 'tx-10',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 1800,
     categoryId: 'cat-6',
     categoryName: '日用品',
@@ -234,7 +269,7 @@ const transactions = [
   },
   {
     id: 'tx-11',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 980,
     categoryId: 'cat-1',
     categoryName: '食費',
@@ -243,7 +278,7 @@ const transactions = [
   },
   {
     id: 'tx-12',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 2800,
     categoryId: 'cat-2',
     categoryName: '交通費',
@@ -254,7 +289,7 @@ const transactions = [
   },
   {
     id: 'tx-13',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 8500,
     categoryId: 'cat-4',
     categoryName: '娯楽・グッズ',
@@ -265,7 +300,7 @@ const transactions = [
   },
   {
     id: 'tx-14',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 2400,
     categoryId: 'cat-3',
     categoryName: '外食',
@@ -276,7 +311,7 @@ const transactions = [
   },
   {
     id: 'tx-15',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 1600,
     categoryId: 'cat-1',
     categoryName: '食費',
@@ -285,7 +320,7 @@ const transactions = [
   },
   {
     id: 'tx-16',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 3200,
     categoryId: 'cat-3',
     categoryName: '外食',
@@ -294,7 +329,7 @@ const transactions = [
   },
   {
     id: 'tx-17',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 1200,
     categoryId: 'cat-1',
     categoryName: '食費',
@@ -303,7 +338,7 @@ const transactions = [
   },
   {
     id: 'tx-18',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 5500,
     categoryId: 'cat-4',
     categoryName: '娯楽・グッズ',
@@ -314,7 +349,7 @@ const transactions = [
   },
   {
     id: 'tx-19',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 8000,
     categoryId: 'cat-2',
     categoryName: '交通費',
@@ -325,7 +360,7 @@ const transactions = [
   },
   {
     id: 'tx-20',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 12000,
     categoryId: 'cat-4',
     categoryName: '娯楽・グッズ',
@@ -336,7 +371,7 @@ const transactions = [
   },
   {
     id: 'tx-21',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 3000,
     categoryId: 'cat-3',
     categoryName: '外食',
@@ -347,7 +382,7 @@ const transactions = [
   },
   {
     id: 'tx-22',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     amount: 15000,
     categoryId: 'cat-5',
     categoryName: '衣服',
@@ -402,36 +437,220 @@ const formatFiscalYearMonth = (dateStr: string): string => {
   return `${fy}年度 ${month}月`
 }
 
-const AddTransactionDialog: React.FC = () => {
+// フォームインスタンスの型
+const useTransactionForm = (
+  defaultValues: TransactionFormValues,
+  onSubmit: (values: TransactionFormValues) => void,
+) =>
+  useForm({
+    defaultValues,
+    validators: { onChange: transactionFormSchema },
+    onSubmit: ({ value }) => {
+      onSubmit(value)
+    },
+  })
+
+type TransactionFormInstance = ReturnType<typeof useTransactionForm>
+
+// 取引フォームの共通フィールド群
+const TransactionFormFields: React.FC<{ form: TransactionFormInstance }> = ({
+  form,
+}) => (
+  <div className="space-y-4 pt-2">
+    {/* 収支種別 */}
+    <form.Field
+      name="type"
+      children={(field) => (
+        <div className="space-y-1.5">
+          <Label>種別</Label>
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            value={field.state.value}
+            onValueChange={(v) => {
+              if (!v) return
+              field.handleChange(v as TransactionType)
+              form.setFieldValue('categoryId', '')
+            }}
+            className="w-full"
+          >
+            <ToggleGroupItem value="expense" className="flex-1">
+              支出
+            </ToggleGroupItem>
+            <ToggleGroupItem value="income" className="flex-1">
+              収入
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+      )}
+    />
+
+    {/* カテゴリ（種別連動） */}
+    <form.Subscribe
+      selector={(state) => state.values.type}
+      children={(type) => (
+        <form.Field
+          name="categoryId"
+          children={(field) => {
+            const filteredCategories = categories.filter((c) => c.type === type)
+            return (
+              <div className="space-y-1.5">
+                <Label htmlFor="tx-category">カテゴリ</Label>
+                <Select
+                  value={field.state.value}
+                  onValueChange={field.handleChange}
+                >
+                  <SelectTrigger id="tx-category" className="w-full">
+                    <SelectValue placeholder="カテゴリを選択" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredCategories.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )
+          }}
+        />
+      )}
+    />
+
+    {/* 金額 */}
+    <form.Field
+      name="amount"
+      children={(field) => (
+        <div className="space-y-1.5">
+          <Label htmlFor="tx-amount">金額</Label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+              ¥
+            </span>
+            <Input
+              id="tx-amount"
+              type="number"
+              value={field.state.value}
+              onChange={(e) => {
+                field.handleChange(e.target.value)
+              }}
+              onBlur={field.handleBlur}
+              className="pl-7"
+            />
+          </div>
+        </div>
+      )}
+    />
+
+    {/* 内容 */}
+    <form.Field
+      name="name"
+      children={(field) => (
+        <div className="space-y-1.5">
+          <Label htmlFor="tx-name">内容</Label>
+          <Input
+            id="tx-name"
+            value={field.state.value}
+            onChange={(e) => {
+              field.handleChange(e.target.value)
+            }}
+            onBlur={field.handleBlur}
+          />
+        </div>
+      )}
+    />
+
+    {/* 日付 */}
+    <form.Field
+      name="transactionDate"
+      children={(field) => (
+        <div className="space-y-1.5">
+          <Label htmlFor="tx-date">日付</Label>
+          <Input
+            id="tx-date"
+            type="date"
+            value={field.state.value}
+            onChange={(e) => {
+              field.handleChange(e.target.value)
+            }}
+            onBlur={field.handleBlur}
+          />
+        </div>
+      )}
+    />
+
+    {/* イベント（任意） */}
+    <form.Field
+      name="eventId"
+      children={(field) => (
+        <div className="space-y-1.5">
+          <Label htmlFor="tx-event">イベント</Label>
+          <Select
+            value={field.state.value || '_none'}
+            onValueChange={(v) => {
+              field.handleChange(v === '_none' ? '' : v)
+            }}
+          >
+            <SelectTrigger id="tx-event" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_none">なし</SelectItem>
+              {events.map((ev) => (
+                <SelectItem key={ev.id} value={ev.id}>
+                  {ev.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+    />
+  </div>
+)
+
+const AddTransactionDialog: React.FC<{
+  onAdd: (t: Transaction) => void
+}> = ({ onAdd }) => {
   const [open, setOpen] = useState(false)
-  const [formType, setFormType] = useState<TransactionType>('expense')
-  const [formCategory, setFormCategory] = useState('')
-  const [formAmount, setFormAmount] = useState('')
-  const [formName, setFormName] = useState('')
-  const [formDate, setFormDate] = useState(TODAY)
-  const [formEvent, setFormEvent] = useState('')
 
-  const filteredCategories = categories.filter((c) => c.type === formType)
-  const canSubmit = formCategory && formAmount && formName && formDate
+  const form = useTransactionForm(
+    {
+      type: 'expense',
+      categoryId: '',
+      amount: '',
+      name: '',
+      transactionDate: TODAY,
+      eventId: '',
+    },
+    (values) => {
+      const selectedCategory = categories.find(
+        (c) => c.id === values.categoryId,
+      )
+      const selectedEvent = events.find((e) => e.id === values.eventId)
+      onAdd({
+        id: `tx-${dayjs().timestamp()}`,
+        type: values.type,
+        categoryId: values.categoryId,
+        categoryName: selectedCategory?.name ?? '',
+        amount: Number(values.amount),
+        name: values.name,
+        transactionDate: values.transactionDate,
+        eventId: values.eventId || undefined,
+        eventName: selectedEvent?.name,
+      })
+      setOpen(false)
+    },
+  )
 
-  const handleTypeChange = (t: TransactionType) => {
-    setFormType(t)
-    setFormCategory('')
-  }
-
-  const handleSubmit = () => {
-    // モック: 実際の保存は行わない
-    setOpen(false)
-    setFormType('expense')
-    setFormCategory('')
-    setFormAmount('')
-    setFormName('')
-    setFormDate(TODAY)
-    setFormEvent('')
+  const handleOpenChange = (v: boolean) => {
+    if (!v) form.reset()
+    setOpen(v)
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm">
           <Plus />
@@ -442,134 +661,97 @@ const AddTransactionDialog: React.FC = () => {
         <DialogHeader>
           <DialogTitle>取引を追加</DialogTitle>
         </DialogHeader>
-
-        <div className="space-y-4 pt-2">
-          {/* 収支種別 */}
-          <div className="space-y-1.5">
-            <Label>種別</Label>
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              value={formType}
-              onValueChange={(v) => {
-                if (v) handleTypeChange(v as TransactionType)
-              }}
+        <TransactionFormFields form={form} />
+        <form.Subscribe
+          selector={(state) => state.canSubmit}
+          children={(canSubmit) => (
+            <Button
               className="w-full"
+              disabled={!canSubmit}
+              onClick={() => form.handleSubmit()}
             >
-              <ToggleGroupItem value="expense" className="flex-1">
-                支出
-              </ToggleGroupItem>
-              <ToggleGroupItem value="income" className="flex-1">
-                収入
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
+              記録する
+            </Button>
+          )}
+        />
+      </DialogContent>
+    </Dialog>
+  )
+}
 
-          {/* カテゴリ */}
-          <div className="space-y-1.5">
-            <Label htmlFor="dialog-category">カテゴリ</Label>
-            <Select value={formCategory} onValueChange={setFormCategory}>
-              <SelectTrigger id="dialog-category" className="w-full">
-                <SelectValue placeholder="カテゴリを選択" />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredCategories.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+const EditTransactionDialog: React.FC<{
+  transaction: Transaction
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  onSave: (t: Transaction) => void
+}> = ({ transaction, open, onOpenChange, onSave }) => {
+  const form = useTransactionForm(
+    {
+      type: transaction.type,
+      categoryId: transaction.categoryId,
+      amount: String(transaction.amount),
+      name: transaction.name,
+      transactionDate: transaction.transactionDate,
+      eventId: transaction.eventId ?? '',
+    },
+    (values) => {
+      const selectedCategory = categories.find(
+        (c) => c.id === values.categoryId,
+      )
+      const selectedEvent = events.find((e) => e.id === values.eventId)
+      onSave({
+        ...transaction,
+        type: values.type,
+        categoryId: values.categoryId,
+        categoryName: selectedCategory?.name ?? '',
+        amount: Number(values.amount),
+        name: values.name,
+        transactionDate: values.transactionDate,
+        eventId: values.eventId || undefined,
+        eventName: selectedEvent?.name,
+      })
+    },
+  )
 
-          {/* 金額 */}
-          <div className="space-y-1.5">
-            <Label htmlFor="dialog-amount">金額</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-                ¥
-              </span>
-              <Input
-                id="dialog-amount"
-                type="number"
-                value={formAmount}
-                onChange={(e) => {
-                  setFormAmount(e.target.value)
-                }}
-                className="pl-7"
-              />
-            </div>
-          </div>
-
-          {/* 内容 */}
-          <div className="space-y-1.5">
-            <Label htmlFor="dialog-name">内容</Label>
-            <Input
-              id="dialog-name"
-              value={formName}
-              onChange={(e) => {
-                setFormName(e.target.value)
-              }}
-            />
-          </div>
-
-          {/* 日付 */}
-          <div className="space-y-1.5">
-            <Label htmlFor="dialog-date">日付</Label>
-            <Input
-              id="dialog-date"
-              type="date"
-              value={formDate}
-              onChange={(e) => {
-                setFormDate(e.target.value)
-              }}
-            />
-          </div>
-
-          {/* イベント（任意） */}
-          <div className="space-y-1.5">
-            <Label htmlFor="dialog-event">イベント</Label>
-            <Select
-              value={formEvent || '_none'}
-              onValueChange={(v) => {
-                setFormEvent(v === '_none' ? '' : v)
-              }}
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>取引を編集</DialogTitle>
+        </DialogHeader>
+        <TransactionFormFields form={form} />
+        <form.Subscribe
+          selector={(state) => state.canSubmit}
+          children={(canSubmit) => (
+            <Button
+              className="w-full"
+              disabled={!canSubmit}
+              onClick={() => form.handleSubmit()}
             >
-              <SelectTrigger id="dialog-event" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="_none">なし</SelectItem>
-                {events.map((ev) => (
-                  <SelectItem key={ev.id} value={ev.id}>
-                    {ev.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button
-            className="w-full"
-            disabled={!canSubmit}
-            onClick={handleSubmit}
-          >
-            記録する
-          </Button>
-        </div>
+              保存する
+            </Button>
+          )}
+        />
       </DialogContent>
     </Dialog>
   )
 }
 
 const TransactionsPage: React.FC = () => {
+  const [transactions, setTransactions] =
+    useState<Transaction[]>(initialTransactions)
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null)
+  const [deletingTransaction, setDeletingTransaction] =
+    useState<Transaction | null>(null)
+
   // 日付降順（未来が先頭）
   const sorted = [...transactions].sort((a, b) =>
     b.transactionDate.localeCompare(a.transactionDate),
   )
 
   // 月ごとにグループ化（挿入順 = 降順）
-  const groupMap = new Map<string, typeof transactions>()
+  const groupMap = new Map<string, Transaction[]>()
   for (const tx of sorted) {
     const key = getGroupKey(tx.transactionDate)
     if (!groupMap.has(key)) groupMap.set(key, [])
@@ -577,13 +759,32 @@ const TransactionsPage: React.FC = () => {
   }
   const groups = [...groupMap.entries()]
 
+  const handleAdd = (t: Transaction) => {
+    setTransactions((prev) => [...prev, t])
+  }
+
+  const handleSave = (updated: Transaction) => {
+    setTransactions((prev) =>
+      prev.map((t) => (t.id === updated.id ? updated : t)),
+    )
+    setEditingTransaction(null)
+  }
+
+  const handleDelete = () => {
+    if (!deletingTransaction) return
+    setTransactions((prev) =>
+      prev.filter((t) => t.id !== deletingTransaction.id),
+    )
+    setDeletingTransaction(null)
+  }
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <Card className="flex flex-col flex-1 min-h-0">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">取引一覧</CardTitle>
-            <AddTransactionDialog />
+            <AddTransactionDialog onAdd={handleAdd} />
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto px-1 md:px-6">
@@ -594,6 +795,7 @@ const TransactionsPage: React.FC = () => {
                 <TableHead>内容</TableHead>
                 <TableHead className="hidden md:table-cell">カテゴリ</TableHead>
                 <TableHead className="text-right">金額</TableHead>
+                <TableHead className="w-16" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -609,7 +811,7 @@ const TransactionsPage: React.FC = () => {
                     {/* 月区切り行 */}
                     <TableRow className="bg-muted/50 hover:bg-muted/50">
                       <TableCell
-                        colSpan={4}
+                        colSpan={5}
                         className="py-1.5 text-xs font-semibold text-muted-foreground tracking-wide"
                       >
                         {label}
@@ -666,6 +868,28 @@ const TransactionsPage: React.FC = () => {
                             {tx.type === 'income' ? '+' : '-'}
                             {formatCurrency(tx.amount)}
                           </TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setEditingTransaction(tx)
+                                }}
+                              >
+                                <Pencil className="size-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setDeletingTransaction(tx)
+                                }}
+                              >
+                                <Trash2 className="size-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
                         </TableRow>
                       )
                     })}
@@ -676,6 +900,41 @@ const TransactionsPage: React.FC = () => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* 編集ダイアログ */}
+      {editingTransaction && (
+        <EditTransactionDialog
+          key={editingTransaction.id}
+          transaction={editingTransaction}
+          open={true}
+          onOpenChange={(v) => {
+            if (!v) setEditingTransaction(null)
+          }}
+          onSave={handleSave}
+        />
+      )}
+
+      {/* 削除確認ダイアログ */}
+      <AlertDialog
+        open={deletingTransaction !== null}
+        onOpenChange={(v) => {
+          if (!v) setDeletingTransaction(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>取引を削除しますか？</AlertDialogTitle>
+            <AlertDialogDescription>
+              「{deletingTransaction?.name}
+              」を削除します。この操作は元に戻せません。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>削除</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
