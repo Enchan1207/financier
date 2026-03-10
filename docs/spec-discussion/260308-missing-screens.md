@@ -12,7 +12,7 @@
 
 | 区分 | ユースケース | 状態 | 優先度 |
 |------|-------------|------|--------|
-| トランザクション編集・削除 | UC-1.3, UC-1.4 | ❌ 未実装 | 高 |
+| トランザクション編集・削除 | UC-1.3, UC-1.4 | ✅ 実装済み | 高 |
 | カテゴリ管理 | UC-2.1〜2.3 | ❌ 未実装 | 高 |
 | 年度予算作成 | UC-3.1 | ✅ 実装済み | 高 |
 | カテゴリ予算の設定・変更 | UC-3.2 | ❌ 未実装 | 高 |
@@ -22,51 +22,43 @@
 
 ---
 
-## 1. トランザクション編集・削除（UC-1.3, UC-1.4）
+## 1. トランザクション編集・削除（UC-1.3, UC-1.4）✅ 実装済み
 
-### 現状
+### 実装内容
 
-`routes/transactions/index.tsx` は一覧表示と新規追加ダイアログのみ実装。モックデータとフォームはインラインで定義（TanStack Form 未使用）。既存取引の行クリックで何も起きない。
+`routes/transactions/index.tsx` に編集・削除機能を追加した。
 
-### 必要な機能
+**UI**:
 
-**UC-1.3（取引編集）**:
+- 各取引行の末尾に編集（鉛筆）・削除（ゴミ箱）のアイコンボタンを配置
+- 編集ボタン → `EditTransactionDialog`（種別・カテゴリ・金額・名前・日付・イベントをすべて編集可能）
+- 削除ボタン → `AlertDialog` で取引名を表示して確認 → ローカル state から除去
 
-- 取引行クリック → 編集ダイアログを開く
-- 金額・日付・カテゴリ・イベント・名前を編集可能
-- カテゴリ変更時は `status=active` のカテゴリのみ選択可能
-- 対象年度が closed なら編集不可（ダイアログを読み取り専用にする）
+**フォーム**:
 
-**UC-1.4（取引削除）**:
+- `AddTransactionDialog` と `EditTransactionDialog` の共通フィールドを `TransactionFormFields` コンポーネントに切り出し
+- `useTransactionForm`（TanStack Form + Zod）で状態・バリデーションを管理し、`AddTransactionDialog` も統一して移行
+- カテゴリは `form.Subscribe` で種別（収支）連動フィルタリング
+- `EditTransactionDialog` は `key={transaction.id}` でリマウントし、`defaultValues` で初期値を設定
 
-- 編集ダイアログ内に削除ボタンを配置
-- `AlertDialog` で確認を挟んでから削除実行
-- 対象年度が closed なら削除ボタンを非表示
+**state 管理**:
 
-### 補足
+- 取引一覧を `TransactionsPage` の `useState` で管理
+- `editingTransaction` / `deletingTransaction` を同じく state で持ち、各ダイアログの開閉を制御
 
-- UC-1.3 には「イベントを紐付ける」操作（UC-5.2）も含まれる。既存の新規追加フォームにイベント選択フィールドがあるため、同様に編集フォームにも含める
-- 既存の `AddTransactionDialog` は `useState` ベースなので、TanStack Form への移行もこのタイミングで行う
+### 実装上の判断
 
-### 実装手順
+当初の方針（行クリックでダイアログ表示 / 編集ダイアログ内に削除ボタン）から変更した点:
 
-1. `routes/transactions/-components/edit-transaction-dialog.tsx` を新規作成
-   - 既存の `AddTransactionDialog` と同じフォーム構造（種別・カテゴリ・金額・名前・日付・イベント）を TanStack Form で実装
-   - `target` prop で初期値を受け取り、`defaultValues` に展開する
-   - フッターに「削除」ボタンを追加し、クリックで `AlertDialog` を開く
-2. `routes/transactions/index.tsx` を改修
-   - `AddTransactionDialog` を TanStack Form ベースに統一（`-components/` に切り出し）
-   - `TableRow` に `onClick` を追加し、対象取引を state に保持してダイアログを開く
-   - モックの取引一覧を `useState` で管理し、編集・削除時にローカル更新する
+- **操作UI**: 行クリックではなく行末のアイコンボタンを採用。意図しない操作を防ぐため
+- **削除確認**: 編集ダイアログ内ではなく独立した `AlertDialog` として切り出し
+- **ファイル分割**: `-components/` への切り出しは行わず、`index.tsx` 内にインラインで定義。規模として適切と判断
 
-### ファイル構成
+### ファイル構成（実装後）
 
 ```
 routes/transactions/
-├── index.tsx                             ← 改修
-└── -components/
-    ├── add-transaction-dialog.tsx        ← 切り出し・TanStack Form 化
-    └── edit-transaction-dialog.tsx       ← 新規（編集・削除）
+└── index.tsx    ← Transaction 型・スキーマ・モックデータ・全コンポーネントを含む
 ```
 
 ---
