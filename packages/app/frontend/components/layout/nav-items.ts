@@ -6,6 +6,7 @@ import {
   PiggyBank,
   PlusCircleIcon,
   Receipt,
+  Tag,
   Wallet,
 } from 'lucide-react'
 
@@ -51,6 +52,12 @@ export const navGroups: NavGroup[] = [
   {
     label: '管理',
     items: [
+      {
+        to: '/categories',
+        label: 'カテゴリ',
+        icon: Tag,
+        visibility: 'public',
+      },
       {
         to: '/budget',
         label: '予算',

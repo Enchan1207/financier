@@ -99,7 +99,8 @@ routes/transactions/
    - モックのカテゴリ一覧を `useState` で管理
    - `Tabs` で支出・収入を切り替え
 2. `routes/categories/-components/create-category-dialog.tsx` を新規作成
-   - 積立オプションの条件付きフォームを `form.Subscribe` で実装
+   - 種別（収入/支出）ToggleGroup + カテゴリ名 Input のみ
+   - ダイアログ下部に「積立カテゴリを作成する場合は[こちら](/savings/new)」リンクを設ける
 3. `routes/categories/-components/edit-category-dialog.tsx` を新規作成
    - 名称変更のみ（シンプルなフォーム）
 4. `frontend/components/layout/nav-items.ts` に `/categories` を「管理」グループに追加
