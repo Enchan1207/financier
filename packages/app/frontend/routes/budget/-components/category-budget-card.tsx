@@ -1,3 +1,4 @@
+import { Button } from '@frontend/components/ui/button'
 import {
   Card,
   CardContent,
@@ -9,6 +10,7 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@frontend/components/ui/toggle-group'
+import { PencilIcon } from 'lucide-react'
 import type React from 'react'
 import { useState } from 'react'
 
@@ -26,11 +28,13 @@ export type BudgetItem = {
 type Props = {
   incomeItems: BudgetItem[]
   expenseItems: BudgetItem[]
+  onEditItem?: (item: BudgetItem) => void
 }
 
 export const CategoryBudgetCard: React.FC<Props> = ({
   incomeItems,
   expenseItems,
+  onEditItem,
 }) => {
   const [activeTab, setActiveTab] = useState<'income' | 'expense'>('expense')
 
@@ -82,6 +86,21 @@ export const CategoryBudgetCard: React.FC<Props> = ({
               current={item.ytdActual}
               max={item.annualBudget}
               showRate={showRate}
+              action={
+                onEditItem ? (
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="size-5 shrink-0"
+                    onClick={() => {
+                      onEditItem(item)
+                    }}
+                  >
+                    <PencilIcon className="size-3" />
+                  </Button>
+                ) : undefined
+              }
             />
           ))}
         </div>
