@@ -13,7 +13,7 @@
 | 区分 | ユースケース | 状態 | 優先度 |
 |------|-------------|------|--------|
 | トランザクション編集・削除 | UC-1.3, UC-1.4 | ✅ 実装済み | 高 |
-| カテゴリ管理 | UC-2.1〜2.3 | ❌ 未実装 | 高 |
+| カテゴリ管理 | UC-2.1〜2.3 | ✅ 実装済み | 高 |
 | 年度予算作成 | UC-3.1 | ✅ 実装済み | 高 |
 | カテゴリ予算の設定・変更 | UC-3.2 | ❌ 未実装 | 高 |
 | 予算の再配分 | UC-3.3 | ❌ 未実装 | 中 |
@@ -63,53 +63,44 @@ routes/transactions/
 
 ---
 
-## 2. カテゴリ管理（UC-2.1〜2.3）
+## 2. カテゴリ管理（UC-2.1〜2.3）✅ 実装済み
 
-### 現状
+### 実装内容
 
-`routes/categories/` ディレクトリが存在しない。`nav-items.ts` にもカテゴリへのリンクがない。
+**UI:**
 
-### 必要な画面・機能
-
-**`/categories` （カテゴリ一覧）**:
-
-- 支出カテゴリ・収入カテゴリをタブ切り替えで表示（shadcn/ui `Tabs`）
-- `status=archived` のカテゴリは薄く表示し「削除済み」バッジを付与
+- `Tabs` で支出・収入を切り替え表示
+- `status=archived` のカテゴリは `opacity-50` で薄く表示し「削除済み」バッジを付与
 - 積立紐付きカテゴリは「積立」バッジで識別
-- 各行に「編集」ボタン（→ UC-2.2）と「削除」ボタン（→ UC-2.3）
-- ページ右上に「新規作成」ボタン（→ UC-2.1）
+- `active` カテゴリの各行末尾に「編集」（鉛筆）・「削除」（ゴミ箱）のアイコンボタンを配置
+- ページ右上に「新規作成」ボタン
+- `nav-items.ts` の「管理」グループに `/categories` を追加
 
-**UC-2.1（カテゴリ作成）の注意点**:
+**UC-2.1（カテゴリ作成）:**
 
-- 支出カテゴリの場合、「このカテゴリを積立として作成する」チェックボックスを設ける
-- チェック時は積立設定フォームを展開（`form.Subscribe` で条件付き表示）
-- 積立設定は `savingType`（`goal` / `free`）、`targetAmount`（任意）、`deadline`（任意）
-- モック段階では保存時にローカル状態のカテゴリ一覧に追加するだけでよい
+- `CreateCategoryDialog` はカテゴリ名 Input のみのシンプルなフォーム
+- 積立カテゴリは `/savings/new` リンクで誘導する方式を採用（ダイアログ内でのチェックボックス展開は見送り）
+- TanStack Form + Zod で状態・バリデーションを管理
 
-**UC-2.3（削除）の注意点**:
+**UC-2.3（削除）:**
 
-- 参照あり → `status` を `archived` に変更（新規選択不可だが行は残る）
-- 参照なし → 一覧から除去（物理削除相当）
-- モックでは「参照あり」固定にして archived 変更のみ実装してもよい
-- 削除ボタンクリック時は `AlertDialog` で確認を挟む
+- モックでは参照チェックを省略し、常に `status: 'archived'` に変更する実装
+- `AlertDialog` で削除前確認を表示
 
-### 実装手順
+**state 管理:**
 
-1. `routes/categories/index.tsx` を新規作成
-   - モックのカテゴリ一覧を `useState` で管理
-   - `Tabs` で支出・収入を切り替え
-2. `routes/categories/-components/create-category-dialog.tsx` を新規作成
-   - 種別（収入/支出）ToggleGroup + カテゴリ名 Input のみ
-   - ダイアログ下部に「積立カテゴリを作成する場合は[こちら](/savings/new)」リンクを設ける
-3. `routes/categories/-components/edit-category-dialog.tsx` を新規作成
-   - 名称変更のみ（シンプルなフォーム）
-4. `frontend/components/layout/nav-items.ts` に `/categories` を「管理」グループに追加
+- カテゴリ一覧を `CategoriesPage` の `useState` で管理
+- `editingCategory` / `deletingCategory` を同じく state で持ち、各ダイアログの開閉を制御
 
-### ファイル構成
+### 実装上の判断
+
+- **積立カテゴリ作成フォーム**: 当初方針（ダイアログ内チェックボックスで積立フォームを展開）から変更し、フッターの `/savings/new` リンクで誘導する方式を採用。ダイアログの複雑化を避けるため
+
+### ファイル構成（実装後）
 
 ```
 routes/categories/
-├── index.tsx
+├── index.tsx    ← Category 型・スキーマ・モックデータ・CategoryTable を含む
 └── -components/
     ├── create-category-dialog.tsx
     └── edit-category-dialog.tsx
