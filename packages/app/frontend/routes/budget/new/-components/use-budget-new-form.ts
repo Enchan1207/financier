@@ -128,12 +128,17 @@ export const useBudgetNewForm = (
     incomeEntries: BudgetEntry[]
     expenseEntries: BudgetEntry[]
   }) => void | Promise<void>,
+  initialEntries?: {
+    year?: string
+    incomeEntries?: BudgetEntry[]
+    expenseEntries?: BudgetEntry[]
+  },
 ) => {
   return useForm({
     defaultValues: {
-      year: String(dayjs().year() + 1),
-      incomeEntries: [] as BudgetEntry[],
-      expenseEntries: [] as BudgetEntry[],
+      year: initialEntries?.year ?? String(dayjs().year() + 1),
+      incomeEntries: initialEntries?.incomeEntries ?? ([] as BudgetEntry[]),
+      expenseEntries: initialEntries?.expenseEntries ?? ([] as BudgetEntry[]),
     },
     validators: {
       onSubmit: budgetNewFormSchema,

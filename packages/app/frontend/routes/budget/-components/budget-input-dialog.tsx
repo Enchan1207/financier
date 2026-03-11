@@ -61,6 +61,7 @@ type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSave: (item: BudgetItem) => Promise<void>
+  checkBalance: (newAnnualBudget: number) => boolean
 }
 
 export const BudgetInputDialog: React.FC<Props> = ({
@@ -68,10 +69,12 @@ export const BudgetInputDialog: React.FC<Props> = ({
   open,
   onOpenChange,
   onSave,
+  checkBalance,
 }) => {
   const [activeTab, setActiveTab] = useState<'annual' | 'fixed' | 'variable'>(
     'annual',
   )
+  const [balanceError, setBalanceError] = useState(false)
 
   const initialMonthly = Math.round(item.annualBudget / 12)
 
@@ -89,6 +92,11 @@ export const BudgetInputDialog: React.FC<Props> = ({
           : activeTab === 'fixed'
             ? value.fixedMonthly * 12
             : value.monthlyAmounts.reduce((s, v) => s + v, 0)
+      if (checkBalance(annualBudget)) {
+        setBalanceError(true)
+        return
+      }
+      setBalanceError(false)
       await onSave({ ...item, annualBudget })
     },
   })
@@ -116,6 +124,7 @@ export const BudgetInputDialog: React.FC<Props> = ({
             value={activeTab}
             onValueChange={(v) => {
               setActiveTab(v as 'annual' | 'fixed' | 'variable')
+              setBalanceError(false)
             }}
           >
             <TabsList className="w-full">
@@ -279,6 +288,11 @@ export const BudgetInputDialog: React.FC<Props> = ({
             selector={(state) => state.isSubmitting}
             children={(isSubmitting) => (
               <DialogFooter className="mt-6">
+                {balanceError && (
+                  <p className="w-full text-sm text-destructive">
+                    支出予算合計が収入予算合計を超えるため保存できません。
+                  </p>
+                )}
                 <Button type="submit" disabled={isSubmitting}>
                   <Loader2Icon
                     className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}

@@ -20,53 +20,67 @@ import { BudgetSummary } from './budget-summary'
 
 type Props = {
   form: FormInstance
+  showYearField?: boolean
+  showCopyButton?: boolean
 }
 
-export const BudgetNewFormFields: React.FC<Props> = ({ form }) => (
+export const BudgetNewFormFields: React.FC<Props> = ({
+  form,
+  showYearField = true,
+  showCopyButton = true,
+}) => (
   <>
-    <div className="flex flex-wrap items-end gap-4">
-      <FieldGroup className="flex-none">
-        <form.Field
-          name="year"
-          children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid
-            return (
-              <Field data-invalid={isInvalid} className="w-36">
-                <FieldLabel htmlFor={field.name}>年度 *</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="number"
-                  min="2000"
-                  max="2100"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => {
-                    field.handleChange(e.target.value)
-                  }}
-                  aria-invalid={isInvalid}
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            )
-          }}
-        />
-      </FieldGroup>
+    {(showYearField || showCopyButton) && (
+      <div className="flex flex-wrap items-end gap-4">
+        {showYearField && (
+          <FieldGroup className="flex-none">
+            <form.Field
+              name="year"
+              children={(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid} className="w-36">
+                    <FieldLabel htmlFor={field.name}>年度 *</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="number"
+                      min="2000"
+                      max="2100"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => {
+                        field.handleChange(e.target.value)
+                      }}
+                      aria-invalid={isInvalid}
+                    />
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                )
+              }}
+            />
+          </FieldGroup>
+        )}
 
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => {
-          form.setFieldValue('incomeEntries', PREV_YEAR_ENTRIES.income)
-          form.setFieldValue('expenseEntries', PREV_YEAR_ENTRIES.expense)
-        }}
-      >
-        <CopyIcon />
-        前年度からコピー
-      </Button>
-    </div>
+        {showCopyButton && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              form.setFieldValue('incomeEntries', PREV_YEAR_ENTRIES.income)
+              form.setFieldValue('expenseEntries', PREV_YEAR_ENTRIES.expense)
+            }}
+          >
+            <CopyIcon />
+            前年度からコピー
+          </Button>
+        )}
+      </div>
+    )}
 
     <Separator />
 

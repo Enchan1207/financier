@@ -1,7 +1,7 @@
 import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import { formatCurrency } from '@frontend/lib/format'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { LockIcon, PencilIcon, TriangleAlertIcon } from 'lucide-react'
 import { useState } from 'react'
 
@@ -78,6 +78,20 @@ const BudgetYearPage: React.FC = () => {
     setCloseDialogOpen(false)
   }
 
+  const checkBalance = (newAnnualBudget: number): boolean => {
+    if (!editingItem) return false
+    const isIncome = incomeItems.some(
+      (i) => i.categoryId === editingItem.categoryId,
+    )
+    const newTotalIncome = isIncome
+      ? totalIncomeBudget - editingItem.annualBudget + newAnnualBudget
+      : totalIncomeBudget
+    const newTotalExpense = isIncome
+      ? totalExpenseBudget
+      : totalExpenseBudget - editingItem.annualBudget + newAnnualBudget
+    return newTotalExpense > newTotalIncome
+  }
+
   const handleSaveItem = async (updated: BudgetItem): Promise<void> => {
     await new Promise<void>((resolve) => setTimeout(resolve, 500))
     const updateList = (items: BudgetItem[]) =>
@@ -102,9 +116,11 @@ const BudgetYearPage: React.FC = () => {
         <div className="flex items-center gap-2">
           {status === 'active' ? (
             <>
-              <Button size="sm" variant="outline">
-                <PencilIcon />
-                編集
+              <Button asChild size="sm" variant="outline">
+                <Link to="/budget/$year/edit" params={{ year }}>
+                  <PencilIcon />
+                  編集
+                </Link>
               </Button>
               <Button
                 size="sm"
@@ -153,6 +169,7 @@ const BudgetYearPage: React.FC = () => {
             if (!v) setEditingItem(null)
           }}
           onSave={handleSaveItem}
+          checkBalance={checkBalance}
         />
       )}
 
