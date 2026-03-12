@@ -36,9 +36,10 @@ export const BudgetBar: React.FC<Props> = ({
   return (
     <div className="flex flex-col gap-1 justify-start h-[60px]">
       <div className="text-sm flex items-center justify-between gap-2 min-w-0">
-        <span className="truncate">{label}</span>
-
-        {action}
+        <span className="flex items-center gap-1 min-w-0">
+          <span className="truncate">{label}</span>
+          {action}
+        </span>
 
         <span className="text-foreground min-w-1/5 text-right flex-shrink-0">
           {formatCurrency(current)} / {formatCurrency(max)}
