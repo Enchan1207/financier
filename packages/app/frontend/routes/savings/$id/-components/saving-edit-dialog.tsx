@@ -22,7 +22,7 @@ import {
 import dayjs from '@frontend/lib/date'
 import type { SavingDefinition } from '@frontend/lib/types'
 import { useForm } from '@tanstack/react-form'
-import { CalendarIcon, XIcon } from 'lucide-react'
+import { CalendarIcon, Loader2Icon, XIcon } from 'lucide-react'
 import type React from 'react'
 import { z } from 'zod'
 
@@ -38,7 +38,7 @@ type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   saving: SavingDefinition
-  onSave: (targetAmount: number, deadline: string) => void
+  onSave: (targetAmount: number, deadline: string) => Promise<void>
 }
 
 export const SavingEditDialog: React.FC<Props> = ({
@@ -55,14 +55,15 @@ export const SavingEditDialog: React.FC<Props> = ({
     validators: {
       onSubmit: formSchema,
     },
-    onSubmit: ({ value, formApi }) => {
-      onSave(parseInt(value.targetAmount, 10), value.deadline)
+    onSubmit: async ({ value, formApi }) => {
+      await onSave(parseInt(value.targetAmount, 10), value.deadline)
       formApi.reset()
       onOpenChange(false)
     },
   })
 
   const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && form.state.isSubmitting) return
     if (nextOpen) {
       form.reset({
         targetAmount: saving.targetAmount?.toString() ?? '',
@@ -80,14 +81,16 @@ export const SavingEditDialog: React.FC<Props> = ({
         </DialogHeader>
 
         <form.Subscribe
-          selector={(state) => state.values.targetAmount}
-          children={(targetAmount) => (
+          selector={(state) =>
+            [state.values.targetAmount, state.isSubmitting] as const
+          }
+          children={([targetAmount, isSubmitting]) => (
             <>
               <form
                 id="saving-edit-form"
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault()
-                  void form.handleSubmit()
+                  await form.handleSubmit()
                 }}
               >
                 <FieldGroup>
@@ -200,6 +203,7 @@ export const SavingEditDialog: React.FC<Props> = ({
                 <Button
                   type="button"
                   variant="ghost"
+                  disabled={isSubmitting}
                   onClick={() => {
                     onOpenChange(false)
                   }}
@@ -209,8 +213,11 @@ export const SavingEditDialog: React.FC<Props> = ({
                 <Button
                   type="submit"
                   form="saving-edit-form"
-                  disabled={!targetAmount}
+                  disabled={!targetAmount || isSubmitting}
                 >
+                  <Loader2Icon
+                    className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
+                  />
                   保存
                 </Button>
               </DialogFooter>

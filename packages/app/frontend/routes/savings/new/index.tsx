@@ -26,7 +26,7 @@ import {
 import dayjs from '@frontend/lib/date'
 import { useForm } from '@tanstack/react-form'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeftIcon, CalendarIcon, XIcon } from 'lucide-react'
+import { ArrowLeftIcon, CalendarIcon, Loader2Icon, XIcon } from 'lucide-react'
 import { z } from 'zod'
 
 type SavingType = 'goal' | 'free'
@@ -61,8 +61,9 @@ const SavingNewPage: React.FC = () => {
     validators: {
       onSubmit: formSchema,
     },
-    onSubmit: () => {
+    onSubmit: async () => {
       // モック：実際にはAPIを呼び出してカテゴリと積立定義を同時に作成する
+      await new Promise((resolve) => setTimeout(resolve, 800))
       void navigate({ to: '/savings' })
     },
   })
@@ -81,9 +82,9 @@ const SavingNewPage: React.FC = () => {
 
       <form
         className="space-y-6 max-w-2xl lg:max-w-full"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault()
-          void form.handleSubmit()
+          await form.handleSubmit()
         }}
       >
         <FieldGroup>
@@ -303,6 +304,9 @@ const SavingNewPage: React.FC = () => {
                   isSubmitting
                 }
               >
+                <Loader2Icon
+                  className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
+                />
                 積立を作成
               </Button>
               <Button asChild variant="ghost">

@@ -319,8 +319,12 @@ const SavingDetailPage: React.FC = () => {
   }
 
   // 積立設定の編集（目標額・期限の変更）
-  const handleEditSave = (targetAmount: number, deadline: string) => {
+  const handleEditSave = async (
+    targetAmount: number,
+    deadline: string,
+  ): Promise<void> => {
     // モック：実際にはAPIを呼び出して積立定義を更新する
+    await new Promise((resolve) => setTimeout(resolve, 800))
     const remaining = Math.max(targetAmount - saving.balance, 0)
     const monthsLeft = deadline
       ? Math.max(dayjs(deadline).diff(dayjs(TODAY), 'month'), 0)
