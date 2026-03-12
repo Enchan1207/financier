@@ -1,6 +1,6 @@
 import { Button } from '@frontend/components/ui/button'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeftIcon } from 'lucide-react'
+import { ArrowLeftIcon, Loader2Icon } from 'lucide-react'
 import { useState } from 'react'
 
 import {
@@ -27,7 +27,7 @@ const BudgetEditPage: React.FC = () => {
   const [balanceError, setBalanceError] = useState(false)
 
   const form = useBudgetNewForm(
-    ({ incomeEntries, expenseEntries }) => {
+    async ({ incomeEntries, expenseEntries }) => {
       const totalIncome = incomeEntries.reduce(
         (s, e) => s + parseInt(e.annualBudget || '0', 10),
         0,
@@ -42,6 +42,7 @@ const BudgetEditPage: React.FC = () => {
       }
       setBalanceError(false)
       // モック：実際には API を呼び出して保存する
+      await new Promise((resolve) => setTimeout(resolve, 800))
       void navigate({ to: '/budget/$year', params: { year } })
     },
     {
@@ -101,6 +102,9 @@ const BudgetEditPage: React.FC = () => {
           children={(isSubmitting) => (
             <div className="flex gap-2">
               <Button type="submit" disabled={isSubmitting}>
+                <Loader2Icon
+                  className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
+                />
                 変更を保存
               </Button>
               <Button asChild variant="ghost">
