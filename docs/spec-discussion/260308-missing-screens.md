@@ -15,7 +15,7 @@
 | トランザクション編集・削除 | UC-1.3, UC-1.4 | ✅ 実装済み | 高 |
 | カテゴリ管理 | UC-2.1〜2.3 | ✅ 実装済み | 高 |
 | 年度予算作成 | UC-3.1 | ✅ 実装済み | 高 |
-| カテゴリ予算の設定・変更 | UC-3.2 | ❌ 未実装 | 高 |
+| カテゴリ予算の設定・変更 | UC-3.2 | ✅ 実装済み | 高 |
 | 予算の再配分 | UC-3.3 | ❌ 未実装 | 中 |
 | 年度締め | UC-6.1 | ✅ 実装済み | 中 |
 | 分析・可視化 | UC-7.1〜7.7 | ❌ 未実装 | 低 |
@@ -126,9 +126,11 @@ routes/categories/
 
 **UC-3.2（カテゴリ予算の設定・変更）**:
 
-- `/budget/$year` の各カテゴリ行に「編集」ボタンを追加し、ダイアログで編集
-- 予算定義ヘルパを提供：「月額固定」タブ（入力値 × 12）と「月ごと変動」タブ（12か月分を入力して合算）
-- 支出予算合計 > 収入予算合計のとき、ページ上部に警告バナーを表示（操作は止めない）
+- `/budget/$year` の各カテゴリ行に「編集（鉛筆）」ボタンを追加し、`BudgetInputDialog` でダイアログ編集
+- 予算定義ヘルパを提供：「年額」「月額固定」（入力値 × 12）「月ごと変動」（12か月分を入力して合算）タブ
+- 支出予算合計 > 収入予算合計のとき、ページ上部に警告バナーを表示
+- 保存時に収支チェックを行い、超過する場合はエラー表示・保存ブロック
+- ヘッダー右上の「編集」ボタン → `/budget/$year/edit` へ遷移し、`/budget/new` フォームを流用した全体編集ページで一括変更可能（こちらも保存時に収支バリデーション）
 
 **UC-3.3（予算の再配分）**:
 
@@ -138,15 +140,10 @@ routes/categories/
 ### 実装手順
 
 1. ~~`routes/budget/new/index.tsx` を実装（UC-3.1）~~ → **実装済み**
-2. `routes/budget/-components/budget-input-dialog.tsx` を新規作成（UC-3.2）
-   - タブ切り替えで「月額固定」と「月ごと変動」を提供
-   - 変動タブでは 12 か月分の入力フィールドを並べ、合算を `form.Subscribe` でリアルタイム表示
+2. ~~`routes/budget/-components/budget-input-dialog.tsx` を新規作成（UC-3.2）~~ → **実装済み**
 3. `routes/budget/-components/reallocation-dialog.tsx` を新規作成（UC-3.3）
    - 差分プレビューは再配分前後の年額を横並びで表示する
-4. `routes/budget/$year/index.tsx` を改修
-   - 各カテゴリ行に「編集」ボタン追加（→ `budget-input-dialog.tsx`）
-   - ページ上部に「再配分」ボタン追加（→ `reallocation-dialog.tsx`）
-   - 収支バランス警告バナーをページ上部に追加
+4. ~~`routes/budget/$year/index.tsx` を改修~~ → **実装済み**（鉛筆ダイアログ・収支バリデーション・編集ボタン接続）
 
 ### 実装済み内容（UC-3.1）
 
@@ -170,13 +167,42 @@ routes/budget/new/
 - 各セクションの末尾に合計行（`TableFooter`）を表示
 - ページ末尾の収支サマリに積み上げ横棒グラフを表示。`BudgetSummaryBar` を `$year/` ページと共通化し、収支逆転時は「不足分」を収入バーへ、余剰時は「未割り当て」を支出バーへ追加して両バーの軸スケールを揃える
 
-### 残りのファイル構成（UC-3.2〜3.3）
+### 実装済み内容（UC-3.2）
+
+Container-Presentation パターンで実装。
 
 ```
 routes/budget/
-├── $year/index.tsx                       ← 改修（編集・再配分ボタン追加）
+├── $year/
+│   ├── index.tsx                         ← 改修（鉛筆ダイアログ統合・編集ボタン接続・収支バリデーション）
+│   └── edit/
+│       └── index.tsx                     ← 新規（全体編集ページ）
 └── -components/
-    ├── budget-input-dialog.tsx           ← 新規（UC-3.2）
+    └── budget-input-dialog.tsx           ← 新規（カテゴリ個別編集ダイアログ）
+```
+
+また `budget/new` フォームを全体編集ページで流用するため以下も改修した：
+
+```
+routes/budget/new/
+└── -components/
+    ├── use-budget-new-form.ts            ← 改修（initialEntries オプション追加）
+    └── budget-new-form/
+        └── index.tsx                     ← 改修（showYearField / showCopyButton props 追加）
+```
+
+**設計上の決定事項**:
+
+- 2つのエントリポイントを整備：鉛筆ダイアログ（1カテゴリをサクッと調整）と全体編集ページ（複数カテゴリを一括見直し）
+- どちらも保存時に収支バリデーションを実施し、支出 > 収入なら保存ブロック
+- 閲覧ページの収支超過警告バナーは引き続き維持（状況把握用）
+- `checkBalance` コールバックをダイアログに渡す方式でカテゴリ種別（収入/支出）の判定を親に委譲
+
+### 残りのファイル構成（UC-3.3）
+
+```
+routes/budget/
+└── -components/
     └── reallocation-dialog.tsx           ← 新規（UC-3.3）
 ```
 
