@@ -50,7 +50,7 @@ import { TODAY } from '@frontend/lib/today'
 import type { TransactionType } from '@frontend/lib/types'
 import { useForm } from '@tanstack/react-form'
 import { createFileRoute } from '@tanstack/react-router'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Loader2Icon, Pencil, Plus, Trash2 } from 'lucide-react'
 import React, { useState } from 'react'
 import { z } from 'zod'
 
@@ -440,13 +440,13 @@ const formatFiscalYearMonth = (dateStr: string): string => {
 // フォームインスタンスの型
 const useTransactionForm = (
   defaultValues: TransactionFormValues,
-  onSubmit: (values: TransactionFormValues) => void,
+  onSubmit: (values: TransactionFormValues) => Promise<void>,
 ) =>
   useForm({
     defaultValues,
     validators: { onChange: transactionFormSchema },
-    onSubmit: ({ value }) => {
-      onSubmit(value)
+    onSubmit: async ({ value }) => {
+      await onSubmit(value)
     },
   })
 
@@ -611,7 +611,7 @@ const TransactionFormFields: React.FC<{ form: TransactionFormInstance }> = ({
 )
 
 const AddTransactionDialog: React.FC<{
-  onAdd: (t: Transaction) => void
+  onAdd: (t: Transaction) => Promise<void>
 }> = ({ onAdd }) => {
   const [open, setOpen] = useState(false)
 
@@ -624,12 +624,12 @@ const AddTransactionDialog: React.FC<{
       transactionDate: TODAY,
       eventId: '',
     },
-    (values) => {
+    async (values) => {
       const selectedCategory = categories.find(
         (c) => c.id === values.categoryId,
       )
       const selectedEvent = events.find((e) => e.id === values.eventId)
-      onAdd({
+      await onAdd({
         id: `tx-${dayjs().timestamp()}`,
         type: values.type,
         categoryId: values.categoryId,
@@ -645,6 +645,7 @@ const AddTransactionDialog: React.FC<{
   )
 
   const handleOpenChange = (v: boolean) => {
+    if (form.state.isSubmitting) return
     if (!v) form.reset()
     setOpen(v)
   }
@@ -663,13 +664,16 @@ const AddTransactionDialog: React.FC<{
         </DialogHeader>
         <TransactionFormFields form={form} />
         <form.Subscribe
-          selector={(state) => state.canSubmit}
-          children={(canSubmit) => (
+          selector={(state) => [state.canSubmit, state.isSubmitting] as const}
+          children={([canSubmit, isSubmitting]) => (
             <Button
               className="w-full"
-              disabled={!canSubmit}
+              disabled={!canSubmit || isSubmitting}
               onClick={() => form.handleSubmit()}
             >
+              <Loader2Icon
+                className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
+              />
               記録する
             </Button>
           )}
@@ -683,7 +687,7 @@ const EditTransactionDialog: React.FC<{
   transaction: Transaction
   open: boolean
   onOpenChange: (v: boolean) => void
-  onSave: (t: Transaction) => void
+  onSave: (t: Transaction) => Promise<void>
 }> = ({ transaction, open, onOpenChange, onSave }) => {
   const form = useTransactionForm(
     {
@@ -694,12 +698,12 @@ const EditTransactionDialog: React.FC<{
       transactionDate: transaction.transactionDate,
       eventId: transaction.eventId ?? '',
     },
-    (values) => {
+    async (values) => {
       const selectedCategory = categories.find(
         (c) => c.id === values.categoryId,
       )
       const selectedEvent = events.find((e) => e.id === values.eventId)
-      onSave({
+      await onSave({
         ...transaction,
         type: values.type,
         categoryId: values.categoryId,
@@ -713,21 +717,29 @@ const EditTransactionDialog: React.FC<{
     },
   )
 
+  const handleOpenChange = (v: boolean) => {
+    if (form.state.isSubmitting) return
+    onOpenChange(v)
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>取引を編集</DialogTitle>
         </DialogHeader>
         <TransactionFormFields form={form} />
         <form.Subscribe
-          selector={(state) => state.canSubmit}
-          children={(canSubmit) => (
+          selector={(state) => [state.canSubmit, state.isSubmitting] as const}
+          children={([canSubmit, isSubmitting]) => (
             <Button
               className="w-full"
-              disabled={!canSubmit}
+              disabled={!canSubmit || isSubmitting}
               onClick={() => form.handleSubmit()}
             >
+              <Loader2Icon
+                className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
+              />
               保存する
             </Button>
           )}
@@ -759,11 +771,13 @@ const TransactionsPage: React.FC = () => {
   }
   const groups = [...groupMap.entries()]
 
-  const handleAdd = (t: Transaction) => {
+  const handleAdd = async (t: Transaction): Promise<void> => {
+    await new Promise((resolve) => setTimeout(resolve, 800))
     setTransactions((prev) => [...prev, t])
   }
 
-  const handleSave = (updated: Transaction) => {
+  const handleSave = async (updated: Transaction): Promise<void> => {
+    await new Promise((resolve) => setTimeout(resolve, 800))
     setTransactions((prev) =>
       prev.map((t) => (t.id === updated.id ? updated : t)),
     )
