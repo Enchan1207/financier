@@ -26,7 +26,7 @@ import {
   Zap,
 } from 'lucide-react'
 
-import type { CategoryColor, CategoryIcon } from './types'
+import type { CategoryColor, CategoryIconType } from './types'
 
 const iconMap: Record<string, React.FC<LucideProps>> = {
   tag: Tag,
@@ -56,7 +56,7 @@ const iconMap: Record<string, React.FC<LucideProps>> = {
 }
 
 type Props = LucideProps & {
-  icon: CategoryIcon
+  icon: CategoryIconType
   color: CategoryColor
 }
 

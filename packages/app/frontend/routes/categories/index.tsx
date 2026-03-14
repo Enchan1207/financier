@@ -1,7 +1,7 @@
 import { CategoryIcon } from '@frontend/components/category/category-icon'
 import type {
   CategoryColor,
-  CategoryIcon as CategoryIconType,
+  CategoryIconType,
 } from '@frontend/components/category/types'
 import {
   AlertDialog,

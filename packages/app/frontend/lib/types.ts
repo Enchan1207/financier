@@ -4,7 +4,7 @@
 
 import type {
   CategoryColor,
-  CategoryIcon,
+  CategoryIconType,
 } from '@frontend/components/category/types'
 
 export type TransactionType = 'income' | 'expense'
@@ -14,7 +14,7 @@ export type Category = {
   name: string
   type: TransactionType
   isSaving: boolean
-  icon: CategoryIcon
+  icon: CategoryIconType
   color: CategoryColor
 }
 

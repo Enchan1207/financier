@@ -1,3 +1,8 @@
+import { CategoryIcon } from '@frontend/components/category/category-icon'
+import type {
+  CategoryColor,
+  CategoryIconType,
+} from '@frontend/components/category/types'
 import { Button } from '@frontend/components/ui/button'
 import {
   Dialog,
@@ -19,9 +24,12 @@ import type React from 'react'
 import { z } from 'zod'
 
 import type { Category } from '../index'
+import { CategoryAppearanceSelector } from './category-appearance-selector'
 
 const editCategorySchema = z.object({
   name: z.string().min(1, 'カテゴリ名を入力してください'),
+  icon: z.string().min(1, 'アイコンを選択してください'),
+  color: z.string().min(1, '色を選択してください'),
 })
 
 type Props = {
@@ -38,10 +46,23 @@ export const EditCategoryDialog: React.FC<Props> = ({
   onSave,
 }) => {
   const form = useForm({
-    defaultValues: { name: category.name },
+    defaultValues: {
+      name: category.name,
+      icon: category.icon as string,
+      color: category.color as string,
+    },
     validators: { onChange: editCategorySchema },
-    onSubmit: async ({ value }: { value: { name: string } }) => {
-      await onSave({ ...category, name: value.name.trim() })
+    onSubmit: async ({
+      value,
+    }: {
+      value: { name: string; icon: string; color: string }
+    }) => {
+      await onSave({
+        ...category,
+        name: value.name.trim(),
+        icon: value.icon as CategoryIconType,
+        color: value.color as CategoryColor,
+      })
       onOpenChange(false)
     },
   })
@@ -66,6 +87,32 @@ export const EditCategoryDialog: React.FC<Props> = ({
           }}
         >
           <FieldGroup>
+            {/* プレビュー */}
+            <form.Subscribe
+              selector={(state) =>
+                [
+                  state.values.icon as CategoryIconType | '',
+                  state.values.color as CategoryColor | '',
+                  state.values.name,
+                ] as const
+              }
+              children={([icon, color, name]) =>
+                icon && color ? (
+                  <div className="flex items-center gap-3 rounded-md border p-3">
+                    <CategoryIcon
+                      icon={icon}
+                      color={color}
+                      className="size-6"
+                    />
+                    <span className="text-sm font-medium">
+                      {name || category.name}
+                    </span>
+                  </div>
+                ) : null
+              }
+            />
+
+            {/* カテゴリ名 */}
             <form.Field
               name="name"
               children={(field) => {
@@ -91,27 +138,64 @@ export const EditCategoryDialog: React.FC<Props> = ({
                 )
               }}
             />
+
+            {/* 色・アイコン選択 */}
+            <form.Field
+              name="color"
+              children={(colorField) => (
+                <form.Field
+                  name="icon"
+                  children={(iconField) => (
+                    <CategoryAppearanceSelector
+                      icon={iconField.state.value}
+                      color={colorField.state.value}
+                      onIconChange={iconField.handleChange}
+                      onColorChange={colorField.handleChange}
+                      onBlur={() => {
+                        colorField.handleBlur()
+                        iconField.handleBlur()
+                      }}
+                      isColorInvalid={
+                        colorField.state.meta.isTouched &&
+                        !colorField.state.meta.isValid
+                      }
+                      isIconInvalid={
+                        iconField.state.meta.isTouched &&
+                        !iconField.state.meta.isValid
+                      }
+                      colorErrors={colorField.state.meta.errors}
+                      iconErrors={iconField.state.meta.errors}
+                    />
+                  )}
+                />
+              )}
+            />
           </FieldGroup>
 
           <form.Subscribe
-            selector={(state) => [state.values.name, state.isSubmitting]}
-            children={([name, isSubmitting]) => (
+            selector={(state) =>
+              [
+                state.values.name,
+                state.values.icon,
+                state.values.color,
+                state.isSubmitting,
+              ] as const
+            }
+            children={([name, icon, color, isSubmitting]) => (
               <DialogFooter className="mt-6">
                 <Button
                   type="submit"
-                  disabled={
-                    !(name as string).trim() || (isSubmitting as boolean)
-                  }
+                  disabled={!name.trim() || !icon || !color || isSubmitting}
                 >
                   <Loader2Icon
-                    className={`animate-spin ${(isSubmitting as boolean) ? '' : 'hidden'}`}
+                    className={`animate-spin ${isSubmitting ? '' : 'hidden'}`}
                   />
                   保存
                 </Button>
                 <Button
                   type="button"
                   variant="ghost"
-                  disabled={isSubmitting as boolean}
+                  disabled={isSubmitting}
                   onClick={() => {
                     handleOpenChange(false)
                   }}
