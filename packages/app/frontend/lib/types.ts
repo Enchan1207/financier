@@ -1,3 +1,7 @@
+/**
+ * このモジュールはバックエンド実装までのモックであり、将来的に削除される予定です。
+ */
+
 export type TransactionType = 'income' | 'expense'
 
 export type CategoryIcon =
