@@ -1,4 +1,4 @@
-import { CategoryIcon } from '@frontend/components/category/category-icon'
+import { CategorySelect } from '@frontend/components/category/category-select'
 import type {
   CategoryColor,
   CategoryIconType,
@@ -103,34 +103,16 @@ export const TemplateFormItem: React.FC<Props> = ({
           return (
             <Field data-invalid={isInvalid}>
               <FieldLabel htmlFor={`cat-${index}`}>カテゴリ</FieldLabel>
-              <Select
+              <CategorySelect
+                id={`cat-${index}`}
+                className="w-full"
+                aria-invalid={isInvalid}
+                categories={SELECTABLE_CATEGORIES}
                 value={field.state.value}
                 onValueChange={(v) => {
                   field.handleChange(v)
                 }}
-              >
-                <SelectTrigger
-                  id={`cat-${index}`}
-                  className="w-full"
-                  aria-invalid={isInvalid}
-                >
-                  <SelectValue placeholder="カテゴリを選択" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SELECTABLE_CATEGORIES.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      <span className="flex items-center gap-2">
-                        <CategoryIcon
-                          icon={cat.icon}
-                          color={cat.color}
-                          className="size-4 shrink-0"
-                        />
-                        {cat.name}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
               {isInvalid && <FieldError errors={field.state.meta.errors} />}
             </Field>
           )

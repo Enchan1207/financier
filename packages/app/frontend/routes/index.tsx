@@ -1,3 +1,4 @@
+import { CategorySelect } from '@frontend/components/category/category-select'
 import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import {
@@ -8,13 +9,6 @@ import {
 } from '@frontend/components/ui/card'
 import { Input } from '@frontend/components/ui/input'
 import { Progress } from '@frontend/components/ui/progress'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@frontend/components/ui/select'
 import { formatCurrency, formatDate } from '@frontend/lib/format'
 import { TODAY } from '@frontend/lib/today'
 import type {
@@ -546,18 +540,13 @@ const HomePage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:gap-3">
-            <Select value={formCategory} onValueChange={setFormCategory}>
-              <SelectTrigger className="sm:w-40">
-                <SelectValue placeholder="カテゴリ" />
-              </SelectTrigger>
-              <SelectContent>
-                {expenseCategories.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <CategorySelect
+              className="sm:w-40"
+              placeholder="カテゴリ"
+              categories={expenseCategories}
+              value={formCategory}
+              onValueChange={setFormCategory}
+            />
 
             <div className="relative sm:w-32">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">

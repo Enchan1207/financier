@@ -1,3 +1,5 @@
+import type { CategorySelectItem } from '@frontend/components/category/category-select'
+import { CategorySelect } from '@frontend/components/category/category-select'
 import { Button } from '@frontend/components/ui/button'
 import { Calendar } from '@frontend/components/ui/calendar'
 import {
@@ -19,33 +21,27 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@frontend/components/ui/popover'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@frontend/components/ui/select'
 import dayjs from '@frontend/lib/date'
 import { useForm } from '@tanstack/react-form'
 import { CalendarIcon } from 'lucide-react'
 import type React from 'react'
 import { z } from 'zod'
+
 // 選択可能カテゴリ：isSaving=false のアクティブカテゴリのみ（UC-5.4）
-const SELECTABLE_CATEGORIES = [
-  { id: 'cat-1', name: '食費' },
-  { id: 'cat-2', name: '交通費' },
-  { id: 'cat-3', name: '外食' },
-  { id: 'cat-4', name: '娯楽・グッズ' },
-  { id: 'cat-5', name: '衣服' },
-  { id: 'cat-6', name: '日用品' },
-  { id: 'cat-7', name: '美容' },
+const SELECTABLE_CATEGORIES: CategorySelectItem[] = [
+  { id: 'cat-1', name: '食費', icon: 'utensils', color: 'red' },
+  { id: 'cat-2', name: '交通費', icon: 'bus', color: 'blue' },
+  { id: 'cat-3', name: '外食', icon: 'coffee', color: 'orange' },
+  { id: 'cat-4', name: '娯楽・グッズ', icon: 'music', color: 'purple' },
+  { id: 'cat-5', name: '衣服', icon: 'shirt', color: 'pink' },
+  { id: 'cat-6', name: '日用品', icon: 'shopping_cart', color: 'teal' },
+  { id: 'cat-7', name: '美容', icon: 'heart_pulse', color: 'pink' },
 ]
 
 const formSchema = z.object({
   date: z.string().min(1, '日付を入力してください'),
   name: z.string().min(1, '内容を入力してください'),
-  categoryName: z.string().min(1, 'カテゴリを入力してください'),
+  categoryId: z.string().min(1, 'カテゴリを入力してください'),
   amount: z.string().min(1, '金額を入力してください'),
 })
 
@@ -71,17 +67,18 @@ export const EventAddTransactionDialog: React.FC<Props> = ({
     defaultValues: {
       date: dayjs().format('YYYY-MM-DD'),
       name: '',
-      categoryName: '',
+      categoryId: '',
       amount: '',
     },
     validators: {
       onSubmit: formSchema,
     },
     onSubmit: ({ value, formApi }) => {
+      const cat = SELECTABLE_CATEGORIES.find((c) => c.id === value.categoryId)
       onAdd({
         date: value.date,
         name: value.name.trim(),
-        categoryName: value.categoryName.trim(),
+        categoryName: cat?.name ?? '',
         amount: Number(value.amount),
       })
       formApi.reset()
@@ -106,12 +103,12 @@ export const EventAddTransactionDialog: React.FC<Props> = ({
             [
               state.values.date,
               state.values.name,
-              state.values.categoryName,
+              state.values.categoryId,
               state.values.amount,
               state.isSubmitting,
             ] as const
           }
-          children={([date, name, categoryName, amount, isSubmitting]) => (
+          children={([date, name, categoryId, amount, isSubmitting]) => (
             <>
               <form
                 id="event-add-transaction-form"
@@ -211,7 +208,7 @@ export const EventAddTransactionDialog: React.FC<Props> = ({
                   />
 
                   <form.Field
-                    name="categoryName"
+                    name="categoryId"
                     children={(field) => {
                       const isInvalid =
                         field.state.meta.isTouched && !field.state.meta.isValid
@@ -219,7 +216,10 @@ export const EventAddTransactionDialog: React.FC<Props> = ({
                       return (
                         <Field data-invalid={isInvalid}>
                           <FieldLabel htmlFor={field.name}>カテゴリ</FieldLabel>
-                          <Select
+                          <CategorySelect
+                            id={field.name}
+                            aria-invalid={isInvalid}
+                            categories={SELECTABLE_CATEGORIES}
                             value={field.state.value}
                             onValueChange={(value) => {
                               field.handleChange(value)
@@ -228,21 +228,7 @@ export const EventAddTransactionDialog: React.FC<Props> = ({
                               if (!open) field.handleBlur()
                             }}
                             disabled={isSubmitting}
-                          >
-                            <SelectTrigger
-                              id={field.name}
-                              aria-invalid={isInvalid}
-                            >
-                              <SelectValue placeholder="カテゴリを選択" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {SELECTABLE_CATEGORIES.map((c) => (
-                                <SelectItem key={c.id} value={c.name}>
-                                  {c.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          />
                           {isInvalid && (
                             <FieldError errors={field.state.meta.errors} />
                           )}
@@ -291,7 +277,7 @@ export const EventAddTransactionDialog: React.FC<Props> = ({
                   disabled={
                     !date ||
                     !name.trim() ||
-                    !categoryName.trim() ||
+                    !categoryId ||
                     !amount ||
                     isSubmitting
                   }

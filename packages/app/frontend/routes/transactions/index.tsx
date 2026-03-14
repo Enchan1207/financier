@@ -1,4 +1,5 @@
 import { CategoryIcon } from '@frontend/components/category/category-icon'
+import { CategorySelect } from '@frontend/components/category/category-select'
 import type {
   CategoryColor,
   CategoryIconType,
@@ -524,28 +525,13 @@ const TransactionFormFields: React.FC<{ form: TransactionFormInstance }> = ({
             return (
               <div className="space-y-1.5">
                 <Label htmlFor="tx-category">カテゴリ</Label>
-                <Select
+                <CategorySelect
+                  id="tx-category"
+                  className="w-full"
+                  categories={filteredCategories}
                   value={field.state.value}
                   onValueChange={field.handleChange}
-                >
-                  <SelectTrigger id="tx-category" className="w-full">
-                    <SelectValue placeholder="カテゴリを選択" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredCategories.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        <span className="flex items-center gap-2">
-                          <CategoryIcon
-                            icon={c.icon}
-                            color={c.color}
-                            className="size-4 shrink-0"
-                          />
-                          {c.name}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                />
               </div>
             )
           }}

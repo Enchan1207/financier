@@ -1,3 +1,7 @@
+import type {
+  CategoryColor,
+  CategoryIconType,
+} from '@frontend/components/category/types'
 import dayjs from '@frontend/lib/date'
 import { useForm } from '@tanstack/react-form'
 import { z } from 'zod'
@@ -34,31 +38,33 @@ export type BudgetEntry = {
 export type AvailableCategory = {
   id: string
   name: string
+  icon: CategoryIconType
+  color: CategoryColor
 }
 
 export const AVAILABLE_INCOME_CATEGORIES: AvailableCategory[] = [
-  { id: 'cat-inc-01', name: '給与' },
-  { id: 'cat-inc-02', name: '副業' },
-  { id: 'cat-inc-03', name: '配当' },
+  { id: 'cat-inc-01', name: '給与', icon: 'wallet', color: 'green' },
+  { id: 'cat-inc-02', name: '副業', icon: 'briefcase', color: 'blue' },
+  { id: 'cat-inc-03', name: '配当', icon: 'trending_up', color: 'yellow' },
 ]
 
 export const AVAILABLE_EXPENSE_CATEGORIES: AvailableCategory[] = [
-  { id: 'cat-exp-01', name: '光熱費' },
-  { id: 'cat-exp-02', name: '衣服' },
-  { id: 'cat-exp-03', name: '医療費' },
-  { id: 'cat-exp-04', name: '通信費' },
-  { id: 'cat-exp-05', name: '食費' },
-  { id: 'cat-exp-06', name: '外食' },
-  { id: 'cat-exp-07', name: '日用品' },
-  { id: 'cat-exp-08', name: '娯楽・グッズ' },
-  { id: 'cat-exp-09', name: '美容' },
-  { id: 'cat-exp-10', name: '交通費' },
-  { id: 'cat-exp-11', name: '書籍・教育' },
-  { id: 'cat-exp-12', name: 'サブスク' },
-  { id: 'cat-exp-13', name: '保険' },
-  { id: 'cat-exp-14', name: '家賃' },
-  { id: 'cat-exp-15', name: '積立：遠征費' },
-  { id: 'cat-exp-16', name: '積立：グッズ' },
+  { id: 'cat-exp-01', name: '光熱費', icon: 'zap', color: 'yellow' },
+  { id: 'cat-exp-02', name: '衣服', icon: 'shirt', color: 'pink' },
+  { id: 'cat-exp-03', name: '医療費', icon: 'heart_pulse', color: 'red' },
+  { id: 'cat-exp-04', name: '通信費', icon: 'wifi', color: 'blue' },
+  { id: 'cat-exp-05', name: '食費', icon: 'utensils', color: 'red' },
+  { id: 'cat-exp-06', name: '外食', icon: 'coffee', color: 'orange' },
+  { id: 'cat-exp-07', name: '日用品', icon: 'shopping_cart', color: 'teal' },
+  { id: 'cat-exp-08', name: '娯楽・グッズ', icon: 'music', color: 'purple' },
+  { id: 'cat-exp-09', name: '美容', icon: 'heart_pulse', color: 'pink' },
+  { id: 'cat-exp-10', name: '交通費', icon: 'bus', color: 'blue' },
+  { id: 'cat-exp-11', name: '書籍・教育', icon: 'book', color: 'orange' },
+  { id: 'cat-exp-12', name: 'サブスク', icon: 'tag', color: 'teal' },
+  { id: 'cat-exp-13', name: '保険', icon: 'piggy_bank', color: 'green' },
+  { id: 'cat-exp-14', name: '家賃', icon: 'house', color: 'orange' },
+  { id: 'cat-exp-15', name: '積立：遠征費', icon: 'plane', color: 'blue' },
+  { id: 'cat-exp-16', name: '積立：グッズ', icon: 'gift', color: 'purple' },
 ]
 
 // 前年度からコピーするためのモックデータ

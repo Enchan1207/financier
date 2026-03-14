@@ -1,3 +1,5 @@
+import { CategoryIcon } from '@frontend/components/category/category-icon'
+import { CategorySelect } from '@frontend/components/category/category-select'
 import { Button } from '@frontend/components/ui/button'
 import { Field, FieldError } from '@frontend/components/ui/field'
 import {
@@ -6,13 +8,6 @@ import {
   InputGroupInput,
   InputGroupText,
 } from '@frontend/components/ui/input-group'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@frontend/components/ui/select'
 import {
   Table,
   TableBody,
@@ -41,7 +36,10 @@ const AddCategorySelect: React.FC<{
   if (availableCategories.length === 0) return null
 
   return (
-    <Select
+    <CategorySelect
+      className="w-full sm:w-64"
+      placeholder="カテゴリを追加…"
+      categories={availableCategories}
       value={value}
       onValueChange={(categoryId) => {
         const cat = availableCategories.find((c) => c.id === categoryId)
@@ -49,18 +47,7 @@ const AddCategorySelect: React.FC<{
         onAdd({ categoryId: cat.id, categoryName: cat.name, annualBudget: '' })
         setValue('')
       }}
-    >
-      <SelectTrigger className="w-full sm:w-64">
-        <SelectValue placeholder="カテゴリを追加…" />
-      </SelectTrigger>
-      <SelectContent>
-        {availableCategories.map((c) => (
-          <SelectItem key={c.id} value={c.id}>
-            {c.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    />
   )
 }
 
@@ -115,7 +102,25 @@ export const BudgetEntriesSection: React.FC<{
                             : '—'
                         return (
                           <TableRow>
-                            <TableCell>{item.categoryName}</TableCell>
+                            <TableCell>
+                              {(() => {
+                                const cat = allCategories.find(
+                                  (c) => c.id === item.categoryId,
+                                )
+                                return (
+                                  <span className="flex items-center gap-2">
+                                    {cat && (
+                                      <CategoryIcon
+                                        icon={cat.icon}
+                                        color={cat.color}
+                                        className="size-4 shrink-0"
+                                      />
+                                    )}
+                                    {item.categoryName}
+                                  </span>
+                                )
+                              })()}
+                            </TableCell>
                             <TableCell>
                               <Field data-invalid={isInvalid}>
                                 <InputGroup>
