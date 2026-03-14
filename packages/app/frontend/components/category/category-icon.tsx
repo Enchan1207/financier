@@ -27,38 +27,38 @@ import {
   Zap,
 } from 'lucide-react'
 
-const iconMap = new Map<CategoryIconType, React.FC<LucideProps>>([
-  ['tag', Tag],
-  ['wallet', Wallet],
-  ['trending_up', TrendingUp],
-  ['trending_down', TrendingDown],
-  ['piggy_bank', PiggyBank],
-  ['house', House],
-  ['utensils', Utensils],
-  ['shopping_cart', ShoppingCart],
-  ['car', Car],
-  ['bus', Bus],
-  ['plane', Plane],
-  ['heart_pulse', HeartPulse],
-  ['graduation_cap', GraduationCap],
-  ['briefcase', Briefcase],
-  ['music', Music],
-  ['zap', Zap],
-  ['wifi', Wifi],
-  ['shirt', Shirt],
-  ['dumbbell', Dumbbell],
-  ['coffee', Coffee],
-  ['gift', Gift],
-  ['book', Book],
-  ['baby', Baby],
-  ['plus', Plus],
-])
+const iconMap: Record<string, React.FC<LucideProps>> = {
+  tag: Tag,
+  wallet: Wallet,
+  trending_up: TrendingUp,
+  trending_down: TrendingDown,
+  piggy_bank: PiggyBank,
+  house: House,
+  utensils: Utensils,
+  shopping_cart: ShoppingCart,
+  car: Car,
+  bus: Bus,
+  plane: Plane,
+  heart_pulse: HeartPulse,
+  graduation_cap: GraduationCap,
+  briefcase: Briefcase,
+  music: Music,
+  zap: Zap,
+  wifi: Wifi,
+  shirt: Shirt,
+  dumbbell: Dumbbell,
+  coffee: Coffee,
+  gift: Gift,
+  book: Book,
+  baby: Baby,
+  plus: Plus,
+}
 
 type Props = LucideProps & {
   icon: CategoryIconType
 }
 
 export function CategoryIcon({ icon, ...props }: Props) {
-  const Icon = iconMap.get(icon) ?? Tag
+  const Icon = iconMap[icon] ?? Tag
   return <Icon {...props} />
 }
