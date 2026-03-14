@@ -67,6 +67,7 @@
     },
     "files.readonlyInclude": {
       "**/routeTree.gen.ts": true,
+      "**/components/ui/**": true,
     },
     "files.watcherExclude": {
       "**/routeTree.gen.ts": true,

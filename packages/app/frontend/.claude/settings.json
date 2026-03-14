@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm -w lint:fix:*)",
+      "Bash(pnpm -w prettier:fix:*)",
+      "Bash(pnpm -F app build)",
+      "mcp__shadcn__*",
+      "Bash(pnpm dlx shadcn@latest add:*)"
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-# AGENTS.md
+# AGENTS.md / CLAUDE.md
 
 ## project overview
 
@@ -40,11 +40,13 @@
   - classes,constants,components: PascalCase
   - module: kebab-case
 - follow the guidelines:
+  - frontend: @ docs/architecture-guideline/frontend.md
   - backend: @ docs/architecture-guideline/backend.md
 - follow the specs:
   - requirements: @docs/spec/requirements.md
   - functions: @docs/spec/functions.md
   - usecases: @docs/spec/usecases.md
+- after all edits, make sure your lint (`pnpm -w lint:fix`), format (`pnpm -w prettier:fix`) and build (`pnpm -F app build`) are successful.
 
 ### forbidden operations
 

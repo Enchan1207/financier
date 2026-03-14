@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": ["Bash(pnpm dlx shadcn@latest *)"],
+    "deny": ["Read(./.env.*.local)"],
+    "defaultMode": "plan"
+  }
+}

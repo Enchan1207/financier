@@ -187,6 +187,36 @@ export default defineConfig(
   // MARK: - Architecture rules
 
   {
+    name: 'LOC limitation for frontend',
+    files: ['**/*.tsx'],
+    rules: {
+      'max-lines': [
+        'warn',
+        {
+          max: 350,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
+    },
+  },
+
+  {
+    name: 'LOC limitation for page component',
+    files: ['**/index.tsx'],
+    rules: {
+      'max-lines': [
+        'warn',
+        {
+          max: 200,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
+    },
+  },
+
+  {
     name: 'Avoid direct import of external package',
     files: ['**/*.{ts,tsx}'],
     rules: {
