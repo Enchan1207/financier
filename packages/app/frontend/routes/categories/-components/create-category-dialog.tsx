@@ -52,6 +52,8 @@ export const CreateCategoryDialog: React.FC<Props> = ({
         name: value.name.trim(),
         status: 'active',
         isSaving: false,
+        icon: 'tag',
+        color: 'blue',
       })
       onOpenChange(false)
     },

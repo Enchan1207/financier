@@ -26,7 +26,7 @@ import {
   Zap,
 } from 'lucide-react'
 
-import type { CategoryIcon as CategoryIconType } from './types'
+import type { CategoryColor, CategoryIcon } from './types'
 
 const iconMap: Record<string, React.FC<LucideProps>> = {
   tag: Tag,
@@ -56,10 +56,13 @@ const iconMap: Record<string, React.FC<LucideProps>> = {
 }
 
 type Props = LucideProps & {
-  icon: CategoryIconType
+  icon: CategoryIcon
+  color: CategoryColor
 }
 
-export function CategoryIcon({ icon, ...props }: Props) {
+export function CategoryIcon({ icon, color, ...props }: Props) {
   const Icon = iconMap[icon] ?? Tag
-  return <Icon {...props} />
+  const iconColor = `var(--category-${color})`
+
+  return <Icon {...props} color={iconColor} />
 }

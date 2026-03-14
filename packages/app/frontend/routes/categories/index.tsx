@@ -1,3 +1,8 @@
+import { CategoryIcon } from '@frontend/components/category/category-icon'
+import type {
+  CategoryColor,
+  CategoryIcon as CategoryIconType,
+} from '@frontend/components/category/types'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,26 +46,56 @@ export type Category = {
   name: string
   status: CategoryStatus
   isSaving: boolean
+  icon: CategoryIconType
+  color: CategoryColor
 }
 
 // モックデータ：本番ではAPIから取得する
 const initialCategories: Category[] = [
-  { id: '1', type: 'income', name: '給与', status: 'active', isSaving: false },
-  { id: '2', type: 'income', name: '副業', status: 'active', isSaving: false },
+  {
+    id: '1',
+    type: 'income',
+    name: '給与',
+    status: 'active',
+    isSaving: false,
+    icon: 'trending_up',
+    color: 'green',
+  },
+  {
+    id: '2',
+    type: 'income',
+    name: '副業',
+    status: 'active',
+    isSaving: false,
+    icon: 'briefcase',
+    color: 'teal',
+  },
   {
     id: '3',
     type: 'income',
     name: '利子・配当',
     status: 'archived',
     isSaving: false,
+    icon: 'trending_up',
+    color: 'yellow',
   },
-  { id: '4', type: 'expense', name: '食費', status: 'active', isSaving: false },
+  {
+    id: '4',
+    type: 'expense',
+    name: '食費',
+    status: 'active',
+    isSaving: false,
+    icon: 'utensils',
+    color: 'orange',
+  },
   {
     id: '5',
     type: 'expense',
     name: '交通費',
     status: 'active',
     isSaving: false,
+    icon: 'bus',
+    color: 'blue',
   },
   {
     id: '6',
@@ -68,6 +103,8 @@ const initialCategories: Category[] = [
     name: '光熱費',
     status: 'active',
     isSaving: false,
+    icon: 'zap',
+    color: 'yellow',
   },
   {
     id: '7',
@@ -75,6 +112,8 @@ const initialCategories: Category[] = [
     name: '旅行積立',
     status: 'active',
     isSaving: true,
+    icon: 'piggy_bank',
+    color: 'purple',
   },
   {
     id: '8',
@@ -82,6 +121,8 @@ const initialCategories: Category[] = [
     name: '書籍',
     status: 'archived',
     isSaving: false,
+    icon: 'book',
+    color: 'teal',
   },
 ]
 
@@ -258,7 +299,16 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
             key={category.id}
             className={category.status === 'archived' ? 'opacity-50' : ''}
           >
-            <TableCell>{category.name}</TableCell>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <CategoryIcon
+                  icon={category.icon}
+                  className="size-4 shrink-0"
+                  color={category.color}
+                />
+                {category.name}
+              </div>
+            </TableCell>
             <TableCell>
               <div className="flex gap-1">
                 {category.isSaving && <Badge variant="secondary">積立</Badge>}
