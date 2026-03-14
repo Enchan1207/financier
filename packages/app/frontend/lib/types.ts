@@ -34,6 +34,7 @@ export type Transaction = {
 export type AnnualBudget = {
   categoryId: string
   categoryName: string
+  categoryType: TransactionType
   annualBudget: number
   // 当月実績（本来はAPIから取得。モックでは手動設定）
   currentMonthActual: number

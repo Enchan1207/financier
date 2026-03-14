@@ -1,4 +1,7 @@
+import { AddTransactionDialog } from '@frontend/components/transaction/add-transaction-dialog'
+import { Button } from '@frontend/components/ui/button'
 import { SidebarTrigger } from '@frontend/components/ui/sidebar'
+import { Plus } from 'lucide-react'
 
 import AccountMenu from '../account/account-menu'
 
@@ -11,6 +14,14 @@ const Header: React.FC = () => {
           Financier
         </div>
         <div className="flex items-center gap-1 md:gap-2">
+          <AddTransactionDialog
+            trigger={
+              <Button size="sm" className="hidden sm:flex">
+                <Plus />
+                取引を追加
+              </Button>
+            }
+          />
           <AccountMenu />
         </div>
       </div>
