@@ -1,9 +1,15 @@
-import { ColoredProgress } from '@frontend/components/ui-custom/colored-progress'
+import { CategoryIcon } from '@frontend/components/category/category-icon'
+import type {
+  CategoryColor,
+  CategoryIconType,
+} from '@frontend/components/category/types'
+import { Progress } from '@frontend/components/ui/progress'
 import { formatCurrency } from '@frontend/lib/format'
 import type React from 'react'
 
 type Props = {
-  color: string
+  icon: CategoryIconType
+  color: CategoryColor
   label: string
   current: number
   max: number
@@ -24,6 +30,7 @@ const getRateLabelStyle = (rate: number) => {
 }
 
 export const BudgetBar: React.FC<Props> = ({
+  icon,
   color,
   label,
   current,
@@ -36,7 +43,8 @@ export const BudgetBar: React.FC<Props> = ({
   return (
     <div className="flex flex-col gap-1 justify-start h-[60px]">
       <div className="text-sm flex items-center justify-between gap-2 min-w-0">
-        <span className="flex items-center gap-1 min-w-0">
+        <span className="flex items-center gap-1.5 min-w-0">
+          <CategoryIcon icon={icon} color={color} className="size-4 shrink-0" />
           <span className="truncate">{label}</span>
           {action}
         </span>
@@ -46,7 +54,7 @@ export const BudgetBar: React.FC<Props> = ({
         </span>
       </div>
 
-      <ColoredProgress rate={rate} color={color} />
+      <Progress value={Math.min(Math.max(rate, 0), 100)} className="h-2" />
 
       {showRate && (
         <p className={`text-xs text-right ${getRateLabelStyle(rate)}`}>

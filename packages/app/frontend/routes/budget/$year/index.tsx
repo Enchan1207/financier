@@ -49,7 +49,7 @@ const BudgetYearPage: React.FC = () => {
     categoryId: item.categoryId,
     categoryName: item.categoryName,
     amount: item.annualBudget,
-    color: item.color,
+    color: `var(--category-${item.color})`,
   }))
 
   const expenseSummaryItems: SummaryBarItem[] = [
@@ -57,7 +57,7 @@ const BudgetYearPage: React.FC = () => {
       categoryId: item.categoryId,
       categoryName: item.categoryName,
       amount: item.annualBudget,
-      color: item.color,
+      color: `var(--category-${item.color})`,
     })),
     ...(unallocated > 0
       ? [

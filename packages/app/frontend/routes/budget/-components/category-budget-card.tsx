@@ -1,3 +1,7 @@
+import type {
+  CategoryColor,
+  CategoryIconType,
+} from '@frontend/components/category/types'
 import { Button } from '@frontend/components/ui/button'
 import {
   Card,
@@ -21,7 +25,8 @@ export type BudgetItem = {
   categoryName: string
   annualBudget: number
   ytdActual: number
-  color: string
+  icon: CategoryIconType
+  color: CategoryColor
   status?: 'over' | 'warning' | 'ok'
 }
 
@@ -81,6 +86,7 @@ export const CategoryBudgetCard: React.FC<Props> = ({
           {items.map((item) => (
             <BudgetBar
               key={item.categoryId}
+              icon={item.icon}
               color={item.color}
               label={item.categoryName}
               current={item.ytdActual}
