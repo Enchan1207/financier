@@ -1,3 +1,8 @@
+import { CategoryIcon } from '@frontend/components/category/category-icon'
+import type {
+  CategoryColor,
+  CategoryIconType,
+} from '@frontend/components/category/types'
 import { Card, CardContent } from '@frontend/components/ui/card'
 import { Progress } from '@frontend/components/ui/progress'
 import dayjs from '@frontend/lib/date'
@@ -9,6 +14,8 @@ import type React from 'react'
 type Props = {
   id: string
   categoryName: string
+  categoryIcon: CategoryIconType
+  categoryColor: CategoryColor
   type: 'goal' | 'free'
   targetAmount?: number
   deadline?: string
@@ -18,6 +25,8 @@ type Props = {
 export const SavingCardMobile: React.FC<Props> = ({
   id,
   categoryName,
+  categoryIcon,
+  categoryColor,
   type,
   targetAmount,
   deadline,
@@ -33,7 +42,12 @@ export const SavingCardMobile: React.FC<Props> = ({
       <Card className="h-full">
         <CardContent className="flex-1 flex flex-col">
           <div className="flex items-start justify-between gap-2">
-            <span className="line-clamp-2 text-base font-semibold">
+            <span className="flex items-center gap-2 line-clamp-2 text-base font-semibold">
+              <CategoryIcon
+                icon={categoryIcon}
+                color={categoryColor}
+                className="size-4 shrink-0"
+              />
               {categoryName}
             </span>
             <ChevronRight className="mt-0.5 shrink-0 text-muted-foreground" />

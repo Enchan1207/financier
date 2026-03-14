@@ -1,3 +1,4 @@
+import { CategoryIcon } from '@frontend/components/category/category-icon'
 import { Button } from '@frontend/components/ui/button'
 import dayjs from '@frontend/lib/date'
 import { TODAY } from '@frontend/lib/today'
@@ -28,6 +29,8 @@ const savings: SavingDefinition[] = [
     id: 'sav-1',
     categoryId: 'cat-8',
     categoryName: '遠征費積立',
+    categoryIcon: 'plane',
+    categoryColor: 'blue',
     type: 'goal',
     targetAmount: 200000,
     deadline: '2026-08-01',
@@ -38,6 +41,8 @@ const savings: SavingDefinition[] = [
     id: 'sav-2',
     categoryId: 'cat-9',
     categoryName: 'グッズ積立',
+    categoryIcon: 'gift',
+    categoryColor: 'purple',
     type: 'free',
     balance: 35000,
   },
@@ -45,6 +50,8 @@ const savings: SavingDefinition[] = [
     id: 'sav-3',
     categoryId: 'cat-11',
     categoryName: '旅行費積立',
+    categoryIcon: 'plane',
+    categoryColor: 'teal',
     type: 'goal',
     targetAmount: 70000,
     deadline: '2026-12-01',
@@ -55,6 +62,8 @@ const savings: SavingDefinition[] = [
     id: 'sav-4',
     categoryId: 'cat-12',
     categoryName: '機材費積立',
+    categoryIcon: 'zap',
+    categoryColor: 'yellow',
     type: 'goal',
     targetAmount: 200000,
     deadline: '2026-06-30',
@@ -65,6 +74,8 @@ const savings: SavingDefinition[] = [
     id: 'sav-5',
     categoryId: 'cat-13',
     categoryName: '緊急資金',
+    categoryIcon: 'piggy_bank',
+    categoryColor: 'green',
     type: 'free',
     balance: 150000,
   },
@@ -357,7 +368,14 @@ const SavingDetailPage: React.FC = () => {
           </Link>
         </Button>
         <div className="flex items-start justify-between gap-4">
-          <h1 className="text-2xl font-bold">{saving.categoryName}</h1>
+          <h1 className="flex items-center gap-2 text-2xl font-bold">
+            <CategoryIcon
+              icon={saving.categoryIcon}
+              color={saving.categoryColor}
+              className="size-6 shrink-0"
+            />
+            {saving.categoryName}
+          </h1>
           {saving.type === 'goal' && (
             <Button
               size="sm"

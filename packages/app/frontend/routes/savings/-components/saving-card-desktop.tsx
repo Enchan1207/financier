@@ -1,3 +1,8 @@
+import { CategoryIcon } from '@frontend/components/category/category-icon'
+import type {
+  CategoryColor,
+  CategoryIconType,
+} from '@frontend/components/category/types'
 import { Card, CardContent } from '@frontend/components/ui/card'
 import { Progress } from '@frontend/components/ui/progress'
 import {
@@ -15,6 +20,8 @@ import type React from 'react'
 type Props = {
   id: string
   categoryName: string
+  categoryIcon: CategoryIconType
+  categoryColor: CategoryColor
   type: 'goal' | 'free'
   targetAmount?: number
   deadline?: string
@@ -24,6 +31,8 @@ type Props = {
 export const SavingCardDesktop: React.FC<Props> = ({
   id,
   categoryName,
+  categoryIcon,
+  categoryColor,
   type,
   targetAmount,
   deadline,
@@ -39,7 +48,12 @@ export const SavingCardDesktop: React.FC<Props> = ({
       <Card className="h-30 py-4 transition-colors hover:bg-accent">
         <CardContent className="flex-1 flex items-stretch justify-between px-3 py-2 lg:pl-6 lg:pr-1">
           <div className="flex flex-col justify-between w-[40%]">
-            <span className="line-clamp-2 text-base font-semibold">
+            <span className="flex items-center gap-2 line-clamp-2 text-base font-semibold">
+              <CategoryIcon
+                icon={categoryIcon}
+                color={categoryColor}
+                className="size-4 shrink-0"
+              />
               {categoryName}
             </span>
             {deadline ? (

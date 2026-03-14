@@ -1,3 +1,8 @@
+import { CategoryIcon } from '@frontend/components/category/category-icon'
+import type {
+  CategoryColor,
+  CategoryIconType,
+} from '@frontend/components/category/types'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,11 +69,15 @@ type EventTransaction = {
   date: string
   name: string
   categoryName: string
+  categoryIcon?: CategoryIconType
+  categoryColor?: CategoryColor
   amount: number
 }
 
 type CategoryBreakdown = {
   categoryName: string
+  categoryIcon: CategoryIconType
+  categoryColor: CategoryColor
   amount: number
 }
 
@@ -92,6 +101,8 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
         date: '2026-02-14',
         name: 'バレンタインコーデ',
         categoryName: '衣服',
+        categoryIcon: 'shirt',
+        categoryColor: 'pink',
         amount: 150000,
       },
       {
@@ -99,12 +110,14 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
         date: '2026-02-15',
         name: 'ぬいぐるみ',
         categoryName: '娯楽・グッズ',
+        categoryIcon: 'music',
+        categoryColor: 'purple',
         amount: 4200,
       },
     ],
     categoryBreakdown: [
-      { categoryName: '衣服', amount: 150000 },
-      { categoryName: '娯楽・グッズ', amount: 4200 },
+      { categoryName: '衣服', categoryIcon: 'shirt', categoryColor: 'pink', amount: 150000 },
+      { categoryName: '娯楽・グッズ', categoryIcon: 'music', categoryColor: 'purple', amount: 4200 },
     ],
   },
   'ev-2': {
@@ -117,6 +130,8 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
         date: '2026-02-20',
         name: '春ライブ 新幹線',
         categoryName: '交通費',
+        categoryIcon: 'bus',
+        categoryColor: 'blue',
         amount: 2800,
       },
       {
@@ -124,6 +139,8 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
         date: '2026-02-20',
         name: 'ライブグッズ',
         categoryName: '娯楽・グッズ',
+        categoryIcon: 'music',
+        categoryColor: 'purple',
         amount: 8500,
       },
       {
@@ -131,6 +148,8 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
         date: '2026-02-21',
         name: '遠征ご飯',
         categoryName: '外食',
+        categoryIcon: 'coffee',
+        categoryColor: 'orange',
         amount: 2400,
       },
       {
@@ -138,6 +157,8 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
         date: '2026-03-20',
         name: '春遠征 新幹線',
         categoryName: '交通費',
+        categoryIcon: 'bus',
+        categoryColor: 'blue',
         amount: 8000,
       },
       {
@@ -145,6 +166,8 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
         date: '2026-03-20',
         name: '春ライブグッズ予定',
         categoryName: '娯楽・グッズ',
+        categoryIcon: 'music',
+        categoryColor: 'purple',
         amount: 12000,
       },
       {
@@ -152,13 +175,15 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
         date: '2026-03-21',
         name: '遠征飯予定',
         categoryName: '外食',
+        categoryIcon: 'coffee',
+        categoryColor: 'orange',
         amount: 3000,
       },
     ],
     categoryBreakdown: [
-      { categoryName: '交通費', amount: 10800 },
-      { categoryName: '娯楽・グッズ', amount: 20500 },
-      { categoryName: '外食', amount: 5400 },
+      { categoryName: '交通費', categoryIcon: 'bus', categoryColor: 'blue', amount: 10800 },
+      { categoryName: '娯楽・グッズ', categoryIcon: 'music', categoryColor: 'purple', amount: 20500 },
+      { categoryName: '外食', categoryIcon: 'coffee', categoryColor: 'orange', amount: 5400 },
     ],
   },
   'ev-3': {
@@ -171,10 +196,14 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
         date: '2026-03-05',
         name: '新グッズ発売',
         categoryName: '娯楽・グッズ',
+        categoryIcon: 'music',
+        categoryColor: 'purple',
         amount: 5500,
       },
     ],
-    categoryBreakdown: [{ categoryName: '娯楽・グッズ', amount: 5500 }],
+    categoryBreakdown: [
+      { categoryName: '娯楽・グッズ', categoryIcon: 'music', categoryColor: 'purple', amount: 5500 },
+    ],
   },
   'ev-4': {
     id: 'ev-4',
@@ -317,7 +346,14 @@ const EventDetailPage: React.FC = () => {
                 {event.categoryBreakdown.map((cat) => (
                   <div key={cat.categoryName} className="space-y-1">
                     <div className="flex justify-between text-sm">
-                      <span>{cat.categoryName}</span>
+                      <span className="flex items-center gap-1.5">
+                        <CategoryIcon
+                          icon={cat.categoryIcon}
+                          color={cat.categoryColor}
+                          className="size-3.5 shrink-0"
+                        />
+                        {cat.categoryName}
+                      </span>
                       <span className="font-mono">
                         {formatCurrency(cat.amount)}
                       </span>
@@ -441,7 +477,16 @@ const EventDetailPage: React.FC = () => {
                           {tx.name}
                         </TableCell>
                         <TableCell className="py-2 text-xs">
-                          {tx.categoryName}
+                          <span className="flex items-center gap-1.5">
+                            {tx.categoryIcon && tx.categoryColor && (
+                              <CategoryIcon
+                                icon={tx.categoryIcon}
+                                color={tx.categoryColor}
+                                className="size-3 shrink-0"
+                              />
+                            )}
+                            {tx.categoryName}
+                          </span>
                         </TableCell>
                         <TableCell className="py-2 text-right font-mono text-xs">
                           -{formatCurrency(tx.amount)}

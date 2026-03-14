@@ -12,6 +12,8 @@ const savings: SavingDefinition[] = [
     id: 'sav-1',
     categoryId: 'cat-8',
     categoryName: '遠征費積立',
+    categoryIcon: 'plane',
+    categoryColor: 'blue',
     type: 'goal',
     targetAmount: 200000,
     deadline: '2026-08-01',
@@ -22,6 +24,8 @@ const savings: SavingDefinition[] = [
     id: 'sav-2',
     categoryId: 'cat-9',
     categoryName: 'グッズ積立',
+    categoryIcon: 'gift',
+    categoryColor: 'purple',
     type: 'free',
     balance: 35000,
   },
@@ -29,6 +33,8 @@ const savings: SavingDefinition[] = [
     id: 'sav-3',
     categoryId: 'cat-11',
     categoryName: '旅行費積立',
+    categoryIcon: 'plane',
+    categoryColor: 'teal',
     type: 'goal',
     targetAmount: 70000,
     deadline: '2026-12-01',
@@ -39,6 +45,8 @@ const savings: SavingDefinition[] = [
     id: 'sav-4',
     categoryId: 'cat-12',
     categoryName: '機材費積立',
+    categoryIcon: 'zap',
+    categoryColor: 'yellow',
     type: 'goal',
     targetAmount: 200000,
     deadline: '2026-06-30',
@@ -49,6 +57,8 @@ const savings: SavingDefinition[] = [
     id: 'sav-5',
     categoryId: 'cat-13',
     categoryName: '緊急資金',
+    categoryIcon: 'piggy_bank',
+    categoryColor: 'green',
     type: 'free',
     balance: 150000,
   },
@@ -74,6 +84,8 @@ const SavingsPage: React.FC = () => {
               <SavingCardDesktop
                 id={sav.id}
                 categoryName={sav.categoryName}
+                categoryIcon={sav.categoryIcon}
+                categoryColor={sav.categoryColor}
                 type={sav.type}
                 targetAmount={sav.targetAmount}
                 deadline={sav.deadline}
@@ -84,6 +96,8 @@ const SavingsPage: React.FC = () => {
               <SavingCardMobile
                 id={sav.id}
                 categoryName={sav.categoryName}
+                categoryIcon={sav.categoryIcon}
+                categoryColor={sav.categoryColor}
                 type={sav.type}
                 targetAmount={sav.targetAmount}
                 deadline={sav.deadline}

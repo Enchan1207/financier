@@ -29,11 +29,15 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeftIcon, CalendarIcon, Loader2Icon, XIcon } from 'lucide-react'
 import { z } from 'zod'
 
+import { CategoryAppearanceSelector } from '../../categories/-components/category-appearance-selector'
+
 type SavingType = 'goal' | 'free'
 
 const formSchema = z
   .object({
     categoryName: z.string().min(1, 'カテゴリ名を入力してください'),
+    icon: z.string().min(1, 'アイコンを選択してください'),
+    color: z.string().min(1, '色を選択してください'),
     savingType: z.enum(['goal', 'free']),
     targetAmount: z.string(),
     deadline: z.string(),
@@ -54,6 +58,8 @@ const SavingNewPage: React.FC = () => {
   const form = useForm({
     defaultValues: {
       categoryName: '',
+      icon: '',
+      color: '',
       savingType: 'goal' as SavingType,
       targetAmount: '',
       deadline: '',
@@ -88,6 +94,7 @@ const SavingNewPage: React.FC = () => {
         }}
       >
         <FieldGroup>
+          {/* カテゴリ名 */}
           <form.Field
             name="categoryName"
             children={(field) => {
@@ -110,6 +117,38 @@ const SavingNewPage: React.FC = () => {
                 </Field>
               )
             }}
+          />
+
+          {/* 色・アイコン選択 */}
+          <form.Field
+            name="color"
+            children={(colorField) => (
+              <form.Field
+                name="icon"
+                children={(iconField) => (
+                  <CategoryAppearanceSelector
+                    icon={iconField.state.value}
+                    color={colorField.state.value}
+                    onIconChange={iconField.handleChange}
+                    onColorChange={colorField.handleChange}
+                    onBlur={() => {
+                      colorField.handleBlur()
+                      iconField.handleBlur()
+                    }}
+                    isColorInvalid={
+                      colorField.state.meta.isTouched &&
+                      !colorField.state.meta.isValid
+                    }
+                    isIconInvalid={
+                      iconField.state.meta.isTouched &&
+                      !iconField.state.meta.isValid
+                    }
+                    colorErrors={colorField.state.meta.errors}
+                    iconErrors={iconField.state.meta.errors}
+                  />
+                )}
+              />
+            )}
           />
         </FieldGroup>
 
@@ -139,13 +178,13 @@ const SavingNewPage: React.FC = () => {
                   >
                     <ToggleGroupItem
                       value="goal"
-                      className="flex-1 md:min-w-[100px]"
+                      className="flex-1 md:flex-none md:min-w-[100px]"
                     >
                       目標型
                     </ToggleGroupItem>
                     <ToggleGroupItem
                       value="free"
-                      className="flex-1 md:min-w-[100px]"
+                      className="flex-1 md:flex-none md:min-w-[100px]"
                     >
                       自由型
                     </ToggleGroupItem>
@@ -283,6 +322,8 @@ const SavingNewPage: React.FC = () => {
           selector={(state) =>
             [
               state.values.categoryName,
+              state.values.icon,
+              state.values.color,
               state.values.savingType,
               state.values.targetAmount,
               state.isSubmitting,
@@ -290,6 +331,8 @@ const SavingNewPage: React.FC = () => {
           }
           children={([
             categoryName,
+            icon,
+            color,
             savingType,
             targetAmount,
             isSubmitting,
@@ -299,6 +342,8 @@ const SavingNewPage: React.FC = () => {
                 type="submit"
                 disabled={
                   !categoryName.trim() ||
+                  !icon ||
+                  !color ||
                   (savingType === 'goal' &&
                     !(parseInt(targetAmount, 10) > 0)) ||
                   isSubmitting

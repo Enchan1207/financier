@@ -43,6 +43,8 @@ export type SavingDefinition = {
   id: string
   categoryId: string
   categoryName: string
+  categoryIcon: CategoryIconType
+  categoryColor: CategoryColor
   type: 'goal' | 'free'
   targetAmount?: number
   deadline?: string
