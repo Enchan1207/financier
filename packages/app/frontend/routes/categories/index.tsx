@@ -24,11 +24,9 @@ import {
   TableRow,
 } from '@frontend/components/ui/table'
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@frontend/components/ui/tabs'
+  ToggleGroup,
+  ToggleGroupItem,
+} from '@frontend/components/ui/toggle-group'
 import { createFileRoute } from '@tanstack/react-router'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import type React from 'react'
@@ -166,28 +164,30 @@ const CategoriesPage: React.FC = () => {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">カテゴリ</h1>
 
-      <Tabs
-        value={activeTab}
-        onValueChange={(v) => {
-          setActiveTab(v as CategoryType)
-        }}
-        className="flex-col"
-      >
+      <div className="space-y-4">
         <div className="flex items-center justify-between gap-2">
-          <TabsList className="w-full md:w-auto">
-            <TabsTrigger
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            value={activeTab}
+            onValueChange={(v) => {
+              if (v) setActiveTab(v as CategoryType)
+            }}
+            className="w-full md:w-auto"
+          >
+            <ToggleGroupItem
               value="expense"
               className="flex-1 md:flex-none md:min-w-[100px]"
             >
               支出
-            </TabsTrigger>
-            <TabsTrigger
+            </ToggleGroupItem>
+            <ToggleGroupItem
               value="income"
               className="flex-1 md:flex-none md:min-w-[100px]"
             >
               収入
-            </TabsTrigger>
-          </TabsList>
+            </ToggleGroupItem>
+          </ToggleGroup>
           <Button
             size="sm"
             onClick={() => {
@@ -199,22 +199,14 @@ const CategoriesPage: React.FC = () => {
           </Button>
         </div>
 
-        <TabsContent value="expense">
-          <CategoryTable
-            categories={expenseCategories}
-            onEdit={setEditingCategory}
-            onDelete={setDeletingCategory}
-          />
-        </TabsContent>
-
-        <TabsContent value="income">
-          <CategoryTable
-            categories={incomeCategories}
-            onEdit={setEditingCategory}
-            onDelete={setDeletingCategory}
-          />
-        </TabsContent>
-      </Tabs>
+        <CategoryTable
+          categories={
+            activeTab === 'expense' ? expenseCategories : incomeCategories
+          }
+          onEdit={setEditingCategory}
+          onDelete={setDeletingCategory}
+        />
+      </div>
 
       <CreateCategoryDialog
         type={activeTab}

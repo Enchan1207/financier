@@ -1,3 +1,8 @@
+import { CategoryIcon } from '@frontend/components/category/category-icon'
+import type {
+  CategoryColor,
+  CategoryIconType,
+} from '@frontend/components/category/types'
 import { Button } from '@frontend/components/ui/button'
 import {
   Card,
@@ -25,14 +30,19 @@ import { Trash2Icon } from 'lucide-react'
 import type { useTemplateForm } from './use-template-form'
 
 // 選択可能カテゴリ：isSaving=false のアクティブカテゴリのみ（UC-5.4）
-export const SELECTABLE_CATEGORIES = [
-  { id: 'cat-1', name: '食費' },
-  { id: 'cat-2', name: '交通費' },
-  { id: 'cat-3', name: '外食' },
-  { id: 'cat-4', name: '娯楽・グッズ' },
-  { id: 'cat-5', name: '衣服' },
-  { id: 'cat-6', name: '日用品' },
-  { id: 'cat-7', name: '美容' },
+export const SELECTABLE_CATEGORIES: {
+  id: string
+  name: string
+  icon: CategoryIconType
+  color: CategoryColor
+}[] = [
+  { id: 'cat-1', name: '食費', icon: 'utensils', color: 'red' },
+  { id: 'cat-2', name: '交通費', icon: 'bus', color: 'blue' },
+  { id: 'cat-3', name: '外食', icon: 'coffee', color: 'orange' },
+  { id: 'cat-4', name: '娯楽・グッズ', icon: 'music', color: 'purple' },
+  { id: 'cat-5', name: '衣服', icon: 'shirt', color: 'pink' },
+  { id: 'cat-6', name: '日用品', icon: 'shopping_cart', color: 'teal' },
+  { id: 'cat-7', name: '美容', icon: 'heart_pulse', color: 'pink' },
 ]
 
 type Props = {
@@ -109,7 +119,14 @@ export const TemplateFormItem: React.FC<Props> = ({
                 <SelectContent>
                   {SELECTABLE_CATEGORIES.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
+                      <span className="flex items-center gap-2">
+                        <CategoryIcon
+                          icon={cat.icon}
+                          color={cat.color}
+                          className="size-4 shrink-0"
+                        />
+                        {cat.name}
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
