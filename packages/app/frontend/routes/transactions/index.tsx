@@ -1,3 +1,8 @@
+import { CategoryIcon } from '@frontend/components/category/category-icon'
+import type {
+  CategoryColor,
+  CategoryIconType,
+} from '@frontend/components/category/types'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -78,97 +83,117 @@ const transactionFormSchema = z.object({
 type TransactionFormValues = z.infer<typeof transactionFormSchema>
 
 // モックデータ：本番ではAPIから取得する
-const categories = [
+const categories: {
+  id: string
+  name: string
+  type: TransactionType
+  isSaving: boolean
+  icon: CategoryIconType
+  color: CategoryColor
+}[] = [
   {
     id: 'cat-1',
     name: '食費',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     isSaving: false,
-    color: 'var(--chart-1)',
+    icon: 'utensils',
+    color: 'red',
   },
   {
     id: 'cat-2',
     name: '交通費',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     isSaving: false,
-    color: 'var(--chart-2)',
+    icon: 'bus',
+    color: 'blue',
   },
   {
     id: 'cat-3',
     name: '外食',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     isSaving: false,
-    color: 'var(--chart-3)',
+    icon: 'coffee',
+    color: 'orange',
   },
   {
     id: 'cat-4',
     name: '娯楽・グッズ',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     isSaving: false,
-    color: 'var(--chart-4)',
+    icon: 'music',
+    color: 'purple',
   },
   {
     id: 'cat-5',
     name: '衣服',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     isSaving: false,
-    color: 'var(--chart-5)',
+    icon: 'shirt',
+    color: 'pink',
   },
   {
     id: 'cat-6',
     name: '日用品',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     isSaving: false,
-    color: 'oklch(0.65 0.2 290)',
+    icon: 'shopping_cart',
+    color: 'teal',
   },
   {
     id: 'cat-7',
     name: '美容',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     isSaving: false,
-    color: 'oklch(0.72 0.18 350)',
+    icon: 'heart_pulse',
+    color: 'pink',
   },
   {
     id: 'cat-8',
     name: '積立：遠征費',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     isSaving: true,
-    color: 'oklch(0.60 0.15 210)',
+    icon: 'plane',
+    color: 'blue',
   },
   {
     id: 'cat-9',
     name: '積立：グッズ',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     isSaving: true,
-    color: 'oklch(0.55 0.15 150)',
+    icon: 'gift',
+    color: 'purple',
   },
   {
     id: 'cat-11',
     name: '積立：旅行費',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     isSaving: true,
-    color: 'oklch(0.60 0.18 50)',
+    icon: 'plane',
+    color: 'teal',
   },
   {
     id: 'cat-12',
     name: '積立：機材費',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     isSaving: true,
-    color: 'oklch(0.55 0.16 260)',
+    icon: 'zap',
+    color: 'yellow',
   },
   {
     id: 'cat-13',
     name: '積立：緊急資金',
-    type: 'expense' as TransactionType,
+    type: 'expense',
     isSaving: true,
-    color: 'oklch(0.50 0.10 180)',
+    icon: 'piggy_bank',
+    color: 'green',
   },
   {
     id: 'cat-10',
     name: '給与',
-    type: 'income' as TransactionType,
+    type: 'income',
     isSaving: false,
-    color: 'oklch(0.70 0.15 140)',
+    icon: 'wallet',
+    color: 'green',
   },
 ]
 
@@ -412,8 +437,11 @@ const events = [
   },
 ]
 
-const categoryColorMap: Record<string, string> = Object.fromEntries(
-  categories.map((c) => [c.id, c.color]),
+const categoryMap: Record<
+  string,
+  { icon: CategoryIconType; color: CategoryColor }
+> = Object.fromEntries(
+  categories.map((c) => [c.id, { icon: c.icon, color: c.color }]),
 )
 
 // 年度（4月始まり）を返す
@@ -506,7 +534,14 @@ const TransactionFormFields: React.FC<{ form: TransactionFormInstance }> = ({
                   <SelectContent>
                     {filteredCategories.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
-                        {c.name}
+                        <span className="flex items-center gap-2">
+                          <CategoryIcon
+                            icon={c.icon}
+                            color={c.color}
+                            className="size-4 shrink-0"
+                          />
+                          {c.name}
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -859,16 +894,17 @@ const TransactionsPage: React.FC = () => {
                             </div>
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
-                            <Badge
-                              variant="outline"
-                              className="text-xs border-[var(--badge-color)] text-[var(--badge-color)]"
-                              style={
-                                {
-                                  '--badge-color':
-                                    categoryColorMap[tx.categoryId],
-                                } as React.CSSProperties
-                              }
-                            >
+                            <Badge variant="outline" className="gap-1 text-xs">
+                              {(() => {
+                                const cat = categoryMap[tx.categoryId]
+                                return cat ? (
+                                  <CategoryIcon
+                                    icon={cat.icon}
+                                    color={cat.color}
+                                    className="size-3"
+                                  />
+                                ) : null
+                              })()}
                               {tx.categoryName}
                             </Badge>
                           </TableCell>
