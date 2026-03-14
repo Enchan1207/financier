@@ -1,11 +1,48 @@
 export type TransactionType = 'income' | 'expense'
 
+export type CategoryIcon =
+  | 'tag'
+  | 'wallet'
+  | 'trending_up'
+  | 'trending_down'
+  | 'piggy_bank'
+  | 'house'
+  | 'utensils'
+  | 'shopping_cart'
+  | 'car'
+  | 'bus'
+  | 'plane'
+  | 'heart_pulse'
+  | 'graduation_cap'
+  | 'briefcase'
+  | 'music'
+  | 'zap'
+  | 'wifi'
+  | 'shirt'
+  | 'dumbbell'
+  | 'coffee'
+  | 'gift'
+  | 'book'
+  | 'baby'
+  | 'plus'
+
+export type CategoryColor =
+  | 'red'
+  | 'orange'
+  | 'yellow'
+  | 'green'
+  | 'teal'
+  | 'blue'
+  | 'purple'
+  | 'pink'
+
 export type Category = {
   id: string
   name: string
   type: TransactionType
   isSaving: boolean
-  color: string
+  icon: CategoryIcon
+  color: CategoryColor
 }
 
 export type Transaction = {
