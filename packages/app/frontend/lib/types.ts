@@ -7,8 +7,6 @@ import type {
   CategoryIcon,
 } from '@frontend/components/category/types'
 
-export type { CategoryColor, CategoryIcon }
-
 export type TransactionType = 'income' | 'expense'
 
 export type Category = {
