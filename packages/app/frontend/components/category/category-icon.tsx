@@ -1,4 +1,3 @@
-import type { CategoryIcon as CategoryIconType } from '@frontend/lib/types'
 import type { LucideProps } from 'lucide-react'
 import {
   Baby,
@@ -26,6 +25,8 @@ import {
   Wifi,
   Zap,
 } from 'lucide-react'
+
+import type { CategoryIcon as CategoryIconType } from './types'
 
 const iconMap: Record<string, React.FC<LucideProps>> = {
   tag: Tag,

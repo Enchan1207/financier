@@ -2,43 +2,14 @@
  * このモジュールはバックエンド実装までのモックであり、将来的に削除される予定です。
  */
 
+import type {
+  CategoryColor,
+  CategoryIcon,
+} from '@frontend/components/category/types'
+
+export type { CategoryColor, CategoryIcon }
+
 export type TransactionType = 'income' | 'expense'
-
-export type CategoryIcon =
-  | 'tag'
-  | 'wallet'
-  | 'trending_up'
-  | 'trending_down'
-  | 'piggy_bank'
-  | 'house'
-  | 'utensils'
-  | 'shopping_cart'
-  | 'car'
-  | 'bus'
-  | 'plane'
-  | 'heart_pulse'
-  | 'graduation_cap'
-  | 'briefcase'
-  | 'music'
-  | 'zap'
-  | 'wifi'
-  | 'shirt'
-  | 'dumbbell'
-  | 'coffee'
-  | 'gift'
-  | 'book'
-  | 'baby'
-  | 'plus'
-
-export type CategoryColor =
-  | 'red'
-  | 'orange'
-  | 'yellow'
-  | 'green'
-  | 'teal'
-  | 'blue'
-  | 'purple'
-  | 'pink'
 
 export type Category = {
   id: string
