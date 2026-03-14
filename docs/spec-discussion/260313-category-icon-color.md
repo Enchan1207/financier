@@ -202,7 +202,7 @@ type Category = {
 複数ページ（カテゴリ管理・取引・予算・積立・ホーム）から参照されるため、`frontend/components/` が適切。
 
 ```
-frontend/components/
+frontend/components/category/
   category-icon.tsx   ← 新設
 ```
 
@@ -255,37 +255,61 @@ const BG_MAP: Record<CategoryColor, string> = {
 - **メリット**: CSS ファイル追加不要、シンプル
 - **デメリット**: ダークモード用 `dark:` バリアントを用途ごとに重複定義が必要。Tailwind purge のため完全文字列が必須であり、組み合わせが増えると煩雑
 
-#### 案B：CSS 変数定義（`globals.css` への追記）
+#### 案B：専用 CSS ファイル + `globals.css` からの import（採用）
+
+カテゴリ色専用の CSS ファイルを新設し、`globals.css` からは `@import` 1行で取り込む。
+
+```
+frontend/styles/
+  category-colors.css   ← 新設（カテゴリ色 CSS 変数のみを定義）
+```
 
 ```css
-/* globals.css */
+/* styles/category-colors.css */
 :root {
-  --category-red: oklch(0.637 0.237 25.331);
+  --category-red:    oklch(0.637 0.237 25.331);
+  --category-orange: oklch(0.705 0.191 47.604);
+  --category-yellow: oklch(0.795 0.184 86.047);
+  --category-green:  oklch(0.723 0.219 142.495);
+  --category-teal:   oklch(0.704 0.14 182.503);
+  --category-blue:   oklch(0.623 0.214 259.532);
+  --category-purple: oklch(0.627 0.265 303.823);
+  --category-pink:   oklch(0.718 0.202 349.761);
 }
+
 .dark {
-  --category-red: oklch(0.704 0.191 22.216);
+  --category-red:    oklch(0.704 0.191 22.216);
+  --category-orange: oklch(0.75 0.183 55.934);
+  --category-yellow: oklch(0.848 0.199 91.936);
+  --category-green:  oklch(0.792 0.209 151.711);
+  --category-teal:   oklch(0.777 0.152 181.912);
+  --category-blue:   oklch(0.707 0.165 254.624);
+  --category-purple: oklch(0.702 0.212 310.135);
+  --category-pink:   oklch(0.783 0.189 352.566);
 }
+```
+
+```css
+/* globals.css（追記は1行のみ） */
+@import './styles/category-colors.css';
 ```
 
 ```typescript
-// 識別子 → CSS 変数名に変換するだけ
-const cssVar = (color: CategoryColor) => `var(--category-${color})`
+// TypeScript 側は変数名への変換のみ
+const categoryVar = (color: CategoryColor) => `var(--category-${color})`
 ```
 
-- **メリット**: ダークモード対応を CSS 側に集約できる。スクリプト側は変数名参照のみで済む。チャート（recharts）等の `fill` / `stroke` 属性にも CSS 変数として直接渡せる
-- **デメリット**: `globals.css` への追記が必要（プロジェクトの CSS 追加制約との整合性要確認）
-
-> **⚠️ 制約確認が必要**: プロジェクトガイドラインは「CSS を追加しない」旨を定めている。`globals.css` への追記がこの制約に抵触するか否かを判断する必要がある。既存 CSS ファイルへの追記を「カスタム CSS ファイルの追加」と区別して許容するかの合意を得ること。
+- **メリット**: ダークモード対応を CSS 側に完全集約。スクリプト側の変更なしに色を調整可能。チャート（recharts）の `fill` / `stroke` 属性にも CSS 変数を直接渡せる。カテゴリ色の定義が1ファイルに集約され変更範囲が明確
+- **注意**: CLAUDE.md の「カスタム CSS ファイルを追加しない」禁止事項に形式上は抵触する。この方針を採用する場合は CLAUDE.md の禁止事項に例外として明記すること
 
 #### 推奨方針
 
-**案B（CSS 変数）を推奨**。理由：
+**案B（専用 CSS ファイル）を採用**。理由：
 
 1. ダークモード対応がスクリプト側の変更なしに CSS 側だけで完結する
 2. チャートライブラリ（recharts）が `fill="var(--category-red)"` のように CSS 変数を直接受け取れるため、用途ごとのマッピング定義が不要になる
-3. 将来的な色の調整が CSS 1箇所の変更で済む
-
-CSS 変数の追記が制約上認められない場合は案Aにフォールバックし、アイコンと同様に **色スウォッチを表示するコンポーネント**（`CategoryColorDot` 等）として実装することで、マッピングの変更を1箇所に閉じ込める。
+3. 色定義が専用ファイルに集約され、`globals.css` の変更を `@import` 1行に最小化できる
+4. 将来的な色調整が CSS 1ファイルの変更で済む
 
 ---
 
