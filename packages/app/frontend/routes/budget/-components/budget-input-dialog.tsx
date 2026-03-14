@@ -19,11 +19,9 @@ import {
   InputGroupText,
 } from '@frontend/components/ui/input-group'
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@frontend/components/ui/tabs'
+  ToggleGroup,
+  ToggleGroupItem,
+} from '@frontend/components/ui/toggle-group'
 import { formatCurrency } from '@frontend/lib/format'
 import { useForm } from '@tanstack/react-form'
 import { Loader2Icon } from 'lucide-react'
@@ -120,26 +118,31 @@ export const BudgetInputDialog: React.FC<Props> = ({
             void form.handleSubmit()
           }}
         >
-          <Tabs
-            value={activeTab}
-            onValueChange={(v) => {
-              setActiveTab(v as 'annual' | 'fixed' | 'variable')
-              setBalanceError(false)
-            }}
-          >
-            <TabsList className="w-full">
-              <TabsTrigger value="annual" className="flex-1">
+          <div className="space-y-4">
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={activeTab}
+              onValueChange={(v) => {
+                if (v) {
+                  setActiveTab(v as 'annual' | 'fixed' | 'variable')
+                  setBalanceError(false)
+                }
+              }}
+              className="w-full"
+            >
+              <ToggleGroupItem value="annual" className="flex-1">
                 年額
-              </TabsTrigger>
-              <TabsTrigger value="fixed" className="flex-1">
+              </ToggleGroupItem>
+              <ToggleGroupItem value="fixed" className="flex-1">
                 月額固定
-              </TabsTrigger>
-              <TabsTrigger value="variable" className="flex-1">
+              </ToggleGroupItem>
+              <ToggleGroupItem value="variable" className="flex-1">
                 月ごと変動
-              </TabsTrigger>
-            </TabsList>
+              </ToggleGroupItem>
+            </ToggleGroup>
 
-            <TabsContent value="annual" className="mt-4">
+            {activeTab === 'annual' && (
               <FieldGroup>
                 <form.Field
                   name="annualDirect"
@@ -174,115 +177,121 @@ export const BudgetInputDialog: React.FC<Props> = ({
                   }}
                 />
               </FieldGroup>
-            </TabsContent>
+            )}
 
-            <TabsContent value="fixed" className="mt-4">
-              <FieldGroup>
-                <form.Field
-                  name="fixedMonthly"
-                  children={(field) => {
-                    const isInvalid =
-                      field.state.meta.isTouched && !field.state.meta.isValid
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>月額</FieldLabel>
-                        <InputGroup>
-                          <InputGroupAddon>
-                            <InputGroupText>¥</InputGroupText>
-                          </InputGroupAddon>
-                          <InputGroupInput
-                            id={field.name}
-                            name={field.name}
-                            type="number"
-                            min={0}
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => {
-                              field.handleChange(Number(e.target.value))
-                            }}
-                            aria-invalid={isInvalid}
-                          />
-                        </InputGroup>
-                        {isInvalid && (
-                          <FieldError errors={field.state.meta.errors} />
-                        )}
-                      </Field>
-                    )
-                  }}
-                />
-              </FieldGroup>
-              <form.Subscribe
-                selector={(state) => state.values.fixedMonthly}
-                children={(fixedMonthly) => (
-                  <p className="mt-3 text-sm text-muted-foreground text-right">
-                    年額: {formatCurrency(fixedMonthly * 12)}
-                  </p>
-                )}
-              />
-            </TabsContent>
-
-            <TabsContent value="variable" className="mt-4">
-              <div className="max-h-64 overflow-y-auto">
+            {activeTab === 'fixed' && (
+              <>
                 <FieldGroup>
-                  {MONTH_LABELS.map((label, index) => (
-                    <form.Field
-                      key={index}
-                      name={`monthlyAmounts[${index}]`}
-                      children={(field) => {
-                        const isInvalid =
-                          field.state.meta.isTouched &&
-                          !field.state.meta.isValid
-                        return (
-                          <Field
-                            data-invalid={isInvalid}
-                            className="flex items-center gap-3"
-                          >
-                            <FieldLabel
-                              htmlFor={field.name}
-                              className="w-10 shrink-0 text-right"
-                            >
-                              {label}
-                            </FieldLabel>
-                            <div className="flex-1">
-                              <InputGroup>
-                                <InputGroupAddon>
-                                  <InputGroupText>¥</InputGroupText>
-                                </InputGroupAddon>
-                                <InputGroupInput
-                                  id={field.name}
-                                  name={field.name}
-                                  type="number"
-                                  min={0}
-                                  value={field.state.value}
-                                  onBlur={field.handleBlur}
-                                  onChange={(e) => {
-                                    field.handleChange(Number(e.target.value))
-                                  }}
-                                  aria-invalid={isInvalid}
-                                />
-                              </InputGroup>
-                              {isInvalid && (
-                                <FieldError errors={field.state.meta.errors} />
-                              )}
-                            </div>
-                          </Field>
-                        )
-                      }}
-                    />
-                  ))}
+                  <form.Field
+                    name="fixedMonthly"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>月額</FieldLabel>
+                          <InputGroup>
+                            <InputGroupAddon>
+                              <InputGroupText>¥</InputGroupText>
+                            </InputGroupAddon>
+                            <InputGroupInput
+                              id={field.name}
+                              name={field.name}
+                              type="number"
+                              min={0}
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => {
+                                field.handleChange(Number(e.target.value))
+                              }}
+                              aria-invalid={isInvalid}
+                            />
+                          </InputGroup>
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      )
+                    }}
+                  />
                 </FieldGroup>
-              </div>
-              <form.Subscribe
-                selector={(state) => state.values.monthlyAmounts}
-                children={(amounts) => (
-                  <p className="mt-3 text-sm text-muted-foreground text-right">
-                    年額合計:{' '}
-                    {formatCurrency(amounts.reduce((s, v) => s + v, 0))}
-                  </p>
-                )}
-              />
-            </TabsContent>
-          </Tabs>
+                <form.Subscribe
+                  selector={(state) => state.values.fixedMonthly}
+                  children={(fixedMonthly) => (
+                    <p className="text-sm text-muted-foreground text-right">
+                      年額: {formatCurrency(fixedMonthly * 12)}
+                    </p>
+                  )}
+                />
+              </>
+            )}
+
+            {activeTab === 'variable' && (
+              <>
+                <div className="max-h-64 overflow-y-auto">
+                  <FieldGroup>
+                    {MONTH_LABELS.map((label, index) => (
+                      <form.Field
+                        key={index}
+                        name={`monthlyAmounts[${index}]`}
+                        children={(field) => {
+                          const isInvalid =
+                            field.state.meta.isTouched &&
+                            !field.state.meta.isValid
+                          return (
+                            <Field
+                              data-invalid={isInvalid}
+                              className="flex items-center gap-3"
+                            >
+                              <FieldLabel
+                                htmlFor={field.name}
+                                className="w-10 shrink-0 text-right"
+                              >
+                                {label}
+                              </FieldLabel>
+                              <div className="flex-1">
+                                <InputGroup>
+                                  <InputGroupAddon>
+                                    <InputGroupText>¥</InputGroupText>
+                                  </InputGroupAddon>
+                                  <InputGroupInput
+                                    id={field.name}
+                                    name={field.name}
+                                    type="number"
+                                    min={0}
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) => {
+                                      field.handleChange(Number(e.target.value))
+                                    }}
+                                    aria-invalid={isInvalid}
+                                  />
+                                </InputGroup>
+                                {isInvalid && (
+                                  <FieldError
+                                    errors={field.state.meta.errors}
+                                  />
+                                )}
+                              </div>
+                            </Field>
+                          )
+                        }}
+                      />
+                    ))}
+                  </FieldGroup>
+                </div>
+                <form.Subscribe
+                  selector={(state) => state.values.monthlyAmounts}
+                  children={(amounts) => (
+                    <p className="text-sm text-muted-foreground text-right">
+                      年額合計:{' '}
+                      {formatCurrency(amounts.reduce((s, v) => s + v, 0))}
+                    </p>
+                  )}
+                />
+              </>
+            )}
+          </div>
 
           <form.Subscribe
             selector={(state) => state.isSubmitting}
