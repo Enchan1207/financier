@@ -53,12 +53,11 @@ type CategoryBase = {
 
 export type IncomeCategory = CategoryBase & { type: 'income' }
 
-export type ExpenseCategory = CategoryBase & {
-  type: 'expense'
-  isSaving: boolean
-}
+export type ExpenseCategory = CategoryBase & { type: 'expense' }
 
-export type Category = IncomeCategory | ExpenseCategory
+export type SavingCategory = CategoryBase & { type: 'saving' }
+
+export type Category = IncomeCategory | ExpenseCategory | SavingCategory
 
 export const createIncomeCategory = (
   props: Omit<IncomeCategory, 'id' | 'status'>,
@@ -71,6 +70,14 @@ export const createIncomeCategory = (
 export const createExpenseCategory = (
   props: Omit<ExpenseCategory, 'id' | 'status'>,
 ): ExpenseCategory => ({
+  id: ulid() as CategoryId,
+  status: 'active',
+  ...props,
+})
+
+export const createSavingCategory = (
+  props: Omit<SavingCategory, 'id' | 'status'>,
+): SavingCategory => ({
   id: ulid() as CategoryId,
   status: 'active',
   ...props,
