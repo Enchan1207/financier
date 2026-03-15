@@ -42,6 +42,7 @@
 - follow the guidelines:
   - frontend: @ docs/architecture-guideline/frontend.md
   - backend: @ docs/architecture-guideline/backend.md
+  - backend (page API layer): @ docs/architecture-guideline/backend-page-api.md
 - follow the specs:
   - requirements: @docs/spec/requirements.md
   - functions: @docs/spec/functions.md

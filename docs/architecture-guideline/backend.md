@@ -17,16 +17,21 @@
 ```
 backend/
 ├── domains/           # ドメインモデル定義（純粋な型のみ）
-├── features/          # 機能別レイヤ
+├── features/          # 機能別レイヤ（ドメイン単位）
 │   └── <feature>/
 │       ├── repository.ts   # 永続化層
 │       ├── workflow.ts     # ビジネスロジック
 │       ├── route.ts        # HTTPエンドポイント
 │       └── middleware.ts   # 機能固有ミドルウェア（任意）
+├── pages/             # ページ API 層（UI 単位・複合 Query 専用）
+│   └── <page>/
+│       └── route.ts        # 複数 feature を集約する読み取り専用エンドポイント
 ├── middlewares/       # 横断的関心事のミドルウェア
 ├── schemas/          # Drizzle ORMスキーマ定義
 └── lib/              # 共通ユーティリティ
 ```
+
+`pages/` の詳細なルールは [バックエンド実装ガイドライン（ページ API 層）](./backend-page-api.md) を参照。
 
 ## レイヤ定義
 
@@ -105,14 +110,20 @@ backend/
 ## 依存関係ルール
 
 ```
+# features/
 route.ts → workflow.ts ← repository.ts (注入)
               ↓
           domains/
 
 middleware.ts (feature固有) → repository.ts, workflow.ts
+
+# pages/
+pages/route.ts → features/*/repository.ts（複数可）
+              → domains/（型参照のみ）
 ```
 
-- **Route**: Workflow, Repository, Middlewareを呼び出す
+- **Route (features)**: Workflow, Repository, Middlewareを呼び出す
+- **Route (pages)**: 複数featureのRepositoryを直接呼び出す。Workflowは呼ばない
 - **Workflow**: Domainのみに依存、Repositoryは注入
 - **Repository**: Domainに依存
 - **Middleware (feature固有)**: Repository, Workflowを使用可能
