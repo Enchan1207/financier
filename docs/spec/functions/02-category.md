@@ -10,17 +10,6 @@
 
 トランザクションを分類するためのラベル。年度に依存せずシステム全体で共通。
 
-## 3.2 属性
-
-| 属性名 | 型                | 必須 | 説明                        |
-| ------ | ----------------- | ---- | --------------------------- |
-| id     | ID                | ○    | 一意識別子                  |
-| name   | 文字列            | ○    | カテゴリ名                  |
-| type   | income / expense  | ○    | カテゴリ種別                |
-| status | active / archived | ○    | 利用状態（有効/削除済み）   |
-| icon   | CategoryIcon      | ○    | 表示アイコン識別子          |
-| color  | CategoryColor     | ○    | 表示色識別子                |
-
 ## 3.3 仕様
 
 - 階層構造は持たない（フラット）
@@ -50,49 +39,11 @@
 #### CategoryIcon（アイコン識別子）
 
 識別子は Lucide React のコンポーネント名を snake_case に変換したもの。
-使用可能な識別子は以下の固定セットに限定する。
-
-| 識別子            | Lucide コンポーネント | 用途例               |
-| ----------------- | --------------------- | -------------------- |
-| `tag`             | `Tag`                 | 汎用・その他         |
-| `wallet`          | `Wallet`              | 財布・支出一般       |
-| `trending_up`     | `TrendingUp`          | 収入・増加           |
-| `trending_down`   | `TrendingDown`        | 支出・減少           |
-| `piggy_bank`      | `PiggyBank`           | 積立・貯金           |
-| `house`           | `House`               | 住居・家賃           |
-| `utensils`        | `Utensils`            | 食費                 |
-| `shopping_cart`   | `ShoppingCart`        | 買い物               |
-| `car`             | `Car`                 | 車・交通費           |
-| `bus`             | `Bus`                 | 公共交通             |
-| `plane`           | `Plane`               | 旅行                 |
-| `heart_pulse`     | `HeartPulse`          | 医療・健康           |
-| `graduation_cap`  | `GraduationCap`       | 教育                 |
-| `briefcase`       | `Briefcase`           | 仕事・副業           |
-| `music`           | `Music`               | 娯楽・音楽           |
-| `zap`             | `Zap`                 | 光熱費               |
-| `wifi`            | `Wifi`                | 通信費               |
-| `shirt`           | `Shirt`               | 衣類                 |
-| `dumbbell`        | `Dumbbell`            | フィットネス         |
-| `coffee`          | `Coffee`              | カフェ・外食         |
-| `gift`            | `Gift`                | 贈り物               |
-| `book`            | `Book`                | 書籍・メディア       |
-| `baby`            | `Baby`                | 育児                 |
-| `plus`            | `Plus`                | その他（予備）       |
+使用可能な識別子の固定セットはコード（`CategoryIcons`）を参照。
 
 #### CategoryColor（色識別子）
 
-使用可能な識別子は以下の 8 色に限定する。
+使用可能な識別子はコード（`CategoryColors`）を参照。
 各識別子は TailwindCSS のカラー名（`-500` 相当）に対応させる。
-
-| 識別子   | 対応 Tailwind カラー |
-| -------- | -------------------- |
-| `red`    | `red-500`            |
-| `orange` | `orange-500`         |
-| `yellow` | `yellow-500`         |
-| `green`  | `green-500`          |
-| `teal`   | `teal-500`           |
-| `blue`   | `blue-500`           |
-| `purple` | `purple-500`         |
-| `pink`   | `pink-500`           |
 
 ---
