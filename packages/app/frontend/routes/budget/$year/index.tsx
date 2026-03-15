@@ -1,8 +1,7 @@
-import { Badge } from '@frontend/components/ui/badge'
 import { Button } from '@frontend/components/ui/button'
 import { formatCurrency } from '@frontend/lib/format'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { LockIcon, PencilIcon, TriangleAlertIcon } from 'lucide-react'
+import { PencilIcon, TriangleAlertIcon } from 'lucide-react'
 import { useState } from 'react'
 
 import { BudgetInputDialog } from '../-components/budget-input-dialog'
@@ -14,9 +13,6 @@ import {
   expenseItems as mockExpenseItems,
   incomeItems as mockIncomeItems,
 } from '../-lib/mock-data'
-import { FiscalYearCloseDialog } from './-components/fiscal-year-close-dialog'
-
-type FiscalYearStatus = 'active' | 'closed'
 
 const calcStatus = (
   ytdActual: number,
@@ -30,8 +26,6 @@ const UNALLOCATED_COLOR = 'var(--border)'
 
 const BudgetYearPage: React.FC = () => {
   const { year } = Route.useParams()
-  const [status, setStatus] = useState<FiscalYearStatus>('active')
-  const [closeDialogOpen, setCloseDialogOpen] = useState(false)
   const [incomeItems, setIncomeItems] = useState<BudgetItem[]>(mockIncomeItems)
   const [expenseItems, setExpenseItems] =
     useState<BudgetItem[]>(mockExpenseItems)
@@ -72,12 +66,6 @@ const BudgetYearPage: React.FC = () => {
       : []),
   ]
 
-  const handleClose = async (_copyBudget: boolean): Promise<void> => {
-    await new Promise<void>((resolve) => setTimeout(resolve, 800))
-    setStatus('closed')
-    setCloseDialogOpen(false)
-  }
-
   const checkBalance = (newAnnualBudget: number): boolean => {
     if (!editingItem) return false
     const isIncome = incomeItems.some(
@@ -114,28 +102,12 @@ const BudgetYearPage: React.FC = () => {
         <h1 className="text-2xl font-bold text-foreground">{year}年度 予算</h1>
 
         <div className="flex items-center gap-2">
-          {status === 'active' ? (
-            <>
-              <Button asChild size="sm" variant="outline">
-                <Link to="/budget/$year/edit" params={{ year }}>
-                  <PencilIcon />
-                  編集
-                </Link>
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={() => {
-                  setCloseDialogOpen(true)
-                }}
-              >
-                <LockIcon />
-                年度を締める
-              </Button>
-            </>
-          ) : (
-            <Badge variant="secondary">締め済み</Badge>
-          )}
+          <Button asChild size="sm" variant="outline">
+            <Link to="/budget/$year/edit" params={{ year }}>
+              <PencilIcon />
+              編集
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -157,7 +129,7 @@ const BudgetYearPage: React.FC = () => {
       <CategoryBudgetCard
         incomeItems={incomeItems}
         expenseItems={expenseItems}
-        onEditItem={status === 'active' ? setEditingItem : undefined}
+        onEditItem={setEditingItem}
       />
 
       {editingItem && (
@@ -172,13 +144,6 @@ const BudgetYearPage: React.FC = () => {
           checkBalance={checkBalance}
         />
       )}
-
-      <FiscalYearCloseDialog
-        open={closeDialogOpen}
-        onOpenChange={setCloseDialogOpen}
-        year={year}
-        onConfirm={handleClose}
-      />
     </div>
   )
 }

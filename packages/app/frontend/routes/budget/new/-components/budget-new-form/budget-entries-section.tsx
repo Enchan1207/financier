@@ -83,6 +83,7 @@ export const BudgetEntriesSection: React.FC<{
                   <TableRow>
                     <TableHead>カテゴリ</TableHead>
                     <TableHead className="w-48">年額予算</TableHead>
+                    <TableHead className="w-20 text-right">割合</TableHead>
                     <TableHead className="w-32 text-right">月額目安</TableHead>
                     <TableHead className="w-10" />
                   </TableRow>
@@ -96,9 +97,14 @@ export const BudgetEntriesSection: React.FC<{
                         const isInvalid =
                           field.state.meta.isTouched &&
                           !field.state.meta.isValid
+                        const amount = parseInt(field.state.value, 10)
+                        const ratio =
+                          amount > 0 && total > 0
+                            ? `${((amount / total) * 100).toFixed(1)}%`
+                            : '—'
                         const monthly =
-                          parseInt(field.state.value, 10) > 0
-                            ? `¥${Math.round(parseInt(field.state.value, 10) / 12).toLocaleString('ja-JP')}`
+                          amount > 0
+                            ? `¥${Math.round(amount / 12).toLocaleString('ja-JP')}`
                             : '—'
                         return (
                           <TableRow>
@@ -147,6 +153,9 @@ export const BudgetEntriesSection: React.FC<{
                               </Field>
                             </TableCell>
                             <TableCell className="text-right text-muted-foreground tabular-nums">
+                              {ratio}
+                            </TableCell>
+                            <TableCell className="text-right text-muted-foreground tabular-nums">
                               {monthly}
                             </TableCell>
                             <TableCell>
@@ -172,7 +181,7 @@ export const BudgetEntriesSection: React.FC<{
                   <TableRow>
                     <TableCell className="font-medium">合計</TableCell>
                     <TableCell
-                      colSpan={3}
+                      colSpan={4}
                       className="text-right font-medium tabular-nums"
                     >
                       ¥{total.toLocaleString('ja-JP')}
