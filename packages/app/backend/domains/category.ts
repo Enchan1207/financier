@@ -45,9 +45,13 @@ export type CategoryColor = (typeof CategoryColors)[number]
 
 type CategoryBase = {
   id: CategoryId
+  /** カテゴリ名。空文字・空白のみ不可、前後空白除去後に一意 */
   name: string
+  /** 利用状態。archived のカテゴリは新規トランザクション作成時の選択肢に表示しない */
   status: CategoryStatus
+  /** 表示アイコン識別子。Lucide コンポーネント名の snake_case 表記 */
   icon: CategoryIcon
+  /** 表示色識別子。TailwindCSS カラー名（-500 相当）に対応 */
   color: CategoryColor
 }
 

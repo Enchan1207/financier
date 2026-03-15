@@ -6,7 +6,9 @@ export type FiscalYearStatus = 'active' | 'closed'
 
 export type FiscalYear = {
   id: FiscalYearId
+  /** 年度の開始年（例: 2026年度 → 2026）。期間は4月1日〜翌年3月31日 */
   year: number
+  /** 年度の状態。closed は年度締め済みを表す */
   status: FiscalYearStatus
 }
 

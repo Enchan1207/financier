@@ -11,11 +11,17 @@ export type TransactionType = 'income' | 'expense'
 
 export type Transaction = {
   id: TransactionId
+  /** 収支種別。categoryId が参照する Category.type と一致しなければならない */
   type: TransactionType
+  /** 金額（日本円、正の整数） */
   amount: number
+  /** 所属カテゴリ */
   categoryId: CategoryId
+  /** 発生日。この値により年度帰属が決定される。未来日入力可 */
   transactionDate: Dayjs
+  /** 紐づくイベント（任意） */
   eventId: EventId | null
+  /** 取引を説明する名称。空文字・空白のみ不可 */
   name: string
   createdAt: Dayjs
 }
