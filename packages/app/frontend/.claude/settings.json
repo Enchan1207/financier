@@ -5,7 +5,8 @@
       "Bash(pnpm -w prettier:fix:*)",
       "Bash(pnpm -F app build)",
       "mcp__shadcn__*",
-      "Bash(pnpm dlx shadcn@latest add:*)"
+      "Bash(pnpm dlx shadcn@latest add:*)",
+      "mcp__github__add_issue_comment"
     ]
   }
 }
