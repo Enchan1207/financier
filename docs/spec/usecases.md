@@ -12,7 +12,7 @@
 - [3. 予算系](./usecases/03-budget.md)
 - [4. 積立系](./usecases/04-saving.md)
 - [5. イベント系](./usecases/05-event.md)
-- [6. 年度締め系](./usecases/06-fiscal-year-close.md)
+- [6. 年度系](./usecases/06-fiscal-year-close.md)
 - [7. 分析・可視化系](./usecases/07-analytics.md)
 - [8. シナリオ系ユースケース](./usecases/08-scenario.md)
 - [9. 潜在的エッジケースとシステム動作](./usecases/09-edge-cases.md)
