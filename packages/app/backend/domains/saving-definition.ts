@@ -8,17 +8,18 @@ import type { CategoryId } from './category'
 export type SavingDefinitionId = Brand<string, 'saving_definition_id'>
 export type SavingWithdrawalId = Brand<string, 'saving_withdrawal_id'>
 
-export type GoalSavingDefinition = {
+type SavingDefinitionBase = {
   id: SavingDefinitionId
   categoryId: CategoryId
+}
+
+export type GoalSavingDefinition = SavingDefinitionBase & {
   type: 'goal'
   targetAmount: number
   deadline: Dayjs | null
 }
 
-export type FreeSavingDefinition = {
-  id: SavingDefinitionId
-  categoryId: CategoryId
+export type FreeSavingDefinition = SavingDefinitionBase & {
   type: 'free'
 }
 

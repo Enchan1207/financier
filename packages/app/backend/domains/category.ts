@@ -3,40 +3,45 @@ import { ulid } from 'ulid'
 
 export type CategoryId = Brand<string, 'category_id'>
 export type CategoryStatus = 'active' | 'archived'
-export type CategoryIcon =
-  | 'tag'
-  | 'wallet'
-  | 'trending_up'
-  | 'trending_down'
-  | 'piggy_bank'
-  | 'house'
-  | 'utensils'
-  | 'shopping_cart'
-  | 'car'
-  | 'bus'
-  | 'plane'
-  | 'heart_pulse'
-  | 'graduation_cap'
-  | 'briefcase'
-  | 'music'
-  | 'zap'
-  | 'wifi'
-  | 'shirt'
-  | 'dumbbell'
-  | 'coffee'
-  | 'gift'
-  | 'book'
-  | 'baby'
-  | 'plus'
-export type CategoryColor =
-  | 'red'
-  | 'orange'
-  | 'yellow'
-  | 'green'
-  | 'teal'
-  | 'blue'
-  | 'purple'
-  | 'pink'
+export const CategoryIcons = [
+  'tag',
+  'wallet',
+  'trending_up',
+  'trending_down',
+  'piggy_bank',
+  'house',
+  'utensils',
+  'shopping_cart',
+  'car',
+  'bus',
+  'plane',
+  'heart_pulse',
+  'graduation_cap',
+  'briefcase',
+  'music',
+  'zap',
+  'wifi',
+  'shirt',
+  'dumbbell',
+  'coffee',
+  'gift',
+  'book',
+  'baby',
+  'plus',
+] as const
+export type CategoryIcon = (typeof CategoryIcons)[number]
+
+export const CategoryColors = [
+  'red',
+  'orange',
+  'yellow',
+  'green',
+  'teal',
+  'blue',
+  'purple',
+  'pink',
+] as const
+export type CategoryColor = (typeof CategoryColors)[number]
 
 type CategoryBase = {
   id: CategoryId
