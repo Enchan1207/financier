@@ -125,20 +125,7 @@ export default defineConfig(
     plugins: { react: reactPlugin },
     rules: {
       'no-console': 'warn',
-      'no-restricted-imports': 'off',
       'react/hook-use-state': 'error',
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['@routes'],
-              message: 'Do not use backend types.',
-              allowTypeImports: true,
-            },
-          ],
-        },
-      ],
       '@typescript-eslint/no-misused-promises': [
         'error',
         {
@@ -169,6 +156,8 @@ export default defineConfig(
         'error',
         { allowNumber: true },
       ],
+      // NOTE: @typescript-eslint/no-restricted-imports はここに書かない。
+      // 'Avoid direct import of external package' ブロックで一元管理する。
       '@typescript-eslint/consistent-type-imports': [
         'error',
         { prefer: 'type-imports' },
@@ -244,6 +233,102 @@ export default defineConfig(
         {
           name: 'Date',
           message: 'Use @frontend/lib/date or @backend/lib/date instead',
+        },
+      ],
+    },
+  },
+
+  // NOTE: フロントエンド固有の import 制約。
+  // 'Avoid direct import of external package' より後に置くことで
+  // @typescript-eslint/no-restricted-imports を正しく上書きする。
+  {
+    name: 'frontend import restrictions',
+    files: ['packages/app/frontend/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': 'off',
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'dayjs',
+              message: 'Use @frontend/lib/date or @backend/lib/date instead',
+            },
+          ],
+          patterns: [
+            {
+              // NOTE: RPC クライアントの型推論のために型インポートは許可する
+              group: ['@routes'],
+              message: 'Do not use backend types.',
+              allowTypeImports: true,
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // MARK: - Backend architecture rules
+
+  // NOTE: pages/**/*.ts は 'Avoid direct import of external package' を上書きするため、
+  // dayjs 制約を改めて含める。
+  {
+    name: 'backend page API rules',
+    files: ['packages/app/backend/pages/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'dayjs',
+              message: 'Use @backend/lib/date instead',
+            },
+          ],
+          patterns: [
+            {
+              // ワークフローを呼び出すことは pages/ 層に許可されない
+              group: ['**/workflow', '**/workflow.ts'],
+              message:
+                'pages/ のルートはワークフローを呼び出してはならない（backend-page-api.md）。',
+            },
+            {
+              // @backend/ エイリアス経由の pages 間クロスインポートを禁止する
+              // NOTE: 相対パス経由のクロスインポートはリントでは検知しきれないため、
+              //       コードレビューで確認すること
+              group: ['@backend/pages/**'],
+              message:
+                'pages/ のルートは他の pages/ モジュールに依存してはならない（backend-page-api.md）。',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // NOTE: features/**/workflow.ts は 'Avoid direct import of external package' を上書きするため、
+  // dayjs 制約を改めて含める。
+  {
+    name: 'backend workflow rules',
+    files: ['packages/app/backend/features/**/workflow.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'dayjs',
+              message: 'Use @backend/lib/date instead',
+            },
+          ],
+          patterns: [
+            {
+              // ワークフローから直接 DB スキーマを参照することを禁止する
+              group: ['@backend/schemas', '@backend/schemas/**', '**/schemas/**'],
+              message:
+                'ワークフローから直接DBスキーマをインポートしてはならない（backend.md）。副作用はEffectsとして注入すること。',
+            },
+          ],
         },
       ],
     },
