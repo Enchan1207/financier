@@ -254,13 +254,9 @@ export default defineConfig(
               name: 'dayjs',
               message: 'Use @frontend/lib/date or @backend/lib/date instead',
             },
-          ],
-          patterns: [
             {
-              // NOTE: RPC クライアントの型推論のために型インポートは許可する
-              group: ['@routes'],
-              message: 'Do not use backend types.',
-              allowTypeImports: true,
+              name: '@routes',
+              message: 'frontend must not depends on backend types',
             },
           ],
         },
