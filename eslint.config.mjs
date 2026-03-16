@@ -125,20 +125,7 @@ export default defineConfig(
     plugins: { react: reactPlugin },
     rules: {
       'no-console': 'warn',
-      'no-restricted-imports': 'off',
       'react/hook-use-state': 'error',
-      '@typescript-eslint/no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: ['@routes'],
-              message: 'Do not use backend types.',
-              allowTypeImports: true,
-            },
-          ],
-        },
-      ],
       '@typescript-eslint/no-misused-promises': [
         'error',
         {
@@ -169,6 +156,8 @@ export default defineConfig(
         'error',
         { allowNumber: true },
       ],
+      // NOTE: @typescript-eslint/no-restricted-imports はここに書かない。
+      // 'Avoid direct import of external package' ブロックで一元管理する。
       '@typescript-eslint/consistent-type-imports': [
         'error',
         { prefer: 'type-imports' },
@@ -244,6 +233,84 @@ export default defineConfig(
         {
           name: 'Date',
           message: 'Use @frontend/lib/date or @backend/lib/date instead',
+        },
+      ],
+    },
+  },
+
+  // NOTE: フロントエンド固有の import 制約。
+  // 'Avoid direct import of external package' より後に置くことで
+  // @typescript-eslint/no-restricted-imports を正しく上書きする。
+  {
+    name: 'frontend import restrictions',
+    files: ['packages/app/frontend/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': 'off',
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'dayjs',
+              message: 'Use @frontend/lib/date or @backend/lib/date instead',
+            },
+            {
+              name: '@routes',
+              message: 'frontend must not depends on backend types',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // MARK: - Backend architecture rules
+
+  {
+    name: 'backend page API rules',
+    files: ['packages/app/backend/pages/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            // NOTE: dayjsの制約が上書きされてしまうため、重ねがけ
+            {
+              name: 'dayjs',
+              message: 'Use @backend/lib/date instead',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/workflow', '**/workflow.ts'],
+              message: 'route of pages must not import any workflows',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    name: 'backend workflow rules',
+    files: ['packages/app/backend/features/**/workflow.ts'],
+    rules: {
+      '@typescript-eslint/no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            // NOTE: dayjsの制約が上書きされてしまうため、重ねがけ
+            {
+              name: 'dayjs',
+              message: 'Use @backend/lib/date instead',
+            },
+          ],
+          patterns: [
+            {
+              group: ['**/schemas/**'],
+              message: 'workflows must not import any db schema',
+            },
+          ],
         },
       ],
     },
