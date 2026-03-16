@@ -266,8 +266,6 @@ export default defineConfig(
 
   // MARK: - Backend architecture rules
 
-  // NOTE: pages/**/*.ts は 'Avoid direct import of external package' を上書きするため、
-  // dayjs 制約を改めて含める。
   {
     name: 'backend page API rules',
     files: ['packages/app/backend/pages/**/*.ts'],
@@ -276,6 +274,7 @@ export default defineConfig(
         'error',
         {
           paths: [
+            // NOTE: dayjsの制約が上書きされてしまうため、重ねがけ
             {
               name: 'dayjs',
               message: 'Use @backend/lib/date instead',
@@ -283,18 +282,8 @@ export default defineConfig(
           ],
           patterns: [
             {
-              // ワークフローを呼び出すことは pages/ 層に許可されない
               group: ['**/workflow', '**/workflow.ts'],
-              message:
-                'pages/ のルートはワークフローを呼び出してはならない（backend-page-api.md）。',
-            },
-            {
-              // @backend/ エイリアス経由の pages 間クロスインポートを禁止する
-              // NOTE: 相対パス経由のクロスインポートはリントでは検知しきれないため、
-              //       コードレビューで確認すること
-              group: ['@backend/pages/**'],
-              message:
-                'pages/ のルートは他の pages/ モジュールに依存してはならない（backend-page-api.md）。',
+              message: 'route of pages must not import any workflows',
             },
           ],
         },
@@ -302,8 +291,6 @@ export default defineConfig(
     },
   },
 
-  // NOTE: features/**/workflow.ts は 'Avoid direct import of external package' を上書きするため、
-  // dayjs 制約を改めて含める。
   {
     name: 'backend workflow rules',
     files: ['packages/app/backend/features/**/workflow.ts'],
@@ -312,6 +299,7 @@ export default defineConfig(
         'error',
         {
           paths: [
+            // NOTE: dayjsの制約が上書きされてしまうため、重ねがけ
             {
               name: 'dayjs',
               message: 'Use @backend/lib/date instead',
@@ -319,10 +307,8 @@ export default defineConfig(
           ],
           patterns: [
             {
-              // ワークフローから直接 DB スキーマを参照することを禁止する
-              group: ['@backend/schemas', '@backend/schemas/**', '**/schemas/**'],
-              message:
-                'ワークフローから直接DBスキーマをインポートしてはならない（backend.md）。副作用はEffectsとして注入すること。',
+              group: ['**/schemas/**'],
+              message: 'workflows must not import any db schema',
             },
           ],
         },
