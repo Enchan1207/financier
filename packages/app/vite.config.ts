@@ -34,7 +34,12 @@ export default defineConfig({
                 '@tanstack/react-query',
                 '@tanstack/react-form',
               ],
-              'vendor-ui': ['radix-ui', 'lucide-react', 'next-themes', 'sonner'],
+              'vendor-ui': [
+                'radix-ui',
+                'lucide-react',
+                'next-themes',
+                'sonner',
+              ],
             },
           },
         },

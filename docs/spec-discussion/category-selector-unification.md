@@ -14,13 +14,13 @@
 
 ### 対象箇所一覧
 
-| 箇所 | ファイル | アイコン表示 | フィルタリング | 値 |
-|------|---------|:----------:|:----------:|---|
-| 取引フォーム | `routes/transactions/index.tsx` | ✅ | `type`（収入/支出）で絞り込み（親で処理） | `categoryId` |
-| 年度予算作成 | `routes/budget/new/-components/budget-new-form/budget-entries-section.tsx` | ✅ | 追加済みIDを除外（親で処理） | `categoryId` |
-| イベントテンプレート作成・編集 | `routes/event-templates/-components/template-form-item.tsx` | ✅ | なし（固定リスト） | `categoryId` |
-| イベント・取引追加ダイアログ | `routes/events/-components/event-add-transaction-dialog.tsx` | ❌ | なし（固定リスト） | `categoryName`（⚠️ ID 代わりに名前を使用） |
-| ホーム・クイック支出 | `routes/index.tsx` | ❌ | 支出のみ（親で処理） | `categoryId` |
+| 箇所                           | ファイル                                                                   | アイコン表示 |              フィルタリング               | 値                                         |
+| ------------------------------ | -------------------------------------------------------------------------- | :----------: | :---------------------------------------: | ------------------------------------------ |
+| 取引フォーム                   | `routes/transactions/index.tsx`                                            |      ✅      | `type`（収入/支出）で絞り込み（親で処理） | `categoryId`                               |
+| 年度予算作成                   | `routes/budget/new/-components/budget-new-form/budget-entries-section.tsx` |      ✅      |       追加済みIDを除外（親で処理）        | `categoryId`                               |
+| イベントテンプレート作成・編集 | `routes/event-templates/-components/template-form-item.tsx`                |      ✅      |            なし（固定リスト）             | `categoryId`                               |
+| イベント・取引追加ダイアログ   | `routes/events/-components/event-add-transaction-dialog.tsx`               |      ❌      |            なし（固定リスト）             | `categoryName`（⚠️ ID 代わりに名前を使用） |
+| ホーム・クイック支出           | `routes/index.tsx`                                                         |      ❌      |           支出のみ（親で処理）            | `categoryId`                               |
 
 ### 各実装の詳細
 
@@ -39,7 +39,11 @@
     {filteredCategories.map((c) => (
       <SelectItem key={c.id} value={c.id}>
         <span className="flex items-center gap-2">
-          <CategoryIcon icon={c.icon} color={c.color} className="size-4 shrink-0" />
+          <CategoryIcon
+            icon={c.icon}
+            color={c.color}
+            className="size-4 shrink-0"
+          />
           {c.name}
         </span>
       </SelectItem>
@@ -87,11 +91,11 @@ type Props = {
   categories: CategorySelectItem[]
   value: string
   onValueChange: (value: string) => void
-  placeholder?: string       // デフォルト: "カテゴリを選択"
-  id?: string                // SelectTrigger の id
+  placeholder?: string // デフォルト: "カテゴリを選択"
+  id?: string // SelectTrigger の id
   disabled?: boolean
   'aria-invalid'?: boolean
-  className?: string         // SelectTrigger の className（幅指定等）
+  className?: string // SelectTrigger の className（幅指定等）
   onOpenChange?: (open: boolean) => void
 }
 ```

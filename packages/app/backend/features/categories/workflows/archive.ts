@@ -1,4 +1,8 @@
-import type { ActiveCategory, Category, CategoryId } from '@backend/domains/category'
+import type {
+  ActiveCategory,
+  Category,
+  CategoryId,
+} from '@backend/domains/category'
 import { Result } from '@praha/byethrow'
 
 import {

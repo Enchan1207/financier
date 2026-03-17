@@ -116,8 +116,18 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
       },
     ],
     categoryBreakdown: [
-      { categoryName: '衣服', categoryIcon: 'shirt', categoryColor: 'pink', amount: 150000 },
-      { categoryName: '娯楽・グッズ', categoryIcon: 'music', categoryColor: 'purple', amount: 4200 },
+      {
+        categoryName: '衣服',
+        categoryIcon: 'shirt',
+        categoryColor: 'pink',
+        amount: 150000,
+      },
+      {
+        categoryName: '娯楽・グッズ',
+        categoryIcon: 'music',
+        categoryColor: 'purple',
+        amount: 4200,
+      },
     ],
   },
   'ev-2': {
@@ -181,9 +191,24 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
       },
     ],
     categoryBreakdown: [
-      { categoryName: '交通費', categoryIcon: 'bus', categoryColor: 'blue', amount: 10800 },
-      { categoryName: '娯楽・グッズ', categoryIcon: 'music', categoryColor: 'purple', amount: 20500 },
-      { categoryName: '外食', categoryIcon: 'coffee', categoryColor: 'orange', amount: 5400 },
+      {
+        categoryName: '交通費',
+        categoryIcon: 'bus',
+        categoryColor: 'blue',
+        amount: 10800,
+      },
+      {
+        categoryName: '娯楽・グッズ',
+        categoryIcon: 'music',
+        categoryColor: 'purple',
+        amount: 20500,
+      },
+      {
+        categoryName: '外食',
+        categoryIcon: 'coffee',
+        categoryColor: 'orange',
+        amount: 5400,
+      },
     ],
   },
   'ev-3': {
@@ -202,7 +227,12 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
       },
     ],
     categoryBreakdown: [
-      { categoryName: '娯楽・グッズ', categoryIcon: 'music', categoryColor: 'purple', amount: 5500 },
+      {
+        categoryName: '娯楽・グッズ',
+        categoryIcon: 'music',
+        categoryColor: 'purple',
+        amount: 5500,
+      },
     ],
   },
   'ev-4': {

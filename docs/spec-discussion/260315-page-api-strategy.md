@@ -37,11 +37,11 @@ TanStack Query を採用しているこのプロジェクトでも、`useQuery` 
 
 登録・更新・削除などの Command 系操作は、ドメイン境界が明確であるため引き続き `features/` のエンドポイントで処理する。
 
-| 区分 | 設計 | 例 |
-|------|------|----|
-| Query（複合） | ページ API（`pages/`） | `GET /api/pages/dashboard` |
-| Query（単純） | `features/` エンドポイント | `GET /api/categories` |
-| Command | `features/` エンドポイント | `POST /api/transactions` |
+| 区分          | 設計                       | 例                         |
+| ------------- | -------------------------- | -------------------------- |
+| Query（複合） | ページ API（`pages/`）     | `GET /api/pages/dashboard` |
+| Query（単純） | `features/` エンドポイント | `GET /api/categories`      |
+| Command       | `features/` エンドポイント | `POST /api/transactions`   |
 
 ---
 
