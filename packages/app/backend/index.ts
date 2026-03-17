@@ -1,5 +1,6 @@
 import authRoute from '@backend/features/auth/route'
 import categoryRoute from '@backend/features/categories/route'
+import transactionRoute from '@backend/features/transactions/route'
 import userRoute from '@backend/features/user/route'
 import { Hono } from 'hono'
 import { csrf } from 'hono/csrf'
@@ -12,6 +13,7 @@ const app = new Hono<{ Bindings: Env }>()
   .route('/auth', authRoute)
   .route('/users', userRoute)
   .route('/categories', categoryRoute)
+  .route('/transactions', transactionRoute)
 
 export default app
 export type AppType = typeof app
