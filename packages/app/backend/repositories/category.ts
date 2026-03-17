@@ -4,6 +4,7 @@ import type {
   CategoryIcon,
   CategoryId,
 } from '@backend/domains/category'
+import type { UserId } from '@backend/domains/user'
 import type { categoriesTable } from '@backend/schemas/categories'
 import type { InferSelectModel } from 'drizzle-orm'
 
@@ -12,6 +13,7 @@ type CategoryRecord = InferSelectModel<typeof categoriesTable>
 export const createCategoryModel = (record: CategoryRecord): Category => {
   const base = {
     id: record.id as CategoryId,
+    userId: record.user_id as UserId,
     name: record.name,
     status: record.status as Category['status'],
     icon: record.icon as CategoryIcon,

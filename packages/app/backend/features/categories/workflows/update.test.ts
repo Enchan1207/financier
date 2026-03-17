@@ -1,4 +1,5 @@
 import type { Category, CategoryId } from '@backend/domains/category'
+import type { UserId } from '@backend/domains/user'
 import { Result } from '@praha/byethrow'
 import { beforeAll, describe, expect, test } from 'vitest'
 
@@ -9,10 +10,13 @@ import {
 import type { UpdateCategoryCommand } from './update'
 import { buildUpdateCategoryWorkflow } from './update'
 
+const TEST_USER_ID = 'test-user-id-00000000001' as UserId
+
 describe('buildUpdateCategoryWorkflow', () => {
   describe('正常系 - アクティブなカテゴリを更新できる', () => {
     const activeCategory: Category = {
       id: 'test-category-id-0000000001' as CategoryId,
+      userId: TEST_USER_ID,
       type: 'expense',
       name: '食費',
       status: 'active',
@@ -62,6 +66,7 @@ describe('buildUpdateCategoryWorkflow', () => {
       if (Result.isFailure(actual)) throw new Error('Expected success')
       expect(actual.value.category).toStrictEqual({
         id: activeCategory.id,
+        userId: TEST_USER_ID,
         type: 'expense',
         name: '外食費',
         status: 'active',
@@ -109,6 +114,7 @@ describe('buildUpdateCategoryWorkflow', () => {
   describe('異常系 - アーカイブ済みカテゴリは更新できない', () => {
     const archivedCategory: Category = {
       id: 'test-category-id-0000000002' as CategoryId,
+      userId: TEST_USER_ID,
       type: 'income',
       name: '給与',
       status: 'archived',

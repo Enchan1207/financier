@@ -5,7 +5,6 @@ import {
   createSavingCategory,
 } from '@backend/domains/category'
 import { sessionMiddleware } from '@backend/features/session/middleware'
-import { dbMiddleware } from '@backend/middlewares/db'
 import { zValidator } from '@hono/zod-validator'
 import { Result } from '@praha/byethrow'
 import { Hono } from 'hono'
@@ -51,36 +50,57 @@ const toCategoryResponse = (category: {
 
 const app = new Hono<{ Bindings: Env }>()
   .use(sessionMiddleware)
-  .use(dbMiddleware)
   .get('/', async (c) => {
-    if (c.get('session') === undefined) {
+    const session = c.get('session')
+    if (session === undefined) {
       return c.json({ message: 'Unauthorized' }, 401)
     }
 
-    const categories = await findCategories(c.get('db'))()
+    const categories = await findCategories(c.get('db'))(session.userId)
     return c.json({ categories: categories.map(toCategoryResponse) })
   })
   .post('/', zValidator('json', CreateCategoryRequestSchema), async (c) => {
-    if (c.get('session') === undefined) {
+    const session = c.get('session')
+    if (session === undefined) {
       return c.json({ message: 'Unauthorized' }, 401)
     }
 
     const { type, name, icon, color } = c.req.valid('json')
     const db = c.get('db')
+    const userId = session.userId
 
     const category =
       type === 'income'
-        ? createIncomeCategory({ type: 'income', name, icon, color })
+        ? createIncomeCategory({
+            type: 'income',
+            userId,
+            name,
+            icon,
+            color,
+          })
         : type === 'saving'
-          ? createSavingCategory({ type: 'saving', name, icon, color })
-          : createExpenseCategory({ type: 'expense', name, icon, color })
+          ? createSavingCategory({
+              type: 'saving',
+              userId,
+              name,
+              icon,
+              color,
+            })
+          : createExpenseCategory({
+              type: 'expense',
+              userId,
+              name,
+              icon,
+              color,
+            })
 
     await saveCategory(db)(category)
 
     return c.json({ category: toCategoryResponse(category) }, 201)
   })
   .put('/:id', zValidator('json', UpdateCategoryRequestSchema), async (c) => {
-    if (c.get('session') === undefined) {
+    const session = c.get('session')
+    if (session === undefined) {
       return c.json({ message: 'Unauthorized' }, 401)
     }
 
@@ -89,7 +109,7 @@ const app = new Hono<{ Bindings: Env }>()
     const db = c.get('db')
 
     const workflow = buildUpdateCategoryWorkflow({
-      findCategoryById: findCategoryById(db),
+      findCategoryById: findCategoryById(db)(session.userId),
     })
 
     const result = await workflow({ id, ...body })
@@ -106,7 +126,8 @@ const app = new Hono<{ Bindings: Env }>()
     return c.json({ category: toCategoryResponse(result.value.category) })
   })
   .delete('/:id', async (c) => {
-    if (c.get('session') === undefined) {
+    const session = c.get('session')
+    if (session === undefined) {
       return c.json({ message: 'Unauthorized' }, 401)
     }
 
@@ -114,7 +135,7 @@ const app = new Hono<{ Bindings: Env }>()
     const db = c.get('db')
 
     const workflow = buildArchiveCategoryWorkflow({
-      findCategoryById: findCategoryById(db),
+      findCategoryById: findCategoryById(db)(session.userId),
     })
 
     const result = await workflow({ id })

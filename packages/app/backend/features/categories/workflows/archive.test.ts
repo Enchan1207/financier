@@ -1,4 +1,5 @@
 import type { Category, CategoryId } from '@backend/domains/category'
+import type { UserId } from '@backend/domains/user'
 import { Result } from '@praha/byethrow'
 import { beforeAll, describe, expect, test } from 'vitest'
 
@@ -9,10 +10,13 @@ import {
 import type { ArchiveCategoryCommand } from './archive'
 import { buildArchiveCategoryWorkflow } from './archive'
 
+const TEST_USER_ID = 'test-user-id-00000000001' as UserId
+
 describe('buildArchiveCategoryWorkflow', () => {
   describe('正常系 - アクティブなカテゴリをアーカイブできる', () => {
     const activeCategory: Category = {
       id: 'test-category-id-0000000001' as CategoryId,
+      userId: TEST_USER_ID,
       type: 'expense',
       name: '食費',
       status: 'active',
@@ -94,6 +98,7 @@ describe('buildArchiveCategoryWorkflow', () => {
   describe('異常系 - すでにアーカイブ済みのカテゴリ', () => {
     const archivedCategory: Category = {
       id: 'test-category-id-0000000002' as CategoryId,
+      userId: TEST_USER_ID,
       type: 'income',
       name: '給与',
       status: 'archived',

@@ -12,6 +12,7 @@ import { usersTable } from '@backend/schemas/users'
 import { env } from 'cloudflare:test'
 import { drizzle } from 'drizzle-orm/d1'
 import { testClient } from 'hono/testing'
+import { ulid } from 'ulid'
 
 import categoriesRoute from './route'
 
@@ -29,11 +30,11 @@ describe('カテゴリAPI', () => {
   })
 
   // セッション付きクッキーを生成するヘルパー
-  const setupSession = async (): Promise<string> => {
+  const setupSession = async (): Promise<{ jwt: string; userId: string }> => {
     const user = createUser({
       email: 'test@example.com',
       idpIssuer: 'https://tenant.region.auth0.com/',
-      idpSubject: 'auth0|123456',
+      idpSubject: `auth0|${ulid()}`,
     })
 
     await db.insert(usersTable).values({
@@ -58,12 +59,14 @@ describe('カテゴリAPI', () => {
       idp_session_id: session.idpSessionId,
     })
 
-    return signSessionJwt(env.SESSION_SECRET)({
+    const jwt = await signSessionJwt(env.SESSION_SECRET)({
       sessionId: session.id,
       userId: user.id,
       now,
       expiresIn: SESSION_JWT_AGE,
     })
+
+    return { jwt, userId: user.id }
   }
 
   describe('GET /', () => {
@@ -72,11 +75,12 @@ describe('カテゴリAPI', () => {
       let responseBody: { categories: unknown[] }
 
       beforeAll(async () => {
-        const sessionJwt = await setupSession()
+        const { jwt: sessionJwt, userId } = await setupSession()
 
         await db.insert(categoriesTable).values([
           {
             id: 'test-category-id-get-000001',
+            user_id: userId,
             type: 'income',
             name: '給与',
             status: 'active',
@@ -85,6 +89,7 @@ describe('カテゴリAPI', () => {
           },
           {
             id: 'test-category-id-get-000002',
+            user_id: userId,
             type: 'expense',
             name: '食費',
             status: 'active',
@@ -137,7 +142,7 @@ describe('カテゴリAPI', () => {
       }
 
       beforeAll(async () => {
-        const sessionJwt = await setupSession()
+        const { jwt: sessionJwt } = await setupSession()
 
         response = await client.index.$post(
           {
@@ -179,7 +184,7 @@ describe('カテゴリAPI', () => {
       let responseBody: { category: { type: string } }
 
       beforeAll(async () => {
-        const sessionJwt = await setupSession()
+        const { jwt: sessionJwt } = await setupSession()
 
         response = await client.index.$post(
           {
@@ -209,7 +214,7 @@ describe('カテゴリAPI', () => {
       let responseBody: { category: { type: string } }
 
       beforeAll(async () => {
-        const sessionJwt = await setupSession()
+        const { jwt: sessionJwt } = await setupSession()
 
         response = await client.index.$post(
           {
@@ -257,7 +262,7 @@ describe('カテゴリAPI', () => {
       let response: Awaited<ReturnType<typeof client.index.$post>>
 
       beforeAll(async () => {
-        const sessionJwt = await setupSession()
+        const { jwt: sessionJwt } = await setupSession()
 
         response = await client.index.$post(
           {
@@ -293,10 +298,11 @@ describe('カテゴリAPI', () => {
       }
 
       beforeAll(async () => {
-        const sessionJwt = await setupSession()
+        const { jwt: sessionJwt, userId } = await setupSession()
 
         await db.insert(categoriesTable).values({
           id: categoryId,
+          user_id: userId,
           type: 'expense',
           name: '食費',
           status: 'active',
@@ -354,7 +360,7 @@ describe('カテゴリAPI', () => {
       let response: Awaited<ReturnType<(typeof client)[':id']['$put']>>
 
       beforeAll(async () => {
-        const sessionJwt = await setupSession()
+        const { jwt: sessionJwt } = await setupSession()
 
         response = await client[':id'].$put(
           {
@@ -375,10 +381,11 @@ describe('カテゴリAPI', () => {
       let response: Awaited<ReturnType<(typeof client)[':id']['$put']>>
 
       beforeAll(async () => {
-        const sessionJwt = await setupSession()
+        const { jwt: sessionJwt, userId } = await setupSession()
 
         await db.insert(categoriesTable).values({
           id: categoryId,
+          user_id: userId,
           type: 'income',
           name: '給与',
           status: 'archived',
@@ -408,10 +415,11 @@ describe('カテゴリAPI', () => {
       let responseBody: { category: { status: string } }
 
       beforeAll(async () => {
-        const sessionJwt = await setupSession()
+        const { jwt: sessionJwt, userId } = await setupSession()
 
         await db.insert(categoriesTable).values({
           id: categoryId,
+          user_id: userId,
           type: 'saving',
           name: '積立貯金',
           status: 'active',
@@ -451,7 +459,7 @@ describe('カテゴリAPI', () => {
       let response: Awaited<ReturnType<(typeof client)[':id']['$delete']>>
 
       beforeAll(async () => {
-        const sessionJwt = await setupSession()
+        const { jwt: sessionJwt } = await setupSession()
 
         response = await client[':id'].$delete(
           { param: { id: 'non-existent-category-id-000' } },
@@ -469,10 +477,11 @@ describe('カテゴリAPI', () => {
       let response: Awaited<ReturnType<(typeof client)[':id']['$delete']>>
 
       beforeAll(async () => {
-        const sessionJwt = await setupSession()
+        const { jwt: sessionJwt, userId } = await setupSession()
 
         await db.insert(categoriesTable).values({
           id: categoryId,
+          user_id: userId,
           type: 'expense',
           name: '食費',
           status: 'archived',

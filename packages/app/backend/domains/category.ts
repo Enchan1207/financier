@@ -1,3 +1,4 @@
+import type { UserId } from '@backend/domains/user'
 import type { Brand } from '@backend/lib/brand'
 import { ulid } from 'ulid'
 
@@ -45,6 +46,7 @@ export type CategoryColor = (typeof CategoryColors)[number]
 
 type CategoryBase = {
   id: CategoryId
+  userId: UserId
   /** カテゴリ名。空文字・空白のみ不可（前後空白除去後） */
   name: string
   /** 利用状態。archived のカテゴリは新規トランザクション作成時の選択肢に表示しない */
