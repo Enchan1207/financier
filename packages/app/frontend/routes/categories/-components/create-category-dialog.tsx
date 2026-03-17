@@ -64,6 +64,7 @@ export const CreateCategoryDialog: React.FC<Props> = ({
         icon: value.icon as CategoryIconType,
         color: value.color as CategoryColor,
       })
+      form.reset()
       onOpenChange(false)
     },
   })
