@@ -8,6 +8,13 @@
       "when": 1771771922833,
       "tag": "0000_absurd_ghost_rider",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1773668011364,
+      "tag": "0001_narrow_khan",
+      "breakpoints": true
     }
   ]
 }
