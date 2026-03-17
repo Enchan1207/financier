@@ -12,6 +12,16 @@ export type ArchiveCategoryCommand = {
   id: CategoryId
 }
 
+// MARK: step types
+
+type CategoryResolved = {
+  category: Category
+}
+
+type StatusChecked = {
+  category: Category
+}
+
 // MARK: event
 
 export type CategoryArchivedEvent = {
@@ -24,16 +34,22 @@ type Effects = {
   findCategoryById: (id: CategoryId) => Promise<Category | undefined>
 }
 
-// MARK: definition
+// MARK: workflow type
 
-export const buildArchiveCategoryWorkflow =
+type Workflow = (
+  command: ArchiveCategoryCommand,
+) => Result.ResultAsync<
+  CategoryArchivedEvent,
+  CategoryNotFoundException | CategoryValidationException
+>
+
+// MARK: steps
+
+const resolveCategory =
   (effects: Effects) =>
   async (
     command: ArchiveCategoryCommand,
-  ): Result.ResultAsync<
-    CategoryArchivedEvent,
-    CategoryNotFoundException | CategoryValidationException
-  > => {
+  ): Result.ResultAsync<CategoryResolved, CategoryNotFoundException> => {
     const target = await effects.findCategoryById(command.id)
     if (!target) {
       return Result.fail(
@@ -42,12 +58,33 @@ export const buildArchiveCategoryWorkflow =
         ),
       )
     }
-
-    if (target.status !== 'active') {
-      return Result.fail(
-        new CategoryValidationException('すでにアーカイブ済みのカテゴリです'),
-      )
-    }
-
-    return Result.succeed({ category: { ...target, status: 'archived' } })
+    return Result.succeed({ category: target })
   }
+
+const checkStatus = (
+  resolved: CategoryResolved,
+): Result.Result<StatusChecked, CategoryValidationException> => {
+  if (resolved.category.status !== 'active') {
+    return Result.fail(
+      new CategoryValidationException('すでにアーカイブ済みのカテゴリです'),
+    )
+  }
+  return Result.succeed({ category: resolved.category })
+}
+
+const createEvent = (
+  checked: StatusChecked,
+): Result.Result<CategoryArchivedEvent, never> =>
+  Result.succeed({ category: { ...checked.category, status: 'archived' } })
+
+// MARK: definition
+
+export const buildArchiveCategoryWorkflow =
+  (effects: Effects): Workflow =>
+  (command) =>
+    Result.pipe(
+      Result.succeed(command),
+      Result.andThen(resolveCategory(effects)),
+      Result.andThen(checkStatus),
+      Result.andThen(createEvent),
+    )
