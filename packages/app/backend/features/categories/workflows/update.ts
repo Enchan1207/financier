@@ -1,4 +1,5 @@
 import type {
+  ActiveCategory,
   Category,
   CategoryColor,
   CategoryIcon,
@@ -40,7 +41,7 @@ type StatusChecked = {
     color: CategoryColor
   }
   context: {
-    category: Category
+    category: ActiveCategory
   }
 }
 
@@ -94,7 +95,10 @@ const checkStatus = (
       new CategoryValidationException('アーカイブ済みカテゴリは編集できません'),
     )
   }
-  return Result.succeed(resolved)
+  return Result.succeed({
+    ...resolved,
+    context: { category: resolved.context.category as ActiveCategory },
+  })
 }
 
 const createEvent = (checked: StatusChecked): CategoryUpdatedEvent => ({

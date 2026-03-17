@@ -1,4 +1,4 @@
-import type { Category, CategoryId } from '@backend/domains/category'
+import type { ActiveCategory, Category, CategoryId } from '@backend/domains/category'
 import { Result } from '@praha/byethrow'
 
 import {
@@ -19,7 +19,7 @@ type CategoryResolved = {
 }
 
 type StatusChecked = {
-  category: Category
+  category: ActiveCategory
 }
 
 // MARK: event
@@ -69,7 +69,7 @@ const checkStatus = (
       new CategoryValidationException('すでにアーカイブ済みのカテゴリです'),
     )
   }
-  return Result.succeed({ category: resolved.category })
+  return Result.succeed({ category: resolved.category as ActiveCategory })
 }
 
 const createEvent = (checked: StatusChecked): CategoryArchivedEvent => ({

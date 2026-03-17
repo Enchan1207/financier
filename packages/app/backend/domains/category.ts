@@ -45,7 +45,7 @@ export type CategoryColor = (typeof CategoryColors)[number]
 
 type CategoryBase = {
   id: CategoryId
-  /** カテゴリ名。空文字・空白のみ不可、前後空白除去後に一意 */
+  /** カテゴリ名。空文字・空白のみ不可（前後空白除去後） */
   name: string
   /** 利用状態。archived のカテゴリは新規トランザクション作成時の選択肢に表示しない */
   status: CategoryStatus
@@ -62,6 +62,9 @@ export type ExpenseCategory = CategoryBase & { type: 'expense' }
 export type SavingCategory = CategoryBase & { type: 'saving' }
 
 export type Category = IncomeCategory | ExpenseCategory | SavingCategory
+
+export type ActiveCategory = Category & { status: 'active' }
+export type ArchivedCategory = Category & { status: 'archived' }
 
 export const createIncomeCategory = (
   props: Omit<IncomeCategory, 'id' | 'status'>,
