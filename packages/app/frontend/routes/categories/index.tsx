@@ -130,9 +130,12 @@ const CategoriesPage: React.FC = () => {
     setDeletingCategory(null)
   }
 
-  const incomeCategories = categories.filter((c) => c.type === 'income')
+  const incomeCategories = categories.filter(
+    (c) => c.type === 'income' && c.status === 'active',
+  )
   const expenseCategories = categories.filter(
-    (c) => c.type === 'expense' || c.type === 'saving',
+    (c) =>
+      (c.type === 'expense' || c.type === 'saving') && c.status === 'active',
   )
 
   return (
