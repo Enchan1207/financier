@@ -97,17 +97,14 @@ const checkStatus = (
   return Result.succeed(resolved)
 }
 
-const createEvent = (
-  checked: StatusChecked,
-): Result.Result<CategoryUpdatedEvent, never> =>
-  Result.succeed({
-    category: {
-      ...checked.context.category,
-      name: checked.input.name,
-      icon: checked.input.icon,
-      color: checked.input.color,
-    },
-  })
+const createEvent = (checked: StatusChecked): CategoryUpdatedEvent => ({
+  category: {
+    ...checked.context.category,
+    name: checked.input.name,
+    icon: checked.input.icon,
+    color: checked.input.color,
+  },
+})
 
 // MARK: definition
 
@@ -118,5 +115,5 @@ export const buildUpdateCategoryWorkflow =
       Result.succeed(command),
       Result.andThen(resolveCategory(effects)),
       Result.andThen(checkStatus),
-      Result.andThen(createEvent),
+      Result.map(createEvent),
     )
