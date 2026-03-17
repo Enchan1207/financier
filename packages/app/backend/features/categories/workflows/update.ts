@@ -5,6 +5,7 @@ import type {
   CategoryIcon,
   CategoryId,
 } from '@backend/domains/category'
+import { isActiveCategory } from '@backend/domains/category'
 import { Result } from '@praha/byethrow'
 
 import {
@@ -81,6 +82,7 @@ const resolveCategory =
         ),
       )
     }
+
     return Result.succeed({
       input: { name: command.name, icon: command.icon, color: command.color },
       context: { category: target },
@@ -90,14 +92,15 @@ const resolveCategory =
 const checkStatus = (
   resolved: CategoryResolved,
 ): Result.Result<StatusChecked, CategoryValidationException> => {
-  if (resolved.context.category.status !== 'active') {
+  if (!isActiveCategory(resolved.context.category)) {
     return Result.fail(
       new CategoryValidationException('アーカイブ済みカテゴリは編集できません'),
     )
   }
+
   return Result.succeed({
     ...resolved,
-    context: { category: resolved.context.category as ActiveCategory },
+    context: { category: resolved.context.category },
   })
 }
 

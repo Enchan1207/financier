@@ -66,6 +66,12 @@ export type Category = IncomeCategory | ExpenseCategory | SavingCategory
 export type ActiveCategory = Category & { status: 'active' }
 export type ArchivedCategory = Category & { status: 'archived' }
 
+export const isActiveCategory = (c: Category): c is ActiveCategory =>
+  c.status === 'active'
+
+export const isArchivedCategory = (c: Category): c is ArchivedCategory =>
+  c.status === 'archived'
+
 export const createIncomeCategory = (
   props: Omit<IncomeCategory, 'id' | 'status'>,
 ): IncomeCategory => ({
