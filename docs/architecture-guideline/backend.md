@@ -27,6 +27,7 @@ backend/
 │   └── <page>/
 │       └── route.ts        # 複数 feature を集約する読み取り専用エンドポイント
 ├── middlewares/       # 横断的関心事のミドルウェア
+├── repositories/      # 複数 feature から共有されるモデル変換ユーティリティ
 ├── schemas/          # Drizzle ORMスキーマ定義
 └── lib/              # 共通ユーティリティ
 ```
@@ -46,6 +47,7 @@ backend/
 
 - Command → Event の変換を実施（ビジネスロジック）
 - 副作用（永続化、外部API）は関数として注入
+- **注入できる副作用は読み取り方向のみ**（`find*` など）。書き込み（`save*`、`delete*`、外部APIへの送信など）はワークフローに注入せず、route 層で実施する
 - ドメイン層のみに依存
 - ワークフロー固有の型はここで定義
 

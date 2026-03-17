@@ -1,3 +1,4 @@
+import type { UserId } from '@backend/domains/user'
 import type { Brand } from '@backend/lib/brand'
 import { ulid } from 'ulid'
 
@@ -45,7 +46,8 @@ export type CategoryColor = (typeof CategoryColors)[number]
 
 type CategoryBase = {
   id: CategoryId
-  /** カテゴリ名。空文字・空白のみ不可、前後空白除去後に一意 */
+  userId: UserId
+  /** カテゴリ名。空文字・空白のみ不可（前後空白除去後） */
   name: string
   /** 利用状態。archived のカテゴリは新規トランザクション作成時の選択肢に表示しない */
   status: CategoryStatus
@@ -62,6 +64,15 @@ export type ExpenseCategory = CategoryBase & { type: 'expense' }
 export type SavingCategory = CategoryBase & { type: 'saving' }
 
 export type Category = IncomeCategory | ExpenseCategory | SavingCategory
+
+export type ActiveCategory = Category & { status: 'active' }
+export type ArchivedCategory = Category & { status: 'archived' }
+
+export const isActiveCategory = (c: Category): c is ActiveCategory =>
+  c.status === 'active'
+
+export const isArchivedCategory = (c: Category): c is ArchivedCategory =>
+  c.status === 'archived'
 
 export const createIncomeCategory = (
   props: Omit<IncomeCategory, 'id' | 'status'>,
