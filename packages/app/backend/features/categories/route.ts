@@ -147,7 +147,7 @@ const app = new Hono<{ Bindings: Env }>()
       return c.json({ message: result.error.message }, 409)
     }
 
-    await archiveCategory(db)(id)
+    await archiveCategory(db)(result.value.category.id)
 
     return c.json({ category: toCategoryResponse(result.value.category) })
   })

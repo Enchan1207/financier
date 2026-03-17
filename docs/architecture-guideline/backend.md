@@ -27,6 +27,7 @@ backend/
 │   └── <page>/
 │       └── route.ts        # 複数 feature を集約する読み取り専用エンドポイント
 ├── middlewares/       # 横断的関心事のミドルウェア
+├── repositories/      # 複数 feature から共有されるモデル変換ユーティリティ
 ├── schemas/          # Drizzle ORMスキーマ定義
 └── lib/              # 共通ユーティリティ
 ```

@@ -27,20 +27,21 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@frontend/components/ui/toggle-group'
-import {
-  archiveCategory,
-  createCategory,
-  listCategoriesQueryOptions,
-  updateCategory,
-} from '@frontend/repositories/categories'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import type React from 'react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 import { CreateCategoryDialog } from './-components/create-category-dialog'
 import { EditCategoryDialog } from './-components/edit-category-dialog'
+import {
+  archiveCategory,
+  createCategory,
+  listCategoriesQueryOptions,
+  updateCategory,
+} from './-repositories/categories'
 
 export type CategoryType = 'income' | 'expense' | 'saving'
 export type CategoryStatus = 'active' | 'archived'
@@ -56,7 +57,7 @@ export type Category = {
 
 const CategoriesPage: React.FC = () => {
   const queryClient = useQueryClient()
-  const { data, isPending } = useQuery(listCategoriesQueryOptions())
+  const { data, isPending, isError } = useQuery(listCategoriesQueryOptions())
   const categories: Category[] = (data ?? []).map((c) => ({
     id: c.id,
     type: c.type as CategoryType,
@@ -84,6 +85,9 @@ const CategoriesPage: React.FC = () => {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['categories'] })
     },
+    onError: (error) => {
+      toast.error(error.message)
+    },
   })
 
   const updateMutation = useMutation({
@@ -96,12 +100,18 @@ const CategoriesPage: React.FC = () => {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['categories'] })
     },
+    onError: (error) => {
+      toast.error(error.message)
+    },
   })
 
   const archiveMutation = useMutation({
     mutationFn: (id: string) => archiveCategory(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['categories'] })
+    },
+    onError: (error) => {
+      toast.error(error.message)
     },
   })
 
@@ -167,6 +177,10 @@ const CategoriesPage: React.FC = () => {
         {isPending ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
             読み込み中...
+          </p>
+        ) : isError ? (
+          <p className="py-8 text-center text-sm text-destructive">
+            カテゴリの取得に失敗しました
           </p>
         ) : (
           <CategoryTable
