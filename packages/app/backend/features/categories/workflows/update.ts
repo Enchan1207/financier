@@ -20,6 +20,30 @@ export type UpdateCategoryCommand = {
   color: CategoryColor
 }
 
+// MARK: step types
+
+type CategoryResolved = {
+  input: {
+    name: string
+    icon: CategoryIcon
+    color: CategoryColor
+  }
+  context: {
+    category: Category
+  }
+}
+
+type StatusChecked = {
+  input: {
+    name: string
+    icon: CategoryIcon
+    color: CategoryColor
+  }
+  context: {
+    category: Category
+  }
+}
+
 // MARK: event
 
 export type CategoryUpdatedEvent = {
@@ -32,16 +56,22 @@ type Effects = {
   findCategoryById: (id: CategoryId) => Promise<Category | undefined>
 }
 
-// MARK: definition
+// MARK: workflow type
 
-export const buildUpdateCategoryWorkflow =
+type Workflow = (
+  command: UpdateCategoryCommand,
+) => Result.ResultAsync<
+  CategoryUpdatedEvent,
+  CategoryNotFoundException | CategoryValidationException
+>
+
+// MARK: steps
+
+const resolveCategory =
   (effects: Effects) =>
   async (
     command: UpdateCategoryCommand,
-  ): Result.ResultAsync<
-    CategoryUpdatedEvent,
-    CategoryNotFoundException | CategoryValidationException
-  > => {
+  ): Result.ResultAsync<CategoryResolved, CategoryNotFoundException> => {
     const target = await effects.findCategoryById(command.id)
     if (!target) {
       return Result.fail(
@@ -50,21 +80,43 @@ export const buildUpdateCategoryWorkflow =
         ),
       )
     }
-
-    if (target.status !== 'active') {
-      return Result.fail(
-        new CategoryValidationException(
-          'アーカイブ済みカテゴリは編集できません',
-        ),
-      )
-    }
-
-    const updated: Category = {
-      ...target,
-      name: command.name,
-      icon: command.icon,
-      color: command.color,
-    }
-
-    return Result.succeed({ category: updated })
+    return Result.succeed({
+      input: { name: command.name, icon: command.icon, color: command.color },
+      context: { category: target },
+    })
   }
+
+const checkStatus = (
+  resolved: CategoryResolved,
+): Result.Result<StatusChecked, CategoryValidationException> => {
+  if (resolved.context.category.status !== 'active') {
+    return Result.fail(
+      new CategoryValidationException('アーカイブ済みカテゴリは編集できません'),
+    )
+  }
+  return Result.succeed(resolved)
+}
+
+const createEvent = (
+  checked: StatusChecked,
+): Result.Result<CategoryUpdatedEvent, never> =>
+  Result.succeed({
+    category: {
+      ...checked.context.category,
+      name: checked.input.name,
+      icon: checked.input.icon,
+      color: checked.input.color,
+    },
+  })
+
+// MARK: definition
+
+export const buildUpdateCategoryWorkflow =
+  (effects: Effects): Workflow =>
+  (command) =>
+    Result.pipe(
+      Result.succeed(command),
+      Result.andThen(resolveCategory(effects)),
+      Result.andThen(checkStatus),
+      Result.andThen(createEvent),
+    )
