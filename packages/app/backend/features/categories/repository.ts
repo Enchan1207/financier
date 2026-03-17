@@ -11,7 +11,12 @@ export const findCategories =
     const results = await db
       .select()
       .from(categoriesTable)
-      .where(eq(categoriesTable.user_id, userId))
+      .where(
+        and(
+          eq(categoriesTable.user_id, userId),
+          eq(categoriesTable.status, 'active'),
+        ),
+      )
     return results.map(createCategoryModel)
   }
 
