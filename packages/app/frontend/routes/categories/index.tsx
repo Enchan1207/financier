@@ -27,6 +27,13 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from '@frontend/components/ui/toggle-group'
+import {
+  archiveCategory,
+  createCategory,
+  listCategoriesQueryOptions,
+  updateCategory,
+} from '@frontend/repositories/categories'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import type React from 'react'
@@ -35,7 +42,7 @@ import { useState } from 'react'
 import { CreateCategoryDialog } from './-components/create-category-dialog'
 import { EditCategoryDialog } from './-components/edit-category-dialog'
 
-export type CategoryType = 'income' | 'expense'
+export type CategoryType = 'income' | 'expense' | 'saving'
 export type CategoryStatus = 'active' | 'archived'
 
 export type Category = {
@@ -43,122 +50,80 @@ export type Category = {
   type: CategoryType
   name: string
   status: CategoryStatus
-  isSaving: boolean
   icon: CategoryIconType
   color: CategoryColor
 }
 
-// モックデータ：本番ではAPIから取得する
-const initialCategories: Category[] = [
-  {
-    id: '1',
-    type: 'income',
-    name: '給与',
-    status: 'active',
-    isSaving: false,
-    icon: 'trending_up',
-    color: 'green',
-  },
-  {
-    id: '2',
-    type: 'income',
-    name: '副業',
-    status: 'active',
-    isSaving: false,
-    icon: 'briefcase',
-    color: 'teal',
-  },
-  {
-    id: '3',
-    type: 'income',
-    name: '利子・配当',
-    status: 'archived',
-    isSaving: false,
-    icon: 'trending_up',
-    color: 'yellow',
-  },
-  {
-    id: '4',
-    type: 'expense',
-    name: '食費',
-    status: 'active',
-    isSaving: false,
-    icon: 'utensils',
-    color: 'orange',
-  },
-  {
-    id: '5',
-    type: 'expense',
-    name: '交通費',
-    status: 'active',
-    isSaving: false,
-    icon: 'bus',
-    color: 'blue',
-  },
-  {
-    id: '6',
-    type: 'expense',
-    name: '光熱費',
-    status: 'active',
-    isSaving: false,
-    icon: 'zap',
-    color: 'yellow',
-  },
-  {
-    id: '7',
-    type: 'expense',
-    name: '旅行積立',
-    status: 'active',
-    isSaving: true,
-    icon: 'piggy_bank',
-    color: 'purple',
-  },
-  {
-    id: '8',
-    type: 'expense',
-    name: '書籍',
-    status: 'archived',
-    isSaving: false,
-    icon: 'book',
-    color: 'teal',
-  },
-]
-
 const CategoriesPage: React.FC = () => {
-  const [categories, setCategories] = useState<Category[]>(initialCategories)
-  const [activeTab, setActiveTab] = useState<CategoryType>('expense')
+  const queryClient = useQueryClient()
+  const { data, isPending } = useQuery(listCategoriesQueryOptions())
+  const categories: Category[] = (data ?? []).map((c) => ({
+    id: c.id,
+    type: c.type as CategoryType,
+    name: c.name,
+    status: c.status as CategoryStatus,
+    icon: c.icon as CategoryIconType,
+    color: c.color as CategoryColor,
+  }))
+
+  const [activeTab, setActiveTab] = useState<'income' | 'expense'>('expense')
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [deletingCategory, setDeletingCategory] = useState<Category | null>(
     null,
   )
 
-  const handleCreate = async (data: Omit<Category, 'id'>): Promise<void> => {
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    setCategories((prev) => [...prev, { ...data, id: crypto.randomUUID() }])
+  const createMutation = useMutation({
+    mutationFn: (data: Omit<Category, 'id' | 'status'>) =>
+      createCategory({
+        type: data.type,
+        name: data.name,
+        icon: data.icon,
+        color: data.color,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['categories'] })
+    },
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: (category: Category) =>
+      updateCategory(category.id, {
+        name: category.name,
+        icon: category.icon,
+        color: category.color,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['categories'] })
+    },
+  })
+
+  const archiveMutation = useMutation({
+    mutationFn: (id: string) => archiveCategory(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['categories'] })
+    },
+  })
+
+  const handleCreate = async (
+    data: Omit<Category, 'id' | 'status'>,
+  ): Promise<void> => {
+    await createMutation.mutateAsync(data)
   }
 
   const handleSave = async (updated: Category): Promise<void> => {
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    setCategories((prev) =>
-      prev.map((c) => (c.id === updated.id ? updated : c)),
-    )
+    await updateMutation.mutateAsync(updated)
   }
 
-  const handleDelete = (category: Category) => {
-    // モック：参照チェックは省略し、常に archived に変更する
-    setCategories((prev) =>
-      prev.map((c) =>
-        c.id === category.id
-          ? { ...c, status: 'archived' as CategoryStatus }
-          : c,
-      ),
-    )
+  const handleDelete = async (category: Category): Promise<void> => {
+    await archiveMutation.mutateAsync(category.id)
     setDeletingCategory(null)
   }
 
   const incomeCategories = categories.filter((c) => c.type === 'income')
-  const expenseCategories = categories.filter((c) => c.type === 'expense')
+  const expenseCategories = categories.filter(
+    (c) => c.type === 'expense' || c.type === 'saving',
+  )
 
   return (
     <div className="space-y-6">
@@ -171,7 +136,7 @@ const CategoriesPage: React.FC = () => {
             variant="outline"
             value={activeTab}
             onValueChange={(v) => {
-              if (v) setActiveTab(v as CategoryType)
+              if (v) setActiveTab(v as 'income' | 'expense')
             }}
             className="w-full md:w-auto"
           >
@@ -199,13 +164,19 @@ const CategoriesPage: React.FC = () => {
           </Button>
         </div>
 
-        <CategoryTable
-          categories={
-            activeTab === 'expense' ? expenseCategories : incomeCategories
-          }
-          onEdit={setEditingCategory}
-          onDelete={setDeletingCategory}
-        />
+        {isPending ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            読み込み中...
+          </p>
+        ) : (
+          <CategoryTable
+            categories={
+              activeTab === 'expense' ? expenseCategories : incomeCategories
+            }
+            onEdit={setEditingCategory}
+            onDelete={setDeletingCategory}
+          />
+        )}
       </div>
 
       <CreateCategoryDialog
@@ -245,7 +216,7 @@ const CategoriesPage: React.FC = () => {
             <AlertDialogCancel>キャンセル</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (deletingCategory) handleDelete(deletingCategory)
+                if (deletingCategory) void handleDelete(deletingCategory)
               }}
             >
               削除
@@ -303,7 +274,9 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
             </TableCell>
             <TableCell>
               <div className="flex gap-1">
-                {category.isSaving && <Badge variant="secondary">積立</Badge>}
+                {category.type === 'saving' && (
+                  <Badge variant="secondary">積立</Badge>
+                )}
                 {category.status === 'archived' && (
                   <Badge variant="outline">削除済み</Badge>
                 )}

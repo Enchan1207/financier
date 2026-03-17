@@ -23,7 +23,7 @@ import { Loader2Icon } from 'lucide-react'
 import type React from 'react'
 import { z } from 'zod'
 
-import type { Category, CategoryType } from '../index'
+import type { Category } from '../index'
 import { CategoryAppearanceSelector } from './category-appearance-selector'
 
 const createCategorySchema = z.object({
@@ -32,16 +32,16 @@ const createCategorySchema = z.object({
   color: z.string().min(1, '色を選択してください'),
 })
 
-const typeLabel: Record<CategoryType, string> = {
+const typeLabel: Record<'income' | 'expense', string> = {
   expense: '支出',
   income: '収入',
 }
 
 type Props = {
-  type: CategoryType
+  type: 'income' | 'expense'
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreate: (category: Omit<Category, 'id'>) => Promise<void>
+  onCreate: (category: Omit<Category, 'id' | 'status'>) => Promise<void>
 }
 
 export const CreateCategoryDialog: React.FC<Props> = ({
@@ -61,8 +61,6 @@ export const CreateCategoryDialog: React.FC<Props> = ({
       await onCreate({
         type,
         name: value.name.trim(),
-        status: 'active',
-        isSaving: false,
         icon: value.icon as CategoryIconType,
         color: value.color as CategoryColor,
       })
