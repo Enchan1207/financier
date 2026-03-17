@@ -72,10 +72,9 @@ const checkStatus = (
   return Result.succeed({ category: resolved.category })
 }
 
-const createEvent = (
-  checked: StatusChecked,
-): Result.Result<CategoryArchivedEvent, never> =>
-  Result.succeed({ category: { ...checked.category, status: 'archived' } })
+const createEvent = (checked: StatusChecked): CategoryArchivedEvent => ({
+  category: { ...checked.category, status: 'archived' },
+})
 
 // MARK: definition
 
@@ -86,5 +85,5 @@ export const buildArchiveCategoryWorkflow =
       Result.succeed(command),
       Result.andThen(resolveCategory(effects)),
       Result.andThen(checkStatus),
-      Result.andThen(createEvent),
+      Result.map(createEvent),
     )
