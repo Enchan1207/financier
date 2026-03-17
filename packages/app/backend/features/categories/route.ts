@@ -1,19 +1,20 @@
 import type { CategoryId } from '@backend/domains/category'
+import {
+  createExpenseCategory,
+  createIncomeCategory,
+  createSavingCategory,
+} from '@backend/domains/category'
 import { sessionMiddleware } from '@backend/features/session/middleware'
 import { dbMiddleware } from '@backend/middlewares/db'
 import { zValidator } from '@hono/zod-validator'
 import { Result } from '@praha/byethrow'
 import { Hono } from 'hono'
 
-import {
-  CategoryConflictException,
-  CategoryNotFoundException,
-} from './exceptions'
+import { CategoryNotFoundException } from './exceptions'
 import {
   archiveCategory,
   findCategories,
   findCategoryById,
-  findCategoryByName,
   saveCategory,
 } from './repository'
 import {
@@ -21,7 +22,6 @@ import {
   UpdateCategoryRequestSchema,
 } from './schema'
 import { buildArchiveCategoryWorkflow } from './workflows/archive'
-import { buildCreateCategoryWorkflow } from './workflows/create'
 import { buildUpdateCategoryWorkflow } from './workflows/update'
 
 type CategoryResponse = {
@@ -65,22 +65,19 @@ const app = new Hono<{ Bindings: Env }>()
       return c.json({ message: 'Unauthorized' }, 401)
     }
 
-    const body = c.req.valid('json')
+    const { type, name, icon, color } = c.req.valid('json')
     const db = c.get('db')
 
-    const workflow = buildCreateCategoryWorkflow({
-      findCategoryByName: findCategoryByName(db),
-    })
+    const category =
+      type === 'income'
+        ? createIncomeCategory({ type: 'income', name, icon, color })
+        : type === 'saving'
+          ? createSavingCategory({ type: 'saving', name, icon, color })
+          : createExpenseCategory({ type: 'expense', name, icon, color })
 
-    const result = await workflow(body)
+    await saveCategory(db)(category)
 
-    if (Result.isFailure(result)) {
-      return c.json({ message: result.error.message }, 409)
-    }
-
-    await saveCategory(db)(result.value.category)
-
-    return c.json({ category: toCategoryResponse(result.value.category) }, 201)
+    return c.json({ category: toCategoryResponse(category) }, 201)
   })
   .put('/:id', zValidator('json', UpdateCategoryRequestSchema), async (c) => {
     if (c.get('session') === undefined) {
@@ -93,7 +90,6 @@ const app = new Hono<{ Bindings: Env }>()
 
     const workflow = buildUpdateCategoryWorkflow({
       findCategoryById: findCategoryById(db),
-      findCategoryByName: findCategoryByName(db),
     })
 
     const result = await workflow({ id, ...body })
@@ -101,9 +97,6 @@ const app = new Hono<{ Bindings: Env }>()
     if (Result.isFailure(result)) {
       if (result.error instanceof CategoryNotFoundException) {
         return c.json({ message: result.error.message }, 404)
-      }
-      if (result.error instanceof CategoryConflictException) {
-        return c.json({ message: result.error.message }, 409)
       }
       return c.json({ message: result.error.message }, 400)
     }

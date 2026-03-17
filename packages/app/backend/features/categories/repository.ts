@@ -22,18 +22,6 @@ export const findCategoryById =
     return row ? createCategoryModel(row) : undefined
   }
 
-export const findCategoryByName =
-  (db: DrizzleDatabase) =>
-  async (name: string): Promise<Category | undefined> => {
-    const results = await db
-      .select()
-      .from(categoriesTable)
-      .where(eq(categoriesTable.name, name))
-
-    const row = results[0]
-    return row ? createCategoryModel(row) : undefined
-  }
-
 export const saveCategory =
   (db: DrizzleDatabase) =>
   async (category: Category): Promise<void> => {

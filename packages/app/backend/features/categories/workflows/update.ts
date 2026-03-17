@@ -7,7 +7,6 @@ import type {
 import { Result } from '@praha/byethrow'
 
 import {
-  CategoryConflictException,
   CategoryNotFoundException,
   CategoryValidationException,
 } from '../exceptions'
@@ -31,7 +30,6 @@ export type CategoryUpdatedEvent = {
 
 type Effects = {
   findCategoryById: (id: CategoryId) => Promise<Category | undefined>
-  findCategoryByName: (name: string) => Promise<Category | undefined>
 }
 
 // MARK: definition
@@ -42,9 +40,7 @@ export const buildUpdateCategoryWorkflow =
     command: UpdateCategoryCommand,
   ): Result.ResultAsync<
     CategoryUpdatedEvent,
-    | CategoryNotFoundException
-    | CategoryValidationException
-    | CategoryConflictException
+    CategoryNotFoundException | CategoryValidationException
   > => {
     const target = await effects.findCategoryById(command.id)
     if (!target) {
@@ -61,17 +57,6 @@ export const buildUpdateCategoryWorkflow =
           'アーカイブ済みカテゴリは編集できません',
         ),
       )
-    }
-
-    if (command.name !== target.name) {
-      const existing = await effects.findCategoryByName(command.name)
-      if (existing) {
-        return Result.fail(
-          new CategoryConflictException(
-            `カテゴリ名「${command.name}」はすでに存在します`,
-          ),
-        )
-      }
     }
 
     const updated: Category = {
