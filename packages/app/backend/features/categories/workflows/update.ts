@@ -6,6 +6,7 @@ import type {
   CategoryId,
 } from '@backend/domains/category'
 import { isActiveCategory } from '@backend/domains/category'
+import type { UserId } from '@backend/domains/user'
 import { Result } from '@praha/byethrow'
 
 import {
@@ -16,10 +17,15 @@ import {
 // MARK: command
 
 export type UpdateCategoryCommand = {
-  id: CategoryId
-  name: string
-  icon: CategoryIcon
-  color: CategoryColor
+  input: {
+    id: CategoryId
+    name: string
+    icon: CategoryIcon
+    color: CategoryColor
+  }
+  context: {
+    userId: UserId
+  }
 }
 
 // MARK: step types
@@ -31,6 +37,7 @@ type CategoryResolved = {
     color: CategoryColor
   }
   context: {
+    userId: UserId
     category: Category
   }
 }
@@ -42,6 +49,7 @@ type StatusChecked = {
     color: CategoryColor
   }
   context: {
+    userId: UserId
     category: ActiveCategory
   }
 }
@@ -55,7 +63,10 @@ export type CategoryUpdatedEvent = {
 // MARK: effects
 
 type Effects = {
-  findCategoryById: (id: CategoryId) => Promise<Category | undefined>
+  findCategoryById: (
+    id: CategoryId,
+    userId: UserId,
+  ) => Promise<Category | undefined>
 }
 
 // MARK: workflow type
@@ -74,18 +85,25 @@ const resolveCategory =
   async (
     command: UpdateCategoryCommand,
   ): Result.ResultAsync<CategoryResolved, CategoryNotFoundException> => {
-    const target = await effects.findCategoryById(command.id)
+    const target = await effects.findCategoryById(
+      command.input.id,
+      command.context.userId,
+    )
     if (!target) {
       return Result.fail(
         new CategoryNotFoundException(
-          `カテゴリが見つかりません: ${command.id}`,
+          `カテゴリが見つかりません: ${command.input.id}`,
         ),
       )
     }
 
     return Result.succeed({
-      input: { name: command.name, icon: command.icon, color: command.color },
-      context: { category: target },
+      input: {
+        name: command.input.name,
+        icon: command.input.icon,
+        color: command.input.color,
+      },
+      context: { userId: command.context.userId, category: target },
     })
   }
 
@@ -100,7 +118,7 @@ const checkStatus = (
 
   return Result.succeed({
     ...resolved,
-    context: { category: resolved.context.category },
+    context: { ...resolved.context, category: resolved.context.category },
   })
 }
 
