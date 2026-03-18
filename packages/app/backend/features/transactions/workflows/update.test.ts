@@ -18,6 +18,7 @@ const makeTransaction = (
   overrides: Partial<Transaction> = {},
 ): Transaction => ({
   id: 'test-transaction-id-000000001' as TransactionId,
+  userId: TEST_USER_ID,
   type: 'expense',
   amount: 5000,
   categoryId: 'test-category-id-0000000001' as CategoryId,
@@ -43,8 +44,8 @@ describe('buildUpdateTransactionWorkflow', () => {
   describe('正常系 - amountを変更できる', () => {
     const transaction = makeTransaction()
     const command: UpdateTransactionCommand = {
-      id: transaction.id,
-      amount: 8000,
+      input: { id: transaction.id, amount: 8000 },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -78,8 +79,8 @@ describe('buildUpdateTransactionWorkflow', () => {
   describe('正常系 - nameを変更できる', () => {
     const transaction = makeTransaction()
     const command: UpdateTransactionCommand = {
-      id: transaction.id,
-      name: '外食費',
+      input: { id: transaction.id, name: '外食費' },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -107,8 +108,8 @@ describe('buildUpdateTransactionWorkflow', () => {
   describe('正常系 - transactionDateを変更できる', () => {
     const transaction = makeTransaction()
     const command: UpdateTransactionCommand = {
-      id: transaction.id,
-      transactionDate: '2024-05-01',
+      input: { id: transaction.id, transactionDate: '2024-05-01' },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -142,8 +143,8 @@ describe('buildUpdateTransactionWorkflow', () => {
       name: '外食費',
     })
     const command: UpdateTransactionCommand = {
-      id: transaction.id,
-      categoryId: newCategory.id,
+      input: { id: transaction.id, categoryId: newCategory.id },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -177,9 +178,8 @@ describe('buildUpdateTransactionWorkflow', () => {
       categoryId: archivedCategory.id,
     })
     const command: UpdateTransactionCommand = {
-      id: transaction.id,
-      amount: 6000,
-      name: '食料品（修正）',
+      input: { id: transaction.id, amount: 6000, name: '食料品（修正）' },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -211,8 +211,11 @@ describe('buildUpdateTransactionWorkflow', () => {
 
   describe('異常系 - トランザクションが存在しない', () => {
     const command: UpdateTransactionCommand = {
-      id: 'non-existent-transaction-id-0' as TransactionId,
-      amount: 1000,
+      input: {
+        id: 'non-existent-transaction-id-0' as TransactionId,
+        amount: 1000,
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -238,15 +241,18 @@ describe('buildUpdateTransactionWorkflow', () => {
 
     test('エラーメッセージにトランザクションIDが含まれること', () => {
       if (Result.isSuccess(actual)) throw new Error('Expected failure')
-      expect(actual.error.message).toContain(command.id)
+      expect(actual.error.message).toContain(command.input.id)
     })
   })
 
   describe('異常系 - 変更先カテゴリが存在しない', () => {
     const transaction = makeTransaction()
     const command: UpdateTransactionCommand = {
-      id: transaction.id,
-      categoryId: 'non-existent-category-id-000',
+      input: {
+        id: transaction.id,
+        categoryId: 'non-existent-category-id-000',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -278,8 +284,8 @@ describe('buildUpdateTransactionWorkflow', () => {
       status: 'archived',
     })
     const command: UpdateTransactionCommand = {
-      id: transaction.id,
-      categoryId: archivedCategory.id,
+      input: { id: transaction.id, categoryId: archivedCategory.id },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -317,8 +323,8 @@ describe('buildUpdateTransactionWorkflow', () => {
       name: '給与',
     })
     const command: UpdateTransactionCommand = {
-      id: transaction.id,
-      categoryId: incomeCategory.id,
+      input: { id: transaction.id, categoryId: incomeCategory.id },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
