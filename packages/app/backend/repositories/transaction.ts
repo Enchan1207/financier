@@ -5,6 +5,7 @@ import type {
   TransactionId,
   TransactionType,
 } from '@backend/domains/transaction'
+import type { UserId } from '@backend/domains/user'
 import dayjs from '@backend/lib/date'
 import type { transactionsTable } from '@backend/schemas/transactions'
 import type { InferSelectModel } from 'drizzle-orm'
@@ -15,6 +16,7 @@ export const createTransactionModel = (
   record: TransactionRecord,
 ): Transaction => ({
   id: record.id as TransactionId,
+  userId: record.user_id as UserId,
   type: record.type as TransactionType,
   amount: record.amount,
   categoryId: record.category_id as CategoryId,

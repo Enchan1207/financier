@@ -22,8 +22,7 @@ export const findCategories =
 
 export const findCategoryById =
   (db: DrizzleDatabase) =>
-  (userId: UserId) =>
-  async (id: CategoryId): Promise<Category | undefined> => {
+  async (id: CategoryId, userId: UserId): Promise<Category | undefined> => {
     const results = await db
       .select()
       .from(categoriesTable)

@@ -17,8 +17,10 @@ export const findTransactions =
 
 export const findTransactionById =
   (db: DrizzleDatabase) =>
-  (userId: UserId) =>
-  async (id: TransactionId): Promise<Transaction | undefined> => {
+  async (
+    id: TransactionId,
+    userId: UserId,
+  ): Promise<Transaction | undefined> => {
     const results = await db
       .select()
       .from(transactionsTable)
@@ -35,13 +37,12 @@ export const findTransactionById =
 
 export const saveTransaction =
   (db: DrizzleDatabase) =>
-  (userId: UserId) =>
   async (transaction: Transaction): Promise<void> => {
     await db
       .insert(transactionsTable)
       .values({
         id: transaction.id,
-        user_id: userId,
+        user_id: transaction.userId,
         type: transaction.type,
         amount: transaction.amount,
         category_id: transaction.categoryId,
