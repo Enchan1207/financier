@@ -120,7 +120,9 @@ const app = new Hono<{ Bindings: Env }>()
       const command = {
         id,
         ...(body.amount !== undefined ? { amount: body.amount } : {}),
-        ...(body.categoryId !== undefined ? { categoryId: body.categoryId } : {}),
+        ...(body.categoryId !== undefined
+          ? { categoryId: body.categoryId }
+          : {}),
         ...(body.transactionDate !== undefined
           ? { transactionDate: body.transactionDate }
           : {}),
