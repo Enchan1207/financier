@@ -5,12 +5,14 @@ import { ulid } from 'ulid'
 
 import type { CategoryId } from './category'
 import type { EventId } from './event'
+import type { UserId } from './user'
 
 export type TransactionId = Brand<string, 'transaction_id'>
 export type TransactionType = 'income' | 'expense'
 
 export type Transaction = {
   id: TransactionId
+  userId: UserId
   /** 収支種別。categoryId が参照する Category.type と一致しなければならない */
   type: TransactionType
   /** 金額（日本円、正の整数） */

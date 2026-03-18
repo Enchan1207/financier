@@ -4,12 +4,14 @@ import dayjs from '@backend/lib/date'
 import { ulid } from 'ulid'
 
 import type { CategoryId } from './category'
+import type { UserId } from './user'
 
 export type SavingDefinitionId = Brand<string, 'saving_definition_id'>
 export type SavingWithdrawalId = Brand<string, 'saving_withdrawal_id'>
 
 type SavingDefinitionBase = {
   id: SavingDefinitionId
+  userId: UserId
   /** 紐づく積立カテゴリ（1定義につき1カテゴリ） */
   categoryId: CategoryId
 }
@@ -30,6 +32,7 @@ export type SavingDefinition = GoalSavingDefinition | FreeSavingDefinition
 
 export type SavingWithdrawal = {
   id: SavingWithdrawalId
+  userId: UserId
   /** 紐づく積立定義 */
   savingDefinitionId: SavingDefinitionId
   /** 取り崩し額（日本円） */

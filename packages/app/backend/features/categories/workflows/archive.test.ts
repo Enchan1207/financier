@@ -25,7 +25,8 @@ describe('buildArchiveCategoryWorkflow', () => {
     }
 
     const command: ArchiveCategoryCommand = {
-      id: activeCategory.id,
+      input: { id: activeCategory.id },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -65,7 +66,8 @@ describe('buildArchiveCategoryWorkflow', () => {
 
   describe('異常系 - カテゴリが存在しない', () => {
     const command: ArchiveCategoryCommand = {
-      id: 'non-existent-category-id-000' as CategoryId,
+      input: { id: 'non-existent-category-id-000' as CategoryId },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -91,7 +93,7 @@ describe('buildArchiveCategoryWorkflow', () => {
 
     test('エラーメッセージにカテゴリIDが含まれること', () => {
       if (Result.isSuccess(actual)) throw new Error('Expected failure')
-      expect(actual.error.message).toContain(command.id)
+      expect(actual.error.message).toContain(command.input.id)
     })
   })
 
@@ -107,7 +109,8 @@ describe('buildArchiveCategoryWorkflow', () => {
     }
 
     const command: ArchiveCategoryCommand = {
-      id: archivedCategory.id,
+      input: { id: archivedCategory.id },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<

@@ -3,6 +3,7 @@ import type {
   Category,
   CategoryId,
 } from '@backend/domains/category'
+import type { UserId } from '@backend/domains/user'
 import { Result } from '@praha/byethrow'
 
 import {
@@ -13,17 +14,28 @@ import {
 // MARK: command
 
 export type ArchiveCategoryCommand = {
-  id: CategoryId
+  input: {
+    id: CategoryId
+  }
+  context: {
+    userId: UserId
+  }
 }
 
 // MARK: step types
 
 type CategoryResolved = {
-  category: Category
+  context: {
+    userId: UserId
+    category: Category
+  }
 }
 
 type StatusChecked = {
-  category: ActiveCategory
+  context: {
+    userId: UserId
+    category: ActiveCategory
+  }
 }
 
 // MARK: event
@@ -35,7 +47,10 @@ export type CategoryArchivedEvent = {
 // MARK: effects
 
 type Effects = {
-  findCategoryById: (id: CategoryId) => Promise<Category | undefined>
+  findCategoryById: (
+    id: CategoryId,
+    userId: UserId,
+  ) => Promise<Category | undefined>
 }
 
 // MARK: workflow type
@@ -54,30 +69,40 @@ const resolveCategory =
   async (
     command: ArchiveCategoryCommand,
   ): Result.ResultAsync<CategoryResolved, CategoryNotFoundException> => {
-    const target = await effects.findCategoryById(command.id)
+    const target = await effects.findCategoryById(
+      command.input.id,
+      command.context.userId,
+    )
     if (!target) {
       return Result.fail(
         new CategoryNotFoundException(
-          `カテゴリが見つかりません: ${command.id}`,
+          `カテゴリが見つかりません: ${command.input.id}`,
         ),
       )
     }
-    return Result.succeed({ category: target })
+    return Result.succeed({
+      context: { userId: command.context.userId, category: target },
+    })
   }
 
 const checkStatus = (
   resolved: CategoryResolved,
 ): Result.Result<StatusChecked, CategoryValidationException> => {
-  if (resolved.category.status !== 'active') {
+  if (resolved.context.category.status !== 'active') {
     return Result.fail(
       new CategoryValidationException('すでにアーカイブ済みのカテゴリです'),
     )
   }
-  return Result.succeed({ category: resolved.category as ActiveCategory })
+  return Result.succeed({
+    context: {
+      ...resolved.context,
+      category: resolved.context.category as ActiveCategory,
+    },
+  })
 }
 
 const createEvent = (checked: StatusChecked): CategoryArchivedEvent => ({
-  category: { ...checked.category, status: 'archived' },
+  category: { ...checked.context.category, status: 'archived' },
 })
 
 // MARK: definition

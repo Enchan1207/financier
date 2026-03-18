@@ -1,8 +1,10 @@
 import type { CategoryId } from './category'
 import type { FiscalYearId } from './fiscal-year'
+import type { UserId } from './user'
 
 export type Budget = {
-  /** 対象年度。fiscalYearId と categoryId の複合キーで一意性を保証する */
+  userId: UserId
+  /** 対象年度。userId + fiscalYearId + categoryId の複合キーで一意性を保証する */
   fiscalYearId: FiscalYearId
   /** 対象カテゴリ */
   categoryId: CategoryId

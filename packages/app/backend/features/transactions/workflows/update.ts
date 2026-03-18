@@ -2,6 +2,7 @@ import type { Category, CategoryId } from '@backend/domains/category'
 import { isActiveCategory } from '@backend/domains/category'
 import type { EventId } from '@backend/domains/event'
 import type { Transaction, TransactionId } from '@backend/domains/transaction'
+import type { UserId } from '@backend/domains/user'
 import dayjs from '@backend/lib/date'
 import { Result } from '@praha/byethrow'
 
@@ -13,19 +14,25 @@ import {
 // MARK: command
 
 export type UpdateTransactionCommand = {
-  id: TransactionId
-  amount?: number
-  categoryId?: string
-  transactionDate?: string
-  name?: string
-  eventId?: string | null
+  input: {
+    id: TransactionId
+    amount?: number | undefined
+    categoryId?: string | undefined
+    transactionDate?: string | undefined
+    name?: string | undefined
+    eventId?: string | null | undefined
+  }
+  context: {
+    userId: UserId
+  }
 }
 
 // MARK: step types
 
 type TransactionResolved = {
-  input: UpdateTransactionCommand
+  input: UpdateTransactionCommand['input']
   context: {
+    userId: UserId
     transaction: Transaction
     newCategory: Category | null
   }
@@ -42,8 +49,14 @@ export type TransactionUpdatedEvent = {
 // MARK: effects
 
 type Effects = {
-  findTransactionById: (id: TransactionId) => Promise<Transaction | undefined>
-  findCategoryById: (id: CategoryId) => Promise<Category | undefined>
+  findTransactionById: (
+    id: TransactionId,
+    userId: UserId,
+  ) => Promise<Transaction | undefined>
+  findCategoryById: (
+    id: CategoryId,
+    userId: UserId,
+  ) => Promise<Category | undefined>
 }
 
 // MARK: workflow type
@@ -65,36 +78,44 @@ const resolveTransaction =
     TransactionResolved,
     TransactionNotFoundException | TransactionValidationException
   > => {
-    const transaction = await effects.findTransactionById(command.id)
+    const transaction = await effects.findTransactionById(
+      command.input.id,
+      command.context.userId,
+    )
     if (!transaction) {
       return Result.fail(
         new TransactionNotFoundException(
-          `トランザクションが見つかりません: ${command.id}`,
+          `トランザクションが見つかりません: ${command.input.id}`,
         ),
       )
     }
 
-    if (command.categoryId === undefined) {
+    if (command.input.categoryId === undefined) {
       return Result.succeed({
-        input: command,
-        context: { transaction, newCategory: null },
+        input: command.input,
+        context: {
+          userId: command.context.userId,
+          transaction,
+          newCategory: null,
+        },
       })
     }
 
     const newCategory = await effects.findCategoryById(
-      command.categoryId as CategoryId,
+      command.input.categoryId as CategoryId,
+      command.context.userId,
     )
     if (!newCategory) {
       return Result.fail(
         new TransactionNotFoundException(
-          `カテゴリが見つかりません: ${command.categoryId}`,
+          `カテゴリが見つかりません: ${command.input.categoryId}`,
         ),
       )
     }
 
     return Result.succeed({
-      input: command,
-      context: { transaction, newCategory },
+      input: command.input,
+      context: { userId: command.context.userId, transaction, newCategory },
     })
   }
 

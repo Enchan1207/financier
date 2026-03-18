@@ -3,6 +3,7 @@ import { isActiveCategory } from '@backend/domains/category'
 import type { EventId } from '@backend/domains/event'
 import type { Transaction, TransactionType } from '@backend/domains/transaction'
 import { createTransaction } from '@backend/domains/transaction'
+import type { UserId } from '@backend/domains/user'
 import dayjs from '@backend/lib/date'
 import { Result } from '@praha/byethrow'
 
@@ -14,29 +15,30 @@ import {
 // MARK: command
 
 export type CreateTransactionCommand = {
-  type: TransactionType
-  amount: number
-  categoryId: CategoryId
-  transactionDate: string
-  name: string
-  eventId?: string | null
+  input: {
+    type: TransactionType
+    amount: number
+    categoryId: CategoryId
+    transactionDate: string
+    name: string
+    eventId?: string | null | undefined
+  }
+  context: {
+    userId: UserId
+  }
 }
 
 // MARK: step types
 
 type CategoryResolved = {
-  input: CreateTransactionCommand
+  input: CreateTransactionCommand['input']
   context: {
+    userId: UserId
     category: Category
   }
 }
 
-type StatusChecked = {
-  input: CreateTransactionCommand
-  context: {
-    category: Category
-  }
-}
+type StatusChecked = CategoryResolved
 
 // MARK: event
 
@@ -47,7 +49,10 @@ export type TransactionCreatedEvent = {
 // MARK: effects
 
 type Effects = {
-  findCategoryById: (id: CategoryId) => Promise<Category | undefined>
+  findCategoryById: (
+    id: CategoryId,
+    userId: UserId,
+  ) => Promise<Category | undefined>
 }
 
 // MARK: workflow type
@@ -66,15 +71,21 @@ const resolveCategory =
   async (
     command: CreateTransactionCommand,
   ): Result.ResultAsync<CategoryResolved, TransactionNotFoundException> => {
-    const category = await effects.findCategoryById(command.categoryId)
+    const category = await effects.findCategoryById(
+      command.input.categoryId,
+      command.context.userId,
+    )
     if (!category) {
       return Result.fail(
         new TransactionNotFoundException(
-          `カテゴリが見つかりません: ${command.categoryId}`,
+          `カテゴリが見つかりません: ${command.input.categoryId}`,
         ),
       )
     }
-    return Result.succeed({ input: command, context: { category } })
+    return Result.succeed({
+      input: command.input,
+      context: { userId: command.context.userId, category },
+    })
   }
 
 const checkCategoryStatus = (
@@ -112,8 +123,9 @@ const checkTypeMismatch = (
 }
 
 const createEvent = (checked: StatusChecked): TransactionCreatedEvent => {
-  const { input } = checked
+  const { input, context } = checked
   const transaction = createTransaction({
+    userId: context.userId,
     type: input.type,
     amount: input.amount,
     categoryId: input.categoryId,

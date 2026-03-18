@@ -109,10 +109,13 @@ const app = new Hono<{ Bindings: Env }>()
     const db = c.get('db')
 
     const workflow = buildUpdateCategoryWorkflow({
-      findCategoryById: findCategoryById(db)(session.userId),
+      findCategoryById: findCategoryById(db),
     })
 
-    const result = await workflow({ id, ...body })
+    const result = await workflow({
+      input: { id, ...body },
+      context: { userId: session.userId },
+    })
 
     if (Result.isFailure(result)) {
       if (result.error instanceof CategoryNotFoundException) {
@@ -135,10 +138,13 @@ const app = new Hono<{ Bindings: Env }>()
     const db = c.get('db')
 
     const workflow = buildArchiveCategoryWorkflow({
-      findCategoryById: findCategoryById(db)(session.userId),
+      findCategoryById: findCategoryById(db),
     })
 
-    const result = await workflow({ id })
+    const result = await workflow({
+      input: { id },
+      context: { userId: session.userId },
+    })
 
     if (Result.isFailure(result)) {
       if (result.error instanceof CategoryNotFoundException) {

@@ -25,11 +25,14 @@ describe('buildCreateTransactionWorkflow', () => {
     }
 
     const command: CreateTransactionCommand = {
-      type: 'income',
-      amount: 300000,
-      categoryId: incomeCategory.id,
-      transactionDate: '2024-04-01',
-      name: '4月分給与',
+      input: {
+        type: 'income',
+        amount: 300000,
+        categoryId: incomeCategory.id,
+        transactionDate: '2024-04-01',
+        name: '4月分給与',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -76,6 +79,11 @@ describe('buildCreateTransactionWorkflow', () => {
       if (Result.isFailure(actual)) throw new Error('Expected success')
       expect(actual.value.transaction.id).toBeDefined()
     })
+
+    test('userIdが設定されること', () => {
+      if (Result.isFailure(actual)) throw new Error('Expected success')
+      expect(actual.value.transaction.userId).toBe(TEST_USER_ID)
+    })
   })
 
   describe('正常系 - expenseカテゴリにexpenseトランザクションを作成できる', () => {
@@ -90,11 +98,14 @@ describe('buildCreateTransactionWorkflow', () => {
     }
 
     const command: CreateTransactionCommand = {
-      type: 'expense',
-      amount: 5000,
-      categoryId: expenseCategory.id,
-      transactionDate: '2024-04-15',
-      name: '食料品',
+      input: {
+        type: 'expense',
+        amount: 5000,
+        categoryId: expenseCategory.id,
+        transactionDate: '2024-04-15',
+        name: '食料品',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -130,11 +141,14 @@ describe('buildCreateTransactionWorkflow', () => {
     }
 
     const command: CreateTransactionCommand = {
-      type: 'expense',
-      amount: 10000,
-      categoryId: savingCategory.id,
-      transactionDate: '2024-04-25',
-      name: '4月積立',
+      input: {
+        type: 'expense',
+        amount: 10000,
+        categoryId: savingCategory.id,
+        transactionDate: '2024-04-25',
+        name: '4月積立',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -170,12 +184,15 @@ describe('buildCreateTransactionWorkflow', () => {
     }
 
     const command: CreateTransactionCommand = {
-      type: 'expense',
-      amount: 2000,
-      categoryId: category.id,
-      transactionDate: '2024-05-01',
-      name: '出張交通費',
-      eventId: 'test-event-id-00000000001',
+      input: {
+        type: 'expense',
+        amount: 2000,
+        categoryId: category.id,
+        transactionDate: '2024-05-01',
+        name: '出張交通費',
+        eventId: 'test-event-id-00000000001',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -211,11 +228,14 @@ describe('buildCreateTransactionWorkflow', () => {
     }
 
     const command: CreateTransactionCommand = {
-      type: 'income',
-      amount: 300000,
-      categoryId: category.id,
-      transactionDate: '2099-12-31',
-      name: '未来の給与',
+      input: {
+        type: 'income',
+        amount: 300000,
+        categoryId: category.id,
+        transactionDate: '2099-12-31',
+        name: '未来の給与',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -236,11 +256,14 @@ describe('buildCreateTransactionWorkflow', () => {
 
   describe('異常系 - カテゴリが存在しない', () => {
     const command: CreateTransactionCommand = {
-      type: 'expense',
-      amount: 1000,
-      categoryId: 'non-existent-category-id-000' as CategoryId,
-      transactionDate: '2024-04-01',
-      name: 'テスト',
+      input: {
+        type: 'expense',
+        amount: 1000,
+        categoryId: 'non-existent-category-id-000' as CategoryId,
+        transactionDate: '2024-04-01',
+        name: 'テスト',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -265,7 +288,7 @@ describe('buildCreateTransactionWorkflow', () => {
 
     test('エラーメッセージにカテゴリIDが含まれること', () => {
       if (Result.isSuccess(actual)) throw new Error('Expected failure')
-      expect(actual.error.message).toContain(command.categoryId)
+      expect(actual.error.message).toContain(command.input.categoryId)
     })
   })
 
@@ -281,11 +304,14 @@ describe('buildCreateTransactionWorkflow', () => {
     }
 
     const command: CreateTransactionCommand = {
-      type: 'expense',
-      amount: 1000,
-      categoryId: archivedCategory.id,
-      transactionDate: '2024-04-01',
-      name: 'テスト',
+      input: {
+        type: 'expense',
+        amount: 1000,
+        categoryId: archivedCategory.id,
+        transactionDate: '2024-04-01',
+        name: 'テスト',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -326,11 +352,14 @@ describe('buildCreateTransactionWorkflow', () => {
     }
 
     const command: CreateTransactionCommand = {
-      type: 'expense',
-      amount: 1000,
-      categoryId: incomeCategory.id,
-      transactionDate: '2024-04-01',
-      name: 'テスト',
+      input: {
+        type: 'expense',
+        amount: 1000,
+        categoryId: incomeCategory.id,
+        transactionDate: '2024-04-01',
+        name: 'テスト',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -366,11 +395,14 @@ describe('buildCreateTransactionWorkflow', () => {
     }
 
     const command: CreateTransactionCommand = {
-      type: 'income',
-      amount: 1000,
-      categoryId: expenseCategory.id,
-      transactionDate: '2024-04-01',
-      name: 'テスト',
+      input: {
+        type: 'income',
+        amount: 1000,
+        categoryId: expenseCategory.id,
+        transactionDate: '2024-04-01',
+        name: 'テスト',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -406,11 +438,14 @@ describe('buildCreateTransactionWorkflow', () => {
     }
 
     const command: CreateTransactionCommand = {
-      type: 'income',
-      amount: 10000,
-      categoryId: savingCategory.id,
-      transactionDate: '2024-04-01',
-      name: 'テスト',
+      input: {
+        type: 'income',
+        amount: 10000,
+        categoryId: savingCategory.id,
+        transactionDate: '2024-04-01',
+        name: 'テスト',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<

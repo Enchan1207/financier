@@ -2,6 +2,7 @@ import type { Brand } from '@backend/lib/brand'
 import { ulid } from 'ulid'
 
 import type { CategoryId } from './category'
+import type { UserId } from './user'
 
 export type EventTemplateId = Brand<string, 'event_template_id'>
 
@@ -16,6 +17,7 @@ export type TemplateTransaction = {
 
 export type EventTemplate = {
   id: EventTemplateId
+  userId: UserId
   /** テンプレート名 */
   name: string
   /** デフォルトの取引定義一覧。イベント作成時に一括登録される */

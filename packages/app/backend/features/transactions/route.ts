@@ -72,16 +72,19 @@ const app = new Hono<{ Bindings: Env }>()
     const db = c.get('db')
 
     const workflow = buildCreateTransactionWorkflow({
-      findCategoryById: findCategoryById(db)(session.userId),
+      findCategoryById: findCategoryById(db),
     })
 
     const command = {
-      type: body.type,
-      amount: body.amount,
-      categoryId: body.categoryId as CategoryId,
-      transactionDate: body.transactionDate,
-      name: body.name,
-      ...(body.eventId !== undefined ? { eventId: body.eventId } : {}),
+      input: {
+        type: body.type,
+        amount: body.amount,
+        categoryId: body.categoryId as CategoryId,
+        transactionDate: body.transactionDate,
+        name: body.name,
+        eventId: body.eventId,
+      },
+      context: { userId: session.userId },
     }
     const result = await workflow(command)
 
@@ -92,7 +95,7 @@ const app = new Hono<{ Bindings: Env }>()
       return c.json({ message: result.error.message }, 400)
     }
 
-    await saveTransaction(db)(session.userId)(result.value.transaction)
+    await saveTransaction(db)(result.value.transaction)
 
     return c.json(
       { transaction: toTransactionResponse(result.value.transaction) },
@@ -113,21 +116,20 @@ const app = new Hono<{ Bindings: Env }>()
       const db = c.get('db')
 
       const workflow = buildUpdateTransactionWorkflow({
-        findTransactionById: findTransactionById(db)(session.userId),
-        findCategoryById: findCategoryById(db)(session.userId),
+        findTransactionById: findTransactionById(db),
+        findCategoryById: findCategoryById(db),
       })
 
       const command = {
-        id,
-        ...(body.amount !== undefined ? { amount: body.amount } : {}),
-        ...(body.categoryId !== undefined
-          ? { categoryId: body.categoryId }
-          : {}),
-        ...(body.transactionDate !== undefined
-          ? { transactionDate: body.transactionDate }
-          : {}),
-        ...(body.name !== undefined ? { name: body.name } : {}),
-        ...(body.eventId !== undefined ? { eventId: body.eventId } : {}),
+        input: {
+          id,
+          amount: body.amount,
+          categoryId: body.categoryId,
+          transactionDate: body.transactionDate,
+          name: body.name,
+          eventId: body.eventId,
+        },
+        context: { userId: session.userId },
       }
       const result = await workflow(command)
 
@@ -138,7 +140,7 @@ const app = new Hono<{ Bindings: Env }>()
         return c.json({ message: result.error.message }, 400)
       }
 
-      await saveTransaction(db)(session.userId)(result.value.transaction)
+      await saveTransaction(db)(result.value.transaction)
 
       return c.json({
         transaction: toTransactionResponse(result.value.transaction),
@@ -154,7 +156,7 @@ const app = new Hono<{ Bindings: Env }>()
     const id = c.req.param('id') as TransactionId
     const db = c.get('db')
 
-    const transaction = await findTransactionById(db)(session.userId)(id)
+    const transaction = await findTransactionById(db)(id, session.userId)
     if (!transaction) {
       return c.json({ message: `トランザクションが見つかりません: ${id}` }, 404)
     }

@@ -25,10 +25,13 @@ describe('buildUpdateCategoryWorkflow', () => {
     }
 
     const command: UpdateCategoryCommand = {
-      id: activeCategory.id,
-      name: '外食費',
-      icon: 'coffee',
-      color: 'orange',
+      input: {
+        id: activeCategory.id,
+        name: '外食費',
+        icon: 'coffee',
+        color: 'orange',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -78,10 +81,13 @@ describe('buildUpdateCategoryWorkflow', () => {
 
   describe('異常系 - カテゴリが存在しない', () => {
     const command: UpdateCategoryCommand = {
-      id: 'non-existent-category-id-000' as CategoryId,
-      name: '更新後名称',
-      icon: 'tag',
-      color: 'blue',
+      input: {
+        id: 'non-existent-category-id-000' as CategoryId,
+        name: '更新後名称',
+        icon: 'tag',
+        color: 'blue',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
@@ -107,7 +113,7 @@ describe('buildUpdateCategoryWorkflow', () => {
 
     test('エラーメッセージにカテゴリIDが含まれること', () => {
       if (Result.isSuccess(actual)) throw new Error('Expected failure')
-      expect(actual.error.message).toContain(command.id)
+      expect(actual.error.message).toContain(command.input.id)
     })
   })
 
@@ -123,10 +129,13 @@ describe('buildUpdateCategoryWorkflow', () => {
     }
 
     const command: UpdateCategoryCommand = {
-      id: archivedCategory.id,
-      name: '給与収入',
-      icon: 'wallet',
-      color: 'teal',
+      input: {
+        id: archivedCategory.id,
+        name: '給与収入',
+        icon: 'wallet',
+        color: 'teal',
+      },
+      context: { userId: TEST_USER_ID },
     }
 
     let actual: Awaited<
