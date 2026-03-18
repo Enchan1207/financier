@@ -82,7 +82,7 @@ const app = new Hono<{ Bindings: Env }>()
         categoryId: body.categoryId as CategoryId,
         transactionDate: body.transactionDate,
         name: body.name,
-        ...(body.eventId !== undefined ? { eventId: body.eventId } : {}),
+        eventId: body.eventId,
       },
       context: { userId: session.userId },
     }
@@ -123,15 +123,11 @@ const app = new Hono<{ Bindings: Env }>()
       const command = {
         input: {
           id,
-          ...(body.amount !== undefined ? { amount: body.amount } : {}),
-          ...(body.categoryId !== undefined
-            ? { categoryId: body.categoryId }
-            : {}),
-          ...(body.transactionDate !== undefined
-            ? { transactionDate: body.transactionDate }
-            : {}),
-          ...(body.name !== undefined ? { name: body.name } : {}),
-          ...(body.eventId !== undefined ? { eventId: body.eventId } : {}),
+          amount: body.amount,
+          categoryId: body.categoryId,
+          transactionDate: body.transactionDate,
+          name: body.name,
+          eventId: body.eventId,
         },
         context: { userId: session.userId },
       }

@@ -21,7 +21,7 @@ export type CreateTransactionCommand = {
     categoryId: CategoryId
     transactionDate: string
     name: string
-    eventId?: string | null
+    eventId?: string | null | undefined
   }
   context: {
     userId: UserId

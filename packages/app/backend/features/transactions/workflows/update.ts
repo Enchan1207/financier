@@ -16,11 +16,11 @@ import {
 export type UpdateTransactionCommand = {
   input: {
     id: TransactionId
-    amount?: number
-    categoryId?: string
-    transactionDate?: string
-    name?: string
-    eventId?: string | null
+    amount?: number | undefined
+    categoryId?: string | undefined
+    transactionDate?: string | undefined
+    name?: string | undefined
+    eventId?: string | null | undefined
   }
   context: {
     userId: UserId
