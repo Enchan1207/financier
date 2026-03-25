@@ -6,23 +6,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@frontend/components/ui/dialog'
-import dayjs from '@frontend/lib/date'
 import { TODAY } from '@frontend/lib/today'
 import { Loader2Icon, Plus } from 'lucide-react'
 import { useState } from 'react'
 
-import { categories, events } from '../-lib/mock-data'
-import type { Transaction } from '../index'
+import type {
+  FormCategory,
+  FormEvent,
+  TransactionFormValues,
+} from './transaction-form-fields'
 import {
   TransactionFormFields,
   useTransactionForm,
 } from './transaction-form-fields'
 
 type AddTransactionDialogProps = {
-  onAdd: (t: Transaction) => Promise<void>
+  categories: FormCategory[]
+  events: FormEvent[]
+  onAdd: (values: TransactionFormValues) => Promise<void>
 }
 
 export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
+  categories,
+  events,
   onAdd,
 }) => {
   const [open, setOpen] = useState(false)
@@ -37,21 +43,7 @@ export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
       eventId: '',
     },
     async (values) => {
-      const selectedCategory = categories.find(
-        (c) => c.id === values.categoryId,
-      )
-      const selectedEvent = events.find((e) => e.id === values.eventId)
-      await onAdd({
-        id: `tx-${dayjs().valueOf()}`,
-        type: values.type,
-        categoryId: values.categoryId,
-        categoryName: selectedCategory?.name ?? '',
-        amount: Number(values.amount),
-        name: values.name,
-        transactionDate: values.transactionDate,
-        eventId: values.eventId || undefined,
-        eventName: selectedEvent?.name,
-      })
+      await onAdd(values)
       setOpen(false)
     },
   )
@@ -74,7 +66,11 @@ export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
         <DialogHeader>
           <DialogTitle>取引を追加</DialogTitle>
         </DialogHeader>
-        <TransactionFormFields form={form} />
+        <TransactionFormFields
+          form={form}
+          categories={categories}
+          events={events}
+        />
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting] as const}
           children={([canSubmit, isSubmitting]) => (

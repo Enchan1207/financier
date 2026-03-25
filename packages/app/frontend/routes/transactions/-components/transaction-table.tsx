@@ -19,15 +19,13 @@ import { TODAY } from '@frontend/lib/today'
 import { Pencil, Trash2 } from 'lucide-react'
 import React from 'react'
 
-import { categories } from '../-lib/mock-data'
 import type { Transaction } from '../index'
 
-const categoryMap: Record<
-  string,
-  { icon: CategoryIconType; color: CategoryColor }
-> = Object.fromEntries(
-  categories.map((c) => [c.id, { icon: c.icon, color: c.color }]),
-)
+type TableCategory = {
+  id: string
+  icon: CategoryIconType
+  color: CategoryColor
+}
 
 // 年度（4月始まり）を返す
 const getFiscalYear = (dateStr: string): number => {
@@ -52,15 +50,21 @@ const formatFiscalYearMonth = (dateStr: string): string => {
 
 type TransactionTableProps = {
   transactions: Transaction[]
+  categories: TableCategory[]
   onEdit: (tx: Transaction) => void
   onDelete: (tx: Transaction) => void
 }
 
 export const TransactionTable: React.FC<TransactionTableProps> = ({
   transactions,
+  categories,
   onEdit,
   onDelete,
 }) => {
+  const categoryMap: Record<string, TableCategory> = Object.fromEntries(
+    categories.map((c) => [c.id, c]),
+  )
+
   // 日付降順（未来が先頭）
   const sorted = [...transactions].sort((a, b) =>
     b.transactionDate.localeCompare(a.transactionDate),

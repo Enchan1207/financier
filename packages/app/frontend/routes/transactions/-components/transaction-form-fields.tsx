@@ -1,4 +1,8 @@
 import { CategorySelect } from '@frontend/components/category/category-select'
+import type {
+  CategoryColor,
+  CategoryIconType,
+} from '@frontend/components/category/types'
 import { Input } from '@frontend/components/ui/input'
 import { Label } from '@frontend/components/ui/label'
 import {
@@ -17,7 +21,18 @@ import { useForm } from '@tanstack/react-form'
 import type React from 'react'
 import { z } from 'zod'
 
-import { categories, events } from '../-lib/mock-data'
+export type FormCategory = {
+  id: string
+  name: string
+  type: 'income' | 'expense' | 'saving'
+  icon: CategoryIconType
+  color: CategoryColor
+}
+
+export type FormEvent = {
+  id: string
+  name: string
+}
 
 export const transactionFormSchema = z.object({
   type: z.enum(['income', 'expense'] as const),
@@ -44,9 +59,17 @@ export const useTransactionForm = (
 
 type TransactionFormInstance = ReturnType<typeof useTransactionForm>
 
-export const TransactionFormFields: React.FC<{
+type TransactionFormFieldsProps = {
   form: TransactionFormInstance
-}> = ({ form }) => (
+  categories: FormCategory[]
+  events: FormEvent[]
+}
+
+export const TransactionFormFields: React.FC<TransactionFormFieldsProps> = ({
+  form,
+  categories,
+  events,
+}) => (
   <div className="space-y-4 pt-2">
     {/* 収支種別 */}
     <form.Field
@@ -83,7 +106,11 @@ export const TransactionFormFields: React.FC<{
         <form.Field
           name="categoryId"
           children={(field) => {
-            const filteredCategories = categories.filter((c) => c.type === type)
+            const filteredCategories = categories.filter((c) =>
+              type === 'income'
+                ? c.type === 'income'
+                : c.type === 'expense' || c.type === 'saving',
+            )
             return (
               <div className="space-y-1.5">
                 <Label htmlFor="tx-category">カテゴリ</Label>
