@@ -1,3 +1,7 @@
+import type {
+  CategoryColor,
+  CategoryIconType,
+} from '@frontend/components/category/types'
 import {
   Card,
   CardContent,
@@ -5,14 +9,18 @@ import {
   CardTitle,
 } from '@frontend/components/ui/card'
 import type { TransactionType } from '@frontend/lib/types'
+import { listCategoriesQueryOptions } from '@frontend/routes/categories/-repositories/categories'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { AddTransactionDialog } from './-components/add-transaction-dialog'
 import { DeleteTransactionDialog } from './-components/delete-transaction-dialog'
 import { EditTransactionDialog } from './-components/edit-transaction-dialog'
+import type { TransactionFormValues } from './-components/transaction-form-fields'
 import { TransactionTable } from './-components/transaction-table'
-import { INITIAL_TRANSACTIONS } from './-lib/mock-data'
+import { useTransactionMutations } from './-hooks/use-transaction-mutations'
+import { listTransactionsQueryOptions } from './-repositories/transactions'
 
 export type Transaction = {
   id: string
@@ -27,32 +35,75 @@ export type Transaction = {
 }
 
 const TransactionsPage: React.FC = () => {
-  const [transactions, setTransactions] =
-    useState<Transaction[]>(INITIAL_TRANSACTIONS)
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null)
   const [deletingTransaction, setDeletingTransaction] =
     useState<Transaction | null>(null)
 
-  const handleAdd = async (t: Transaction): Promise<void> => {
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    setTransactions((prev) => [...prev, t])
+  const {
+    data: transactionsData,
+    isPending: txPending,
+    isError: txError,
+  } = useQuery(listTransactionsQueryOptions())
+  const { data: categoriesData } = useQuery(listCategoriesQueryOptions())
+
+  const { createMutation, updateMutation, deleteMutation } =
+    useTransactionMutations(
+      () => {
+        setEditingTransaction(null)
+      },
+      () => {
+        setDeletingTransaction(null)
+      },
+    )
+
+  const transactions = useMemo<Transaction[]>(
+    () =>
+      (transactionsData ?? []).map((tx) => ({
+        id: tx.id,
+        type: tx.type,
+        amount: tx.amount,
+        categoryId: tx.categoryId,
+        categoryName:
+          categoriesData?.find((c) => c.id === tx.categoryId)?.name ?? '',
+        transactionDate: tx.transactionDate,
+        name: tx.name,
+        eventId: tx.eventId ?? undefined,
+      })),
+    [transactionsData, categoriesData],
+  )
+
+  const formCategories = useMemo(
+    () =>
+      (categoriesData ?? [])
+        .filter((c) => c.status === 'active')
+        .map((c) => ({
+          id: c.id,
+          name: c.name,
+          type: c.type,
+          icon: c.icon as CategoryIconType,
+          color: c.color as CategoryColor,
+        })),
+    [categoriesData],
+  )
+
+  const tableCategories = useMemo(
+    () =>
+      (categoriesData ?? []).map((c) => ({
+        id: c.id,
+        icon: c.icon as CategoryIconType,
+        color: c.color as CategoryColor,
+      })),
+    [categoriesData],
+  )
+
+  const handleAdd = async (values: TransactionFormValues): Promise<void> => {
+    await createMutation.mutateAsync(values)
   }
 
-  const handleSave = async (updated: Transaction): Promise<void> => {
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    setTransactions((prev) =>
-      prev.map((t) => (t.id === updated.id ? updated : t)),
-    )
-    setEditingTransaction(null)
-  }
-
-  const handleDelete = () => {
-    if (!deletingTransaction) return
-    setTransactions((prev) =>
-      prev.filter((t) => t.id !== deletingTransaction.id),
-    )
-    setDeletingTransaction(null)
+  const handleSave = async (values: TransactionFormValues): Promise<void> => {
+    if (!editingTransaction) return
+    await updateMutation.mutateAsync({ id: editingTransaction.id, values })
   }
 
   return (
@@ -61,15 +112,30 @@ const TransactionsPage: React.FC = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">取引一覧</CardTitle>
-            <AddTransactionDialog onAdd={handleAdd} />
+            <AddTransactionDialog
+              categories={formCategories}
+              events={[]}
+              onAdd={handleAdd}
+            />
           </div>
         </CardHeader>
         <CardContent className="flex-1 overflow-y-auto px-1 md:px-6">
-          <TransactionTable
-            transactions={transactions}
-            onEdit={setEditingTransaction}
-            onDelete={setDeletingTransaction}
-          />
+          {txPending ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              読み込み中...
+            </p>
+          ) : txError ? (
+            <p className="py-8 text-center text-sm text-destructive">
+              取引の取得に失敗しました
+            </p>
+          ) : (
+            <TransactionTable
+              transactions={transactions}
+              categories={tableCategories}
+              onEdit={setEditingTransaction}
+              onDelete={setDeletingTransaction}
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -81,6 +147,8 @@ const TransactionsPage: React.FC = () => {
           onOpenChange={(v) => {
             if (!v) setEditingTransaction(null)
           }}
+          categories={formCategories}
+          events={[]}
           onSave={handleSave}
         />
       )}
@@ -90,7 +158,9 @@ const TransactionsPage: React.FC = () => {
         onOpenChange={(v) => {
           if (!v) setDeletingTransaction(null)
         }}
-        onConfirm={handleDelete}
+        onConfirm={() => {
+          if (deletingTransaction) deleteMutation.mutate(deletingTransaction.id)
+        }}
       />
     </div>
   )

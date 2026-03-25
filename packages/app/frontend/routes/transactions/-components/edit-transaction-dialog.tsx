@@ -7,8 +7,12 @@ import {
 } from '@frontend/components/ui/dialog'
 import { Loader2Icon } from 'lucide-react'
 
-import { categories, events } from '../-lib/mock-data'
 import type { Transaction } from '../index'
+import type {
+  FormCategory,
+  FormEvent,
+  TransactionFormValues,
+} from './transaction-form-fields'
 import {
   TransactionFormFields,
   useTransactionForm,
@@ -18,13 +22,17 @@ type EditTransactionDialogProps = {
   transaction: Transaction
   open: boolean
   onOpenChange: (v: boolean) => void
-  onSave: (t: Transaction) => Promise<void>
+  categories: FormCategory[]
+  events: FormEvent[]
+  onSave: (values: TransactionFormValues) => Promise<void>
 }
 
 export const EditTransactionDialog: React.FC<EditTransactionDialogProps> = ({
   transaction,
   open,
   onOpenChange,
+  categories,
+  events,
   onSave,
 }) => {
   const form = useTransactionForm(
@@ -37,21 +45,7 @@ export const EditTransactionDialog: React.FC<EditTransactionDialogProps> = ({
       eventId: transaction.eventId ?? '',
     },
     async (values) => {
-      const selectedCategory = categories.find(
-        (c) => c.id === values.categoryId,
-      )
-      const selectedEvent = events.find((e) => e.id === values.eventId)
-      await onSave({
-        ...transaction,
-        type: values.type,
-        categoryId: values.categoryId,
-        categoryName: selectedCategory?.name ?? '',
-        amount: Number(values.amount),
-        name: values.name,
-        transactionDate: values.transactionDate,
-        eventId: values.eventId || undefined,
-        eventName: selectedEvent?.name,
-      })
+      await onSave(values)
     },
   )
 
@@ -66,7 +60,11 @@ export const EditTransactionDialog: React.FC<EditTransactionDialogProps> = ({
         <DialogHeader>
           <DialogTitle>取引を編集</DialogTitle>
         </DialogHeader>
-        <TransactionFormFields form={form} />
+        <TransactionFormFields
+          form={form}
+          categories={categories}
+          events={events}
+        />
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting] as const}
           children={([canSubmit, isSubmitting]) => (
