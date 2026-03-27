@@ -27,17 +27,6 @@ import { CalendarIcon } from 'lucide-react'
 import type React from 'react'
 import { z } from 'zod'
 
-// 選択可能カテゴリ：isSaving=false のアクティブカテゴリのみ（UC-5.4）
-const SELECTABLE_CATEGORIES: CategorySelectItem[] = [
-  { id: 'cat-1', name: '食費', icon: 'utensils', color: 'red' },
-  { id: 'cat-2', name: '交通費', icon: 'bus', color: 'blue' },
-  { id: 'cat-3', name: '外食', icon: 'coffee', color: 'orange' },
-  { id: 'cat-4', name: '娯楽・グッズ', icon: 'music', color: 'purple' },
-  { id: 'cat-5', name: '衣服', icon: 'shirt', color: 'pink' },
-  { id: 'cat-6', name: '日用品', icon: 'shopping_cart', color: 'teal' },
-  { id: 'cat-7', name: '美容', icon: 'heart_pulse', color: 'pink' },
-]
-
 const formSchema = z.object({
   date: z.string().min(1, '日付を入力してください'),
   name: z.string().min(1, '内容を入力してください'),
@@ -48,19 +37,24 @@ const formSchema = z.object({
 export type NewTransaction = {
   date: string
   name: string
-  categoryName: string
+  categoryId: string
+  type: 'income' | 'expense'
   amount: number
 }
 
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onAdd: (tx: NewTransaction) => void
+  categories: CategorySelectItem[]
+  categoryTypes: Record<string, 'income' | 'expense' | 'saving'>
+  onAdd: (tx: NewTransaction) => Promise<void>
 }
 
 export const EventAddTransactionDialog: React.FC<Props> = ({
   open,
   onOpenChange,
+  categories,
+  categoryTypes,
   onAdd,
 }) => {
   const form = useForm({
@@ -73,12 +67,15 @@ export const EventAddTransactionDialog: React.FC<Props> = ({
     validators: {
       onSubmit: formSchema,
     },
-    onSubmit: ({ value, formApi }) => {
-      const cat = SELECTABLE_CATEGORIES.find((c) => c.id === value.categoryId)
-      onAdd({
+    onSubmit: async ({ value, formApi }) => {
+      const catType = categoryTypes[value.categoryId] ?? 'expense'
+      const type: 'income' | 'expense' =
+        catType === 'income' ? 'income' : 'expense'
+      await onAdd({
         date: value.date,
         name: value.name.trim(),
-        categoryName: cat?.name ?? '',
+        categoryId: value.categoryId,
+        type,
         amount: Number(value.amount),
       })
       formApi.reset()
@@ -219,13 +216,13 @@ export const EventAddTransactionDialog: React.FC<Props> = ({
                           <CategorySelect
                             id={field.name}
                             aria-invalid={isInvalid}
-                            categories={SELECTABLE_CATEGORIES}
+                            categories={categories}
                             value={field.state.value}
                             onValueChange={(value) => {
                               field.handleChange(value)
                             }}
-                            onOpenChange={(open) => {
-                              if (!open) field.handleBlur()
+                            onOpenChange={(catOpen) => {
+                              if (!catOpen) field.handleBlur()
                             }}
                             disabled={isSubmitting}
                           />
