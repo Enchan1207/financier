@@ -9,19 +9,18 @@
 
 SPA において古典的な REST API を用いると、1 画面の表示に複数の API コールが直列・並列混在で発生し、ローディング状態の管理が複雑になる（popcorn UI）。
 
-これを防ぐため、**複数ドメインのデータを集約して返す Query 専用のエンドポイント層**として `pages/` を設ける。
+これを防ぐため、**ページの表示に必要なデータを組み立てて返す Query 専用のエンドポイント層**として `pages/` を設ける。
 
 ---
 
 ## API 区分の判断基準
 
-| 区分                        | 配置先      | 例                         |
-| --------------------------- | ----------- | -------------------------- |
-| Command（登録・更新・削除） | `features/` | `POST /api/transactions`   |
-| Query（単一ドメイン）       | `features/` | `GET /api/categories`      |
-| Query（複数ドメイン集約）   | `pages/`    | `GET /api/pages/dashboard` |
+| 区分                        | 配置先      | 例                            |
+| --------------------------- | ----------- | ----------------------------- |
+| Command（登録・更新・削除） | `features/` | `POST /api/transactions`      |
+| Query（ページ表示用）       | `pages/`    | `GET /api/pages/categories`   |
 
-**判断の原則**: 複数の `features/*/repository.ts` を組み合わせなければ応答を構築できない Query は `pages/` に置く。単一 feature のリポジトリだけで完結する Query は `features/` に置く。
+**判断の原則**: ページの表示に必要なデータを組み立てて返す Query は `pages/` に置く。Command（登録・更新・削除）は `features/` に置く。
 
 ---
 
