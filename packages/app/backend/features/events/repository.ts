@@ -31,16 +31,13 @@ export const findEventById =
 export const findTransactionCountByEventId =
   (db: DrizzleDatabase) =>
   async (eventId: EventId, userId: UserId): Promise<number> => {
-    const results = await db
-      .select()
-      .from(transactionsTable)
-      .where(
-        and(
-          eq(transactionsTable.event_id, eventId),
-          eq(transactionsTable.user_id, userId),
-        ),
-      )
-    return results.length
+    return db.$count(
+      transactionsTable,
+      and(
+        eq(transactionsTable.event_id, eventId),
+        eq(transactionsTable.user_id, userId),
+      ),
+    )
   }
 
 export const saveEvent =

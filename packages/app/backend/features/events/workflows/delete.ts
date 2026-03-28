@@ -18,10 +18,11 @@ export type DeleteEventCommand = {
 // MARK: step types
 
 type EventResolved = {
-  input: DeleteEventCommand['input']
+  input: {
+    event: Event
+  }
   context: {
     userId: UserId
-    event: Event
   }
 }
 
@@ -69,8 +70,8 @@ const resolveEvent =
       )
     }
     return Result.succeed({
-      input: command.input,
-      context: { userId: command.context.userId, event },
+      input: { event },
+      context: { userId: command.context.userId },
     })
   }
 
@@ -80,7 +81,7 @@ const checkNoTransactions =
     resolved: EventResolved,
   ): Result.ResultAsync<EventResolved, EventValidationException> => {
     const count = await effects.findTransactionCountByEventId(
-      resolved.context.event.id,
+      resolved.input.event.id,
       resolved.context.userId,
     )
     if (count > 0) {
@@ -94,7 +95,7 @@ const checkNoTransactions =
   }
 
 const buildDeletedEvent = (resolved: EventResolved): EventDeletedEvent => ({
-  event: resolved.context.event,
+  event: resolved.input.event,
 })
 
 // MARK: definition
