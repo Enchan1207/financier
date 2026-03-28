@@ -10,7 +10,6 @@ import {
 } from '@frontend/components/ui/card'
 import type { TransactionType } from '@frontend/lib/types'
 import { listCategoriesQueryOptions } from '@frontend/routes/categories/-repositories/categories'
-import { listEventsQueryOptions } from '@frontend/routes/events/-repositories/events'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
@@ -47,7 +46,6 @@ const TransactionsPage: React.FC = () => {
     isError: txError,
   } = useQuery(listTransactionsQueryOptions())
   const { data: categoriesData } = useQuery(listCategoriesQueryOptions())
-  const { data: eventsData } = useQuery(listEventsQueryOptions())
 
   const { createMutation, updateMutation, deleteMutation } =
     useTransactionMutations(
@@ -71,19 +69,8 @@ const TransactionsPage: React.FC = () => {
         transactionDate: tx.transactionDate,
         name: tx.name,
         eventId: tx.eventId ?? undefined,
-        eventName:
-          eventsData?.find((ev) => ev.id === tx.eventId)?.name ?? undefined,
       })),
-    [transactionsData, categoriesData, eventsData],
-  )
-
-  const formEvents = useMemo(
-    () =>
-      (eventsData ?? []).map((ev) => ({
-        id: ev.id,
-        name: ev.name,
-      })),
-    [eventsData],
+    [transactionsData, categoriesData],
   )
 
   const formCategories = useMemo(
@@ -127,7 +114,7 @@ const TransactionsPage: React.FC = () => {
             <CardTitle className="text-base">取引一覧</CardTitle>
             <AddTransactionDialog
               categories={formCategories}
-              events={formEvents}
+              events={[]}
               onAdd={handleAdd}
             />
           </div>
@@ -161,7 +148,7 @@ const TransactionsPage: React.FC = () => {
             if (!v) setEditingTransaction(null)
           }}
           categories={formCategories}
-          events={formEvents}
+          events={[]}
           onSave={handleSave}
         />
       )}

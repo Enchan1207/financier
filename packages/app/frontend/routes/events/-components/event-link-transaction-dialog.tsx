@@ -10,13 +10,46 @@ import dayjs from '@frontend/lib/date'
 import type React from 'react'
 import { useState } from 'react'
 
-export type LinkableTransaction = {
-  id: string
-  date: string
-  name: string
-  categoryName: string
-  amount: number
-}
+// モック：本番ではAPIから未紐付けトランザクション一覧を取得する
+const UNLINKED_TRANSACTIONS = [
+  {
+    id: 'tx-u-1',
+    date: '2026-02-10',
+    name: 'コスメ購入',
+    categoryName: '美容',
+    amount: 3200,
+  },
+  {
+    id: 'tx-u-2',
+    date: '2026-02-18',
+    name: 'カフェ代',
+    categoryName: '外食',
+    amount: 850,
+  },
+  {
+    id: 'tx-u-3',
+    date: '2026-02-22',
+    name: 'ブロマイド',
+    categoryName: '娯楽・グッズ',
+    amount: 1200,
+  },
+  {
+    id: 'tx-u-4',
+    date: '2026-03-01',
+    name: '交通費（バス）',
+    categoryName: '交通費',
+    amount: 400,
+  },
+  {
+    id: 'tx-u-5',
+    date: '2026-03-04',
+    name: 'アクスタ',
+    categoryName: '娯楽・グッズ',
+    amount: 2000,
+  },
+]
+
+export type LinkedTransaction = (typeof UNLINKED_TRANSACTIONS)[number]
 
 const formatDate = (dateStr: string) => dayjs(dateStr).format('M/D')
 const formatCurrency = (amount: number) => `¥${amount.toLocaleString('ja-JP')}`
@@ -25,34 +58,27 @@ type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   alreadyLinkedIds: string[]
-  availableTransactions: LinkableTransaction[]
-  onLink: (txId: string) => Promise<void>
+  onLink: (tx: LinkedTransaction) => void
 }
 
 export const EventLinkTransactionDialog: React.FC<Props> = ({
   open,
   onOpenChange,
   alreadyLinkedIds,
-  availableTransactions,
   onLink,
 }) => {
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const available = availableTransactions.filter(
+  const available = UNLINKED_TRANSACTIONS.filter(
     (tx) => !alreadyLinkedIds.includes(tx.id),
   )
 
-  const handleSubmit = async () => {
-    if (!selectedId) return
-    setIsSubmitting(true)
-    try {
-      await onLink(selectedId)
-      setSelectedId(null)
-      onOpenChange(false)
-    } finally {
-      setIsSubmitting(false)
-    }
+  const handleSubmit = () => {
+    const tx = available.find((t) => t.id === selectedId)
+    if (!tx) return
+    onLink(tx)
+    setSelectedId(null)
+    onOpenChange(false)
   }
 
   return (
@@ -96,7 +122,7 @@ export const EventLinkTransactionDialog: React.FC<Props> = ({
           </div>
         )}
         <DialogFooter>
-          <Button onClick={handleSubmit} disabled={!selectedId || isSubmitting}>
+          <Button onClick={handleSubmit} disabled={!selectedId}>
             追加
           </Button>
         </DialogFooter>
