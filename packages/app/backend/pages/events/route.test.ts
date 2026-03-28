@@ -170,11 +170,13 @@ describe('イベントページAPI', () => {
       })
 
       test('totalAmountが正しく集計されること', () => {
-        expect(responseBody.events[0].totalAmount).toBe(5000)
+        const [event] = responseBody.events
+        expect(event?.totalAmount).toBe(5000)
       })
 
       test('transactionCountが正しく集計されること', () => {
-        expect(responseBody.events[0].transactionCount).toBe(2)
+        const [event] = responseBody.events
+        expect(event?.transactionCount).toBe(2)
       })
     })
 
@@ -200,11 +202,13 @@ describe('イベントページAPI', () => {
       })
 
       test('totalAmountが0であること', () => {
-        expect(responseBody.events[0].totalAmount).toBe(0)
+        const [event] = responseBody.events
+        expect(event?.totalAmount).toBe(0)
       })
 
       test('transactionCountが0であること', () => {
-        expect(responseBody.events[0].transactionCount).toBe(0)
+        const [event] = responseBody.events
+        expect(event?.transactionCount).toBe(0)
       })
     })
 
@@ -256,10 +260,9 @@ describe('イベントページAPI', () => {
 
       test('同一カテゴリのトランザクションが集計されること', () => {
         expect(responseBody.event.categoryBreakdown).toHaveLength(1)
-        expect(responseBody.event.categoryBreakdown[0].categoryName).toBe(
-          '食費',
-        )
-        expect(responseBody.event.categoryBreakdown[0].amount).toBe(5000)
+        const [breakdown] = responseBody.event.categoryBreakdown
+        expect(breakdown?.categoryName).toBe('食費')
+        expect(breakdown?.amount).toBe(5000)
       })
     })
 
