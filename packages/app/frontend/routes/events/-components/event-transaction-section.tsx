@@ -100,7 +100,7 @@ export const EventTransactionSection: React.FC<Props> = ({
   const formCategories = useMemo(
     () =>
       (categoriesData ?? [])
-        .filter((c) => c.status === 'active' && c.type !== 'saving')
+        .filter((c) => c.type !== 'saving')
         .map((c) => ({
           id: c.id,
           name: c.name,

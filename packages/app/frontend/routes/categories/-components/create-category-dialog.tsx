@@ -41,7 +41,7 @@ type Props = {
   type: 'income' | 'expense'
   open: boolean
   onOpenChange: (open: boolean) => void
-  onCreate: (category: Omit<Category, 'id' | 'status'>) => Promise<void>
+  onCreate: (category: Omit<Category, 'id'>) => Promise<void>
 }
 
 export const CreateCategoryDialog: React.FC<Props> = ({

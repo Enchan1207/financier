@@ -44,13 +44,11 @@ import {
 } from './-repositories/categories'
 
 export type CategoryType = 'income' | 'expense' | 'saving'
-export type CategoryStatus = 'active' | 'archived'
 
 export type Category = {
   id: string
   type: CategoryType
   name: string
-  status: CategoryStatus
   icon: CategoryIconType
   color: CategoryColor
 }
@@ -62,7 +60,6 @@ const CategoriesPage: React.FC = () => {
     id: c.id,
     type: c.type as CategoryType,
     name: c.name,
-    status: c.status as CategoryStatus,
     icon: c.icon as CategoryIconType,
     color: c.color as CategoryColor,
   }))
@@ -75,7 +72,7 @@ const CategoriesPage: React.FC = () => {
   )
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<Category, 'id' | 'status'>) =>
+    mutationFn: (data: Omit<Category, 'id'>) =>
       createCategory({
         type: data.type,
         name: data.name,
@@ -115,9 +112,7 @@ const CategoriesPage: React.FC = () => {
     },
   })
 
-  const handleCreate = async (
-    data: Omit<Category, 'id' | 'status'>,
-  ): Promise<void> => {
+  const handleCreate = async (data: Omit<Category, 'id'>): Promise<void> => {
     await createMutation.mutateAsync(data)
   }
 
@@ -272,10 +267,7 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
       </TableHeader>
       <TableBody>
         {categories.map((category) => (
-          <TableRow
-            key={category.id}
-            className={category.status === 'archived' ? 'opacity-50' : ''}
-          >
+          <TableRow key={category.id}>
             <TableCell>
               <div className="flex items-center gap-2">
                 <CategoryIcon
@@ -287,40 +279,33 @@ const CategoryTable: React.FC<CategoryTableProps> = ({
               </div>
             </TableCell>
             <TableCell>
-              <div className="flex gap-1">
-                {category.type === 'saving' && (
-                  <Badge variant="secondary">積立</Badge>
-                )}
-                {category.status === 'archived' && (
-                  <Badge variant="outline">削除済み</Badge>
-                )}
-              </div>
+              {category.type === 'saving' && (
+                <Badge variant="secondary">積立</Badge>
+              )}
             </TableCell>
             <TableCell>
-              {category.status === 'active' && (
-                <div className="flex justify-end gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      onEdit(category)
-                    }}
-                    aria-label="編集"
-                  >
-                    <Pencil />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      onDelete(category)
-                    }}
-                    aria-label="削除"
-                  >
-                    <Trash2 />
-                  </Button>
-                </div>
-              )}
+              <div className="flex justify-end gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    onEdit(category)
+                  }}
+                  aria-label="編集"
+                >
+                  <Pencil />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    onDelete(category)
+                  }}
+                  aria-label="削除"
+                >
+                  <Trash2 />
+                </Button>
+              </div>
             </TableCell>
           </TableRow>
         ))}
