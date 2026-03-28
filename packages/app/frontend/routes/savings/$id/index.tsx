@@ -17,235 +17,25 @@ import {
 import { useState } from 'react'
 
 import { ContributionHistoryTable } from './-components/contribution-history-table'
+import {
+  MOCK_SAVING_WITHDRAWALS,
+  MOCK_SAVINGS,
+  MOCK_TRANSACTIONS,
+} from './-components/mock-data'
 import { SavingContributionDialog } from './-components/saving-contribution-dialog'
 import { SavingEditDialog } from './-components/saving-edit-dialog'
 import { SavingSummaryCard } from './-components/saving-summary-card'
 import { SavingWithdrawalDialog } from './-components/saving-withdrawal-dialog'
 import { WithdrawalHistoryTable } from './-components/withdrawal-history-table'
 
-// モックデータ：本番ではAPIから取得する
-const savings: SavingDefinition[] = [
-  {
-    id: 'sav-1',
-    categoryId: 'cat-8',
-    categoryName: '遠征費積立',
-    categoryIcon: 'plane',
-    categoryColor: 'blue',
-    type: 'goal',
-    targetAmount: 200000,
-    deadline: '2026-08-01',
-    balance: 90000,
-    monthlyGuide: 22000,
-  },
-  {
-    id: 'sav-2',
-    categoryId: 'cat-9',
-    categoryName: 'グッズ積立',
-    categoryIcon: 'gift',
-    categoryColor: 'purple',
-    type: 'free',
-    balance: 35000,
-  },
-  {
-    id: 'sav-3',
-    categoryId: 'cat-11',
-    categoryName: '旅行費積立',
-    categoryIcon: 'plane',
-    categoryColor: 'teal',
-    type: 'goal',
-    targetAmount: 70000,
-    deadline: '2026-12-01',
-    balance: 18000,
-    monthlyGuide: 6000,
-  },
-  {
-    id: 'sav-4',
-    categoryId: 'cat-12',
-    categoryName: '機材費積立',
-    categoryIcon: 'zap',
-    categoryColor: 'yellow',
-    type: 'goal',
-    targetAmount: 200000,
-    deadline: '2026-06-30',
-    balance: 170000,
-    monthlyGuide: 25000,
-  },
-  {
-    id: 'sav-5',
-    categoryId: 'cat-13',
-    categoryName: '緊急資金',
-    categoryIcon: 'piggy_bank',
-    categoryColor: 'green',
-    type: 'free',
-    balance: 150000,
-  },
-]
-
-const transactions: Transaction[] = [
-  {
-    id: 'tx-5',
-    type: 'expense',
-    amount: 30000,
-    categoryId: 'cat-8',
-    categoryName: '積立：遠征費',
-    transactionDate: '2026-02-08',
-    name: '2月分積立',
-  },
-  {
-    id: 'tx-s1',
-    type: 'expense',
-    amount: 30000,
-    categoryId: 'cat-8',
-    categoryName: '積立：遠征費',
-    transactionDate: '2025-12-01',
-    name: '12月分積立',
-  },
-  {
-    id: 'tx-s2',
-    type: 'expense',
-    amount: 30000,
-    categoryId: 'cat-8',
-    categoryName: '積立：遠征費',
-    transactionDate: '2026-01-05',
-    name: '1月分積立',
-  },
-  {
-    id: 'tx-s3',
-    type: 'expense',
-    amount: 10000,
-    categoryId: 'cat-9',
-    categoryName: '積立：グッズ',
-    transactionDate: '2025-11-01',
-    name: '11月分積立',
-  },
-  {
-    id: 'tx-s4',
-    type: 'expense',
-    amount: 15000,
-    categoryId: 'cat-9',
-    categoryName: '積立：グッズ',
-    transactionDate: '2025-12-01',
-    name: '12月分積立',
-  },
-  {
-    id: 'tx-s5',
-    type: 'expense',
-    amount: 10000,
-    categoryId: 'cat-9',
-    categoryName: '積立：グッズ',
-    transactionDate: '2026-02-10',
-    name: '2月分積立',
-  },
-  {
-    id: 'tx-s6',
-    type: 'expense',
-    amount: 15000,
-    categoryId: 'cat-11',
-    categoryName: '積立：旅行費',
-    transactionDate: '2025-11-01',
-    name: '11月分積立',
-  },
-  {
-    id: 'tx-s7',
-    type: 'expense',
-    amount: 15000,
-    categoryId: 'cat-11',
-    categoryName: '積立：旅行費',
-    transactionDate: '2026-01-05',
-    name: '1月分積立',
-  },
-  {
-    id: 'tx-s8',
-    type: 'expense',
-    amount: 50000,
-    categoryId: 'cat-12',
-    categoryName: '積立：機材費',
-    transactionDate: '2025-09-01',
-    name: '9月分積立',
-  },
-  {
-    id: 'tx-s9',
-    type: 'expense',
-    amount: 50000,
-    categoryId: 'cat-12',
-    categoryName: '積立：機材費',
-    transactionDate: '2025-10-01',
-    name: '10月分積立',
-  },
-  {
-    id: 'tx-s10',
-    type: 'expense',
-    amount: 50000,
-    categoryId: 'cat-12',
-    categoryName: '積立：機材費',
-    transactionDate: '2025-11-01',
-    name: '11月分積立',
-  },
-  {
-    id: 'tx-s11',
-    type: 'expense',
-    amount: 30000,
-    categoryId: 'cat-12',
-    categoryName: '積立：機材費',
-    transactionDate: '2026-01-05',
-    name: '1月分積立',
-  },
-  {
-    id: 'tx-s12',
-    type: 'expense',
-    amount: 50000,
-    categoryId: 'cat-13',
-    categoryName: '積立：緊急資金',
-    transactionDate: '2025-10-01',
-    name: '初期積立',
-  },
-  {
-    id: 'tx-s13',
-    type: 'expense',
-    amount: 50000,
-    categoryId: 'cat-13',
-    categoryName: '積立：緊急資金',
-    transactionDate: '2025-11-01',
-    name: '追加積立',
-  },
-  {
-    id: 'tx-s14',
-    type: 'expense',
-    amount: 50000,
-    categoryId: 'cat-13',
-    categoryName: '積立：緊急資金',
-    transactionDate: '2026-01-05',
-    name: '追加積立',
-  },
-]
-
-const savingWithdrawals: SavingWithdrawal[] = [
-  {
-    id: 'wdl-1',
-    savingDefinitionId: 'sav-3',
-    amount: 12000,
-    withdrawalDate: '2025-11-15',
-    memo: '旅行費の一部として使用',
-    createdAt: '2025-11-15T10:30:00Z',
-  },
-  {
-    id: 'wdl-2',
-    savingDefinitionId: 'sav-4',
-    amount: 10000,
-    withdrawalDate: '2026-01-20',
-    memo: 'カメラバッグ購入',
-    createdAt: '2026-01-20T14:00:00Z',
-  },
-]
-
 const SavingDetailPage: React.FC = () => {
   const { id } = Route.useParams()
 
-  const initialSaving = savings.find((s) => s.id === id)
-  const initialWithdrawals = savingWithdrawals.filter(
+  const initialSaving = MOCK_SAVINGS.find((s) => s.id === id)
+  const initialWithdrawals = MOCK_SAVING_WITHDRAWALS.filter(
     (w) => w.savingDefinitionId === id,
   )
-  const initialContributions = transactions
+  const initialContributions = MOCK_TRANSACTIONS
     .filter(
       (tx) =>
         tx.categoryId === initialSaving?.categoryId &&
