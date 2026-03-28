@@ -4,6 +4,7 @@ import {
   CollapsibleTrigger,
 } from '@frontend/components/ui/collapsible'
 import dayjs from '@frontend/lib/date'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { ChevronDownIcon } from 'lucide-react'
 import { useState } from 'react'
@@ -11,44 +12,92 @@ import { useState } from 'react'
 import type { EventSummary } from './-components/event-card'
 import { EventCard } from './-components/event-card'
 import { EventCreateDialog } from './-components/event-create-dialog'
+import { useEventMutations } from './-hooks/use-event-mutations'
+import { listEventsQueryOptions } from './-repositories/events'
 
-const TODAY = '2026-02-28'
+const TODAY = dayjs().format('YYYY-MM-DD')
 
-// モックデータ：本番ではAPIから /events を取得する
-const MOCK_EVENTS: EventSummary[] = [
-  {
-    id: 'ev-1',
-    name: 'バレンタインイベント',
-    occurredOn: '2026-02-14',
-    totalAmount: 154200,
-    transactionCount: 2,
-  },
-  {
-    id: 'ev-2',
-    name: '春ライブ遠征',
-    occurredOn: '2026-02-20',
-    totalAmount: 35700,
-    transactionCount: 5,
-  },
-  {
-    id: 'ev-3',
-    name: '春グッズ',
-    occurredOn: '2026-03-05',
-    totalAmount: 5500,
-    transactionCount: 1,
-  },
-  {
-    id: 'ev-4',
-    name: '年末飲み会',
-    occurredOn: '2025-12-28',
-    totalAmount: 4500,
-    transactionCount: 0,
-  },
-]
+type EventGroupProps = {
+  label: string
+  events: EventSummary[]
+}
+
+const EventGroup: React.FC<EventGroupProps> = ({ label, events }) => {
+  if (events.length === 0) return null
+
+  return (
+    <Collapsible defaultOpen>
+      <section className="space-y-3">
+        <CollapsibleTrigger className="group flex w-[calc(100%+1rem)] items-center justify-between rounded-md px-2 py-1 hover:bg-muted">
+          <h2 className="text-sm font-medium text-muted-foreground">{label}</h2>
+          <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {events.map((ev) => (
+              <EventCard key={ev.id} ev={ev} />
+            ))}
+          </div>
+        </CollapsibleContent>
+      </section>
+    </Collapsible>
+  )
+}
+
+type EventListProps = {
+  isPending: boolean
+  isError: boolean
+  upcoming: EventSummary[]
+  past: EventSummary[]
+}
+
+const EventList: React.FC<EventListProps> = ({
+  isPending,
+  isError,
+  upcoming,
+  past,
+}) => {
+  if (isPending) {
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">
+        読み込み中...
+      </p>
+    )
+  }
+
+  if (isError) {
+    return (
+      <p className="py-8 text-center text-sm text-destructive">
+        イベントの取得に失敗しました
+      </p>
+    )
+  }
+
+  return (
+    <>
+      <EventGroup label="進行中 / 予定" events={upcoming} />
+      <EventGroup label="過去" events={past} />
+    </>
+  )
+}
 
 const EventsPage: React.FC = () => {
-  const [events, setEvents] = useState<EventSummary[]>(MOCK_EVENTS)
   const [newDialogOpen, setNewDialogOpen] = useState(false)
+
+  const {
+    data: eventsData,
+    isPending,
+    isError,
+  } = useQuery(listEventsQueryOptions())
+  const { createMutation } = useEventMutations()
+
+  const events: EventSummary[] = (eventsData ?? []).map((ev) => ({
+    id: ev.id,
+    name: ev.name,
+    occurredOn: ev.occurredOn,
+    totalAmount: ev.totalAmount,
+    transactionCount: ev.transactionCount,
+  }))
 
   const upcoming = events.filter((ev) => ev.occurredOn >= TODAY)
   const past = events.filter((ev) => ev.occurredOn < TODAY)
@@ -57,23 +106,13 @@ const EventsPage: React.FC = () => {
     name: string,
     occurredOn: string,
   ): Promise<void> => {
-    // モック：実際にはAPIを呼び出してイベントを作成する（UC-5.1）
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    const created: EventSummary = {
-      id: `ev-${dayjs().valueOf()}`,
-      name,
-      occurredOn,
-      totalAmount: 0,
-      transactionCount: 0,
-    }
-    setEvents((prev) => [...prev, created])
+    await createMutation.mutateAsync({ name, occurredOn })
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">イベント</h1>
-        {/* 新規作成ダイアログ（UC-5.1） */}
         <EventCreateDialog
           open={newDialogOpen}
           onOpenChange={setNewDialogOpen}
@@ -81,45 +120,12 @@ const EventsPage: React.FC = () => {
         />
       </div>
 
-      {upcoming.length > 0 && (
-        <Collapsible defaultOpen>
-          <section className="space-y-3">
-            <CollapsibleTrigger className="group flex w-[calc(100%+1rem)] items-center justify-between rounded-md px-2 py-1 hover:bg-muted">
-              <h2 className="text-sm font-medium text-muted-foreground">
-                進行中 / 予定
-              </h2>
-              <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="grid gap-4 lg:grid-cols-2">
-                {upcoming.map((ev) => (
-                  <EventCard key={ev.id} ev={ev} />
-                ))}
-              </div>
-            </CollapsibleContent>
-          </section>
-        </Collapsible>
-      )}
-
-      {past.length > 0 && (
-        <Collapsible defaultOpen>
-          <section className="space-y-3">
-            <CollapsibleTrigger className="group flex w-[calc(100%+1rem)] items-center justify-between rounded-md px-2 py-1 hover:bg-muted">
-              <h2 className="text-sm font-medium text-muted-foreground">
-                過去
-              </h2>
-              <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <div className="grid gap-4 lg:grid-cols-2">
-                {past.map((ev) => (
-                  <EventCard key={ev.id} ev={ev} />
-                ))}
-              </div>
-            </CollapsibleContent>
-          </section>
-        </Collapsible>
-      )}
+      <EventList
+        isPending={isPending}
+        isError={isError}
+        upcoming={upcoming}
+        past={past}
+      />
     </div>
   )
 }
