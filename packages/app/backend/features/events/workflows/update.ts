@@ -21,7 +21,10 @@ export type UpdateEventCommand = {
 // MARK: step types
 
 type EventResolved = {
-  input: UpdateEventCommand['input']
+  input: {
+    name?: string | undefined
+    occurredOn?: string | undefined
+  }
   context: {
     event: Event
   }
@@ -63,7 +66,10 @@ const resolveEvent =
         ),
       )
     }
-    return Result.succeed({ input: command.input, context: { event } })
+    return Result.succeed({
+      input: { name: command.input.name, occurredOn: command.input.occurredOn },
+      context: { event },
+    })
   }
 
 const buildUpdatedEvent = (resolved: EventResolved): EventUpdatedEvent => ({
