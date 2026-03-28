@@ -17,6 +17,70 @@ import { listEventsQueryOptions } from './-repositories/events'
 
 const TODAY = dayjs().format('YYYY-MM-DD')
 
+type EventGroupProps = {
+  label: string
+  events: EventSummary[]
+}
+
+const EventGroup: React.FC<EventGroupProps> = ({ label, events }) => {
+  if (events.length === 0) return null
+
+  return (
+    <Collapsible defaultOpen>
+      <section className="space-y-3">
+        <CollapsibleTrigger className="group flex w-[calc(100%+1rem)] items-center justify-between rounded-md px-2 py-1 hover:bg-muted">
+          <h2 className="text-sm font-medium text-muted-foreground">{label}</h2>
+          <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {events.map((ev) => (
+              <EventCard key={ev.id} ev={ev} />
+            ))}
+          </div>
+        </CollapsibleContent>
+      </section>
+    </Collapsible>
+  )
+}
+
+type EventListProps = {
+  isPending: boolean
+  isError: boolean
+  upcoming: EventSummary[]
+  past: EventSummary[]
+}
+
+const EventList: React.FC<EventListProps> = ({
+  isPending,
+  isError,
+  upcoming,
+  past,
+}) => {
+  if (isPending) {
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">
+        読み込み中...
+      </p>
+    )
+  }
+
+  if (isError) {
+    return (
+      <p className="py-8 text-center text-sm text-destructive">
+        イベントの取得に失敗しました
+      </p>
+    )
+  }
+
+  return (
+    <>
+      <EventGroup label="進行中 / 予定" events={upcoming} />
+      <EventGroup label="過去" events={past} />
+    </>
+  )
+}
+
 const EventsPage: React.FC = () => {
   const [newDialogOpen, setNewDialogOpen] = useState(false)
 
@@ -56,57 +120,12 @@ const EventsPage: React.FC = () => {
         />
       </div>
 
-      {isPending ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">
-          読み込み中...
-        </p>
-      ) : isError ? (
-        <p className="py-8 text-center text-sm text-destructive">
-          イベントの取得に失敗しました
-        </p>
-      ) : (
-        <>
-          {upcoming.length > 0 && (
-            <Collapsible defaultOpen>
-              <section className="space-y-3">
-                <CollapsibleTrigger className="group flex w-[calc(100%+1rem)] items-center justify-between rounded-md px-2 py-1 hover:bg-muted">
-                  <h2 className="text-sm font-medium text-muted-foreground">
-                    進行中 / 予定
-                  </h2>
-                  <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    {upcoming.map((ev) => (
-                      <EventCard key={ev.id} ev={ev} />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </section>
-            </Collapsible>
-          )}
-
-          {past.length > 0 && (
-            <Collapsible defaultOpen>
-              <section className="space-y-3">
-                <CollapsibleTrigger className="group flex w-[calc(100%+1rem)] items-center justify-between rounded-md px-2 py-1 hover:bg-muted">
-                  <h2 className="text-sm font-medium text-muted-foreground">
-                    過去
-                  </h2>
-                  <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    {past.map((ev) => (
-                      <EventCard key={ev.id} ev={ev} />
-                    ))}
-                  </div>
-                </CollapsibleContent>
-              </section>
-            </Collapsible>
-          )}
-        </>
-      )}
+      <EventList
+        isPending={isPending}
+        isError={isError}
+        upcoming={upcoming}
+        past={past}
+      />
     </div>
   )
 }
