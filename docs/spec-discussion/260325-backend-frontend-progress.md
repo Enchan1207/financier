@@ -32,10 +32,16 @@
 | トランザクション | `POST /transactions` | |
 | トランザクション | `PUT /transactions/:id` | |
 | トランザクション | `DELETE /transactions/:id` | |
+| イベント | `GET /events` | |
+| イベント | `POST /events` | |
+| イベント | `PUT /events/:id` | |
+| イベント | `DELETE /events/:id` | |
+| イベントページ | `GET /pages/events` | 集計付き一覧 |
+| イベントページ | `GET /pages/events/:id` | 詳細・カテゴリ別内訳 |
 
 ### 未実装エンドポイント
 
-予算・積立・イベント・イベントテンプレートのバックエンドは未実装。
+予算・積立・イベントテンプレートのバックエンドは未実装。
 
 ---
 
@@ -47,7 +53,7 @@
 | --- | --- | --- | --- | --- |
 | 1 | DATA | カテゴリ一覧 | `GET /categories` | ✅ |
 | 2 | DATA | トランザクション一覧 | `GET /transactions` | ✅ |
-| 3 | DATA | イベント一覧 | `GET /events` | ❌ バックエンド未実装。現状 `events={[]}` で空固定 |
+| 3 | DATA | イベント一覧 | `GET /pages/events` | ✅ |
 | 4 | CREATE | `handleAdd` | `POST /transactions` | ✅ |
 | 5 | UPDATE | `handleSave` | `PUT /transactions/:id` | ✅ |
 | 6 | DELETE | `handleDelete` | `DELETE /transactions/:id` | ✅ |
@@ -87,20 +93,23 @@
 
 | # | 種別 | 内容 | 対応 API | 状態 |
 | --- | --- | --- | --- | --- |
-| 23 | DATA | イベント一覧 | `GET /events` | ❌ |
-| 24 | CREATE | `handleCreate` | `POST /events` | ❌ |
-| 25 | UPDATE | 編集ダイアログ確定 | `PUT /events/:id` | ❌ |
+| 23 | DATA | イベント一覧 | `GET /pages/events` | ✅ |
+| 24 | DATA | イベント詳細 | `GET /pages/events/:id` | ✅ |
+| 25 | CREATE | イベント作成 | `POST /events` | ✅ |
+| 26 | UPDATE | イベント編集 | `PUT /events/:id` | ✅ |
+| 27 | DELETE | イベント削除 | `DELETE /events/:id` | ✅ |
+| 28 | CREATE/UPDATE | 既存トランザクション紐付け | `PUT /transactions/:id` | ✅ |
 
 ### 6. イベントテンプレート（routes/event-templates/）
 
 | # | 種別 | 内容 | 対応 API | 状態 |
 | --- | --- | --- | --- | --- |
-| 26 | DATA | テンプレート一覧 | `GET /event-templates` | ❌ |
-| 27 | DATA | テンプレート詳細 | `GET /event-templates/:id` | ❌ |
-| 28 | DATA | テンプレート詳細（編集画面） | `GET /event-templates/:id` | ❌ |
-| 29 | CREATE | テンプレート新規作成 | `POST /event-templates` | ❌ |
-| 30 | UPDATE | テンプレート編集 | `PUT /event-templates/:id` | ❌ |
-| 31 | CREATE | 一括登録 | `POST /event-templates/:id/register`（仮称） | ❌ |
+| 29 | DATA | テンプレート一覧 | `GET /event-templates` | ❌ |
+| 30 | DATA | テンプレート詳細 | `GET /event-templates/:id` | ❌ |
+| 31 | DATA | テンプレート詳細（編集画面） | `GET /event-templates/:id` | ❌ |
+| 32 | CREATE | テンプレート新規作成 | `POST /event-templates` | ❌ |
+| 33 | UPDATE | テンプレート編集 | `PUT /event-templates/:id` | ❌ |
+| 34 | CREATE | 一括登録 | `POST /event-templates/:id/register`（仮称） | ❌ |
 
 ---
 
@@ -108,13 +117,13 @@
 
 | 区分 | 全項目数 | 接続済み | 未接続（バックエンドあり） | 未接続（バックエンドなし） |
 | ---- | -------- | -------- | -------------------------- | -------------------------- |
-| トランザクション | 6 | 5 | 0 | 1（イベント連携） |
+| トランザクション | 6 | 6 | 0 | 0 |
 | カテゴリ | 4 | 4 | 0 | 0 |
 | 予算 | 5 | 0 | 0 | 5 |
 | 積立 | 7 | 0 | 0 | 7 |
-| イベント | 3 | 0 | 0 | 3 |
+| イベント | 6 | 6 | 0 | 0 |
 | イベントテンプレート | 6 | 0 | 0 | 6 |
-| **合計** | **31** | **9** | **0** | **22** |
+| **合計** | **34** | **16** | **0** | **18** |
 
 ---
 
@@ -122,10 +131,9 @@
 
 バックエンド実装 → フロントエンド接続の順で進める。優先度は要件・依存関係を踏まえて検討すること。
 
-1. **イベント** — トランザクション画面のイベント連携（`events={[]}`の解消）にも必要なため、先行して実装する価値がある
-2. **予算** — 年度予算管理は独立した機能であり、他への依存が少ない
-3. **積立** — カテゴリとトランザクションへの依存あり（両方接続済みなので実装可能）
-4. **イベントテンプレート** — イベント実装後に着手
+1. **予算** — 年度予算管理は独立した機能であり、他への依存が少ない
+2. **積立** — カテゴリとトランザクションへの依存あり（両方接続済みなので実装可能）
+3. **イベントテンプレート** — イベント実装済みのため着手可能
 
 ---
 
