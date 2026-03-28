@@ -3,7 +3,7 @@ import categoryRoute from '@backend/features/categories/route'
 import eventRoute from '@backend/features/events/route'
 import transactionRoute from '@backend/features/transactions/route'
 import userRoute from '@backend/features/user/route'
-import eventsPageRoute from '@backend/pages/events/route'
+import pagesRoute from '@backend/pages/index'
 import { Hono } from 'hono'
 import { csrf } from 'hono/csrf'
 import { logger } from 'hono/logger'
@@ -17,7 +17,7 @@ const app = new Hono<{ Bindings: Env }>()
   .route('/categories', categoryRoute)
   .route('/transactions', transactionRoute)
   .route('/events', eventRoute)
-  .route('/pages/events', eventsPageRoute)
+  .route('/pages', pagesRoute)
 
 export default app
 export type AppType = typeof app
