@@ -69,64 +69,6 @@ describe('カテゴリAPI', () => {
     return { jwt, userId: user.id }
   }
 
-  describe('GET /', () => {
-    describe('正常系', () => {
-      let response: Awaited<ReturnType<typeof client.index.$get>>
-      let responseBody: { categories: unknown[] }
-
-      beforeAll(async () => {
-        const { jwt: sessionJwt, userId } = await setupSession()
-
-        await db.insert(categoriesTable).values([
-          {
-            id: 'test-category-id-get-000001',
-            user_id: userId,
-            type: 'income',
-            name: '給与',
-            status: 'active',
-            icon: 'briefcase',
-            color: 'green',
-          },
-          {
-            id: 'test-category-id-get-000002',
-            user_id: userId,
-            type: 'expense',
-            name: '食費',
-            status: 'active',
-            icon: 'utensils',
-            color: 'red',
-          },
-        ])
-
-        response = await client.index.$get(
-          {},
-          { headers: { Cookie: `__Host-Http-session=${sessionJwt}` } },
-        )
-        responseBody = (await response.json()) as { categories: unknown[] }
-      })
-
-      test('200が返ること', () => {
-        expect(response.status).toBe(200)
-      })
-
-      test('カテゴリ一覧が返ること', () => {
-        expect(responseBody.categories).toHaveLength(2)
-      })
-    })
-
-    describe('異常系 - セッションなし', () => {
-      let response: Awaited<ReturnType<typeof client.index.$get>>
-
-      beforeAll(async () => {
-        response = await client.index.$get({})
-      })
-
-      test('401が返ること', () => {
-        expect(response.status).toBe(401)
-      })
-    })
-  })
-
   describe('POST /', () => {
     describe('正常系 - incomeカテゴリを作成できる', () => {
       let response: Awaited<ReturnType<typeof client.index.$post>>

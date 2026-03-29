@@ -26,13 +26,11 @@ import {
 } from './-repositories/categories'
 
 export type CategoryType = 'income' | 'expense' | 'saving'
-export type CategoryStatus = 'active' | 'archived'
 
 export type Category = {
   id: string
   type: CategoryType
   name: string
-  status: CategoryStatus
   icon: CategoryIconType
   color: CategoryColor
 }
@@ -44,7 +42,6 @@ const CategoriesPage: React.FC = () => {
     id: c.id,
     type: c.type as CategoryType,
     name: c.name,
-    status: c.status as CategoryStatus,
     icon: c.icon as CategoryIconType,
     color: c.color as CategoryColor,
   }))
@@ -57,7 +54,7 @@ const CategoriesPage: React.FC = () => {
   )
 
   const createMutation = useMutation({
-    mutationFn: (data: Omit<Category, 'id' | 'status'>) =>
+    mutationFn: (data: Omit<Category, 'id'>) =>
       createCategory({
         type: data.type,
         name: data.name,
@@ -97,9 +94,7 @@ const CategoriesPage: React.FC = () => {
     },
   })
 
-  const handleCreate = async (
-    data: Omit<Category, 'id' | 'status'>,
-  ): Promise<void> => {
+  const handleCreate = async (data: Omit<Category, 'id'>): Promise<void> => {
     await createMutation.mutateAsync(data)
   }
 

@@ -10,12 +10,7 @@ import { Result } from '@praha/byethrow'
 import { Hono } from 'hono'
 
 import { CategoryNotFoundException } from './exceptions'
-import {
-  archiveCategory,
-  findCategories,
-  findCategoryById,
-  saveCategory,
-} from './repository'
+import { archiveCategory, findCategoryById, saveCategory } from './repository'
 import {
   CreateCategoryRequestSchema,
   UpdateCategoryRequestSchema,
@@ -50,15 +45,6 @@ const toCategoryResponse = (category: {
 
 const app = new Hono<{ Bindings: Env }>()
   .use(sessionMiddleware)
-  .get('/', async (c) => {
-    const session = c.get('session')
-    if (session === undefined) {
-      return c.json({ message: 'Unauthorized' }, 401)
-    }
-
-    const categories = await findCategories(c.get('db'))(session.userId)
-    return c.json({ categories: categories.map(toCategoryResponse) })
-  })
   .post('/', zValidator('json', CreateCategoryRequestSchema), async (c) => {
     const session = c.get('session')
     if (session === undefined) {
