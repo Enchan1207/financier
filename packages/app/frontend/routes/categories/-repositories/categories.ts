@@ -2,12 +2,12 @@ import { client } from '@frontend/lib/client'
 import type { InferRequestType, InferResponseType } from 'hono/client'
 
 export type CategoryItem = InferResponseType<
-  typeof client.categories.$get,
+  typeof client.pages.categories.$get,
   200
 >['categories'][number]
 
 const fetchCategories = async (): Promise<CategoryItem[]> => {
-  const response = await client.categories.$get()
+  const response = await client.pages.categories.$get()
   if (!response.ok) {
     throw new Error('カテゴリの取得に失敗しました')
   }
