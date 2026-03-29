@@ -29,7 +29,6 @@ import { z } from 'zod'
 
 import { MOCK_CATEGORIES, MOCK_EVENTS } from './mock-data'
 
-
 const formSchema = z.object({
   type: z.enum(['income', 'expense'] as const),
   categoryId: z.string().min(1),
@@ -118,7 +117,9 @@ export const AddTransactionDialog: React.FC<AddTransactionDialogProps> = ({
               <form.Field
                 name="categoryId"
                 children={(field) => {
-                  const filtered = MOCK_CATEGORIES.filter((c) => c.type === type)
+                  const filtered = MOCK_CATEGORIES.filter(
+                    (c) => c.type === type,
+                  )
                   return (
                     <div className="space-y-1.5">
                       <Label htmlFor="quick-tx-category">カテゴリ</Label>

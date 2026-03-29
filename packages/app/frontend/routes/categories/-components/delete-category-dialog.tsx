@@ -23,10 +23,7 @@ export const DeleteCategoryDialog: React.FC<DeleteCategoryDialogProps> = ({
   onOpenChange,
   onDelete,
 }) => (
-  <AlertDialog
-    open={category !== null}
-    onOpenChange={onOpenChange}
-  >
+  <AlertDialog open={category !== null} onOpenChange={onOpenChange}>
     <AlertDialogContent>
       <AlertDialogHeader>
         <AlertDialogTitle>カテゴリを削除しますか？</AlertDialogTitle>
