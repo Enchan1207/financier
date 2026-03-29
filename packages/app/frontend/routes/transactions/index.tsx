@@ -88,15 +88,13 @@ const TransactionsPage: React.FC = () => {
 
   const formCategories = useMemo(
     () =>
-      (categoriesData ?? [])
-        .filter((c) => c.status === 'active')
-        .map((c) => ({
-          id: c.id,
-          name: c.name,
-          type: c.type,
-          icon: c.icon as CategoryIconType,
-          color: c.color as CategoryColor,
-        })),
+      (categoriesData ?? []).map((c) => ({
+        id: c.id,
+        name: c.name,
+        type: c.type,
+        icon: c.icon as CategoryIconType,
+        color: c.color as CategoryColor,
+      })),
     [categoriesData],
   )
 
