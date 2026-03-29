@@ -152,6 +152,31 @@ export default defineConfig(
   },
 
   {
+    name: 'frontend components',
+    files: ['packages/app/frontend/routes/**/index.tsx'],
+    rules: {
+      // NOTE: redirect
+      '@typescript-eslint/only-throw-error': [
+        'off',
+        /*
+        本来は以下の記述でRedirectオブジェクトだけを許可できるが、
+        TanStack Routerがappパッケージ内にインストールされているためか、指定子がうまく動作しない。
+
+        {
+          allow: [
+            {
+              from: 'package',
+              name: 'Redirect',
+              package: '@tanstack/react-router',
+            },
+          ],
+        },
+        */
+      ],
+    },
+  },
+
+  {
     name: 'backend rules',
     files: ['packages/app/backend/**/*.ts'],
     rules: {
