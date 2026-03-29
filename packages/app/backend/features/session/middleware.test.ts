@@ -298,9 +298,13 @@ describe('sessionMiddleware', () => {
       expect(body.session?.userId).toBe(userId)
     })
 
-    test('Set-Cookieヘッダに新しいJWTが付与されること', () => {
+    test('Set-Cookieヘッダが付与されていること', () => {
       const setCookieHeader = response.headers.get('Set-Cookie')
       expect(setCookieHeader).toBeTruthy()
+    })
+
+    test('Set-CookieヘッダにセッションCookieが含まれること', () => {
+      const setCookieHeader = response.headers.get('Set-Cookie')
       expect(setCookieHeader).toContain('__Host-Http-session=')
     })
 

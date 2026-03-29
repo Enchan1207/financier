@@ -260,8 +260,15 @@ describe('イベントページAPI', () => {
 
       test('同一カテゴリのトランザクションが集計されること', () => {
         expect(responseBody.event.categoryBreakdown).toHaveLength(1)
+      })
+
+      test('集計結果のカテゴリ名が正しいこと', () => {
         const [breakdown] = responseBody.event.categoryBreakdown
         expect(breakdown?.categoryName).toBe('食費')
+      })
+
+      test('集計結果の金額が正しいこと', () => {
+        const [breakdown] = responseBody.event.categoryBreakdown
         expect(breakdown?.amount).toBe(5000)
       })
     })
@@ -300,14 +307,17 @@ describe('イベントページAPI', () => {
         expect(responseBody.event.categoryBreakdown).toHaveLength(2)
       })
 
-      test('各カテゴリの金額が正しく集計されること', () => {
+      test('食費カテゴリの金額が正しく集計されること', () => {
         const food = responseBody.event.categoryBreakdown.find(
           (b) => b.categoryName === '食費',
         )
+        expect(food?.amount).toBe(3000)
+      })
+
+      test('交通費カテゴリの金額が正しく集計されること', () => {
         const travel = responseBody.event.categoryBreakdown.find(
           (b) => b.categoryName === '交通費',
         )
-        expect(food?.amount).toBe(3000)
         expect(travel?.amount).toBe(2000)
       })
     })
