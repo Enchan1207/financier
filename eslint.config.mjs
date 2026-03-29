@@ -2,6 +2,7 @@
 // NOTE: プラグインの命名は eslint-plugin を削ったlowerCamelCase
 
 import eslint from '@eslint/js'
+import vitest from '@vitest/eslint-plugin'
 import { defineConfig } from 'eslint/config'
 import prettierConfig from 'eslint-config-prettier'
 import * as importPlugin from 'eslint-plugin-import'
@@ -51,6 +52,18 @@ export default defineConfig(
   },
 
   // MARK: - Plugins config
+
+  {
+    name: 'plugin rules',
+    files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
+    plugins: {
+      vitest,
+    },
+    rules: {
+      ...vitest.configs.recommended.rules,
+      'vitest/max-expects': ['error', { max: 1 }],
+    },
+  },
 
   // based on: https://typescript-eslint.io/getting-started/typed-linting
   {
@@ -134,6 +147,31 @@ export default defineConfig(
             attributes: false,
           },
         },
+      ],
+    },
+  },
+
+  {
+    name: 'frontend components',
+    files: ['packages/app/frontend/routes/**/index.tsx'],
+    rules: {
+      // NOTE: redirect
+      '@typescript-eslint/only-throw-error': [
+        'off',
+        /*
+        本来は以下の記述でRedirectオブジェクトだけを許可できるが、
+        TanStack Routerがappパッケージ内にインストールされているためか、指定子がうまく動作しない。
+
+        {
+          allow: [
+            {
+              from: 'package',
+              name: 'Redirect',
+              package: '@tanstack/react-router',
+            },
+          ],
+        },
+        */
       ],
     },
   },

@@ -73,8 +73,11 @@ describe('updateD1Database', () => {
       expect(actual.env.staging.d1_databases[0]?.migrations_dir).toBe('drizzle')
     })
 
-    test('staging環境の他のプロパティが保持されること', () => {
+    test('staging環境のnameが保持されること', () => {
       expect(actual.env.staging['name']).toBe('test-app-stg')
+    })
+
+    test('staging環境のroutesが保持されること', () => {
       expect(actual.env.staging['routes']).toStrictEqual([
         { pattern: 'stg.example.com', custom_domain: true },
       ])
@@ -88,8 +91,11 @@ describe('updateD1Database', () => {
       expect(actual.env.production).toStrictEqual(original.env.production)
     })
 
-    test('グローバル設定が保持されること', () => {
+    test('グローバルのnameが保持されること', () => {
       expect(actual['name']).toBe('test-app')
+    })
+
+    test('グローバルのmainが保持されること', () => {
       expect(actual['main']).toBe('./backend/index.ts')
     })
   })

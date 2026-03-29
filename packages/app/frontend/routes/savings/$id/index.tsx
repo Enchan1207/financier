@@ -35,13 +35,11 @@ const SavingDetailPage: React.FC = () => {
   const initialWithdrawals = MOCK_SAVING_WITHDRAWALS.filter(
     (w) => w.savingDefinitionId === id,
   )
-  const initialContributions = MOCK_TRANSACTIONS
-    .filter(
-      (tx) =>
-        tx.categoryId === initialSaving?.categoryId &&
-        tx.transactionDate <= TODAY,
-    )
-    .sort((a, b) => b.transactionDate.localeCompare(a.transactionDate))
+  const initialContributions = MOCK_TRANSACTIONS.filter(
+    (tx) =>
+      tx.categoryId === initialSaving?.categoryId &&
+      tx.transactionDate <= TODAY,
+  ).sort((a, b) => b.transactionDate.localeCompare(a.transactionDate))
 
   const [saving, setSaving] = useState<SavingDefinition | undefined>(
     initialSaving,

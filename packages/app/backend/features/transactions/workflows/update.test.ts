@@ -69,9 +69,13 @@ describe('buildUpdateTransactionWorkflow', () => {
       expect(actual.value.transaction.amount).toBe(8000)
     })
 
-    test('その他のプロパティが保持されること', () => {
+    test('nameが保持されること', () => {
       if (Result.isFailure(actual)) throw new Error('Expected success')
       expect(actual.value.transaction.name).toBe(transaction.name)
+    })
+
+    test('categoryIdが保持されること', () => {
+      if (Result.isFailure(actual)) throw new Error('Expected success')
       expect(actual.value.transaction.categoryId).toBe(transaction.categoryId)
     })
   })

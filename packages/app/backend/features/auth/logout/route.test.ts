@@ -92,6 +92,10 @@ describe('POST /api/auth/logout', () => {
     test('Auth0のログアウトURLにリダイレクトすること', () => {
       const location = response.headers.get('Location')
       expect(location).toBeTruthy()
+    })
+
+    test('Locationヘッダが定義されていること', () => {
+      const location = response.headers.get('Location')
       // buildLogoutUrl によって生成されたログアウトURL
       expect(location).toBeDefined()
     })
@@ -107,7 +111,15 @@ describe('POST /api/auth/logout', () => {
     test('セッションクッキーが削除されていること', () => {
       const setCookieHeader = response.headers.get('Set-Cookie')
       expect(setCookieHeader).toBeTruthy()
+    })
+
+    test('セッションクッキーのヘッダ名が正しいこと', () => {
+      const setCookieHeader = response.headers.get('Set-Cookie')
       expect(setCookieHeader).toContain('__Host-Http-session=')
+    })
+
+    test('セッションクッキーのMax-Ageが0であること', () => {
+      const setCookieHeader = response.headers.get('Set-Cookie')
       expect(setCookieHeader).toContain('Max-Age=0')
     })
   })

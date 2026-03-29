@@ -55,8 +55,11 @@ describe('mergeEnvLines', () => {
       expect(actual[2]).toBe('KEY3=new_value')
     })
 
-    test('既存のキーは変更されないこと', () => {
+    test('既存の1つ目のキーは変更されないこと', () => {
       expect(actual[0]).toBe('KEY1=value1')
+    })
+
+    test('既存の2つ目のキーは変更されないこと', () => {
       expect(actual[1]).toBe('KEY2=value2')
     })
 
@@ -116,8 +119,11 @@ describe('mergeEnvLines', () => {
       expect(actual[1]).toBe('KEY2=value2')
     })
 
-    test('新規キーが末尾に追加されること', () => {
+    test('1つ目の新規キーが末尾に追加されること', () => {
       expect(actual[2]).toBe('KEY3=new_value')
+    })
+
+    test('2つ目の新規キーが末尾に追加されること', () => {
       expect(actual[3]).toBe('KEY4=another_new_value')
     })
 
@@ -140,8 +146,11 @@ describe('mergeEnvLines', () => {
       expect(actual[0]).toBe('KEY1=value1')
     })
 
-    test('新規キーが順番に追加されること', () => {
+    test('1つ目の新規キーが順番に追加されること', () => {
       expect(actual[1]).toBe('KEY2=value2')
+    })
+
+    test('2つ目の新規キーが順番に追加されること', () => {
       expect(actual[2]).toBe('KEY3=value3')
     })
 
@@ -188,8 +197,11 @@ describe('mergeEnvLines', () => {
       expect(actual[0]).toBe('PORT=3000')
     })
 
-    test('文字列型の新規キーが追加されること', () => {
+    test('HOSTキーが追加されること', () => {
       expect(actual[1]).toBe('HOST=localhost')
+    })
+
+    test('DEBUGキーが追加されること', () => {
       expect(actual[2]).toBe('DEBUG=true')
     })
   })
