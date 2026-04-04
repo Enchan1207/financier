@@ -29,7 +29,7 @@ export const DeleteCategoryDialog: React.FC<DeleteCategoryDialogProps> = ({
         <AlertDialogTitle>カテゴリを削除しますか？</AlertDialogTitle>
         <AlertDialogDescription>
           「{category?.name}
-          」を削除します。削除後は新規取引の選択肢に表示されなくなります。
+          」を削除します。トランザクション・予算・積立定義から参照されている場合は削除できません。
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>

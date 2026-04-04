@@ -1,10 +1,13 @@
 import { client } from '@frontend/lib/client'
-import type { InferRequestType, InferResponseType } from 'hono/client'
+import type { InferRequestType } from 'hono/client'
 
-export type CategoryItem = InferResponseType<
-  typeof client.pages.categories.$get,
-  200
->['categories'][number]
+export type CategoryItem = {
+  id: string
+  type: 'income' | 'expense' | 'saving'
+  name: string
+  icon: string
+  color: string
+}
 
 const fetchCategories = async (): Promise<CategoryItem[]> => {
   const response = await client.pages.categories.$get()
@@ -52,7 +55,7 @@ export const updateCategory = async (
   return data.category
 }
 
-export const archiveCategory = async (id: string): Promise<CategoryItem> => {
+export const deleteCategory = async (id: string): Promise<void> => {
   const response = await client.categories[':id'].$delete({
     param: { id },
   })
@@ -62,6 +65,4 @@ export const archiveCategory = async (id: string): Promise<CategoryItem> => {
       'message' in error ? error.message : 'カテゴリの削除に失敗しました',
     )
   }
-  const data = await response.json()
-  return data.category
 }
