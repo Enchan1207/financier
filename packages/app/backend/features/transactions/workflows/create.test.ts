@@ -19,7 +19,6 @@ describe('buildCreateTransactionWorkflow', () => {
       userId: TEST_USER_ID,
       type: 'income',
       name: '給与',
-      status: 'active',
       icon: 'briefcase',
       color: 'green',
     }
@@ -92,7 +91,6 @@ describe('buildCreateTransactionWorkflow', () => {
       userId: TEST_USER_ID,
       type: 'expense',
       name: '食費',
-      status: 'active',
       icon: 'utensils',
       color: 'red',
     }
@@ -135,7 +133,6 @@ describe('buildCreateTransactionWorkflow', () => {
       userId: TEST_USER_ID,
       type: 'saving',
       name: '積立貯金',
-      status: 'active',
       icon: 'piggy_bank',
       color: 'pink',
     }
@@ -178,7 +175,6 @@ describe('buildCreateTransactionWorkflow', () => {
       userId: TEST_USER_ID,
       type: 'expense',
       name: '交通費',
-      status: 'active',
       icon: 'bus',
       color: 'yellow',
     }
@@ -222,7 +218,6 @@ describe('buildCreateTransactionWorkflow', () => {
       userId: TEST_USER_ID,
       type: 'income',
       name: '給与',
-      status: 'active',
       icon: 'briefcase',
       color: 'green',
     }
@@ -292,61 +287,12 @@ describe('buildCreateTransactionWorkflow', () => {
     })
   })
 
-  describe('異常系 - アーカイブ済みカテゴリは使用できない', () => {
-    const archivedCategory: Category = {
-      id: 'test-category-id-0000000006' as CategoryId,
-      userId: TEST_USER_ID,
-      type: 'expense',
-      name: '食費',
-      status: 'archived',
-      icon: 'utensils',
-      color: 'red',
-    }
-
-    const command: CreateTransactionCommand = {
-      input: {
-        type: 'expense',
-        amount: 1000,
-        categoryId: archivedCategory.id,
-        transactionDate: '2024-04-01',
-        name: 'テスト',
-      },
-      context: { userId: TEST_USER_ID },
-    }
-
-    let actual: Awaited<
-      ReturnType<ReturnType<typeof buildCreateTransactionWorkflow>>
-    >
-
-    beforeAll(async () => {
-      const workflow = buildCreateTransactionWorkflow({
-        findCategoryById: () => Promise.resolve(archivedCategory),
-      })
-      actual = await workflow(command)
-    })
-
-    test('失敗結果を返すこと', () => {
-      expect(Result.isFailure(actual)).toBe(true)
-    })
-
-    test('エラーがTransactionValidationExceptionであること', () => {
-      if (Result.isSuccess(actual)) throw new Error('Expected failure')
-      expect(actual.error).toBeInstanceOf(TransactionValidationException)
-    })
-
-    test('エラーメッセージにアーカイブ済みである旨が含まれること', () => {
-      if (Result.isSuccess(actual)) throw new Error('Expected failure')
-      expect(actual.error.message).toContain('アーカイブ済み')
-    })
-  })
-
   describe('異常系 - incomeカテゴリにexpenseトランザクションは作成できない', () => {
     const incomeCategory: Category = {
       id: 'test-category-id-0000000007' as CategoryId,
       userId: TEST_USER_ID,
       type: 'income',
       name: '給与',
-      status: 'active',
       icon: 'briefcase',
       color: 'green',
     }
@@ -389,7 +335,6 @@ describe('buildCreateTransactionWorkflow', () => {
       userId: TEST_USER_ID,
       type: 'expense',
       name: '食費',
-      status: 'active',
       icon: 'utensils',
       color: 'red',
     }
@@ -432,7 +377,6 @@ describe('buildCreateTransactionWorkflow', () => {
       userId: TEST_USER_ID,
       type: 'saving',
       name: '積立貯金',
-      status: 'active',
       icon: 'piggy_bank',
       color: 'pink',
     }
