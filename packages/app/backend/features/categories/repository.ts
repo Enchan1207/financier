@@ -2,8 +2,13 @@ import type { Category, CategoryId } from '@backend/domains/category'
 import type { UserId } from '@backend/domains/user'
 import type { DrizzleDatabase } from '@backend/lib/drizzle'
 import { createCategoryModel } from '@backend/repositories/category'
+import { budgetsTable } from '@backend/schemas/budgets'
 import { categoriesTable } from '@backend/schemas/categories'
-import { and, eq } from 'drizzle-orm'
+import { savingDefinitionsTable } from '@backend/schemas/saving-definitions'
+import { transactionsTable } from '@backend/schemas/transactions'
+import { and, count, eq } from 'drizzle-orm'
+
+import type { CategoryReferences } from './exceptions'
 
 export const findCategories =
   (db: DrizzleDatabase) =>
@@ -11,12 +16,7 @@ export const findCategories =
     const results = await db
       .select()
       .from(categoriesTable)
-      .where(
-        and(
-          eq(categoriesTable.user_id, userId),
-          eq(categoriesTable.status, 'active'),
-        ),
-      )
+      .where(eq(categoriesTable.user_id, userId))
     return results.map(createCategoryModel)
   }
 
@@ -44,7 +44,6 @@ export const saveCategory =
         user_id: category.userId,
         type: category.type,
         name: category.name,
-        status: category.status,
         icon: category.icon,
         color: category.color,
       })
@@ -52,18 +51,39 @@ export const saveCategory =
         target: categoriesTable.id,
         set: {
           name: category.name,
-          status: category.status,
           icon: category.icon,
           color: category.color,
         },
       })
   }
 
-export const archiveCategory =
+export const countCategoryReferences =
+  (db: DrizzleDatabase) =>
+  async (id: CategoryId): Promise<CategoryReferences> => {
+    const [txResult, budgetResult, savingResult] = await Promise.all([
+      db
+        .select({ count: count() })
+        .from(transactionsTable)
+        .where(eq(transactionsTable.category_id, id)),
+      db
+        .select({ count: count() })
+        .from(budgetsTable)
+        .where(eq(budgetsTable.category_id, id)),
+      db
+        .select({ count: count() })
+        .from(savingDefinitionsTable)
+        .where(eq(savingDefinitionsTable.category_id, id)),
+    ])
+
+    return {
+      transactions: (txResult[0]?.count ?? 0) > 0,
+      budgets: (budgetResult[0]?.count ?? 0) > 0,
+      savingDefinitions: (savingResult[0]?.count ?? 0) > 0,
+    }
+  }
+
+export const deleteCategory =
   (db: DrizzleDatabase) =>
   async (id: CategoryId): Promise<void> => {
-    await db
-      .update(categoriesTable)
-      .set({ status: 'archived' })
-      .where(eq(categoriesTable.id, id))
+    await db.delete(categoriesTable).where(eq(categoriesTable.id, id))
   }

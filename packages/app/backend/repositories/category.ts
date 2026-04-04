@@ -15,7 +15,6 @@ export const createCategoryModel = (record: CategoryRecord): Category => {
     id: record.id as CategoryId,
     userId: record.user_id as UserId,
     name: record.name,
-    status: record.status as Category['status'],
     icon: record.icon as CategoryIcon,
     color: record.color as CategoryColor,
   }
