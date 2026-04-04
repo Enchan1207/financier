@@ -19,8 +19,8 @@ import { CreateCategoryDialog } from './-components/create-category-dialog'
 import { DeleteCategoryDialog } from './-components/delete-category-dialog'
 import { EditCategoryDialog } from './-components/edit-category-dialog'
 import {
-  archiveCategory,
   createCategory,
+  deleteCategory,
   listCategoriesQueryOptions,
   updateCategory,
 } from './-repositories/categories'
@@ -84,8 +84,8 @@ const CategoriesPage: React.FC = () => {
     },
   })
 
-  const archiveMutation = useMutation({
-    mutationFn: (id: string) => archiveCategory(id),
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteCategory(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['categories'] })
     },
@@ -103,7 +103,7 @@ const CategoriesPage: React.FC = () => {
   }
 
   const handleDelete = async (category: Category): Promise<void> => {
-    await archiveMutation.mutateAsync(category.id)
+    await deleteMutation.mutateAsync(category.id)
     setDeletingCategory(null)
   }
 

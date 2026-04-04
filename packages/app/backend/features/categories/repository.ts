@@ -3,7 +3,13 @@ import type { UserId } from '@backend/domains/user'
 import type { DrizzleDatabase } from '@backend/lib/drizzle'
 import { createCategoryModel } from '@backend/repositories/category'
 import { categoriesTable } from '@backend/schemas/categories'
-import { and, eq } from 'drizzle-orm'
+import { Result } from '@praha/byethrow'
+import { and, DrizzleQueryError, eq } from 'drizzle-orm'
+
+import {
+  CategoryNotFoundException,
+  CategoryRelationException,
+} from './exceptions'
 
 export const findCategories =
   (db: DrizzleDatabase) =>
@@ -11,12 +17,7 @@ export const findCategories =
     const results = await db
       .select()
       .from(categoriesTable)
-      .where(
-        and(
-          eq(categoriesTable.user_id, userId),
-          eq(categoriesTable.status, 'active'),
-        ),
-      )
+      .where(eq(categoriesTable.user_id, userId))
     return results.map(createCategoryModel)
   }
 
@@ -44,7 +45,6 @@ export const saveCategory =
         user_id: category.userId,
         type: category.type,
         name: category.name,
-        status: category.status,
         icon: category.icon,
         color: category.color,
       })
@@ -52,18 +52,62 @@ export const saveCategory =
         target: categoriesTable.id,
         set: {
           name: category.name,
-          status: category.status,
           icon: category.icon,
           color: category.color,
         },
       })
   }
 
-export const archiveCategory =
+export const deleteCategory =
   (db: DrizzleDatabase) =>
-  async (id: CategoryId): Promise<void> => {
-    await db
-      .update(categoriesTable)
-      .set({ status: 'archived' })
-      .where(eq(categoriesTable.id, id))
-  }
+  async (
+    id: CategoryId,
+    userId: UserId,
+  ): Result.ResultAsync<
+    Category,
+    CategoryNotFoundException | CategoryRelationException
+  > =>
+    Result.pipe(
+      Result.try({
+        try: () =>
+          db
+            .delete(categoriesTable)
+            .where(
+              and(
+                eq(categoriesTable.id, id),
+                eq(categoriesTable.user_id, userId),
+              ),
+            )
+            .returning(),
+        catch: (e: unknown) => {
+          if (!(e instanceof DrizzleQueryError)) {
+            throw e
+          }
+
+          // NOTE: 外部キー制約により削除に失敗した場合のエラーメッセージは以下のとおり:
+          // NOTE: `D1_ERROR: FOREIGN KEY constraint failed: SQLITE_CONSTRAINT`
+          // NOTE: D1環境・Cloudflare環境でどのように変化するか読めないため、明らかに変わらないであろう部分のみ比較
+          const rawErrorMessage = e.cause?.message
+          if (rawErrorMessage?.includes('FOREIGN KEY constraint failed')) {
+            return new CategoryRelationException(
+              'カテゴリと関連するエンティティが残っているため削除できません',
+            )
+          }
+
+          throw e
+        },
+      }),
+      Result.andThen((rows) => {
+        const deleted = rows.at(0)
+
+        if (deleted === undefined) {
+          return Result.fail(
+            new CategoryNotFoundException(
+              '削除しようとしたカテゴリが見つかりませんでした。すでに削除されている可能性があります',
+            ),
+          )
+        }
+
+        return Result.succeed(createCategoryModel(deleted))
+      }),
+    )

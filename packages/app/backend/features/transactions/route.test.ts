@@ -75,7 +75,6 @@ describe('トランザクションAPI', () => {
       id: string
       type: string
       name: string
-      status: string
       icon: string
       color: string
     }> = {},
@@ -85,7 +84,6 @@ describe('トランザクションAPI', () => {
       user_id: userId,
       type: 'expense',
       name: '食費',
-      status: 'active',
       icon: 'utensils',
       color: 'red',
       ...overrides,
@@ -343,32 +341,6 @@ describe('トランザクションAPI', () => {
       })
     })
 
-    describe('異常系 - アーカイブ済みカテゴリへのトランザクション作成', () => {
-      let response: Awaited<ReturnType<typeof client.index.$post>>
-
-      beforeAll(async () => {
-        const { jwt: sessionJwt, userId } = await setupSession()
-        const category = await insertCategory(userId, { status: 'archived' })
-
-        response = await client.index.$post(
-          {
-            json: {
-              type: 'expense',
-              amount: 1000,
-              categoryId: category.id,
-              transactionDate: '2024-04-01',
-              name: 'テスト',
-            },
-          },
-          { headers: { Cookie: `__Host-Http-session=${sessionJwt}` } },
-        )
-      })
-
-      test('400が返ること', () => {
-        expect(response.status).toBe(400)
-      })
-    })
-
     describe('異常系 - カテゴリ種別とトランザクション種別が不一致', () => {
       let response: Awaited<ReturnType<typeof client.index.$post>>
 
@@ -472,13 +444,13 @@ describe('トランザクションAPI', () => {
       })
     })
 
-    describe('正常系 - アーカイブ済みカテゴリを持つトランザクションをカテゴリ変更なしで更新できる', () => {
+    describe('正常系 - カテゴリ変更なしでトランザクションを更新できる', () => {
       let response: Awaited<ReturnType<(typeof client)[':id']['$put']>>
       let responseBody: { transaction: { amount: number } }
 
       beforeAll(async () => {
         const { jwt: sessionJwt, userId } = await setupSession()
-        const category = await insertCategory(userId, { status: 'archived' })
+        const category = await insertCategory(userId)
         const transaction = await insertTransaction(userId, category.id)
 
         response = await client[':id'].$put(
@@ -532,31 +504,6 @@ describe('トランザクションAPI', () => {
 
       test('404が返ること', () => {
         expect(response.status).toBe(404)
-      })
-    })
-
-    describe('異常系 - 変更先カテゴリがアーカイブ済み', () => {
-      let response: Awaited<ReturnType<(typeof client)[':id']['$put']>>
-
-      beforeAll(async () => {
-        const { jwt: sessionJwt, userId } = await setupSession()
-        const activeCategory = await insertCategory(userId)
-        const archivedCategory = await insertCategory(userId, {
-          status: 'archived',
-        })
-        const transaction = await insertTransaction(userId, activeCategory.id)
-
-        response = await client[':id'].$put(
-          {
-            param: { id: transaction.id },
-            json: { categoryId: archivedCategory.id },
-          },
-          { headers: { Cookie: `__Host-Http-session=${sessionJwt}` } },
-        )
-      })
-
-      test('400が返ること', () => {
-        expect(response.status).toBe(400)
       })
     })
   })

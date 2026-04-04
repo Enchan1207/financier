@@ -8,21 +8,19 @@ import { sessionMiddleware } from '@backend/features/session/middleware'
 import { zValidator } from '@hono/zod-validator'
 import { Result } from '@praha/byethrow'
 import { Hono } from 'hono'
+import { match } from 'ts-pattern'
 
-import { CategoryNotFoundException } from './exceptions'
-import { archiveCategory, findCategoryById, saveCategory } from './repository'
+import { deleteCategory, findCategoryById, saveCategory } from './repository'
 import {
   CreateCategoryRequestSchema,
   UpdateCategoryRequestSchema,
 } from './schema'
-import { buildArchiveCategoryWorkflow } from './workflows/archive'
 import { buildUpdateCategoryWorkflow } from './workflows/update'
 
 type CategoryResponse = {
   id: string
   type: 'income' | 'expense' | 'saving'
   name: string
-  status: 'active' | 'archived'
   icon: string
   color: string
 }
@@ -31,14 +29,12 @@ const toCategoryResponse = (category: {
   id: string
   type: string
   name: string
-  status: string
   icon: string
   color: string
 }): CategoryResponse => ({
   id: category.id,
   type: category.type as CategoryResponse['type'],
   name: category.name,
-  status: category.status as CategoryResponse['status'],
   icon: category.icon,
   color: category.color,
 })
@@ -104,10 +100,7 @@ const app = new Hono<{ Bindings: Env }>()
     })
 
     if (Result.isFailure(result)) {
-      if (result.error instanceof CategoryNotFoundException) {
-        return c.json({ message: result.error.message }, 404)
-      }
-      return c.json({ message: result.error.message }, 400)
+      return c.json({ message: result.error.message }, 404)
     }
 
     await saveCategory(db)(result.value.category)
@@ -123,25 +116,34 @@ const app = new Hono<{ Bindings: Env }>()
     const id = c.req.param('id') as CategoryId
     const db = c.get('db')
 
-    const workflow = buildArchiveCategoryWorkflow({
-      findCategoryById: findCategoryById(db),
-    })
-
-    const result = await workflow({
-      input: { id },
-      context: { userId: session.userId },
-    })
-
-    if (Result.isFailure(result)) {
-      if (result.error instanceof CategoryNotFoundException) {
-        return c.json({ message: result.error.message }, 404)
-      }
-      return c.json({ message: result.error.message }, 409)
+    const deleteResult = await deleteCategory(db)(id, session.userId)
+    if (Result.isSuccess(deleteResult)) {
+      const deleted = deleteResult.value
+      console.log(`カテゴリ ${deleted.id} は削除されました。`, { deleted })
+      return c.body(null, 204)
     }
 
-    await archiveCategory(db)(result.value.category.id)
+    return match(deleteResult.error)
+      .with({ name: 'CategoryNotFoundException' }, () => {
+        console.error(`カテゴリ ${id} が見つかりません`)
+        return c.json({ message: 'no such category' }, 404)
+      })
+      .with({ name: 'CategoryRelationException' }, () => {
+        console.error(
+          `カテゴリ ${id} は他のデータから参照されているため、削除できません`,
+        )
 
-    return c.json({ category: toCategoryResponse(result.value.category) })
+        return c.json(
+          {
+            message: 'category is related to other entities',
+          },
+          409,
+        )
+      })
+      .otherwise((e: unknown) => {
+        console.error(`カテゴリ ${id} 削除時の不明なエラー`, { cause: e })
+        return c.json({ message: 'unknown error' }, 500)
+      })
   })
 
 export default app

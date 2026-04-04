@@ -1,18 +1,13 @@
 import type {
-  ActiveCategory,
   Category,
   CategoryColor,
   CategoryIcon,
   CategoryId,
 } from '@backend/domains/category'
-import { isActiveCategory } from '@backend/domains/category'
 import type { UserId } from '@backend/domains/user'
 import { Result } from '@praha/byethrow'
 
-import {
-  CategoryNotFoundException,
-  CategoryValidationException,
-} from '../exceptions'
+import { CategoryNotFoundException } from '../exceptions'
 
 // MARK: command
 
@@ -42,18 +37,6 @@ type CategoryResolved = {
   }
 }
 
-type StatusChecked = {
-  input: {
-    name: string
-    icon: CategoryIcon
-    color: CategoryColor
-  }
-  context: {
-    userId: UserId
-    category: ActiveCategory
-  }
-}
-
 // MARK: event
 
 export type CategoryUpdatedEvent = {
@@ -73,10 +56,7 @@ type Effects = {
 
 type Workflow = (
   command: UpdateCategoryCommand,
-) => Result.ResultAsync<
-  CategoryUpdatedEvent,
-  CategoryNotFoundException | CategoryValidationException
->
+) => Result.ResultAsync<CategoryUpdatedEvent, CategoryNotFoundException>
 
 // MARK: steps
 
@@ -107,27 +87,12 @@ const resolveCategory =
     })
   }
 
-const checkStatus = (
-  resolved: CategoryResolved,
-): Result.Result<StatusChecked, CategoryValidationException> => {
-  if (!isActiveCategory(resolved.context.category)) {
-    return Result.fail(
-      new CategoryValidationException('アーカイブ済みカテゴリは編集できません'),
-    )
-  }
-
-  return Result.succeed({
-    ...resolved,
-    context: { ...resolved.context, category: resolved.context.category },
-  })
-}
-
-const createEvent = (checked: StatusChecked): CategoryUpdatedEvent => ({
+const createEvent = (resolved: CategoryResolved): CategoryUpdatedEvent => ({
   category: {
-    ...checked.context.category,
-    name: checked.input.name,
-    icon: checked.input.icon,
-    color: checked.input.color,
+    ...resolved.context.category,
+    name: resolved.input.name,
+    icon: resolved.input.icon,
+    color: resolved.input.color,
   },
 })
 
@@ -139,6 +104,5 @@ export const buildUpdateCategoryWorkflow =
     Result.pipe(
       Result.succeed(command),
       Result.andThen(resolveCategory(effects)),
-      Result.andThen(checkStatus),
       Result.map(createEvent),
     )

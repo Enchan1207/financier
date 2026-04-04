@@ -11,3 +11,10 @@ export class CategoryValidationException extends Error {
     this.name = 'CategoryValidationException'
   }
 }
+
+export class CategoryRelationException extends Error {
+  constructor(...args: ConstructorParameters<ErrorConstructor>) {
+    super(...args)
+    this.name = 'CategoryRelationException'
+  }
+}

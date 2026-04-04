@@ -3,30 +3,26 @@ import type { UserId } from '@backend/domains/user'
 import { Result } from '@praha/byethrow'
 import { beforeAll, describe, expect, test } from 'vitest'
 
-import {
-  CategoryNotFoundException,
-  CategoryValidationException,
-} from '../exceptions'
+import { CategoryNotFoundException } from '../exceptions'
 import type { UpdateCategoryCommand } from './update'
 import { buildUpdateCategoryWorkflow } from './update'
 
 const TEST_USER_ID = 'test-user-id-00000000001' as UserId
 
 describe('buildUpdateCategoryWorkflow', () => {
-  describe('正常系 - アクティブなカテゴリを更新できる', () => {
-    const activeCategory: Category = {
+  describe('正常系 - カテゴリを更新できる', () => {
+    const category: Category = {
       id: 'test-category-id-0000000001' as CategoryId,
       userId: TEST_USER_ID,
       type: 'expense',
       name: '食費',
-      status: 'active',
       icon: 'utensils',
       color: 'red',
     }
 
     const command: UpdateCategoryCommand = {
       input: {
-        id: activeCategory.id,
+        id: category.id,
         name: '外食費',
         icon: 'coffee',
         color: 'orange',
@@ -40,7 +36,7 @@ describe('buildUpdateCategoryWorkflow', () => {
 
     beforeAll(async () => {
       const workflow = buildUpdateCategoryWorkflow({
-        findCategoryById: () => Promise.resolve(activeCategory),
+        findCategoryById: () => Promise.resolve(category),
       })
 
       actual = await workflow(command)
@@ -65,14 +61,13 @@ describe('buildUpdateCategoryWorkflow', () => {
       expect(actual.value.category.color).toBe('orange')
     })
 
-    test('idとtypeとstatusが保持されること', () => {
+    test('idとtypeが保持されること', () => {
       if (Result.isFailure(actual)) throw new Error('Expected success')
       expect(actual.value.category).toStrictEqual({
-        id: activeCategory.id,
+        id: category.id,
         userId: TEST_USER_ID,
         type: 'expense',
         name: '外食費',
-        status: 'active',
         icon: 'coffee',
         color: 'orange',
       })
@@ -114,54 +109,6 @@ describe('buildUpdateCategoryWorkflow', () => {
     test('エラーメッセージにカテゴリIDが含まれること', () => {
       if (Result.isSuccess(actual)) throw new Error('Expected failure')
       expect(actual.error.message).toContain(command.input.id)
-    })
-  })
-
-  describe('異常系 - アーカイブ済みカテゴリは更新できない', () => {
-    const archivedCategory: Category = {
-      id: 'test-category-id-0000000002' as CategoryId,
-      userId: TEST_USER_ID,
-      type: 'income',
-      name: '給与',
-      status: 'archived',
-      icon: 'briefcase',
-      color: 'green',
-    }
-
-    const command: UpdateCategoryCommand = {
-      input: {
-        id: archivedCategory.id,
-        name: '給与収入',
-        icon: 'wallet',
-        color: 'teal',
-      },
-      context: { userId: TEST_USER_ID },
-    }
-
-    let actual: Awaited<
-      ReturnType<ReturnType<typeof buildUpdateCategoryWorkflow>>
-    >
-
-    beforeAll(async () => {
-      const workflow = buildUpdateCategoryWorkflow({
-        findCategoryById: () => Promise.resolve(archivedCategory),
-      })
-
-      actual = await workflow(command)
-    })
-
-    test('失敗結果を返すこと', () => {
-      expect(Result.isFailure(actual)).toBe(true)
-    })
-
-    test('エラーがCategoryValidationExceptionであること', () => {
-      if (Result.isSuccess(actual)) throw new Error('Expected failure')
-      expect(actual.error).toBeInstanceOf(CategoryValidationException)
-    })
-
-    test('エラーメッセージにアーカイブ済みである旨が含まれること', () => {
-      if (Result.isSuccess(actual)) throw new Error('Expected failure')
-      expect(actual.error.message).toContain('アーカイブ済み')
     })
   })
 })

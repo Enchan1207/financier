@@ -34,7 +34,6 @@ const makeCategory = (overrides: Partial<Category> = {}): Category => ({
   userId: TEST_USER_ID,
   type: 'expense',
   name: '食費',
-  status: 'active',
   icon: 'utensils',
   color: 'red',
   ...overrides,
@@ -173,13 +172,12 @@ describe('buildUpdateTransactionWorkflow', () => {
     })
   })
 
-  describe('正常系 - アーカイブ済みカテゴリを持つトランザクションをカテゴリ変更なしで更新できる', () => {
-    const archivedCategory: Category = makeCategory({
+  describe('正常系 - カテゴリ変更なしでトランザクションを更新できる', () => {
+    const category: Category = makeCategory({
       id: 'test-category-id-archived-001' as CategoryId,
-      status: 'archived',
     })
     const transaction = makeTransaction({
-      categoryId: archivedCategory.id,
+      categoryId: category.id,
     })
     const command: UpdateTransactionCommand = {
       input: { id: transaction.id, amount: 6000, name: '食料品（修正）' },
@@ -209,7 +207,7 @@ describe('buildUpdateTransactionWorkflow', () => {
 
     test('categoryIdが変わらないこと', () => {
       if (Result.isFailure(actual)) throw new Error('Expected success')
-      expect(actual.value.transaction.categoryId).toBe(archivedCategory.id)
+      expect(actual.value.transaction.categoryId).toBe(category.id)
     })
   })
 
@@ -278,44 +276,6 @@ describe('buildUpdateTransactionWorkflow', () => {
     test('エラーがTransactionNotFoundExceptionであること', () => {
       if (Result.isSuccess(actual)) throw new Error('Expected failure')
       expect(actual.error).toBeInstanceOf(TransactionNotFoundException)
-    })
-  })
-
-  describe('異常系 - 変更先カテゴリがアーカイブ済み', () => {
-    const transaction = makeTransaction()
-    const archivedCategory = makeCategory({
-      id: 'test-category-id-archived-002' as CategoryId,
-      status: 'archived',
-    })
-    const command: UpdateTransactionCommand = {
-      input: { id: transaction.id, categoryId: archivedCategory.id },
-      context: { userId: TEST_USER_ID },
-    }
-
-    let actual: Awaited<
-      ReturnType<ReturnType<typeof buildUpdateTransactionWorkflow>>
-    >
-
-    beforeAll(async () => {
-      const workflow = buildUpdateTransactionWorkflow({
-        findTransactionById: () => Promise.resolve(transaction),
-        findCategoryById: () => Promise.resolve(archivedCategory),
-      })
-      actual = await workflow(command)
-    })
-
-    test('失敗結果を返すこと', () => {
-      expect(Result.isFailure(actual)).toBe(true)
-    })
-
-    test('エラーがTransactionValidationExceptionであること', () => {
-      if (Result.isSuccess(actual)) throw new Error('Expected failure')
-      expect(actual.error).toBeInstanceOf(TransactionValidationException)
-    })
-
-    test('エラーメッセージにアーカイブ済みである旨が含まれること', () => {
-      if (Result.isSuccess(actual)) throw new Error('Expected failure')
-      expect(actual.error.message).toContain('アーカイブ済み')
     })
   })
 

@@ -9,7 +9,6 @@ export const categoriesTable = sqliteTable('categories', {
     .references(() => usersTable.id),
   type: text().notNull(), // 'income' | 'expense' | 'saving'
   name: text().notNull(),
-  status: text().notNull(), // 'active' | 'archived'
   icon: text().notNull(),
   color: text().notNull(),
 })

@@ -1,5 +1,4 @@
 import type { Category, CategoryId } from '@backend/domains/category'
-import { isActiveCategory } from '@backend/domains/category'
 import type { EventId } from '@backend/domains/event'
 import type { Transaction, TransactionId } from '@backend/domains/transaction'
 import type { UserId } from '@backend/domains/user'
@@ -37,8 +36,6 @@ type TransactionResolved = {
     newCategory: Category | null
   }
 }
-
-type CategoryChecked = TransactionResolved
 
 // MARK: event
 
@@ -119,26 +116,12 @@ const resolveTransaction =
     })
   }
 
-const checkCategoryStatus = (
-  resolved: TransactionResolved,
-): Result.Result<CategoryChecked, TransactionValidationException> => {
-  const { newCategory } = resolved.context
-  if (newCategory !== null && !isActiveCategory(newCategory)) {
-    return Result.fail(
-      new TransactionValidationException(
-        'アーカイブ済みカテゴリは使用できません',
-      ),
-    )
-  }
-  return Result.succeed(resolved)
-}
-
 const checkTypeMismatch = (
-  checked: CategoryChecked,
-): Result.Result<CategoryChecked, TransactionValidationException> => {
-  const { newCategory, transaction } = checked.context
+  resolved: TransactionResolved,
+): Result.Result<TransactionResolved, TransactionValidationException> => {
+  const { newCategory, transaction } = resolved.context
   if (newCategory === null) {
-    return Result.succeed(checked)
+    return Result.succeed(resolved)
   }
 
   const transactionType = transaction.type
@@ -156,11 +139,13 @@ const checkTypeMismatch = (
       ),
     )
   }
-  return Result.succeed(checked)
+  return Result.succeed(resolved)
 }
 
-const createEvent = (checked: CategoryChecked): TransactionUpdatedEvent => {
-  const { input, context } = checked
+const createEvent = (
+  resolved: TransactionResolved,
+): TransactionUpdatedEvent => {
+  const { input, context } = resolved
   const { transaction, newCategory } = context
 
   const updated: Transaction = {
@@ -190,7 +175,6 @@ export const buildUpdateTransactionWorkflow =
     Result.pipe(
       Result.succeed(command),
       Result.andThen(resolveTransaction(effects)),
-      Result.andThen(checkCategoryStatus),
       Result.andThen(checkTypeMismatch),
       Result.map(createEvent),
     )

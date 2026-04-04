@@ -82,7 +82,6 @@ describe('カテゴリページAPI', () => {
             user_id: userId,
             type: 'income',
             name: '給与',
-            status: 'active',
             icon: 'briefcase',
             color: 'green',
           },
@@ -91,7 +90,6 @@ describe('カテゴリページAPI', () => {
             user_id: userId,
             type: 'expense',
             name: '食費',
-            status: 'active',
             icon: 'utensils',
             color: 'red',
           },
@@ -122,50 +120,6 @@ describe('カテゴリページAPI', () => {
         for (const cat of responseBody.categories) {
           expect(cat).not.toHaveProperty('userId')
         }
-      })
-    })
-
-    describe('正常系 - アーカイブ済みカテゴリは返らないこと', () => {
-      let response: Awaited<ReturnType<typeof client.index.$get>>
-      let responseBody: { categories: unknown[] }
-
-      beforeAll(async () => {
-        const { jwt: sessionJwt, userId } = await setupSession()
-
-        await db.insert(categoriesTable).values([
-          {
-            id: `cat-page-${ulid()}`,
-            user_id: userId,
-            type: 'expense',
-            name: 'アクティブカテゴリ',
-            status: 'active',
-            icon: 'tag',
-            color: 'blue',
-          },
-          {
-            id: `cat-page-${ulid()}`,
-            user_id: userId,
-            type: 'expense',
-            name: 'アーカイブ済みカテゴリ',
-            status: 'archived',
-            icon: 'tag',
-            color: 'red',
-          },
-        ])
-
-        response = await client.index.$get(
-          {},
-          { headers: { Cookie: `__Host-Http-session=${sessionJwt}` } },
-        )
-        responseBody = (await response.json()) as typeof responseBody
-      })
-
-      test('200が返ること', () => {
-        expect(response.status).toBe(200)
-      })
-
-      test('アクティブなカテゴリのみ返ること', () => {
-        expect(responseBody.categories).toHaveLength(1)
       })
     })
 

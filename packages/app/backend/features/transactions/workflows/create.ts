@@ -1,5 +1,4 @@
 import type { Category, CategoryId } from '@backend/domains/category'
-import { isActiveCategory } from '@backend/domains/category'
 import type { EventId } from '@backend/domains/event'
 import type { Transaction, TransactionType } from '@backend/domains/transaction'
 import { createTransaction } from '@backend/domains/transaction'
@@ -37,8 +36,6 @@ type CategoryResolved = {
     category: Category
   }
 }
-
-type StatusChecked = CategoryResolved
 
 // MARK: event
 
@@ -88,24 +85,11 @@ const resolveCategory =
     })
   }
 
-const checkCategoryStatus = (
-  resolved: CategoryResolved,
-): Result.Result<StatusChecked, TransactionValidationException> => {
-  if (!isActiveCategory(resolved.context.category)) {
-    return Result.fail(
-      new TransactionValidationException(
-        'アーカイブ済みカテゴリは使用できません',
-      ),
-    )
-  }
-  return Result.succeed(resolved)
-}
-
 const checkTypeMismatch = (
-  checked: StatusChecked,
-): Result.Result<StatusChecked, TransactionValidationException> => {
-  const { type } = checked.input
-  const categoryType = checked.context.category.type
+  resolved: CategoryResolved,
+): Result.Result<CategoryResolved, TransactionValidationException> => {
+  const { type } = resolved.input
+  const categoryType = resolved.context.category.type
 
   const valid =
     (type === 'income' && categoryType === 'income') ||
@@ -119,11 +103,11 @@ const checkTypeMismatch = (
       ),
     )
   }
-  return Result.succeed(checked)
+  return Result.succeed(resolved)
 }
 
-const createEvent = (checked: StatusChecked): TransactionCreatedEvent => {
-  const { input, context } = checked
+const createEvent = (resolved: CategoryResolved): TransactionCreatedEvent => {
+  const { input, context } = resolved
   const transaction = createTransaction({
     userId: context.userId,
     type: input.type,
@@ -144,7 +128,6 @@ export const buildCreateTransactionWorkflow =
     Result.pipe(
       Result.succeed(command),
       Result.andThen(resolveCategory(effects)),
-      Result.andThen(checkCategoryStatus),
       Result.andThen(checkTypeMismatch),
       Result.map(createEvent),
     )
