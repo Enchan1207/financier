@@ -12,18 +12,9 @@ export class CategoryValidationException extends Error {
   }
 }
 
-export type CategoryReferences = {
-  transactions: boolean
-  budgets: boolean
-  savingDefinitions: boolean
-}
-
-export class CategoryHasReferencesException extends Error {
-  constructor(
-    public readonly references: CategoryReferences,
-    message: string,
-  ) {
-    super(message)
-    this.name = 'CategoryHasReferencesException'
+export class CategoryRelationException extends Error {
+  constructor(...args: ConstructorParameters<ErrorConstructor>) {
+    super(...args)
+    this.name = 'CategoryRelationException'
   }
 }

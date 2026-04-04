@@ -8,19 +8,13 @@ import { sessionMiddleware } from '@backend/features/session/middleware'
 import { zValidator } from '@hono/zod-validator'
 import { Result } from '@praha/byethrow'
 import { Hono } from 'hono'
+import { match } from 'ts-pattern'
 
-import { CategoryNotFoundException } from './exceptions'
-import {
-  countCategoryReferences,
-  deleteCategory,
-  findCategoryById,
-  saveCategory,
-} from './repository'
+import { deleteCategory, findCategoryById, saveCategory } from './repository'
 import {
   CreateCategoryRequestSchema,
   UpdateCategoryRequestSchema,
 } from './schema'
-import { buildDeleteCategoryWorkflow } from './workflows/delete'
 import { buildUpdateCategoryWorkflow } from './workflows/update'
 
 type CategoryResponse = {
@@ -122,29 +116,34 @@ const app = new Hono<{ Bindings: Env }>()
     const id = c.req.param('id') as CategoryId
     const db = c.get('db')
 
-    const workflow = buildDeleteCategoryWorkflow({
-      findCategoryById: findCategoryById(db),
-      countCategoryReferences: countCategoryReferences(db),
-    })
-
-    const result = await workflow({
-      input: { id },
-      context: { userId: session.userId },
-    })
-
-    if (Result.isFailure(result)) {
-      if (result.error instanceof CategoryNotFoundException) {
-        return c.json({ message: result.error.message }, 404)
-      }
-      return c.json(
-        { message: result.error.message, references: result.error.references },
-        409,
-      )
+    const deleteResult = await deleteCategory(db)(id, session.userId)
+    if (Result.isSuccess(deleteResult)) {
+      const deleted = deleteResult.value
+      console.log(`カテゴリ ${deleted.id} は削除されました。`, { deleted })
+      return c.body(null, 204)
     }
 
-    await deleteCategory(db)(result.value.categoryId)
+    return match(deleteResult.error)
+      .with({ name: 'CategoryNotFoundException' }, () => {
+        console.error(`カテゴリ ${id} が見つかりません`)
+        return c.json({ message: 'no such category' }, 404)
+      })
+      .with({ name: 'CategoryRelationException' }, () => {
+        console.error(
+          `カテゴリ ${id} は他のデータから参照されているため、削除できません`,
+        )
 
-    return c.body(null, 204)
+        return c.json(
+          {
+            message: 'category is related to other entities',
+          },
+          409,
+        )
+      })
+      .otherwise((e: unknown) => {
+        console.error(`カテゴリ ${id} 削除時の不明なエラー`, { cause: e })
+        return c.json({ message: 'unknown error' }, 500)
+      })
   })
 
 export default app
