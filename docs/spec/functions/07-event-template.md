@@ -12,7 +12,7 @@
 
 ## 8.2.1 TemplateTransaction
 
-- `categoryId` が参照するカテゴリは `status=active` かつ積立定義非紐付けのカテゴリのみ
+- `categoryId` が参照するカテゴリは積立定義非紐付けのカテゴリのみ
 - `Transaction.type` は `categoryId` が参照する `Category.type` から保存時に自動決定する
 - テンプレート定義自体は `type` 属性を持たない
 
