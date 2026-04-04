@@ -6,9 +6,13 @@ import {
   SESSION_COOKIE_AGE,
   SESSION_JWT_AGE,
 } from '@backend/lib/session-config'
+import { budgetsTable } from '@backend/schemas/budgets'
 import { categoriesTable } from '@backend/schemas/categories'
+import { fiscalYearsTable } from '@backend/schemas/fiscal-years'
 import { sessionsTable } from '@backend/schemas/sessions'
+import { transactionsTable } from '@backend/schemas/transactions'
 import { usersTable } from '@backend/schemas/users'
+import dayjs from '@backend/lib/date'
 import { env } from 'cloudflare:test'
 import { drizzle } from 'drizzle-orm/d1'
 import { testClient } from 'hono/testing'
@@ -29,7 +33,6 @@ describe('カテゴリAPI', () => {
     vi.useRealTimers()
   })
 
-  // セッション付きクッキーを生成するヘルパー
   const setupSession = async (): Promise<{ jwt: string; userId: string }> => {
     const user = createUser({
       email: 'test@example.com',
@@ -77,7 +80,6 @@ describe('カテゴリAPI', () => {
           id: string
           type: string
           name: string
-          status: string
           icon: string
           color: string
         }
@@ -112,12 +114,12 @@ describe('カテゴリAPI', () => {
         expect(responseBody.category.name).toBe('副業収入')
       })
 
-      test('作成されたカテゴリのstatusがactiveであること', () => {
-        expect(responseBody.category.status).toBe('active')
-      })
-
       test('作成されたカテゴリのIDが存在すること', () => {
         expect(responseBody.category.id).toBeDefined()
+      })
+
+      test('statusフィールドが含まれないこと', () => {
+        expect(responseBody.category).not.toHaveProperty('status')
       })
     })
 
@@ -226,7 +228,7 @@ describe('カテゴリAPI', () => {
   })
 
   describe('PUT /:id', () => {
-    describe('正常系 - アクティブなカテゴリを更新できる', () => {
+    describe('正常系 - カテゴリを更新できる', () => {
       const categoryId = 'test-category-id-put-000001'
       let response: Awaited<ReturnType<(typeof client)[':id']['$put']>>
       let responseBody: {
@@ -235,7 +237,6 @@ describe('カテゴリAPI', () => {
           name: string
           icon: string
           color: string
-          status: string
         }
       }
 
@@ -247,7 +248,6 @@ describe('カテゴリAPI', () => {
           user_id: userId,
           type: 'expense',
           name: '食費',
-          status: 'active',
           icon: 'utensils',
           color: 'red',
         })
@@ -276,10 +276,6 @@ describe('カテゴリAPI', () => {
 
       test('colorが更新されること', () => {
         expect(responseBody.category.color).toBe('orange')
-      })
-
-      test('statusがactiveのままであること', () => {
-        expect(responseBody.category.status).toBe('active')
       })
     })
 
@@ -317,44 +313,12 @@ describe('カテゴリAPI', () => {
         expect(response.status).toBe(404)
       })
     })
-
-    describe('異常系 - アーカイブ済みカテゴリは更新できない', () => {
-      const categoryId = 'test-category-id-put-000002'
-      let response: Awaited<ReturnType<(typeof client)[':id']['$put']>>
-
-      beforeAll(async () => {
-        const { jwt: sessionJwt, userId } = await setupSession()
-
-        await db.insert(categoriesTable).values({
-          id: categoryId,
-          user_id: userId,
-          type: 'income',
-          name: '給与',
-          status: 'archived',
-          icon: 'briefcase',
-          color: 'green',
-        })
-
-        response = await client[':id'].$put(
-          {
-            param: { id: categoryId },
-            json: { name: '給与収入', icon: 'wallet', color: 'teal' },
-          },
-          { headers: { Cookie: `__Host-Http-session=${sessionJwt}` } },
-        )
-      })
-
-      test('400が返ること', () => {
-        expect(response.status).toBe(400)
-      })
-    })
   })
 
   describe('DELETE /:id', () => {
-    describe('正常系 - アクティブなカテゴリをアーカイブできる', () => {
+    describe('正常系 - 参照のないカテゴリを削除できる', () => {
       const categoryId = 'test-category-id-del-000001'
       let response: Awaited<ReturnType<(typeof client)[':id']['$delete']>>
-      let responseBody: { category: { status: string } }
 
       beforeAll(async () => {
         const { jwt: sessionJwt, userId } = await setupSession()
@@ -364,7 +328,6 @@ describe('カテゴリAPI', () => {
           user_id: userId,
           type: 'saving',
           name: '積立貯金',
-          status: 'active',
           icon: 'piggy_bank',
           color: 'pink',
         })
@@ -373,15 +336,10 @@ describe('カテゴリAPI', () => {
           { param: { id: categoryId } },
           { headers: { Cookie: `__Host-Http-session=${sessionJwt}` } },
         )
-        responseBody = (await response.json()) as typeof responseBody
       })
 
-      test('200が返ること', () => {
-        expect(response.status).toBe(200)
-      })
-
-      test('レスポンスのstatusがarchivedになること', () => {
-        expect(responseBody.category.status).toBe('archived')
+      test('204が返ること', () => {
+        expect(response.status).toBe(204)
       })
     })
 
@@ -414,7 +372,7 @@ describe('カテゴリAPI', () => {
       })
     })
 
-    describe('異常系 - すでにアーカイブ済みのカテゴリ', () => {
+    describe('異常系 - トランザクションから参照されているカテゴリは削除できない', () => {
       const categoryId = 'test-category-id-del-000002'
       let response: Awaited<ReturnType<(typeof client)[':id']['$delete']>>
 
@@ -426,9 +384,61 @@ describe('カテゴリAPI', () => {
           user_id: userId,
           type: 'expense',
           name: '食費',
-          status: 'archived',
           icon: 'utensils',
           color: 'red',
+        })
+
+        await db.insert(transactionsTable).values({
+          id: ulid(),
+          user_id: userId,
+          type: 'expense',
+          amount: 1000,
+          category_id: categoryId,
+          name: 'ランチ',
+          transaction_date: '2022-11-01',
+          created_at: dayjs().toISOString(),
+        })
+
+        response = await client[':id'].$delete(
+          { param: { id: categoryId } },
+          { headers: { Cookie: `__Host-Http-session=${sessionJwt}` } },
+        )
+      })
+
+      test('409が返ること', () => {
+        expect(response.status).toBe(409)
+      })
+    })
+
+    describe('異常系 - 予算から参照されているカテゴリは削除できない', () => {
+      const categoryId = 'test-category-id-del-000003'
+      let response: Awaited<ReturnType<(typeof client)[':id']['$delete']>>
+
+      beforeAll(async () => {
+        const { jwt: sessionJwt, userId } = await setupSession()
+
+        await db.insert(categoriesTable).values({
+          id: categoryId,
+          user_id: userId,
+          type: 'expense',
+          name: '交際費',
+          icon: 'gift',
+          color: 'purple',
+        })
+
+        const fiscalYearId = ulid()
+        await db.insert(fiscalYearsTable).values({
+          id: fiscalYearId,
+          user_id: userId,
+          year: 2022,
+          status: 'active',
+        })
+
+        await db.insert(budgetsTable).values({
+          user_id: userId,
+          fiscal_year_id: fiscalYearId,
+          category_id: categoryId,
+          budget_amount: 50000,
         })
 
         response = await client[':id'].$delete(

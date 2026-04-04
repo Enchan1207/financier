@@ -10,19 +10,23 @@ import { Result } from '@praha/byethrow'
 import { Hono } from 'hono'
 
 import { CategoryNotFoundException } from './exceptions'
-import { archiveCategory, findCategoryById, saveCategory } from './repository'
+import {
+  countCategoryReferences,
+  deleteCategory,
+  findCategoryById,
+  saveCategory,
+} from './repository'
 import {
   CreateCategoryRequestSchema,
   UpdateCategoryRequestSchema,
 } from './schema'
-import { buildArchiveCategoryWorkflow } from './workflows/archive'
+import { buildDeleteCategoryWorkflow } from './workflows/delete'
 import { buildUpdateCategoryWorkflow } from './workflows/update'
 
 type CategoryResponse = {
   id: string
   type: 'income' | 'expense' | 'saving'
   name: string
-  status: 'active' | 'archived'
   icon: string
   color: string
 }
@@ -31,14 +35,12 @@ const toCategoryResponse = (category: {
   id: string
   type: string
   name: string
-  status: string
   icon: string
   color: string
 }): CategoryResponse => ({
   id: category.id,
   type: category.type as CategoryResponse['type'],
   name: category.name,
-  status: category.status as CategoryResponse['status'],
   icon: category.icon,
   color: category.color,
 })
@@ -104,10 +106,7 @@ const app = new Hono<{ Bindings: Env }>()
     })
 
     if (Result.isFailure(result)) {
-      if (result.error instanceof CategoryNotFoundException) {
-        return c.json({ message: result.error.message }, 404)
-      }
-      return c.json({ message: result.error.message }, 400)
+      return c.json({ message: result.error.message }, 404)
     }
 
     await saveCategory(db)(result.value.category)
@@ -123,8 +122,9 @@ const app = new Hono<{ Bindings: Env }>()
     const id = c.req.param('id') as CategoryId
     const db = c.get('db')
 
-    const workflow = buildArchiveCategoryWorkflow({
+    const workflow = buildDeleteCategoryWorkflow({
       findCategoryById: findCategoryById(db),
+      countCategoryReferences: countCategoryReferences(db),
     })
 
     const result = await workflow({
@@ -136,12 +136,15 @@ const app = new Hono<{ Bindings: Env }>()
       if (result.error instanceof CategoryNotFoundException) {
         return c.json({ message: result.error.message }, 404)
       }
-      return c.json({ message: result.error.message }, 409)
+      return c.json(
+        { message: result.error.message, references: result.error.references },
+        409,
+      )
     }
 
-    await archiveCategory(db)(result.value.category.id)
+    await deleteCategory(db)(result.value.categoryId)
 
-    return c.json({ category: toCategoryResponse(result.value.category) })
+    return c.body(null, 204)
   })
 
 export default app
