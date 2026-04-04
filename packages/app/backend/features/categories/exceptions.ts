@@ -11,3 +11,19 @@ export class CategoryValidationException extends Error {
     this.name = 'CategoryValidationException'
   }
 }
+
+export type CategoryReferences = {
+  transactions: boolean
+  budgets: boolean
+  savingDefinitions: boolean
+}
+
+export class CategoryHasReferencesException extends Error {
+  constructor(
+    public readonly references: CategoryReferences,
+    message: string,
+  ) {
+    super(message)
+    this.name = 'CategoryHasReferencesException'
+  }
+}
