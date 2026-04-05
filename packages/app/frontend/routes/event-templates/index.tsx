@@ -15,18 +15,47 @@ type TemplateListState =
   | { type: 'empty' }
   | { type: 'loaded'; templates: EventTemplateSummary[] }
 
+const buildState = (
+  isPending: boolean,
+  isError: boolean,
+  data: EventTemplateSummary[] | undefined,
+): TemplateListState => {
+  if (isPending) return { type: 'pending' }
+  if (isError) return { type: 'error' }
+  if (!data || data.length === 0) return { type: 'empty' }
+  return { type: 'loaded', templates: data }
+}
+
+const TemplateGrid: React.FC<{ templates: EventTemplateSummary[] }> = ({
+  templates,
+}) => (
+  <div className="grid gap-4 sm:grid-cols-2">
+    {templates.map((tmpl) => {
+      const items: BulkRegisterItem[] = tmpl.items.map((item, index) => ({
+        id: `${tmpl.id}-${index}`,
+        categoryName: item.categoryName,
+        name: item.name,
+        defaultAmount: item.defaultAmount,
+        type: item.type,
+      }))
+      return (
+        <TemplateCard
+          key={tmpl.id}
+          id={tmpl.id}
+          name={tmpl.name}
+          items={items}
+        />
+      )
+    })}
+  </div>
+)
+
 const EventTemplatesPage: React.FC = () => {
   const { data, isPending, isError } = useQuery(
     listEventTemplatesQueryOptions(),
   )
 
-  const state: TemplateListState = isPending
-    ? { type: 'pending' }
-    : isError
-      ? { type: 'error' }
-      : data.length === 0
-        ? { type: 'empty' }
-        : { type: 'loaded', templates: data }
+  const state = buildState(isPending, isError, data)
 
   return (
     <div className="space-y-6">
@@ -57,27 +86,7 @@ const EventTemplatesPage: React.FC = () => {
           </p>
         ))
         .with({ type: 'loaded' }, ({ templates }) => (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {templates.map((tmpl) => {
-              const items: BulkRegisterItem[] = tmpl.items.map(
-                (item, index) => ({
-                  id: `${tmpl.id}-${index}`,
-                  categoryName: item.categoryName,
-                  name: item.name,
-                  defaultAmount: item.defaultAmount,
-                  type: item.type,
-                }),
-              )
-              return (
-                <TemplateCard
-                  key={tmpl.id}
-                  id={tmpl.id}
-                  name={tmpl.name}
-                  items={items}
-                />
-              )
-            })}
-          </div>
+          <TemplateGrid templates={templates} />
         ))
         .exhaustive()}
     </div>
