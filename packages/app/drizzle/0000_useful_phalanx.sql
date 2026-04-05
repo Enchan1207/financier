@@ -28,11 +28,20 @@ CREATE TABLE `categories` (
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE TABLE `event_template_items` (
+	`event_template_id` text NOT NULL,
+	`category_id` text NOT NULL,
+	`name` text NOT NULL,
+	`amount` integer NOT NULL,
+	PRIMARY KEY(`event_template_id`, `category_id`),
+	FOREIGN KEY (`event_template_id`) REFERENCES `event_templates`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE no action
+);
+--> statement-breakpoint
 CREATE TABLE `event_templates` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
 	`name` text NOT NULL,
-	`default_transactions` text NOT NULL,
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint

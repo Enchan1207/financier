@@ -41,7 +41,8 @@ describe('buildRegisterEventTemplateWorkflow', () => {
     const template = makeTemplate()
     const workflow = buildRegisterEventTemplateWorkflow({
       findEventTemplateById: () => Promise.resolve(template),
-      findCategoryById: () => Promise.resolve(category),
+      findCategoriesByIds: (ids) =>
+        Promise.resolve(new Map(ids.map((id) => [id, category]))),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>
@@ -85,7 +86,8 @@ describe('buildRegisterEventTemplateWorkflow', () => {
     const template = makeTemplate()
     const workflow = buildRegisterEventTemplateWorkflow({
       findEventTemplateById: () => Promise.resolve(template),
-      findCategoryById: () => Promise.resolve(incomeCategory),
+      findCategoriesByIds: (ids) =>
+        Promise.resolve(new Map(ids.map((id) => [id, incomeCategory]))),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>
@@ -112,7 +114,7 @@ describe('buildRegisterEventTemplateWorkflow', () => {
   describe('異常系 - テンプレートが存在しない場合は失敗する', () => {
     const workflow = buildRegisterEventTemplateWorkflow({
       findEventTemplateById: () => Promise.resolve(undefined),
-      findCategoryById: () => Promise.resolve(undefined),
+      findCategoriesByIds: () => Promise.resolve(new Map()),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>
@@ -145,7 +147,7 @@ describe('buildRegisterEventTemplateWorkflow', () => {
     const template = makeTemplate()
     const workflow = buildRegisterEventTemplateWorkflow({
       findEventTemplateById: () => Promise.resolve(template),
-      findCategoryById: () => Promise.resolve(undefined),
+      findCategoriesByIds: () => Promise.resolve(new Map()),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>
