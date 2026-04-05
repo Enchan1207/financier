@@ -1,34 +1,82 @@
+import type {
+  CategoryColor,
+  CategoryIconType,
+} from '@frontend/components/category/types'
 import { Button } from '@frontend/components/ui/button'
+import { listCategoriesQueryOptions } from '@frontend/routes/categories/-repositories/categories'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeftIcon, Loader2Icon } from 'lucide-react'
+import { toast } from 'sonner'
 
-import { TEMPLATE_DETAILS } from '../../-components/template-data'
 import { TemplateFormFields } from '../../-components/template-form-fields'
 import { useTemplateForm } from '../../-components/use-template-form'
+import {
+  getEventTemplateDetailQueryOptions,
+  updateEventTemplate,
+} from '../../-repositories/event-templates'
 
 const EventTemplateEditPage: React.FC = () => {
   const { id } = Route.useParams()
   const navigate = useNavigate()
-  const original = TEMPLATE_DETAILS[id]
+  const queryClient = useQueryClient()
+
+  const { data: template, isPending: templatePending } = useQuery(
+    getEventTemplateDetailQueryOptions(id),
+  )
+  const { data: categoriesData } = useQuery(listCategoriesQueryOptions())
+
+  const categories = (categoriesData ?? [])
+    .filter((c) => c.type !== 'saving')
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      icon: c.icon as CategoryIconType,
+      color: c.color as CategoryColor,
+    }))
+
+  const mutation = useMutation({
+    mutationFn: (body: Parameters<typeof updateEventTemplate>[1]) =>
+      updateEventTemplate(id, body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['event-templates'] })
+      void navigate({ to: '/event-templates/$id', params: { id } })
+    },
+    onError: (error) => {
+      toast.error(error.message)
+    },
+  })
 
   const form = useTemplateForm(
     {
-      templateName: original?.name,
-      items: original?.items.map((it) => ({
+      templateName: template?.name,
+      items: template?.items.map((it) => ({
         categoryId: it.categoryId,
         name: it.name,
-        amount: String(it.amount),
-        type: it.type,
+        amount: String(it.defaultAmount),
       })),
     },
-    async () => {
-      // モック：実際にはAPIを呼び出してテンプレートを更新する
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      void navigate({ to: '/event-templates/$id', params: { id } })
+    async (value) => {
+      await mutation.mutateAsync({
+        name: value.templateName,
+        defaultTransactions: value.items.map((item) => ({
+          categoryId: item.categoryId,
+          name: item.name,
+          amount: parseInt(item.amount, 10),
+        })),
+      })
     },
   )
 
-  if (!original) {
+  if (templatePending) {
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">
+        読み込み中...
+      </p>
+    )
+  }
+
+  if (!template) {
     return (
       <div className="space-y-4">
         <Button asChild variant="ghost" size="sm">
@@ -61,7 +109,7 @@ const EventTemplateEditPage: React.FC = () => {
           await form.handleSubmit()
         }}
       >
-        <TemplateFormFields form={form} />
+        <TemplateFormFields form={form} categories={categories} />
 
         <form.Subscribe
           selector={(state) => state.isSubmitting}

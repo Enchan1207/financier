@@ -25,25 +25,50 @@ import {
   TableHeader,
   TableRow,
 } from '@frontend/components/ui/table'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeftIcon, PencilIcon, Trash2Icon } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { RegisterEventButton } from '../-components/register-event-button'
-import { TEMPLATE_DETAILS } from '../-components/template-data'
+import {
+  deleteEventTemplate,
+  getEventTemplateDetailQueryOptions,
+} from '../-repositories/event-templates'
 
 const formatCurrency = (amount: number) => `¥${amount.toLocaleString('ja-JP')}`
 
 const EventTemplateDetailPage: React.FC = () => {
   const { id } = Route.useParams()
   const navigate = useNavigate()
-  const template = TEMPLATE_DETAILS[id]
+  const queryClient = useQueryClient()
 
-  const handleDelete = () => {
-    // モック：実際にはAPIを呼び出してテンプレートを削除する
-    void navigate({ to: '/event-templates' })
+  const {
+    data: template,
+    isPending,
+    isError,
+  } = useQuery(getEventTemplateDetailQueryOptions(id))
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteEventTemplate(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['event-templates'] })
+      void navigate({ to: '/event-templates' })
+    },
+    onError: (error) => {
+      toast.error(error.message)
+    },
+  })
+
+  if (isPending) {
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">
+        読み込み中...
+      </p>
+    )
   }
 
-  if (!template) {
+  if (isError || !template) {
     return (
       <div className="space-y-4">
         <Button asChild variant="ghost" size="sm">
@@ -58,7 +83,8 @@ const EventTemplateDetailPage: React.FC = () => {
   }
 
   const netDefault = template.items.reduce(
-    (sum, it) => sum + (it.type === 'income' ? it.amount : -it.amount),
+    (sum, it) =>
+      sum + (it.type === 'income' ? it.defaultAmount : -it.defaultAmount),
     0,
   )
 
@@ -104,7 +130,11 @@ const EventTemplateDetailPage: React.FC = () => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>キャンセル</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>
+                  <AlertDialogAction
+                    onClick={() => {
+                      deleteMutation.mutate()
+                    }}
+                  >
                     削除する
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -132,8 +162,8 @@ const EventTemplateDetailPage: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {template.items.map((item) => (
-                <TableRow key={item.id}>
+              {template.items.map((item, index) => (
+                <TableRow key={index}>
                   <TableCell className="py-2 pl-6 text-xs">
                     {item.type === 'income' ? (
                       <span className="text-emerald-600">収入</span>
@@ -147,7 +177,7 @@ const EventTemplateDetailPage: React.FC = () => {
                   <TableCell className="py-2 text-xs">{item.name}</TableCell>
                   <TableCell className="py-2 pr-6 text-right font-mono text-xs">
                     {item.type === 'income' ? '+' : '-'}
-                    {formatCurrency(item.amount)}
+                    {formatCurrency(item.defaultAmount)}
                   </TableCell>
                 </TableRow>
               ))}

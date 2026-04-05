@@ -1,3 +1,4 @@
+import type { CategorySelectItem } from '@frontend/components/category/category-select'
 import { Button } from '@frontend/components/ui/button'
 import { Field, FieldError, FieldLabel } from '@frontend/components/ui/field'
 import { Input } from '@frontend/components/ui/input'
@@ -10,9 +11,10 @@ import { newFormItemValues } from './use-template-form'
 
 type Props = {
   form: ReturnType<typeof useTemplateForm>
+  categories: CategorySelectItem[]
 }
 
-export const TemplateFormFields: React.FC<Props> = ({ form }) => (
+export const TemplateFormFields: React.FC<Props> = ({ form, categories }) => (
   <>
     <form.Field
       name="templateName"
@@ -56,6 +58,7 @@ export const TemplateFormFields: React.FC<Props> = ({ form }) => (
                 onRemove={() => {
                   field.removeValue(index)
                 }}
+                categories={categories}
               />
             ))}
             <Button
