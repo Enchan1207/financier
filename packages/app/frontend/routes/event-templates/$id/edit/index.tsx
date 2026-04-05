@@ -56,16 +56,15 @@ const EventTemplateEditPage: React.FC = () => {
         amount: String(it.defaultAmount),
       })),
     },
-    async (value) => {
-      await mutation.mutateAsync({
+    (value) =>
+      mutation.mutateAsync({
         name: value.templateName,
         defaultTransactions: value.items.map((item) => ({
           categoryId: item.categoryId,
           name: item.name,
           amount: parseInt(item.amount, 10),
         })),
-      })
-    },
+      }),
   )
 
   if (templatePending) {

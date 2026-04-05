@@ -58,16 +58,15 @@ const EventTemplateRegisterPage: React.FC = () => {
         : [],
     },
     validators: { onSubmit: formSchema },
-    onSubmit: async ({ value }) => {
-      await mutation.mutateAsync({
+    onSubmit: ({ value }) =>
+      mutation.mutateAsync({
         occurredOn: value.date,
         items: value.items.map((item) => ({
           categoryId: item.categoryId,
           name: item.name,
           amount: parseInt(item.amount, 10),
         })),
-      })
-    },
+      }),
   })
 
   if (isPending) {

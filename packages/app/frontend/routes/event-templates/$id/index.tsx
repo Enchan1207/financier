@@ -162,8 +162,8 @@ const EventTemplateDetailPage: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {template.items.map((item, index) => (
-                <TableRow key={index}>
+              {template.items.map((item) => (
+                <TableRow key={item.categoryId}>
                   <TableCell className="py-2 pl-6 text-xs">
                     {item.type === 'income' ? (
                       <span className="text-emerald-600">収入</span>

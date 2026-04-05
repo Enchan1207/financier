@@ -2,15 +2,31 @@ import { Button } from '@frontend/components/ui/button'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { PlusIcon } from 'lucide-react'
+import { match } from 'ts-pattern'
 
 import type { BulkRegisterItem } from './-components/template-card'
 import { TemplateCard } from './-components/template-card'
+import type { EventTemplateSummary } from './-repositories/event-templates'
 import { listEventTemplatesQueryOptions } from './-repositories/event-templates'
+
+type TemplateListState =
+  | { type: 'pending' }
+  | { type: 'error' }
+  | { type: 'empty' }
+  | { type: 'loaded'; templates: EventTemplateSummary[] }
 
 const EventTemplatesPage: React.FC = () => {
   const { data, isPending, isError } = useQuery(
     listEventTemplatesQueryOptions(),
   )
+
+  const state: TemplateListState = isPending
+    ? { type: 'pending' }
+    : isError
+      ? { type: 'error' }
+      : data.length === 0
+        ? { type: 'empty' }
+        : { type: 'loaded', templates: data }
 
   return (
     <div className="space-y-6">
@@ -24,39 +40,46 @@ const EventTemplatesPage: React.FC = () => {
         </Button>
       </div>
 
-      {isPending ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">
-          読み込み中...
-        </p>
-      ) : isError ? (
-        <p className="py-8 text-center text-sm text-destructive">
-          テンプレートの取得に失敗しました
-        </p>
-      ) : data.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">
-          テンプレートがありません
-        </p>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {data.map((tmpl) => {
-            const items: BulkRegisterItem[] = tmpl.items.map((item, index) => ({
-              id: `${tmpl.id}-${index}`,
-              categoryName: item.categoryName,
-              name: item.name,
-              defaultAmount: item.defaultAmount,
-              type: item.type,
-            }))
-            return (
-              <TemplateCard
-                key={tmpl.id}
-                id={tmpl.id}
-                name={tmpl.name}
-                items={items}
-              />
-            )
-          })}
-        </div>
-      )}
+      {match(state)
+        .with({ type: 'pending' }, () => (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            読み込み中...
+          </p>
+        ))
+        .with({ type: 'error' }, () => (
+          <p className="py-8 text-center text-sm text-destructive">
+            テンプレートの取得に失敗しました
+          </p>
+        ))
+        .with({ type: 'empty' }, () => (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            テンプレートがありません
+          </p>
+        ))
+        .with({ type: 'loaded' }, ({ templates }) => (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {templates.map((tmpl) => {
+              const items: BulkRegisterItem[] = tmpl.items.map(
+                (item, index) => ({
+                  id: `${tmpl.id}-${index}`,
+                  categoryName: item.categoryName,
+                  name: item.name,
+                  defaultAmount: item.defaultAmount,
+                  type: item.type,
+                }),
+              )
+              return (
+                <TemplateCard
+                  key={tmpl.id}
+                  id={tmpl.id}
+                  name={tmpl.name}
+                  items={items}
+                />
+              )
+            })}
+          </div>
+        ))
+        .exhaustive()}
     </div>
   )
 }
