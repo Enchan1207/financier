@@ -17,12 +17,14 @@ import {
 export type UpdateEventTemplateCommand = {
   input: {
     id: EventTemplateId
-    name?: string
-    defaultTransactions?: Array<{
-      categoryId: CategoryId
-      name: string
-      amount: number
-    }>
+    name?: string | undefined
+    defaultTransactions?:
+      | Array<{
+          categoryId: CategoryId
+          name: string
+          amount: number
+        }>
+      | undefined
   }
   context: {
     userId: UserId
@@ -33,12 +35,8 @@ export type UpdateEventTemplateCommand = {
 
 type TemplateResolved = {
   input: {
-    name?: string
-    defaultTransactions?: Array<{
-      categoryId: CategoryId
-      name: string
-      amount: number
-    }>
+    name: string
+    defaultTransactions: TemplateTransaction[]
   }
   context: {
     userId: UserId
@@ -94,12 +92,13 @@ const resolveTemplate =
     }
     return Result.succeed({
       input: {
-        ...(command.input.name !== undefined
-          ? { name: command.input.name }
-          : {}),
-        ...(command.input.defaultTransactions !== undefined
-          ? { defaultTransactions: command.input.defaultTransactions }
-          : {}),
+        name: command.input.name ?? template.name,
+        defaultTransactions:
+          command.input.defaultTransactions?.map((tx) => ({
+            categoryId: tx.categoryId,
+            name: tx.name,
+            amount: tx.amount,
+          })) ?? template.defaultTransactions,
       },
       context: { userId: command.context.userId, template },
     })
@@ -110,9 +109,7 @@ const resolveCategories =
   async (
     resolved: TemplateResolved,
   ): Result.ResultAsync<TemplateResolved, EventTemplateValidationException> => {
-    if (!resolved.input.defaultTransactions) {
-      return Result.succeed(resolved)
-    }
+    // FIXME: #39 にて修正 - forループ内でDBクエリが発生する
     for (const tx of resolved.input.defaultTransactions) {
       const category = await effects.findCategoryById(
         tx.categoryId,
@@ -138,22 +135,13 @@ const resolveCategories =
 
 const buildUpdatedTemplate = (
   resolved: TemplateResolved,
-): EventTemplateUpdatedEvent => {
-  const defaultTransactions: TemplateTransaction[] | undefined =
-    resolved.input.defaultTransactions?.map((tx) => ({
-      categoryId: tx.categoryId,
-      name: tx.name,
-      amount: tx.amount,
-    }))
-  return {
-    template: {
-      ...resolved.context.template,
-      name: resolved.input.name ?? resolved.context.template.name,
-      defaultTransactions:
-        defaultTransactions ?? resolved.context.template.defaultTransactions,
-    },
-  }
-}
+): EventTemplateUpdatedEvent => ({
+  template: {
+    ...resolved.context.template,
+    name: resolved.input.name,
+    defaultTransactions: resolved.input.defaultTransactions,
+  },
+})
 
 // MARK: definition
 

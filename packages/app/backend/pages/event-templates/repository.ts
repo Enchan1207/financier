@@ -73,6 +73,7 @@ export const findEventTemplateSummaries =
       ]),
     )
 
+    // FIXME: #39 にて修正 - default_transactionsがJSONカラムのためSQLのJOINが使えず、アプリケーションレベルでJOINしている
     const categoryIds = [
       ...new Set(
         [...transactionsByTemplateId.values()].flatMap((transactions) =>
@@ -130,6 +131,7 @@ export const findEventTemplateDetail =
       row.default_transactions,
     ) as TemplateTransaction[]
 
+    // FIXME: #39 にて修正 - default_transactionsがJSONカラムのためSQLのJOINが使えず、アプリケーションレベルでJOINしている
     const categoryIds = [...new Set(transactions.map((tx) => tx.categoryId))]
 
     const categoryRows =

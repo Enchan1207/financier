@@ -75,6 +75,7 @@ const resolveCategories =
     CategoriesResolved,
     EventTemplateValidationException
   > => {
+    // FIXME: #39 にて修正 - forループ内でDBクエリが発生する
     for (const tx of command.input.defaultTransactions) {
       const category = await effects.findCategoryById(
         tx.categoryId,

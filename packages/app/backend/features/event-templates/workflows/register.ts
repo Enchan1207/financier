@@ -133,6 +133,7 @@ const resolveCategories =
       amount: number
     }> = []
 
+    // FIXME: #39 にて修正 - forループ内でDBクエリが発生する。外部キー制約で解決可能
     for (const item of resolved.input.items) {
       const category = await effects.findCategoryById(
         item.categoryId,

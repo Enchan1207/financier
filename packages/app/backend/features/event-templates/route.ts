@@ -2,8 +2,6 @@ import type { CategoryId } from '@backend/domains/category'
 import type { EventTemplateId } from '@backend/domains/event-template'
 import { findCategoryById } from '@backend/features/categories/repository'
 import { sessionMiddleware } from '@backend/features/session/middleware'
-import { eventsTable } from '@backend/schemas/events'
-import { transactionsTable } from '@backend/schemas/transactions'
 import { zValidator } from '@hono/zod-validator'
 import { Result } from '@praha/byethrow'
 import { Hono } from 'hono'
@@ -13,6 +11,7 @@ import {
   deleteEventTemplate,
   findEventTemplateById,
   saveEventTemplate,
+  saveEventWithTransactions,
 } from './repository'
 import {
   CreateEventTemplateRequestSchema,
@@ -111,16 +110,12 @@ const app = new Hono<{ Bindings: Env }>()
       const result = await workflow({
         input: {
           id,
-          ...(body.name !== undefined ? { name: body.name } : {}),
-          ...(body.defaultTransactions !== undefined
-            ? {
-                defaultTransactions: body.defaultTransactions.map((tx) => ({
-                  categoryId: tx.categoryId as CategoryId,
-                  name: tx.name,
-                  amount: tx.amount,
-                })),
-              }
-            : {}),
+          name: body.name,
+          defaultTransactions: body.defaultTransactions?.map((tx) => ({
+            categoryId: tx.categoryId as CategoryId,
+            name: tx.name,
+            amount: tx.amount,
+          })),
         },
         context: { userId: session.userId },
       })
@@ -205,49 +200,7 @@ const app = new Hono<{ Bindings: Env }>()
 
       const { event, transactions } = result.value
 
-      await db.batch([
-        db
-          .insert(eventsTable)
-          .values({
-            id: event.id,
-            user_id: event.userId,
-            name: event.name,
-            occurred_on: event.occurredOn.format('YYYY-MM-DD'),
-          })
-          .onConflictDoUpdate({
-            target: eventsTable.id,
-            set: {
-              name: event.name,
-              occurred_on: event.occurredOn.format('YYYY-MM-DD'),
-            },
-          }),
-        ...transactions.map((t) =>
-          db
-            .insert(transactionsTable)
-            .values({
-              id: t.id,
-              user_id: t.userId,
-              type: t.type,
-              amount: t.amount,
-              category_id: t.categoryId,
-              event_id: t.eventId,
-              name: t.name,
-              transaction_date: t.transactionDate.format('YYYY-MM-DD'),
-              created_at: t.createdAt.toISOString(),
-            })
-            .onConflictDoUpdate({
-              target: transactionsTable.id,
-              set: {
-                type: t.type,
-                amount: t.amount,
-                category_id: t.categoryId,
-                event_id: t.eventId,
-                name: t.name,
-                transaction_date: t.transactionDate.format('YYYY-MM-DD'),
-              },
-            }),
-        ),
-      ])
+      await saveEventWithTransactions(db)(event, transactions)
 
       return c.json({ eventId: event.id }, 201)
     },
