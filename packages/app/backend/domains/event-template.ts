@@ -7,7 +7,7 @@ import type { UserId } from './user'
 export type EventTemplateId = Brand<string, 'event_template_id'>
 
 export type TemplateTransaction = {
-  /** 対象カテゴリ。status=active かつ積立定義非紐付けのカテゴリのみ指定可 */
+  /** 対象カテゴリ。積立カテゴリ（type=saving）は指定不可 */
   categoryId: CategoryId
   /** 金額（日本円） */
   amount: number
