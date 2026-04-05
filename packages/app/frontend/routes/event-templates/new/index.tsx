@@ -1,16 +1,53 @@
+import type {
+  CategoryColor,
+  CategoryIconType,
+} from '@frontend/components/category/types'
 import { Button } from '@frontend/components/ui/button'
+import { listCategoriesQueryOptions } from '@frontend/routes/categories/-repositories/categories'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { ArrowLeftIcon, Loader2Icon } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { TemplateFormFields } from '../-components/template-form-fields'
 import { useTemplateForm } from '../-components/use-template-form'
+import { createEventTemplate } from '../-repositories/event-templates'
 
 const EventTemplateNewPage: React.FC = () => {
   const navigate = useNavigate()
-  const form = useTemplateForm({}, async () => {
-    // モック：実際にはAPIを呼び出してテンプレートを作成する
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    void navigate({ to: '/event-templates' })
+  const queryClient = useQueryClient()
+
+  const { data: categoriesData } = useQuery(listCategoriesQueryOptions())
+
+  const categories = (categoriesData ?? [])
+    .filter((c) => c.type !== 'saving')
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      icon: c.icon as CategoryIconType,
+      color: c.color as CategoryColor,
+    }))
+
+  const mutation = useMutation({
+    mutationFn: createEventTemplate,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['event-templates'] })
+      void navigate({ to: '/event-templates' })
+    },
+    onError: (error) => {
+      toast.error(error.message)
+    },
+  })
+
+  const form = useTemplateForm({}, async (value) => {
+    await mutation.mutateAsync({
+      name: value.templateName,
+      defaultTransactions: value.items.map((item) => ({
+        categoryId: item.categoryId,
+        name: item.name,
+        amount: parseInt(item.amount, 10),
+      })),
+    })
   })
 
   return (
@@ -32,7 +69,7 @@ const EventTemplateNewPage: React.FC = () => {
           await form.handleSubmit()
         }}
       >
-        <TemplateFormFields form={form} />
+        <TemplateFormFields form={form} categories={categories} />
 
         <form.Subscribe
           selector={(state) => state.isSubmitting}

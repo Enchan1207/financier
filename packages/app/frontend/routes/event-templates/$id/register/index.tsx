@@ -1,64 +1,81 @@
 import { Button } from '@frontend/components/ui/button'
-import { Calendar } from '@frontend/components/ui/calendar'
-import { Field, FieldLabel } from '@frontend/components/ui/field'
-import { Input } from '@frontend/components/ui/input'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@frontend/components/ui/popover'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@frontend/components/ui/table'
 import dayjs from '@frontend/lib/date'
 import { useForm } from '@tanstack/react-form'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeftIcon, CalendarIcon, Loader2Icon } from 'lucide-react'
+import { ArrowLeftIcon, Loader2Icon } from 'lucide-react'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
-import { TEMPLATE_DETAILS } from '../../-components/template-data'
+import { DatePickerField } from '../../-components/date-picker-field'
+import type { RegisterItem } from '../../-components/register-items-table'
+import { RegisterItemsTable } from '../../-components/register-items-table'
+import {
+  getEventTemplateDetailQueryOptions,
+  registerEventTemplate,
+} from '../../-repositories/event-templates'
 
 const formatCurrency = (amount: number) => `¥${amount.toLocaleString('ja-JP')}`
 
 const formSchema = z.object({
   date: z.string().min(1, '取引日を入力してください'),
   items: z.array(
-    z.object({
-      id: z.string(),
-      amount: z.string(),
-    }),
+    z.object({ categoryId: z.string(), name: z.string(), amount: z.string() }),
   ),
 })
 
 const EventTemplateRegisterPage: React.FC = () => {
   const { id } = Route.useParams()
   const navigate = useNavigate()
-  const template = TEMPLATE_DETAILS[id]
+  const queryClient = useQueryClient()
+
+  const { data: template, isPending } = useQuery(
+    getEventTemplateDetailQueryOptions(id),
+  )
+
+  const mutation = useMutation({
+    mutationFn: (body: Parameters<typeof registerEventTemplate>[1]) =>
+      registerEventTemplate(id, body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      void queryClient.invalidateQueries({ queryKey: ['events'] })
+      void navigate({ to: '/event-templates/$id', params: { id } })
+    },
+    onError: (error) => {
+      toast.error(error.message)
+    },
+  })
 
   const form = useForm({
     defaultValues: {
       date: dayjs().format('YYYY-MM-DD'),
       items: template
         ? template.items.map((item) => ({
-            id: item.id,
-            amount: String(item.amount),
+            categoryId: item.categoryId,
+            name: item.name,
+            amount: String(item.defaultAmount),
           }))
         : [],
     },
-    validators: {
-      onSubmit: formSchema,
-    },
-    onSubmit: async () => {
-      // モック：実際にはAPIを呼び出してトランザクションを一括作成する
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      void navigate({ to: '/event-templates/$id', params: { id } })
-    },
+    validators: { onSubmit: formSchema },
+    onSubmit: ({ value }) =>
+      mutation.mutateAsync({
+        occurredOn: value.date,
+        items: value.items.map((item) => ({
+          categoryId: item.categoryId,
+          name: item.name,
+          amount: parseInt(item.amount, 10),
+        })),
+      }),
   })
+
+  if (isPending) {
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">
+        読み込み中...
+      </p>
+    )
+  }
 
   if (!template) {
     return (
@@ -95,98 +112,41 @@ const EventTemplateRegisterPage: React.FC = () => {
       >
         <form.Field
           name="date"
-          children={(field) => {
-            const selectedDate = field.state.value
-              ? dayjs(field.state.value).toDate()
-              : undefined
+          children={(field) => (
+            <DatePickerField
+              id="bulk-date"
+              label="取引日（全件共通）"
+              value={field.state.value}
+              onChange={field.handleChange}
+              onBlur={field.handleBlur}
+            />
+          )}
+        />
+
+        <form.Subscribe
+          selector={(state) => state.values.items}
+          children={(formItems) => {
+            const tableItems: RegisterItem[] = template.items.map(
+              (item, index) => ({
+                categoryName: item.categoryName,
+                name: item.name,
+                type: item.type,
+                amount: formItems[index]?.amount ?? String(item.defaultAmount),
+              }),
+            )
             return (
-              <Field>
-                <FieldLabel htmlFor="bulk-date">取引日（全件共通）</FieldLabel>
-                <Popover
-                  onOpenChange={(popoverOpen) => {
-                    if (!popoverOpen) field.handleBlur()
-                  }}
-                >
-                  <PopoverTrigger asChild>
-                    <Button
-                      id="bulk-date"
-                      type="button"
-                      variant="outline"
-                      className={
-                        selectedDate
-                          ? 'w-full justify-start text-left font-normal'
-                          : 'w-full justify-start text-left font-normal text-muted-foreground'
-                      }
-                    >
-                      <CalendarIcon />
-                      {selectedDate
-                        ? dayjs(selectedDate).format('YYYY/MM/DD')
-                        : '日付を選択'}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={(d) => {
-                        field.handleChange(
-                          d ? dayjs(d).format('YYYY-MM-DD') : '',
-                        )
-                      }}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </Field>
+              <RegisterItemsTable
+                items={tableItems}
+                onAmountChange={(index, value) => {
+                  form.setFieldValue(`items[${index}].amount`, value)
+                }}
+                onAmountBlur={(index) => {
+                  void form.validateField(`items[${index}].amount`, 'blur')
+                }}
+              />
             )
           }}
         />
-
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="h-8 text-xs">種別</TableHead>
-              <TableHead className="h-8 text-xs">カテゴリ</TableHead>
-              <TableHead className="h-8 text-xs">内容</TableHead>
-              <TableHead className="h-8 text-right text-xs">
-                金額（円）
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {template.items.map((item, index) => (
-              <TableRow key={item.id}>
-                <TableCell className="py-2 text-xs">
-                  {item.type === 'income' ? (
-                    <span className="text-emerald-600">収入</span>
-                  ) : (
-                    <span className="text-rose-600">支出</span>
-                  )}
-                </TableCell>
-                <TableCell className="py-2 text-xs">
-                  {item.categoryName}
-                </TableCell>
-                <TableCell className="py-2 text-xs">{item.name}</TableCell>
-                <TableCell className="py-2 text-right">
-                  <form.Field
-                    name={`items[${index}].amount`}
-                    children={(field) => (
-                      <Input
-                        type="number"
-                        min={0}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => {
-                          field.handleChange(e.target.value)
-                        }}
-                        className="h-7 w-28 text-right text-xs"
-                      />
-                    )}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
 
         <form.Subscribe
           selector={(state) =>

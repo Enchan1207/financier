@@ -7,7 +7,6 @@ const itemSchema = z.object({
   amount: z
     .string()
     .refine((v) => parseInt(v, 10) > 0, '1以上の金額を入力してください'),
-  type: z.enum(['income', 'expense']),
 })
 
 export const templateFormSchema = z.object({
@@ -19,14 +18,12 @@ export type FormItemValues = {
   categoryId: string
   name: string
   amount: string
-  type: 'income' | 'expense'
 }
 
 export const newFormItemValues = (): FormItemValues => ({
   categoryId: '',
   name: '',
   amount: '',
-  type: 'expense',
 })
 
 export const useTemplateForm = (

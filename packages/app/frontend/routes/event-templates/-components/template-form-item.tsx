@@ -1,8 +1,5 @@
+import type { CategorySelectItem } from '@frontend/components/category/category-select'
 import { CategorySelect } from '@frontend/components/category/category-select'
-import type {
-  CategoryColor,
-  CategoryIconType,
-} from '@frontend/components/category/types'
 import { Button } from '@frontend/components/ui/button'
 import {
   Card,
@@ -18,38 +15,16 @@ import {
   InputGroupInput,
   InputGroupText,
 } from '@frontend/components/ui/input-group'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@frontend/components/ui/select'
 import { Trash2Icon } from 'lucide-react'
 
 import type { useTemplateForm } from './use-template-form'
-
-// 選択可能カテゴリ：isSaving=false のアクティブカテゴリのみ（UC-5.4）
-export const SELECTABLE_CATEGORIES: {
-  id: string
-  name: string
-  icon: CategoryIconType
-  color: CategoryColor
-}[] = [
-  { id: 'cat-1', name: '食費', icon: 'utensils', color: 'red' },
-  { id: 'cat-2', name: '交通費', icon: 'bus', color: 'blue' },
-  { id: 'cat-3', name: '外食', icon: 'coffee', color: 'orange' },
-  { id: 'cat-4', name: '娯楽・グッズ', icon: 'music', color: 'purple' },
-  { id: 'cat-5', name: '衣服', icon: 'shirt', color: 'pink' },
-  { id: 'cat-6', name: '日用品', icon: 'shopping_cart', color: 'teal' },
-  { id: 'cat-7', name: '美容', icon: 'heart_pulse', color: 'pink' },
-]
 
 type Props = {
   form: ReturnType<typeof useTemplateForm>
   index: number
   canRemove: boolean
   onRemove: () => void
+  categories: CategorySelectItem[]
 }
 
 export const TemplateFormItem: React.FC<Props> = ({
@@ -57,6 +32,7 @@ export const TemplateFormItem: React.FC<Props> = ({
   index,
   canRemove,
   onRemove,
+  categories,
 }) => (
   <Card>
     <CardHeader className="pb-2 pt-3 px-4">
@@ -73,29 +49,6 @@ export const TemplateFormItem: React.FC<Props> = ({
     </CardHeader>
     <CardContent className="px-4 pb-4 space-y-3">
       <form.Field
-        name={`items[${index}].type`}
-        children={(field) => (
-          <Field>
-            <FieldLabel htmlFor={`type-${index}`}>種別</FieldLabel>
-            <Select
-              value={field.state.value}
-              onValueChange={(v: 'income' | 'expense') => {
-                field.handleChange(v)
-              }}
-            >
-              <SelectTrigger id={`type-${index}`} className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="income">収入</SelectItem>
-                <SelectItem value="expense">支出</SelectItem>
-              </SelectContent>
-            </Select>
-          </Field>
-        )}
-      />
-
-      <form.Field
         name={`items[${index}].categoryId`}
         children={(field) => {
           const isInvalid =
@@ -107,7 +60,7 @@ export const TemplateFormItem: React.FC<Props> = ({
                 id={`cat-${index}`}
                 className="w-full"
                 aria-invalid={isInvalid}
-                categories={SELECTABLE_CATEGORIES}
+                categories={categories}
                 value={field.state.value}
                 onValueChange={(v) => {
                   field.handleChange(v)

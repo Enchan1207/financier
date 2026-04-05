@@ -1,136 +1,62 @@
 import { Button } from '@frontend/components/ui/button'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { PlusIcon } from 'lucide-react'
+import { match } from 'ts-pattern'
 
 import type { BulkRegisterItem } from './-components/template-card'
 import { TemplateCard } from './-components/template-card'
+import type { EventTemplateSummary } from './-repositories/event-templates'
+import { listEventTemplatesQueryOptions } from './-repositories/event-templates'
 
-type TemplateSummary = {
-  id: string
-  name: string
-  items: BulkRegisterItem[]
+type TemplateListState =
+  | { type: 'pending' }
+  | { type: 'error' }
+  | { type: 'empty' }
+  | { type: 'loaded'; templates: EventTemplateSummary[] }
+
+const buildState = (
+  isPending: boolean,
+  isError: boolean,
+  data: EventTemplateSummary[] | undefined,
+): TemplateListState => {
+  if (isPending) return { type: 'pending' }
+  if (isError) return { type: 'error' }
+  if (!data || data.length === 0) return { type: 'empty' }
+  return { type: 'loaded', templates: data }
 }
 
-// モックデータ：本番ではAPIから /event-templates を取得する
-const TEMPLATES: TemplateSummary[] = [
-  {
-    id: 'tmpl-1',
-    name: 'ライブ遠征',
-    items: [
-      {
-        id: 'i-1',
-        categoryName: '交通費',
-        name: '新幹線代',
-        defaultAmount: 8000,
-        type: 'expense',
-      },
-      {
-        id: 'i-2',
-        categoryName: '娯楽・グッズ',
-        name: 'ライブグッズ',
-        defaultAmount: 10000,
-        type: 'expense',
-      },
-      {
-        id: 'i-3',
-        categoryName: '外食',
-        name: '遠征ご飯',
-        defaultAmount: 3000,
-        type: 'expense',
-      },
-    ],
-  },
-  {
-    id: 'tmpl-2',
-    name: 'グッズ購入',
-    items: [
-      {
-        id: 'i-4',
-        categoryName: '娯楽・グッズ',
-        name: 'グッズ購入',
-        defaultAmount: 5000,
-        type: 'expense',
-      },
-      {
-        id: 'i-5',
-        categoryName: '交通費',
-        name: '交通費',
-        defaultAmount: 1000,
-        type: 'expense',
-      },
-    ],
-  },
-  {
-    id: 'tmpl-3',
-    name: 'イベント参加（日帰り）',
-    items: [
-      {
-        id: 'i-6',
-        categoryName: '交通費',
-        name: '電車代',
-        defaultAmount: 2000,
-        type: 'expense',
-      },
-      {
-        id: 'i-7',
-        categoryName: '娯楽・グッズ',
-        name: 'チケット',
-        defaultAmount: 8000,
-        type: 'expense',
-      },
-      {
-        id: 'i-8',
-        categoryName: '外食',
-        name: '食事',
-        defaultAmount: 1500,
-        type: 'expense',
-      },
-    ],
-  },
-  {
-    id: 'tmpl-4',
-    name: '給料日',
-    items: [
-      {
-        id: 'i-9',
-        categoryName: '給与・賞与',
-        name: '給与',
-        defaultAmount: 250000,
-        type: 'income',
-      },
-      {
-        id: 'i-10',
-        categoryName: '給与・賞与',
-        name: 'RW手当',
-        defaultAmount: 5000,
-        type: 'income',
-      },
-      {
-        id: 'i-11',
-        categoryName: '社会保険料',
-        name: '厚生年金',
-        defaultAmount: 15000,
-        type: 'expense',
-      },
-      {
-        id: 'i-12',
-        categoryName: '税金',
-        name: '住民税',
-        defaultAmount: 8000,
-        type: 'expense',
-      },
-      {
-        id: 'i-13',
-        categoryName: '税金',
-        name: '市県民税',
-        defaultAmount: 5000,
-        type: 'expense',
-      },
-    ],
-  },
-]
+const TemplateGrid: React.FC<{ templates: EventTemplateSummary[] }> = ({
+  templates,
+}) => (
+  <div className="grid gap-4 sm:grid-cols-2">
+    {templates.map((tmpl) => {
+      const items: BulkRegisterItem[] = tmpl.items.map((item, index) => ({
+        id: `${tmpl.id}-${index}`,
+        categoryName: item.categoryName,
+        name: item.name,
+        defaultAmount: item.defaultAmount,
+        type: item.type,
+      }))
+      return (
+        <TemplateCard
+          key={tmpl.id}
+          id={tmpl.id}
+          name={tmpl.name}
+          items={items}
+        />
+      )
+    })}
+  </div>
+)
 
 const EventTemplatesPage: React.FC = () => {
+  const { data, isPending, isError } = useQuery(
+    listEventTemplatesQueryOptions(),
+  )
+
+  const state = buildState(isPending, isError, data)
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -143,16 +69,26 @@ const EventTemplatesPage: React.FC = () => {
         </Button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {TEMPLATES.map((tmpl) => (
-          <TemplateCard
-            key={tmpl.id}
-            id={tmpl.id}
-            name={tmpl.name}
-            items={tmpl.items}
-          />
-        ))}
-      </div>
+      {match(state)
+        .with({ type: 'pending' }, () => (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            読み込み中...
+          </p>
+        ))
+        .with({ type: 'error' }, () => (
+          <p className="py-8 text-center text-sm text-destructive">
+            テンプレートの取得に失敗しました
+          </p>
+        ))
+        .with({ type: 'empty' }, () => (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            テンプレートがありません
+          </p>
+        ))
+        .with({ type: 'loaded' }, ({ templates }) => (
+          <TemplateGrid templates={templates} />
+        ))
+        .exhaustive()}
     </div>
   )
 }
