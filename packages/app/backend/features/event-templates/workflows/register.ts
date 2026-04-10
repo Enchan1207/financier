@@ -116,7 +116,7 @@ const resolveTemplate =
     })
   }
 
-const resolveCategories = (
+const validateItems = (
   resolved: TemplateResolved,
 ): Result.ResultAsync<CategoriesResolved, EventTemplateValidationException> => {
   const categoryMap = new Map(
@@ -194,6 +194,6 @@ export const buildRegisterEventTemplateWorkflow =
     Result.pipe(
       Result.succeed(command),
       Result.andThen(resolveTemplate(effects)),
-      Result.andThen(resolveCategories),
+      Result.andThen(validateItems),
       Result.map(buildRegistrationData),
     )
