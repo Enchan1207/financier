@@ -45,7 +45,8 @@ describe('buildUpdateEventTemplateWorkflow', () => {
     })
     const workflow = buildUpdateEventTemplateWorkflow({
       findEventTemplateById: () => Promise.resolve(template),
-      findCategoryById: () => Promise.resolve(category),
+      findCategoriesByIds: (ids) =>
+        Promise.resolve(new Map(ids.map((id) => [id, category]))),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>
@@ -82,7 +83,8 @@ describe('buildUpdateEventTemplateWorkflow', () => {
     })
     const workflow = buildUpdateEventTemplateWorkflow({
       findEventTemplateById: () => Promise.resolve(template),
-      findCategoryById: () => Promise.resolve(newCategory),
+      findCategoriesByIds: (ids) =>
+        Promise.resolve(new Map(ids.map((id) => [id, newCategory]))),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>
@@ -117,7 +119,7 @@ describe('buildUpdateEventTemplateWorkflow', () => {
   describe('異常系 - テンプレートが存在しない場合は失敗する', () => {
     const workflow = buildUpdateEventTemplateWorkflow({
       findEventTemplateById: () => Promise.resolve(undefined),
-      findCategoryById: () => Promise.resolve(undefined),
+      findCategoriesByIds: () => Promise.resolve(new Map()),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>
@@ -147,7 +149,7 @@ describe('buildUpdateEventTemplateWorkflow', () => {
     })
     const workflow = buildUpdateEventTemplateWorkflow({
       findEventTemplateById: () => Promise.resolve(template),
-      findCategoryById: () => Promise.resolve(undefined),
+      findCategoriesByIds: () => Promise.resolve(new Map()),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>
@@ -183,7 +185,8 @@ describe('buildUpdateEventTemplateWorkflow', () => {
     const template = makeTemplate()
     const workflow = buildUpdateEventTemplateWorkflow({
       findEventTemplateById: () => Promise.resolve(template),
-      findCategoryById: () => Promise.resolve(savingCategory),
+      findCategoriesByIds: (ids) =>
+        Promise.resolve(new Map(ids.map((id) => [id, savingCategory]))),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>

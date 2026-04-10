@@ -22,7 +22,8 @@ describe('buildCreateEventTemplateWorkflow', () => {
   describe('正常系 - テンプレートを作成できる', () => {
     const category = makeCategory('expense')
     const workflow = buildCreateEventTemplateWorkflow({
-      findCategoryById: () => Promise.resolve(category),
+      findCategoriesByIds: (ids) =>
+        Promise.resolve(new Map(ids.map((id) => [id, category]))),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>
@@ -56,7 +57,7 @@ describe('buildCreateEventTemplateWorkflow', () => {
 
   describe('異常系 - カテゴリが存在しない場合は失敗する', () => {
     const workflow = buildCreateEventTemplateWorkflow({
-      findCategoryById: () => Promise.resolve(undefined),
+      findCategoriesByIds: () => Promise.resolve(new Map()),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>
@@ -91,7 +92,8 @@ describe('buildCreateEventTemplateWorkflow', () => {
   describe('異常系 - 積立カテゴリを指定した場合は失敗する', () => {
     const savingCategory = makeCategory('saving')
     const workflow = buildCreateEventTemplateWorkflow({
-      findCategoryById: () => Promise.resolve(savingCategory),
+      findCategoriesByIds: (ids) =>
+        Promise.resolve(new Map(ids.map((id) => [id, savingCategory]))),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>

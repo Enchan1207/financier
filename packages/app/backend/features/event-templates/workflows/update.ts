@@ -57,10 +57,10 @@ type Effects = {
     id: EventTemplateId,
     userId: UserId,
   ) => Promise<EventTemplate | undefined>
-  findCategoryById: (
-    id: CategoryId,
+  findCategoriesByIds: (
+    ids: CategoryId[],
     userId: UserId,
-  ) => Promise<Category | undefined>
+  ) => Promise<Map<CategoryId, Category>>
 }
 
 // MARK: workflow type
@@ -109,12 +109,13 @@ const resolveCategories =
   async (
     resolved: TemplateResolved,
   ): Result.ResultAsync<TemplateResolved, EventTemplateValidationException> => {
-    // FIXME: #39 にて修正 - forループ内でDBクエリが発生する
+    const ids = resolved.input.defaultTransactions.map((tx) => tx.categoryId)
+    const categoryMap = await effects.findCategoriesByIds(
+      ids,
+      resolved.context.userId,
+    )
     for (const tx of resolved.input.defaultTransactions) {
-      const category = await effects.findCategoryById(
-        tx.categoryId,
-        resolved.context.userId,
-      )
+      const category = categoryMap.get(tx.categoryId)
       if (!category) {
         return Result.fail(
           new EventTemplateValidationException(

@@ -4,7 +4,7 @@ import type { DrizzleDatabase } from '@backend/lib/drizzle'
 import { createCategoryModel } from '@backend/repositories/category'
 import { categoriesTable } from '@backend/schemas/categories'
 import { Result } from '@praha/byethrow'
-import { and, DrizzleQueryError, eq } from 'drizzle-orm'
+import { and, DrizzleQueryError, eq, inArray } from 'drizzle-orm'
 
 import {
   CategoryNotFoundException,
@@ -33,6 +33,27 @@ export const findCategoryById =
 
     const row = results[0]
     return row ? createCategoryModel(row) : undefined
+  }
+
+export const findCategoriesByIds =
+  (db: DrizzleDatabase) =>
+  async (
+    ids: CategoryId[],
+    userId: UserId,
+  ): Promise<Map<CategoryId, Category>> => {
+    if (ids.length === 0) return new Map()
+    const results = await db
+      .select()
+      .from(categoriesTable)
+      .where(
+        and(
+          inArray(categoriesTable.id, ids),
+          eq(categoriesTable.user_id, userId),
+        ),
+      )
+    return new Map(
+      results.map((r) => [r.id as CategoryId, createCategoryModel(r)]),
+    )
   }
 
 export const saveCategory =

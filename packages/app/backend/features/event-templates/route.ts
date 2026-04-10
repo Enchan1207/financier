@@ -1,6 +1,6 @@
 import type { CategoryId } from '@backend/domains/category'
 import type { EventTemplateId } from '@backend/domains/event-template'
-import { findCategoryById } from '@backend/features/categories/repository'
+import { findCategoriesByIds } from '@backend/features/categories/repository'
 import { sessionMiddleware } from '@backend/features/session/middleware'
 import { zValidator } from '@hono/zod-validator'
 import { Result } from '@praha/byethrow'
@@ -10,6 +10,7 @@ import { EventTemplateNotFoundException } from './exceptions'
 import {
   deleteEventTemplate,
   findEventTemplateById,
+  findEventTemplateWithCategoriesById,
   saveEventTemplate,
   saveEventWithTransactions,
 } from './repository'
@@ -62,7 +63,7 @@ const app = new Hono<{ Bindings: Env }>()
       const db = c.get('db')
 
       const workflow = buildCreateEventTemplateWorkflow({
-        findCategoryById: findCategoryById(db),
+        findCategoriesByIds: findCategoriesByIds(db),
       })
 
       const result = await workflow({
@@ -104,7 +105,7 @@ const app = new Hono<{ Bindings: Env }>()
 
       const workflow = buildUpdateEventTemplateWorkflow({
         findEventTemplateById: findEventTemplateById(db),
-        findCategoryById: findCategoryById(db),
+        findCategoriesByIds: findCategoriesByIds(db),
       })
 
       const result = await workflow({
@@ -174,8 +175,8 @@ const app = new Hono<{ Bindings: Env }>()
       const db = c.get('db')
 
       const workflow = buildRegisterEventTemplateWorkflow({
-        findEventTemplateById: findEventTemplateById(db),
-        findCategoryById: findCategoryById(db),
+        findEventTemplateWithCategoriesById:
+          findEventTemplateWithCategoriesById(db),
       })
 
       const result = await workflow({

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "cf9fc053-5ca7-4b42-9751-9d7edaa1d421",
+  "id": "a31ba3ab-abf9-450c-a119-2cc271641180",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "auth_states": {
@@ -209,6 +209,79 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "event_template_items": {
+      "name": "event_template_items",
+      "columns": {
+        "event_template_id": {
+          "name": "event_template_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "category_id": {
+          "name": "category_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "amount": {
+          "name": "amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "event_template_items_event_template_id_event_templates_id_fk": {
+          "name": "event_template_items_event_template_id_event_templates_id_fk",
+          "tableFrom": "event_template_items",
+          "tableTo": "event_templates",
+          "columnsFrom": [
+            "event_template_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "event_template_items_category_id_categories_id_fk": {
+          "name": "event_template_items_category_id_categories_id_fk",
+          "tableFrom": "event_template_items",
+          "tableTo": "categories",
+          "columnsFrom": [
+            "category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "event_template_items_event_template_id_category_id_pk": {
+          "columns": [
+            "event_template_id",
+            "category_id"
+          ],
+          "name": "event_template_items_event_template_id_category_id_pk"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "event_templates": {
       "name": "event_templates",
       "columns": {
@@ -228,13 +301,6 @@
         },
         "name": {
           "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "default_transactions": {
-          "name": "default_transactions",
           "type": "text",
           "primaryKey": false,
           "notNull": true,

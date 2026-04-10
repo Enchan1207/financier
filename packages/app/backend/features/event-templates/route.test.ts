@@ -7,7 +7,10 @@ import {
   SESSION_JWT_AGE,
 } from '@backend/lib/session-config'
 import { categoriesTable } from '@backend/schemas/categories'
-import { eventTemplatesTable } from '@backend/schemas/event-templates'
+import {
+  eventTemplateItemsTable,
+  eventTemplatesTable,
+} from '@backend/schemas/event-templates'
 import { sessionsTable } from '@backend/schemas/sessions'
 import { usersTable } from '@backend/schemas/users'
 import { env } from 'cloudflare:test'
@@ -95,12 +98,15 @@ describe('イベントテンプレートAPI', () => {
       id: `tpl-${ulid()}`,
       user_id: userId,
       name: '旅行テンプレート',
-      default_transactions: JSON.stringify([
-        { categoryId, name: '交通費', amount: 10000 },
-      ]),
       ...overrides,
     }
     await db.insert(eventTemplatesTable).values(template)
+    await db.insert(eventTemplateItemsTable).values({
+      event_template_id: template.id,
+      category_id: categoryId,
+      name: '交通費',
+      amount: 10000,
+    })
     return template
   }
 

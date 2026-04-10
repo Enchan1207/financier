@@ -1,12 +1,12 @@
-import type {
-  EventTemplateId,
-  TemplateTransaction,
-} from '@backend/domains/event-template'
+import type { EventTemplateId } from '@backend/domains/event-template'
 import type { UserId } from '@backend/domains/user'
 import type { DrizzleDatabase } from '@backend/lib/drizzle'
 import { categoriesTable } from '@backend/schemas/categories'
-import { eventTemplatesTable } from '@backend/schemas/event-templates'
-import { eq, inArray } from 'drizzle-orm'
+import {
+  eventTemplateItemsTable,
+  eventTemplatesTable,
+} from '@backend/schemas/event-templates'
+import { and, eq } from 'drizzle-orm'
 
 export type EventTemplateSummaryItem = {
   categoryName: string
@@ -35,80 +35,56 @@ export type EventTemplateDetailRow = {
   items: EventTemplateDetailItem[]
 }
 
-type CategoryRow = {
-  id: string
-  name: string
-  type: string
-}
-
-const buildCategoryMap = (
-  categories: CategoryRow[],
-): Map<string, CategoryRow> => {
-  const map = new Map<string, CategoryRow>()
-  for (const cat of categories) {
-    map.set(cat.id, cat)
-  }
-  return map
-}
-
 const resolveCategoryType = (type: string): 'income' | 'expense' =>
   type === 'income' ? 'income' : 'expense'
 
 export const findEventTemplateSummaries =
   (db: DrizzleDatabase) =>
   async (userId: UserId): Promise<EventTemplateSummaryRow[]> => {
-    const templateRows = await db
-      .select()
+    const rows = await db
+      .select({
+        id: eventTemplatesTable.id,
+        name: eventTemplatesTable.name,
+        item_category_id: eventTemplateItemsTable.category_id,
+        item_name: eventTemplateItemsTable.name,
+        item_amount: eventTemplateItemsTable.amount,
+        category_name: categoriesTable.name,
+        category_type: categoriesTable.type,
+      })
       .from(eventTemplatesTable)
+      .leftJoin(
+        eventTemplateItemsTable,
+        eq(eventTemplatesTable.id, eventTemplateItemsTable.event_template_id),
+      )
+      .leftJoin(
+        categoriesTable,
+        eq(eventTemplateItemsTable.category_id, categoriesTable.id),
+      )
       .where(eq(eventTemplatesTable.user_id, userId))
 
-    if (templateRows.length === 0) {
-      return []
+    const map = new Map<string, EventTemplateSummaryRow>()
+    for (const row of rows) {
+      if (!map.has(row.id)) {
+        map.set(row.id, { id: row.id, name: row.name, items: [] })
+      }
+      const entry = map.get(row.id)
+      if (
+        entry !== undefined &&
+        row.item_category_id !== null &&
+        row.item_name !== null &&
+        row.item_amount !== null &&
+        row.category_name !== null &&
+        row.category_type !== null
+      ) {
+        entry.items.push({
+          categoryName: row.category_name,
+          name: row.item_name,
+          defaultAmount: row.item_amount,
+          type: resolveCategoryType(row.category_type),
+        })
+      }
     }
-
-    const transactionsByTemplateId = new Map(
-      templateRows.map((row) => [
-        row.id,
-        JSON.parse(row.default_transactions) as TemplateTransaction[],
-      ]),
-    )
-
-    // FIXME: #39 にて修正 - default_transactionsがJSONカラムのためSQLのJOINが使えず、アプリケーションレベルでJOINしている
-    const categoryIds = [
-      ...new Set(
-        [...transactionsByTemplateId.values()].flatMap((transactions) =>
-          transactions.map((tx) => tx.categoryId),
-        ),
-      ),
-    ]
-
-    const categoryRows =
-      categoryIds.length > 0
-        ? await db
-            .select({
-              id: categoriesTable.id,
-              name: categoriesTable.name,
-              type: categoriesTable.type,
-            })
-            .from(categoriesTable)
-            .where(inArray(categoriesTable.id, categoryIds))
-        : []
-
-    const categoryMap = buildCategoryMap(categoryRows)
-
-    return templateRows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      items: (transactionsByTemplateId.get(row.id) ?? []).map((tx) => {
-        const cat = categoryMap.get(tx.categoryId)
-        return {
-          categoryName: cat?.name ?? tx.categoryId,
-          name: tx.name,
-          defaultAmount: tx.amount,
-          type: resolveCategoryType(cat?.type ?? 'expense'),
-        }
-      }),
-    }))
+    return [...map.values()]
   }
 
 export const findEventTemplateDetail =
@@ -117,49 +93,58 @@ export const findEventTemplateDetail =
     id: EventTemplateId,
     userId: UserId,
   ): Promise<EventTemplateDetailRow | undefined> => {
-    const results = await db
-      .select()
+    const rows = await db
+      .select({
+        id: eventTemplatesTable.id,
+        name: eventTemplatesTable.name,
+        item_category_id: eventTemplateItemsTable.category_id,
+        item_name: eventTemplateItemsTable.name,
+        item_amount: eventTemplateItemsTable.amount,
+        category_name: categoriesTable.name,
+        category_type: categoriesTable.type,
+      })
       .from(eventTemplatesTable)
-      .where(eq(eventTemplatesTable.id, id))
+      .leftJoin(
+        eventTemplateItemsTable,
+        eq(eventTemplatesTable.id, eventTemplateItemsTable.event_template_id),
+      )
+      .leftJoin(
+        categoriesTable,
+        eq(eventTemplateItemsTable.category_id, categoriesTable.id),
+      )
+      .where(
+        and(
+          eq(eventTemplatesTable.id, id),
+          eq(eventTemplatesTable.user_id, userId),
+        ),
+      )
 
-    const row = results[0]
-    if (!row || row.user_id !== userId) {
+    if (rows.length === 0) {
       return undefined
     }
 
-    const transactions = JSON.parse(
-      row.default_transactions,
-    ) as TemplateTransaction[]
-
-    // FIXME: #39 にて修正 - default_transactionsがJSONカラムのためSQLのJOINが使えず、アプリケーションレベルでJOINしている
-    const categoryIds = [...new Set(transactions.map((tx) => tx.categoryId))]
-
-    const categoryRows =
-      categoryIds.length > 0
-        ? await db
-            .select({
-              id: categoriesTable.id,
-              name: categoriesTable.name,
-              type: categoriesTable.type,
-            })
-            .from(categoriesTable)
-            .where(inArray(categoriesTable.id, categoryIds))
-        : []
-
-    const categoryMap = buildCategoryMap(categoryRows)
-
-    return {
-      id: row.id,
-      name: row.name,
-      items: transactions.map((tx) => {
-        const cat = categoryMap.get(tx.categoryId)
-        return {
-          categoryId: tx.categoryId,
-          categoryName: cat?.name ?? tx.categoryId,
-          name: tx.name,
-          defaultAmount: tx.amount,
-          type: resolveCategoryType(cat?.type ?? 'expense'),
-        }
-      }),
+    const first = rows[0]
+    if (first === undefined) {
+      return undefined
     }
+    const items: EventTemplateDetailItem[] = []
+    for (const row of rows) {
+      if (
+        row.item_category_id !== null &&
+        row.item_name !== null &&
+        row.item_amount !== null &&
+        row.category_name !== null &&
+        row.category_type !== null
+      ) {
+        items.push({
+          categoryId: row.item_category_id,
+          categoryName: row.category_name,
+          name: row.item_name,
+          defaultAmount: row.item_amount,
+          type: resolveCategoryType(row.category_type),
+        })
+      }
+    }
+
+    return { id: first.id, name: first.name, items }
   }
