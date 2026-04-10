@@ -10,6 +10,7 @@ import { EventTemplateNotFoundException } from './exceptions'
 import {
   deleteEventTemplate,
   findEventTemplateById,
+  findEventTemplateWithCategoriesById,
   saveEventTemplate,
   saveEventWithTransactions,
 } from './repository'
@@ -174,8 +175,8 @@ const app = new Hono<{ Bindings: Env }>()
       const db = c.get('db')
 
       const workflow = buildRegisterEventTemplateWorkflow({
-        findEventTemplateById: findEventTemplateById(db),
-        findCategoriesByIds: findCategoriesByIds(db),
+        findEventTemplateWithCategoriesById:
+          findEventTemplateWithCategoriesById(db),
       })
 
       const result = await workflow({

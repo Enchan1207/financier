@@ -1,8 +1,5 @@
 import type { Category, CategoryId } from '@backend/domains/category'
-import type {
-  EventTemplate,
-  EventTemplateId,
-} from '@backend/domains/event-template'
+import type { EventTemplateId } from '@backend/domains/event-template'
 import type { UserId } from '@backend/domains/user'
 import { Result } from '@praha/byethrow'
 import { ulid } from 'ulid'
@@ -12,6 +9,7 @@ import {
   EventTemplateNotFoundException,
   EventTemplateValidationException,
 } from '../exceptions'
+import type { EventTemplateWithCategories } from '../repository'
 import { buildRegisterEventTemplateWorkflow } from './register'
 
 const userId = `usr-${ulid()}` as UserId
@@ -25,24 +23,26 @@ const makeCategory = (type: Category['type']): Category => ({
   color: 'red',
 })
 
-const makeTemplate = (
-  overrides: Partial<EventTemplate> = {},
-): EventTemplate => ({
+const makeTemplateWithCategories = (
+  categories: Category[],
+): EventTemplateWithCategories => ({
   id: `tpl-${ulid()}` as EventTemplateId,
   userId,
   name: '旅行テンプレート',
-  defaultTransactions: [],
-  ...overrides,
+  defaultTransactions: categories.map((category) => ({
+    categoryId: category.id,
+    name: 'デフォルト項目',
+    amount: 1000,
+    category,
+  })),
 })
 
 describe('buildRegisterEventTemplateWorkflow', () => {
   describe('正常系 - イベントとトランザクションを生成できる', () => {
     const category = makeCategory('expense')
-    const template = makeTemplate()
+    const template = makeTemplateWithCategories([category])
     const workflow = buildRegisterEventTemplateWorkflow({
-      findEventTemplateById: () => Promise.resolve(template),
-      findCategoriesByIds: (ids) =>
-        Promise.resolve(new Map(ids.map((id) => [id, category]))),
+      findEventTemplateWithCategoriesById: () => Promise.resolve(template),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>
@@ -83,11 +83,9 @@ describe('buildRegisterEventTemplateWorkflow', () => {
 
   describe('正常系 - 収入カテゴリはincomeとなること', () => {
     const incomeCategory = makeCategory('income')
-    const template = makeTemplate()
+    const template = makeTemplateWithCategories([incomeCategory])
     const workflow = buildRegisterEventTemplateWorkflow({
-      findEventTemplateById: () => Promise.resolve(template),
-      findCategoriesByIds: (ids) =>
-        Promise.resolve(new Map(ids.map((id) => [id, incomeCategory]))),
+      findEventTemplateWithCategoriesById: () => Promise.resolve(template),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>
@@ -113,8 +111,7 @@ describe('buildRegisterEventTemplateWorkflow', () => {
 
   describe('異常系 - テンプレートが存在しない場合は失敗する', () => {
     const workflow = buildRegisterEventTemplateWorkflow({
-      findEventTemplateById: () => Promise.resolve(undefined),
-      findCategoriesByIds: () => Promise.resolve(new Map()),
+      findEventTemplateWithCategoriesById: () => Promise.resolve(undefined),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>
@@ -144,10 +141,9 @@ describe('buildRegisterEventTemplateWorkflow', () => {
   })
 
   describe('異常系 - カテゴリが存在しない場合は失敗する', () => {
-    const template = makeTemplate()
+    const template = makeTemplateWithCategories([])
     const workflow = buildRegisterEventTemplateWorkflow({
-      findEventTemplateById: () => Promise.resolve(template),
-      findCategoriesByIds: () => Promise.resolve(new Map()),
+      findEventTemplateWithCategoriesById: () => Promise.resolve(template),
     })
 
     let result: Awaited<ReturnType<typeof workflow>>

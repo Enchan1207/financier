@@ -1,10 +1,7 @@
-import type { Category, CategoryId } from '@backend/domains/category'
+import type { Category } from '@backend/domains/category'
 import type { Event } from '@backend/domains/event'
 import { createEvent } from '@backend/domains/event'
-import type {
-  EventTemplate,
-  EventTemplateId,
-} from '@backend/domains/event-template'
+import type { EventTemplateId } from '@backend/domains/event-template'
 import type { Transaction, TransactionType } from '@backend/domains/transaction'
 import { createTransaction } from '@backend/domains/transaction'
 import type { UserId } from '@backend/domains/user'
@@ -15,6 +12,10 @@ import {
   EventTemplateNotFoundException,
   EventTemplateValidationException,
 } from '../exceptions'
+import type {
+  EventTemplateWithCategories,
+  TemplateTransactionWithCategory,
+} from '../repository'
 
 // MARK: command
 
@@ -23,7 +24,7 @@ export type RegisterEventTemplateCommand = {
     id: EventTemplateId
     occurredOn: string
     items: Array<{
-      categoryId: CategoryId
+      categoryId: TemplateTransactionWithCategory['categoryId']
       name: string
       amount: number
     }>
@@ -39,21 +40,21 @@ type TemplateResolved = {
   input: {
     occurredOn: string
     items: Array<{
-      categoryId: CategoryId
+      categoryId: TemplateTransactionWithCategory['categoryId']
       name: string
       amount: number
     }>
   }
   context: {
     userId: UserId
-    template: EventTemplate
+    template: EventTemplateWithCategories
   }
 }
 
 type CategoriesResolved = {
   context: {
     userId: UserId
-    template: EventTemplate
+    template: EventTemplateWithCategories
     occurredOn: string
     items: Array<{
       category: Category
@@ -73,14 +74,10 @@ export type EventTemplateRegisteredEvent = {
 // MARK: effects
 
 type Effects = {
-  findEventTemplateById: (
+  findEventTemplateWithCategoriesById: (
     id: EventTemplateId,
     userId: UserId,
-  ) => Promise<EventTemplate | undefined>
-  findCategoriesByIds: (
-    ids: CategoryId[],
-    userId: UserId,
-  ) => Promise<Map<CategoryId, Category>>
+  ) => Promise<EventTemplateWithCategories | undefined>
 }
 
 // MARK: workflow type
@@ -99,7 +96,7 @@ const resolveTemplate =
   async (
     command: RegisterEventTemplateCommand,
   ): Result.ResultAsync<TemplateResolved, EventTemplateNotFoundException> => {
-    const template = await effects.findEventTemplateById(
+    const template = await effects.findEventTemplateWithCategoriesById(
       command.input.id,
       command.context.userId,
     )
@@ -119,47 +116,47 @@ const resolveTemplate =
     })
   }
 
-const resolveCategories =
-  (effects: Effects) =>
-  async (
-    resolved: TemplateResolved,
-  ): Result.ResultAsync<
-    CategoriesResolved,
-    EventTemplateValidationException
-  > => {
-    const ids = resolved.input.items.map((item) => item.categoryId)
-    const categoryMap = await effects.findCategoriesByIds(
-      ids,
-      resolved.context.userId,
-    )
+const resolveCategories = (
+  resolved: TemplateResolved,
+): Result.ResultAsync<CategoriesResolved, EventTemplateValidationException> => {
+  const categoryMap = new Map(
+    resolved.context.template.defaultTransactions.map((tx) => [
+      tx.categoryId,
+      tx.category,
+    ]),
+  )
 
-    const resolvedItems: Array<{
-      category: Category
-      name: string
-      amount: number
-    }> = []
+  const resolvedItems: Array<{
+    category: Category
+    name: string
+    amount: number
+  }> = []
 
-    for (const item of resolved.input.items) {
-      const category = categoryMap.get(item.categoryId)
-      if (!category) {
-        return Result.fail(
+  for (const item of resolved.input.items) {
+    const category = categoryMap.get(item.categoryId)
+    if (!category) {
+      return Promise.resolve(
+        Result.fail(
           new EventTemplateValidationException(
             `カテゴリが見つかりません: ${item.categoryId}`,
           ),
-        )
-      }
-      resolvedItems.push({ category, name: item.name, amount: item.amount })
+        ),
+      )
     }
+    resolvedItems.push({ category, name: item.name, amount: item.amount })
+  }
 
-    return Result.succeed({
+  return Promise.resolve(
+    Result.succeed({
       context: {
         userId: resolved.context.userId,
         template: resolved.context.template,
         occurredOn: resolved.input.occurredOn,
         items: resolvedItems,
       },
-    })
-  }
+    }),
+  )
+}
 
 const resolveTransactionType = (
   categoryType: Category['type'],
@@ -197,6 +194,6 @@ export const buildRegisterEventTemplateWorkflow =
     Result.pipe(
       Result.succeed(command),
       Result.andThen(resolveTemplate(effects)),
-      Result.andThen(resolveCategories(effects)),
+      Result.andThen(resolveCategories),
       Result.map(buildRegistrationData),
     )
