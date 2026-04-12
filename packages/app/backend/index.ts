@@ -1,4 +1,5 @@
 import authRoute from '@backend/features/auth/route'
+import budgetRoute from '@backend/features/budgets/route'
 import categoryRoute from '@backend/features/categories/route'
 import eventTemplateRoute from '@backend/features/event-templates/route'
 import eventRoute from '@backend/features/events/route'
@@ -19,6 +20,7 @@ const app = new Hono<{ Bindings: Env }>()
   .route('/transactions', transactionRoute)
   .route('/events', eventRoute)
   .route('/event-templates', eventTemplateRoute)
+  .route('/budgets', budgetRoute)
   .route('/pages', pagesRoute)
 
 export default app

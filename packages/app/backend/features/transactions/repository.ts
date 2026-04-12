@@ -3,7 +3,7 @@ import type { UserId } from '@backend/domains/user'
 import type { DrizzleDatabase } from '@backend/lib/drizzle'
 import { createTransactionModel } from '@backend/repositories/transaction'
 import { transactionsTable } from '@backend/schemas/transactions'
-import { and, eq } from 'drizzle-orm'
+import { and, between, eq } from 'drizzle-orm'
 
 export const findTransactions =
   (db: DrizzleDatabase) =>
@@ -68,4 +68,21 @@ export const deleteTransaction =
   (db: DrizzleDatabase) =>
   async (id: TransactionId): Promise<void> => {
     await db.delete(transactionsTable).where(eq(transactionsTable.id, id))
+  }
+
+export const findTransactionsByFiscalYear =
+  (db: DrizzleDatabase) =>
+  async (userId: UserId, year: number): Promise<Transaction[]> => {
+    const startDate = `${year}-04-01`
+    const endDate = `${year + 1}-03-31`
+    const results = await db
+      .select()
+      .from(transactionsTable)
+      .where(
+        and(
+          eq(transactionsTable.user_id, userId),
+          between(transactionsTable.transaction_date, startDate, endDate),
+        ),
+      )
+    return results.map(createTransactionModel)
   }
