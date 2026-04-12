@@ -58,9 +58,9 @@ type Effects = {
     userId: UserId,
   ) => Promise<EventTemplate | undefined>
   findCategoriesByIds: (
-    ids: CategoryId[],
+    ids: string[],
     userId: UserId,
-  ) => Promise<Map<CategoryId, Category>>
+  ) => Promise<Map<string, Category>>
 }
 
 // MARK: workflow type
