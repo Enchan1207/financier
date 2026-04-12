@@ -1,18 +1,21 @@
-import type { Budget } from '@backend/domains/budget'
-import type { Category, CategoryId } from '@backend/domains/category'
 import type { FiscalYear, FiscalYearId } from '@backend/domains/fiscal-year'
 import type { UserId } from '@backend/domains/user'
 import { Result } from '@praha/byethrow'
 import { beforeAll, describe, expect, test } from 'vitest'
 
 import {
+  BudgetNotFoundException,
   BudgetValidationException,
   FiscalYearClosedException,
 } from '../exceptions'
+import type { BudgetWithCategoryType } from '../repository'
 import type { UpdateBudgetItemCommand } from './update-item'
 import { buildUpdateBudgetItemWorkflow } from './update-item'
 
 const TEST_USER_ID = 'test-user-id-00000000001' as UserId
+
+const INCOME_CATEGORY_ID = 'test-category-income-00000001'
+const EXPENSE_CATEGORY_ID = 'test-category-expense-0000001'
 
 const fiscalYear: FiscalYear = {
   id: 'test-fiscal-year-id-000000001' as FiscalYearId,
@@ -21,37 +24,29 @@ const fiscalYear: FiscalYear = {
   status: 'active',
 }
 
-const incomeCategory: Category = {
-  id: 'test-category-income-00000001' as CategoryId,
-  userId: TEST_USER_ID,
-  type: 'income',
-  name: '給与',
-  icon: 'briefcase',
-  color: 'green',
-}
-
-const expenseCategory: Category = {
-  id: 'test-category-expense-0000001' as CategoryId,
-  userId: TEST_USER_ID,
-  type: 'expense',
-  name: '食費',
-  icon: 'utensils',
-  color: 'red',
-}
-
-const existingIncomeBudget: Budget = {
-  userId: TEST_USER_ID,
-  fiscalYearId: fiscalYear.id,
-  categoryId: incomeCategory.id,
-  budgetAmount: 300000,
-}
+const existingBudgets: BudgetWithCategoryType[] = [
+  {
+    userId: TEST_USER_ID,
+    fiscalYearId: fiscalYear.id,
+    categoryId: INCOME_CATEGORY_ID as BudgetWithCategoryType['categoryId'],
+    budgetAmount: 300000,
+    categoryType: 'income',
+  },
+  {
+    userId: TEST_USER_ID,
+    fiscalYearId: fiscalYear.id,
+    categoryId: EXPENSE_CATEGORY_ID as BudgetWithCategoryType['categoryId'],
+    budgetAmount: 100000,
+    categoryType: 'expense',
+  },
+]
 
 describe('buildUpdateBudgetItemWorkflow', () => {
   describe('正常系 - 支出予算を収入予算内で更新できる', () => {
     const command: UpdateBudgetItemCommand = {
       input: {
         year: 2026,
-        categoryId: expenseCategory.id,
+        categoryId: EXPENSE_CATEGORY_ID,
         budgetAmount: 200000,
       },
       context: { userId: TEST_USER_ID },
@@ -64,11 +59,8 @@ describe('buildUpdateBudgetItemWorkflow', () => {
     beforeAll(async () => {
       const workflow = buildUpdateBudgetItemWorkflow({
         findFiscalYearByYear: () => Promise.resolve(fiscalYear),
-        findCategoryById: () => Promise.resolve(expenseCategory),
-        findBudgetsByFiscalYearId: () =>
-          Promise.resolve([existingIncomeBudget]),
-        findCategoriesByIds: () =>
-          Promise.resolve(new Map([[incomeCategory.id, incomeCategory]])),
+        findBudgetsWithCategoryTypeByFiscalYearId: () =>
+          Promise.resolve(existingBudgets),
       })
       actual = await workflow(command)
     })
@@ -84,7 +76,7 @@ describe('buildUpdateBudgetItemWorkflow', () => {
 
     test('カテゴリIDが正しいこと', () => {
       if (Result.isFailure(actual)) throw new Error('Expected success')
-      expect(actual.value.budget.categoryId).toBe(expenseCategory.id)
+      expect(actual.value.budget.categoryId).toBe(EXPENSE_CATEGORY_ID)
     })
   })
 
@@ -94,7 +86,7 @@ describe('buildUpdateBudgetItemWorkflow', () => {
     const command: UpdateBudgetItemCommand = {
       input: {
         year: 2026,
-        categoryId: expenseCategory.id,
+        categoryId: EXPENSE_CATEGORY_ID,
         budgetAmount: 100000,
       },
       context: { userId: TEST_USER_ID },
@@ -107,9 +99,7 @@ describe('buildUpdateBudgetItemWorkflow', () => {
     beforeAll(async () => {
       const workflow = buildUpdateBudgetItemWorkflow({
         findFiscalYearByYear: () => Promise.resolve(closedFiscalYear),
-        findCategoryById: () => Promise.resolve(undefined),
-        findBudgetsByFiscalYearId: () => Promise.resolve([]),
-        findCategoriesByIds: () => Promise.resolve(new Map()),
+        findBudgetsWithCategoryTypeByFiscalYearId: () => Promise.resolve([]),
       })
       actual = await workflow(command)
     })
@@ -124,11 +114,11 @@ describe('buildUpdateBudgetItemWorkflow', () => {
     })
   })
 
-  describe('異常系 - 存在しないカテゴリが指定された場合はエラーになる', () => {
+  describe('異常系 - 予算アイテムが存在しない場合はエラーになる', () => {
     const command: UpdateBudgetItemCommand = {
       input: {
         year: 2026,
-        categoryId: 'non-existent-category-id-000' as CategoryId,
+        categoryId: 'non-existent-category-id-000',
         budgetAmount: 100000,
       },
       context: { userId: TEST_USER_ID },
@@ -141,9 +131,8 @@ describe('buildUpdateBudgetItemWorkflow', () => {
     beforeAll(async () => {
       const workflow = buildUpdateBudgetItemWorkflow({
         findFiscalYearByYear: () => Promise.resolve(fiscalYear),
-        findCategoryById: () => Promise.resolve(undefined),
-        findBudgetsByFiscalYearId: () => Promise.resolve([]),
-        findCategoriesByIds: () => Promise.resolve(new Map()),
+        findBudgetsWithCategoryTypeByFiscalYearId: () =>
+          Promise.resolve(existingBudgets),
       })
       actual = await workflow(command)
     })
@@ -152,9 +141,9 @@ describe('buildUpdateBudgetItemWorkflow', () => {
       expect(Result.isFailure(actual)).toBe(true)
     })
 
-    test('エラーがBudgetValidationExceptionであること', () => {
+    test('エラーがBudgetNotFoundExceptionであること', () => {
       if (Result.isSuccess(actual)) throw new Error('Expected failure')
-      expect(actual.error).toBeInstanceOf(BudgetValidationException)
+      expect(actual.error).toBeInstanceOf(BudgetNotFoundException)
     })
   })
 
@@ -162,7 +151,7 @@ describe('buildUpdateBudgetItemWorkflow', () => {
     const command: UpdateBudgetItemCommand = {
       input: {
         year: 2026,
-        categoryId: expenseCategory.id,
+        categoryId: EXPENSE_CATEGORY_ID,
         budgetAmount: 400000,
       },
       context: { userId: TEST_USER_ID },
@@ -175,11 +164,8 @@ describe('buildUpdateBudgetItemWorkflow', () => {
     beforeAll(async () => {
       const workflow = buildUpdateBudgetItemWorkflow({
         findFiscalYearByYear: () => Promise.resolve(fiscalYear),
-        findCategoryById: () => Promise.resolve(expenseCategory),
-        findBudgetsByFiscalYearId: () =>
-          Promise.resolve([existingIncomeBudget]),
-        findCategoriesByIds: () =>
-          Promise.resolve(new Map([[incomeCategory.id, incomeCategory]])),
+        findBudgetsWithCategoryTypeByFiscalYearId: () =>
+          Promise.resolve(existingBudgets),
       })
       actual = await workflow(command)
     })

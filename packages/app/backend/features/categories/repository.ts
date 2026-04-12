@@ -23,7 +23,7 @@ export const findCategories =
 
 export const findCategoryById =
   (db: DrizzleDatabase) =>
-  async (id: CategoryId, userId: UserId): Promise<Category | undefined> => {
+  async (id: string, userId: UserId): Promise<Category | undefined> => {
     const results = await db
       .select()
       .from(categoriesTable)
@@ -37,10 +37,7 @@ export const findCategoryById =
 
 export const findCategoriesByIds =
   (db: DrizzleDatabase) =>
-  async (
-    ids: CategoryId[],
-    userId: UserId,
-  ): Promise<Map<CategoryId, Category>> => {
+  async (ids: string[], userId: UserId): Promise<Map<string, Category>> => {
     if (ids.length === 0) return new Map()
     const results = await db
       .select()
@@ -51,9 +48,7 @@ export const findCategoriesByIds =
           eq(categoriesTable.user_id, userId),
         ),
       )
-    return new Map(
-      results.map((r) => [r.id as CategoryId, createCategoryModel(r)]),
-    )
+    return new Map(results.map((r) => [r.id, createCategoryModel(r)]))
   }
 
 export const saveCategory =

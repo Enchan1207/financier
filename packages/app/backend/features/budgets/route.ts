@@ -1,9 +1,5 @@
-import type { CategoryId } from '@backend/domains/category'
 import type { FiscalYear } from '@backend/domains/fiscal-year'
-import {
-  findCategoriesByIds,
-  findCategoryById,
-} from '@backend/features/categories/repository'
+import { findCategoriesByIds } from '@backend/features/categories/repository'
 import { sessionMiddleware } from '@backend/features/session/middleware'
 import { zValidator } from '@hono/zod-validator'
 import { Result } from '@praha/byethrow'
@@ -13,12 +9,14 @@ import {
   findFiscalYearByYear,
   saveFiscalYear,
 } from '../fiscal-years/repository'
-import { FiscalYearClosedException } from './exceptions'
 import {
-  deleteBudgetsByFiscalYearId,
-  findBudgetsByFiscalYearId,
+  BudgetNotFoundException,
+  FiscalYearClosedException,
+} from './exceptions'
+import {
+  findBudgetsWithCategoryTypeByFiscalYearId,
   saveBudget,
-  saveBudgets,
+  saveFiscalYearAndBudgets,
 } from './repository'
 import {
   CreateBudgetsRequestSchema,
@@ -67,17 +65,10 @@ const app = new Hono<{ Bindings: Env }>()
       findCategoriesByIds: findCategoriesByIds(db),
     })
 
-    const command = {
-      input: {
-        year: body.year,
-        items: body.items.map((item) => ({
-          categoryId: item.categoryId as CategoryId,
-          budgetAmount: item.budgetAmount,
-        })),
-      },
+    const result = await workflow({
+      input: { year: body.year, items: body.items },
       context: { userId: session.userId },
-    }
-    const result = await workflow(command)
+    })
 
     if (Result.isFailure(result)) {
       if (result.error instanceof FiscalYearClosedException) {
@@ -86,14 +77,14 @@ const app = new Hono<{ Bindings: Env }>()
       return c.json({ message: result.error.message }, 400)
     }
 
-    if (result.value.isNewFiscalYear) {
-      await saveFiscalYear(db)(result.value.fiscalYear)
-    }
-    await deleteBudgetsByFiscalYearId(db)(
-      session.userId,
-      result.value.fiscalYear.id,
-    )
-    await saveBudgets(db)(result.value.budgets)
+    await saveFiscalYearAndBudgets(db)({
+      newFiscalYear: result.value.isNewFiscalYear
+        ? result.value.fiscalYear
+        : undefined,
+      userId: session.userId,
+      fiscalYearId: result.value.fiscalYear.id,
+      budgets: result.value.budgets,
+    })
 
     return c.json(
       {
@@ -125,17 +116,10 @@ const app = new Hono<{ Bindings: Env }>()
       findCategoriesByIds: findCategoriesByIds(db),
     })
 
-    const command = {
-      input: {
-        year,
-        items: body.items.map((item) => ({
-          categoryId: item.categoryId as CategoryId,
-          budgetAmount: item.budgetAmount,
-        })),
-      },
+    const result = await workflow({
+      input: { year, items: body.items },
       context: { userId: session.userId },
-    }
-    const result = await workflow(command)
+    })
 
     if (Result.isFailure(result)) {
       if (result.error instanceof FiscalYearClosedException) {
@@ -144,14 +128,14 @@ const app = new Hono<{ Bindings: Env }>()
       return c.json({ message: result.error.message }, 400)
     }
 
-    if (result.value.isNewFiscalYear) {
-      await saveFiscalYear(db)(result.value.fiscalYear)
-    }
-    await deleteBudgetsByFiscalYearId(db)(
-      session.userId,
-      result.value.fiscalYear.id,
-    )
-    await saveBudgets(db)(result.value.budgets)
+    await saveFiscalYearAndBudgets(db)({
+      newFiscalYear: result.value.isNewFiscalYear
+        ? result.value.fiscalYear
+        : undefined,
+      userId: session.userId,
+      fiscalYearId: result.value.fiscalYear.id,
+      budgets: result.value.budgets,
+    })
 
     return c.json({
       fiscalYear: toFiscalYearResponse(result.value.fiscalYear),
@@ -175,50 +159,41 @@ const app = new Hono<{ Bindings: Env }>()
         return c.json({ message: '年度が不正です' }, 400)
       }
 
-      const categoryId = c.req.param('categoryId') as CategoryId
+      const categoryId = c.req.param('categoryId')
       const body = c.req.valid('json')
       const db = c.get('db')
 
       const workflow = buildUpdateBudgetItemWorkflow({
         findFiscalYearByYear: findFiscalYearByYear(db),
-        findCategoryById: findCategoryById(db),
-        findBudgetsByFiscalYearId: findBudgetsByFiscalYearId(db),
-        findCategoriesByIds: findCategoriesByIds(db),
+        findBudgetsWithCategoryTypeByFiscalYearId:
+          findBudgetsWithCategoryTypeByFiscalYearId(db),
       })
 
-      const command = {
-        input: {
-          year,
-          categoryId,
-          budgetAmount: body.budgetAmount,
-        },
+      const result = await workflow({
+        input: { year, categoryId, budgetAmount: body.budgetAmount },
         context: { userId: session.userId },
-      }
-      const result = await workflow(command)
+      })
 
       if (Result.isFailure(result)) {
         if (result.error instanceof FiscalYearClosedException) {
           return c.json({ message: result.error.message }, 409)
         }
+        if (result.error instanceof BudgetNotFoundException) {
+          return c.json({ message: result.error.message }, 404)
+        }
         return c.json({ message: result.error.message }, 400)
       }
 
-      if (result.value.isNewFiscalYear) {
-        await saveFiscalYear(db)(result.value.fiscalYear)
-      }
       await saveBudget(db)(result.value.budget)
-
-      const allBudgets = await findBudgetsByFiscalYearId(db)(
-        session.userId,
-        result.value.fiscalYear.id,
-      )
 
       return c.json({
         fiscalYear: toFiscalYearResponse(result.value.fiscalYear),
-        items: allBudgets.map((b) => ({
-          categoryId: b.categoryId,
-          budgetAmount: b.budgetAmount,
-        })),
+        items: [
+          {
+            categoryId: result.value.budget.categoryId,
+            budgetAmount: result.value.budget.budgetAmount,
+          },
+        ],
       } satisfies BudgetsResponse)
     },
   )

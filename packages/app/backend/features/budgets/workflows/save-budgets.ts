@@ -9,13 +9,15 @@ import {
   BudgetValidationException,
   FiscalYearClosedException,
 } from '../exceptions'
+import type { BudgetBalanceItem } from './logic'
+import { checkBudgetBalance } from './logic'
 
 // MARK: command
 
 export type SaveBudgetsCommand = {
   input: {
     year: number
-    items: { categoryId: CategoryId; budgetAmount: number }[]
+    items: { categoryId: string; budgetAmount: number }[]
   }
   context: {
     userId: UserId
@@ -38,8 +40,8 @@ type CategoriesResolved = {
     userId: UserId
     fiscalYear: FiscalYear
     isNewFiscalYear: boolean
-    categories: Map<CategoryId, Category>
-    items: { categoryId: CategoryId; budgetAmount: number }[]
+    categories: Map<string, Category>
+    items: { categoryId: string; budgetAmount: number }[]
   }
 }
 
@@ -59,9 +61,9 @@ type Effects = {
     year: number,
   ) => Promise<FiscalYear | undefined>
   findCategoriesByIds: (
-    ids: CategoryId[],
+    ids: string[],
     userId: UserId,
-  ) => Promise<Map<CategoryId, Category>>
+  ) => Promise<Map<string, Category>>
 }
 
 // MARK: workflow type
@@ -149,29 +151,29 @@ const resolveCategories =
     })
   }
 
-const checkBudgetBalance = (
+const validateBudgetBalance = (
   resolved: CategoriesResolved,
 ): Result.Result<CategoriesResolved, BudgetValidationException> => {
-  let incomeTotal = 0
-  let expenseTotal = 0
+  const balanceItems: BudgetBalanceItem[] = []
 
   for (const item of resolved.context.items) {
     const category = resolved.context.categories.get(item.categoryId)
-    if (!category) continue
-
-    if (category.type === 'income') {
-      incomeTotal += item.budgetAmount
-    } else if (category.type === 'expense') {
-      expenseTotal += item.budgetAmount
+    if (!category) {
+      return Result.fail(
+        new BudgetValidationException(
+          `不正な状態: カテゴリが見つかりません: ${item.categoryId}`,
+        ),
+      )
     }
+    balanceItems.push({
+      budgetAmount: item.budgetAmount,
+      categoryType: category.type,
+    })
   }
 
-  if (expenseTotal > incomeTotal) {
-    return Result.fail(
-      new BudgetValidationException(
-        `支出予算合計（${expenseTotal}円）が収入予算合計（${incomeTotal}円）を超えています`,
-      ),
-    )
+  const balanceResult = checkBudgetBalance(balanceItems)
+  if (Result.isFailure(balanceResult)) {
+    return Result.fail(balanceResult.error)
   }
 
   return Result.succeed(resolved)
@@ -183,7 +185,7 @@ const createEvent = (resolved: CategoriesResolved): BudgetsSavedEvent => ({
   budgets: resolved.context.items.map((item) => ({
     userId: resolved.context.userId,
     fiscalYearId: resolved.context.fiscalYear.id,
-    categoryId: item.categoryId,
+    categoryId: item.categoryId as CategoryId,
     budgetAmount: item.budgetAmount,
   })),
 })
@@ -197,6 +199,6 @@ export const buildSaveBudgetsWorkflow =
       Result.succeed(command),
       Result.andThen(resolveFiscalYear(effects)),
       Result.andThen(resolveCategories(effects)),
-      Result.andThen(checkBudgetBalance),
+      Result.andThen(validateBudgetBalance),
       Result.map(createEvent),
     )

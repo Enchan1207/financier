@@ -18,3 +18,10 @@ export class BudgetValidationException extends Error {
     this.name = 'BudgetValidationException'
   }
 }
+
+export class BudgetNotFoundException extends Error {
+  constructor(...args: ConstructorParameters<ErrorConstructor>) {
+    super(...args)
+    this.name = 'BudgetNotFoundException'
+  }
+}

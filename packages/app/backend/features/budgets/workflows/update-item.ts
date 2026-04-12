@@ -1,21 +1,25 @@
 import type { Budget } from '@backend/domains/budget'
-import type { Category, CategoryId } from '@backend/domains/category'
+import type { CategoryId } from '@backend/domains/category'
 import type { FiscalYear, FiscalYearId } from '@backend/domains/fiscal-year'
 import { createFiscalYear } from '@backend/domains/fiscal-year'
 import type { UserId } from '@backend/domains/user'
 import { Result } from '@praha/byethrow'
 
+import type { BudgetValidationException } from '../exceptions'
 import {
-  BudgetValidationException,
+  BudgetNotFoundException,
   FiscalYearClosedException,
 } from '../exceptions'
+import type { BudgetWithCategoryType } from '../repository'
+import type { BudgetBalanceItem } from './logic'
+import { checkBudgetBalance } from './logic'
 
 // MARK: command
 
 export type UpdateBudgetItemCommand = {
   input: {
     year: number
-    categoryId: CategoryId
+    categoryId: string
     budgetAmount: number
   }
   context: {
@@ -30,31 +34,16 @@ type FiscalYearResolved = {
   context: {
     userId: UserId
     fiscalYear: FiscalYear
-    isNewFiscalYear: boolean
   }
 }
 
-type CategoryResolved = {
+type BudgetsResolved = {
   context: {
     userId: UserId
     fiscalYear: FiscalYear
-    isNewFiscalYear: boolean
-    category: Category
     categoryId: CategoryId
     budgetAmount: number
-  }
-}
-
-type BudgetsAndCategoriesResolved = {
-  context: {
-    userId: UserId
-    fiscalYear: FiscalYear
-    isNewFiscalYear: boolean
-    category: Category
-    categoryId: CategoryId
-    budgetAmount: number
-    existingBudgets: Budget[]
-    existingCategories: Map<CategoryId, Category>
+    existingBudgets: BudgetWithCategoryType[]
   }
 }
 
@@ -62,7 +51,6 @@ type BudgetsAndCategoriesResolved = {
 
 export type BudgetItemUpdatedEvent = {
   fiscalYear: FiscalYear
-  isNewFiscalYear: boolean
   budget: Budget
 }
 
@@ -73,18 +61,10 @@ type Effects = {
     userId: UserId,
     year: number,
   ) => Promise<FiscalYear | undefined>
-  findCategoryById: (
-    id: CategoryId,
-    userId: UserId,
-  ) => Promise<Category | undefined>
-  findBudgetsByFiscalYearId: (
+  findBudgetsWithCategoryTypeByFiscalYearId: (
     userId: UserId,
     fiscalYearId: FiscalYearId,
-  ) => Promise<Budget[]>
-  findCategoriesByIds: (
-    ids: CategoryId[],
-    userId: UserId,
-  ) => Promise<Map<CategoryId, Category>>
+  ) => Promise<BudgetWithCategoryType[]>
 }
 
 // MARK: workflow type
@@ -93,7 +73,9 @@ type Workflow = (
   command: UpdateBudgetItemCommand,
 ) => Result.ResultAsync<
   BudgetItemUpdatedEvent,
-  FiscalYearClosedException | BudgetValidationException
+  | FiscalYearClosedException
+  | BudgetValidationException
+  | BudgetNotFoundException
 >
 
 // MARK: steps
@@ -121,11 +103,11 @@ const resolveFiscalYear =
         context: {
           userId: command.context.userId,
           fiscalYear: existing,
-          isNewFiscalYear: false,
         },
       })
     }
 
+    // 年度が存在しない = 予算アイテムも存在しないため NotFound
     const newFiscalYear = createFiscalYear(
       command.context.userId,
       command.input.year,
@@ -135,25 +117,31 @@ const resolveFiscalYear =
       context: {
         userId: command.context.userId,
         fiscalYear: newFiscalYear,
-        isNewFiscalYear: true,
       },
     })
   }
 
-const resolveCategory =
+const resolveBudgetsWithCategories =
   (effects: Effects) =>
   async (
     resolved: FiscalYearResolved,
-  ): Result.ResultAsync<CategoryResolved, BudgetValidationException> => {
-    const category = await effects.findCategoryById(
-      resolved.input.categoryId,
-      resolved.context.userId,
-    )
+  ): Result.ResultAsync<
+    BudgetsResolved,
+    BudgetValidationException | BudgetNotFoundException
+  > => {
+    const existingBudgets =
+      await effects.findBudgetsWithCategoryTypeByFiscalYearId(
+        resolved.context.userId,
+        resolved.context.fiscalYear.id,
+      )
 
-    if (!category) {
+    const targetBudget = existingBudgets.find(
+      (b) => b.categoryId === resolved.input.categoryId,
+    )
+    if (!targetBudget) {
       return Result.fail(
-        new BudgetValidationException(
-          `カテゴリが見つかりません: ${resolved.input.categoryId}`,
+        new BudgetNotFoundException(
+          `予算アイテムが見つかりません: ${resolved.input.categoryId}`,
         ),
       )
     }
@@ -162,83 +150,35 @@ const resolveCategory =
       context: {
         userId: resolved.context.userId,
         fiscalYear: resolved.context.fiscalYear,
-        isNewFiscalYear: resolved.context.isNewFiscalYear,
-        category,
-        categoryId: resolved.input.categoryId,
+        categoryId: resolved.input.categoryId as CategoryId,
         budgetAmount: resolved.input.budgetAmount,
-      },
-    })
-  }
-
-const resolveBudgetsAndCategories =
-  (effects: Effects) =>
-  async (
-    resolved: CategoryResolved,
-  ): Result.ResultAsync<BudgetsAndCategoriesResolved, never> => {
-    const existingBudgets = await effects.findBudgetsByFiscalYearId(
-      resolved.context.userId,
-      resolved.context.fiscalYear.id,
-    )
-
-    const existingCategoryIds = existingBudgets
-      .map((b) => b.categoryId)
-      .filter((id) => id !== resolved.context.categoryId)
-
-    const existingCategories = await effects.findCategoriesByIds(
-      existingCategoryIds,
-      resolved.context.userId,
-    )
-
-    return Result.succeed({
-      context: {
-        ...resolved.context,
         existingBudgets,
-        existingCategories,
       },
     })
   }
 
-const checkBudgetBalance = (
-  resolved: BudgetsAndCategoriesResolved,
-): Result.Result<BudgetsAndCategoriesResolved, BudgetValidationException> => {
-  let incomeTotal = 0
-  let expenseTotal = 0
+const validateBudgetBalance = (
+  resolved: BudgetsResolved,
+): Result.Result<BudgetsResolved, BudgetValidationException> => {
+  const balanceItems: BudgetBalanceItem[] =
+    resolved.context.existingBudgets.map((b) => ({
+      budgetAmount:
+        b.categoryId === resolved.context.categoryId
+          ? resolved.context.budgetAmount
+          : b.budgetAmount,
+      categoryType: b.categoryType,
+    }))
 
-  for (const budget of resolved.context.existingBudgets) {
-    if (budget.categoryId === resolved.context.categoryId) continue
-
-    const category = resolved.context.existingCategories.get(budget.categoryId)
-    if (!category) continue
-
-    if (category.type === 'income') {
-      incomeTotal += budget.budgetAmount
-    } else if (category.type === 'expense') {
-      expenseTotal += budget.budgetAmount
-    }
-  }
-
-  if (resolved.context.category.type === 'income') {
-    incomeTotal += resolved.context.budgetAmount
-  } else if (resolved.context.category.type === 'expense') {
-    expenseTotal += resolved.context.budgetAmount
-  }
-
-  if (expenseTotal > incomeTotal) {
-    return Result.fail(
-      new BudgetValidationException(
-        `支出予算合計（${expenseTotal}円）が収入予算合計（${incomeTotal}円）を超えています`,
-      ),
-    )
+  const balanceResult = checkBudgetBalance(balanceItems)
+  if (Result.isFailure(balanceResult)) {
+    return Result.fail(balanceResult.error)
   }
 
   return Result.succeed(resolved)
 }
 
-const createEvent = (
-  resolved: BudgetsAndCategoriesResolved,
-): BudgetItemUpdatedEvent => ({
+const createEvent = (resolved: BudgetsResolved): BudgetItemUpdatedEvent => ({
   fiscalYear: resolved.context.fiscalYear,
-  isNewFiscalYear: resolved.context.isNewFiscalYear,
   budget: {
     userId: resolved.context.userId,
     fiscalYearId: resolved.context.fiscalYear.id,
@@ -255,8 +195,7 @@ export const buildUpdateBudgetItemWorkflow =
     Result.pipe(
       Result.succeed(command),
       Result.andThen(resolveFiscalYear(effects)),
-      Result.andThen(resolveCategory(effects)),
-      Result.andThen(resolveBudgetsAndCategories(effects)),
-      Result.andThen(checkBudgetBalance),
+      Result.andThen(resolveBudgetsWithCategories(effects)),
+      Result.andThen(validateBudgetBalance),
       Result.map(createEvent),
     )

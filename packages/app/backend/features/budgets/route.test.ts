@@ -298,7 +298,35 @@ describe('予算API', () => {
       })
 
       test('更新後の予算項目が含まれること', () => {
-        expect(responseBody.items).toBeDefined()
+        expect(responseBody.items).toHaveLength(1)
+      })
+
+      test('更新後の予算金額が正しいこと', () => {
+        expect(responseBody.items[0]?.budgetAmount).toBe(200000)
+      })
+    })
+
+    describe('異常系 - 存在しない予算アイテムは404が返る', () => {
+      let response: Awaited<
+        ReturnType<(typeof client)[':year']['items'][':categoryId']['$put']>
+      >
+
+      beforeAll(async () => {
+        const { jwt, userId } = await setupSession()
+        const incomeCategory = await insertCategory(userId, 'income')
+        await insertFiscalYear(userId, 2026)
+
+        response = await client[':year']['items'][':categoryId'].$put(
+          {
+            param: { year: '2026', categoryId: incomeCategory.id },
+            json: { budgetAmount: 300000 },
+          },
+          { headers: { Cookie: `__Host-Http-session=${jwt}` } },
+        )
+      })
+
+      test('404が返ること', () => {
+        expect(response.status).toBe(404)
       })
     })
   })
